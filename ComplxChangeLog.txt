@@ -1,0 +1,185 @@
+23 June 2013
+   released version 4.5.0 of Complx
+     Change log:
+       - New: Call Stack Dialog.  Allows user to immediately rewind to subroutine call / view stack frame for particular call.
+       - New: Debugging comment @subroutine to be used with the call stack dialog
+       - New: Error Messages update.
+
+19 June 2013
+   released version 4.4.3 of Complx
+	 Change log:
+		-New: More tips.
+
+16 June 2013
+   released version 4.4.2 of Complx
+	 Change log:
+		-New: Mouseover on instruction column to have your comments appear
+		-New: More tips.
+
+8 June 2013
+   released version 4.4.1 of Complx
+     Change log:
+        -Changed: lc3os code.
+		-New: Message on starting the program for the first time.
+		-New: Tips
+
+28 Februrary 2013
+   released version 4.3.0 of Complx
+     Change log:
+        -Fixed: <test-pc> and <test-register>
+
+25 Februrary 2013
+   released version 4.2.0 of Complx
+     Change log:
+        -New: Warnings will display in the test report
+        -New: New LC-3 Warnings.  Running out of input and calling PUTS with an invalid address.
+        -Fixed: Input text box of LC-3 console. (Big caret) as a consequence it is now multilined.
+
+24 Februrary 2013
+   released version 4.1.0 of Complx
+     Change log:
+        -New: Tests will run as soon as the testing dialog opens.
+        -Fixed: Threads not being destroyed if the application ends
+        -Changed: Text in the LC3 console, in addition remade the GUI for it.  The entry box is bigger and it can be resized.
+
+7 Februrary 2013
+   released version 4.0.0 of Complx
+     Change log:
+        -New: Integrated a GUI based testing system much like lc3test.  Test menu added Run Tests and Rerun Tests.
+        -New: Expanded the testing system added several check conditions
+        -New: Added randomize and (re)load which is equivalent to Reinitialze+Randomize+(Re)load over
+
+30 September 2012
+   released version 3.4.0 of Complx
+     Change log:
+        -New: Added Run For and Run Again (Run For allows the user to run for X instructions, Run Again allows the user to continue to run for X instructions)
+        -Fixed: Undid the fix for 3.2.0
+        -Fixed: Race condition for I/O when interrupts are enabled.
+
+27 February 2012
+   released version 3.3.0 of Complx
+     Change log:
+        -New: Added Blackbox support.
+        -New: Added Move PC here (Right Click on an address).
+        -Fixed: On Enter key console moved to start of the line
+
+21 February 2012
+   released version 3.2.0 of Complx
+     Change log:
+        -Fixed: Slowed down execution of instructions (fixes unresponsiveness of infinite i/o)
+
+22 January 2012
+   released version 3.1.0 of Complx
+     Change log:
+        -New: Complx has a full builtin assembler, which is used when loading a file.  Complx no longer depends on lc3as.
+        -Fixed: First read from input was returning an incorrect value
+
+23 October 2011
+   released version 3.0.0 of Complx
+     Change log:
+        -New: Added support for interrupts and exceptions
+	-New: LC3OS code is loaded at the start
+	-New: Can now poke the DDR/DSR
+	-Updated: Architectural changes with framework.
+	-Fixed: Bug with warnings at PC = x3000
+	-Fixed: Bug with prev line / infinite loop.
+	-Fixed: Enter key causes double event to occur (had no effect on operation)
+	-Fixed: Next/Prev line rewind finish more responsive
+
+10 October 2011
+   released version 2.9.0 of Complx
+     Change log:
+        -Fixed: Couldn't type enter into console!
+
+8 October 2011
+   released version 2.8.0 of Complx
+     Change log:
+        -Fixed: Data race in console output
+
+6 October 2011
+   released version 2.7.0 of Complx
+     Change log:
+        -Fixed: Console did not flush on new character on output.
+	-Fixed: OUT trap trashes R1. (due to me not restoring it!)
+
+4 October 2011
+   released version 2.6.0 of Complx
+     Change log:
+        -Fixed: When deleting an instruction in the instruction column segfault fixed.
+	-Updated: Changed the way I handle console input
+
+30 September 2011
+   released version 2.5.0 of Complx
+     Change log:
+        -Fixed: Added Clear console output and input
+	-Fixed: Only able to type uppercase characters into the terminal
+	-Updated: The Console will not start minimized.
+
+21 June 2011
+   released version 2.4.0 of Complx
+     Change log:
+        -Fixed: Output not flushing to console
+
+14 June 2011
+   released version 2.3.0 of Complx
+     Change log:
+        -Fixed: Bug when enabling true traps and loading code overwriting things
+
+25 February 2011
+   released version 2.2.0 of Complx
+     Change log:
+        -New: Instruction View will show ASCII character when it is a NOP (if it is printable)
+        -New: Manual (Complx Documentation) option added to help menu
+        -Updated: Randomization, the distribution of random numbers should be more uniform now.
+        -Updated: Made the window a little bit bigger (and the instruction column bigger)
+        -Updated: Made the file dialog remember last directory (or rather it changes the directory)
+
+18 February 2011
+   released version 2.1.0 of Complx
+     Change log:
+        -New: New feature for showing characters in disassemble
+        -Fixed: Bug with printing to the console when program was rewinded!
+
+12 February 2011
+   released version 2.0.1 of Complx
+     Change log:
+        -Fixed: Assemble error Number/Offset Overflow reports the wrong number of bits got.
+
+11 February 2011
+   released version 2.0.0 of Complx
+     Change log:
+        -New: Fixed Console Input
+        -New: When running your program if you run out of input then the program will stop and let you input more
+        -New: On the fly assembling.  (Edit the instruction column)
+        -New: Registers are randomized from the start
+        -New: C-Like Disassembling Updated LEA uses &var (address of) operator LD uses = var LDI uses *var
+        -Fixed: Bug when you added a symbol that already exists in the symbol column
+
+14 October 2010
+   released version 1.4.0 of Complx
+     Change log:
+        -New: Added more tooltips
+        -Fixed: Program crash when program generated a warning or any output
+        -New: Menu options (shortcuts) added for Run,Step,Back, etc
+        -Fixed: Some GUI screens were kinda off.
+
+12 October 2010
+   released version 1.3.0 of Complx
+     Change log:
+        -Fixed: Fixed Freezing of application on infinite loop.
+
+11 October 2010
+   released version 1.2.0 of Complx
+     Change log:
+        -New: You now have the ability to pause execution of your program or stop it if it infinitely loops
+        -New: NEW Rewind Button allows you to rewind all changes in the undo stack.
+        -New: Tooltips for buttons
+	      -Fixed: Problem with Instruction Highlighting
+        -Fixed: Executions/Warnings did not refresh when you loaded a new file
+        -Fixed: Undo stack size was always infinite.
+
+28 September 2010
+   released version 1.1.0 of Complx
+     Change log:
+        -Fixed: Fixed Instruction Highlighting for ERROR/RTI instruction.
+

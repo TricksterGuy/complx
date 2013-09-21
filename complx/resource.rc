@@ -1,0 +1,3 @@
+#include "wx/msw/wx.rc"
+
+wxICON_AAA                      ICON "icon32.ico"
