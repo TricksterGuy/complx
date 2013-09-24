@@ -1,3 +1,5 @@
+Note before you begin.  I assume some familarity with the linux terminal.  This is similar to the windows command prompt for you people on windows.  If you feel your terminal experience is low then I suggest you read up on the terminal (google it).  I also suggest in this case you download nautilus-open-terminal.
+
 Steps to install this from source.
 
 0: Please note what the codename of your ubuntu is as you will need to know later in the setup.  For most of you it should be raring
@@ -35,7 +37,7 @@ This gives you access to utiliies essential for building stuff.
   4. Install the dependancies with the following command
      sudo apt-get install libwxbase2.9-0-unofficial libwxbase2.9-dev libwxgtk2.9-0-unofficial libwxgtk2.9-dev wx2.9-headers wx-common
 
-3: Now bring a terminal to the directory of the source tree (i.e. where this file is located) and just type the following command
+3: Now bring a terminal to the directory of the source tree (i.e. where this file is located along with folders complx, liblc3, lc3runner, as2obj) and just type the following command
    make
 
 4. If all goes well then it should not have given you any error messages.  If you got a compiler warning do let me (email: bwhitehead0308@gmail.com) or a TA know (TA will just pass it along to me).  If you get a compiler error check to make sure you followed the steps correctly and/or get a TA to debug your issue.
