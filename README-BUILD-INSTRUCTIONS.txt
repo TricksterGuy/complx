@@ -51,4 +51,42 @@ The second is required since one of the files installed is a shared library (win
 
 Troubleshooting
 ---------------
-Coming soon as problems are found.
+Here is the part where I yell at you for making mistakes.  You'll get used to it
+
+1. i got a unable to fetch warning from the sudo apt-get update
+Ok not yelling at you for this one, try again in a few minutes.
+
+2. I get a Malformed line at XXX line in source list /etc/apt/sources.list
+Congratulations for not following instructions correctly!  You mistyped the command "sudo apt-add-repository 'deb http://repos.codelite.org/wx2.9/ubuntu/ raring universe'"
+And now for your punishment you must go and edit the file /etc/apt/sources.list
+sudo gedit /etc/apt/sources.list
+Please scroll to the line causing the problem and remove it.  In addition remove any line that includes "http://repos.codelite.org/wx2.9/ubuntu/"
+Now you can either try the command again or you can manually add them by adding these two lines in its place
+
+deb http://repos.codelite.org/wx2.9/ubuntu/ raring universe
+deb-src http://repos.codelite.org/wx2.9/ubuntu/ raring universe
+
+replace raring with whatever silly codename ubuntu is using.
+
+3. I get this error when I type make
+make[1]: g++: Command not found
+make[1]: *** [ExpressionEvaluator.o] Error 127
+make[1]: Leaving directory `/home/owen/Downloads/complx-master/liblc3'
+
+Congratulations you also did not follow instructions correctly. You skipped this step (and the first step no less!)
+
+"Install the following package build-essential by executing the following command. 
+sudo apt-get install build-essential"
+
+4. I get this error when I type make
+make: *** No targets specified and no makefile found.  Stop.
+
+For this I point you to this part in the instructions.
+Now bring a terminal to the <<<directory of the source tree (i.e. where this file is located along with folders complx, liblc3, lc3runner, as2obj)>>>
+
+Learn how to use the terminal.  To know if you are in the correct directly please type the following command
+ls
+and you should see a file named Makefile along with the directories listed above.
+If you don't see those files then you will need to use cd (change directory) to get to that directory.
+
+Also if you followed step 0 you can alternatively right click in that same directory right click and select Open Terminal.
