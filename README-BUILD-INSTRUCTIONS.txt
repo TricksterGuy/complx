@@ -33,6 +33,14 @@ This gives you access to utiliies essential for building stuff.
   1. sudo apt-key adv --fetch-keys http://repos.codelite.org/CodeLite.asc
   2. Remember step 0 where I told you to remember the code name here is where you will use it.  Replace raring in the next command with your code name.
      sudo apt-add-repository 'deb http://repos.codelite.org/wx2.9/ubuntu/ raring universe'
+     ALTERNATIVE to this step.
+     Open the file /etc/apt/sources.list
+     Add the following lines to the end of this file
+     
+     deb http://repos.codelite.org/wx2.9/ubuntu/ raring universe
+     deb-src http://repos.codelite.org/wx2.9/ubuntu/ raring universe
+     
+     replace raring with whatever silly codename your linux is uing.
   3. Run sudo apt-get update.  This will update the list of packages available.
   4. Install the dependancies with the following command
      sudo apt-get install libwxbase2.9-0-unofficial libwxbase2.9-dev libwxgtk2.9-0-unofficial libwxgtk2.9-dev wx2.9-headers wx-common
