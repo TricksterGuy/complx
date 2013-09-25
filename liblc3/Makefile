@@ -16,7 +16,7 @@ clean :
 	$(RM) -rf $(FILES) $(OUTPUT)
 
 install : $(OUTPUT)
-	$(INSTALL) -m 0644 $(OUTPUT) $(PREFIX)/lib
+	$(INSTALL) -m 0755 $(OUTPUT) $(PREFIX)/lib
 
 uninstall :
 	$(RM) -rf $(PREFIX)/lib/$(OUTPUT)
