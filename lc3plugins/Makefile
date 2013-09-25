@@ -36,13 +36,13 @@ clean :
 	$(RM) -rf *.o *.so
 
 install : lc3_random.so lc3_second_timer.so lc3_timer.so lc3_multiply.so lc3_bwlcd.so lc3_colorlcd.so lc3_udiv.so
-	$(INSTALL) -m 0644 lc3_random.so $(PREFIX)/lib/lc3_random.so
-	$(INSTALL) -m 0644 lc3_second_timer.so $(PREFIX)/lib/lc3_second_timer.so
-	$(INSTALL) -m 0644 lc3_timer.so $(PREFIX)/lib/lc3_timer.so
-	$(INSTALL) -m 0644 lc3_multiply.so $(PREFIX)/lib/lc3_multiply.so
-	$(INSTALL) -m 0644 lc3_bwlcd.so $(PREFIX)/lib/lc3_bwlcd.so
-	$(INSTALL) -m 0644 lc3_colorlcd.so $(PREFIX)/lib/lc3_colorlcd.so
-	$(INSTALL) -m 0644 lc3_udiv.so $(PREFIX)/lib/lc3_udiv.so
+	$(INSTALL) -m 0755 lc3_random.so $(PREFIX)/lib/lc3_random.so
+	$(INSTALL) -m 0755 lc3_second_timer.so $(PREFIX)/lib/lc3_second_timer.so
+	$(INSTALL) -m 0755 lc3_timer.so $(PREFIX)/lib/lc3_timer.so
+	$(INSTALL) -m 0755 lc3_multiply.so $(PREFIX)/lib/lc3_multiply.so
+	$(INSTALL) -m 0755 lc3_bwlcd.so $(PREFIX)/lib/lc3_bwlcd.so
+	$(INSTALL) -m 0755 lc3_colorlcd.so $(PREFIX)/lib/lc3_colorlcd.so
+	$(INSTALL) -m 0755 lc3_udiv.so $(PREFIX)/lib/lc3_udiv.so
 
 uninstall :
 	$(RM) -rf $(PREFIX)/lib/lc3_random.so
