@@ -2,8 +2,8 @@
 OUTPUT := complx
 WXCPPFLAGS := $(shell wx-config --cppflags)
 WXCPPLIBS := $(shell wx-config --libs)
-CPPFLAGS := -Wall -O3 -s -I../liblc3 -I. $(WXCPPFLAGS)
-LDFLAGS := -O3 -Wall -s -rdynamic -L../liblc3
+CPPFLAGS := $(MASTER_CPP_FLAGS) -Wall -I../liblc3 -I. $(WXCPPFLAGS)
+LDFLAGS := $(MASTER_CPP_FLAGS) -Wall -rdynamic -L../liblc3
 LDLIBS := -llc3 $(WXCPPLIBS)
 CC := g++ $(ARCH_FLAGS)
 CXX := $(CC)

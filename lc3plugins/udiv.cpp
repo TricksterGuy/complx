@@ -63,6 +63,9 @@ std::string UdivPlugin::GetTrapName() const
   */
 void UdivPlugin::OnExecute(lc3_state& state, lc3_state_change& changes)
 {
+    lc3_change_info r0_change;
+    lc3_change_info r1_change;
+    r0_change.is_
     changes.changes = LC3_MULTI_CHANGE;
     changes.info.push_back((lc3_change_info) {true, 0, (unsigned short)state.regs[0]});
     changes.info.push_back((lc3_change_info) {true, 1, (unsigned short)state.regs[1]});
