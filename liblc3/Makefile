@@ -7,7 +7,7 @@ CC := g++ $(ARCH_FLAGS)
 CXX := $(CC)
 RM := rm
 INSTALL := install
-FILES := ExpressionEvaluator.o lc3_cmp.o lc3_debug.o lc3_expressions.o lc3_params.o lc3_plugin.o lc3_symbol.o lc3_test.o lc3_parser.o lc3_os.o lc3.o lc3_assemble.o lc3_runner.o lc3_execute.o
+FILES := ExpressionEvaluator.o lc3_cmp.o lc3_debug.o lc3_expressions.o lc3_params.o lc3_plugin.o lc3_symbol.o lc3_test.o
 
 $(OUTPUT) : $(FILES)
 	$(CC) $(LDFLAGS) $^ -o $(OUTPUT) $(LDLIBS)
