@@ -2,7 +2,7 @@
 OUTPUT := liblc3.so
 CPPFLAGS := $(MASTER_CPP_FLAGS) -fPIC -Wall -DLINUX
 LDFLAGS := $(MASTER_CPP_FLAGS) -fPIC -Wall -shared -Wl,-soname,$(OUTPUT) -L.
-LDLIBS := -lstdc++ -ldl #-llc3_priv$(ARCH)
+LDLIBS := -lstdc++ -ldl -llc3_priv$(ARCH)
 CC := g++ $(ARCH_FLAGS)
 CXX := $(CC)
 RM := rm
