@@ -2,6 +2,9 @@ Note before you begin.  I assume some familarity with the linux terminal.  This 
 
 Steps to install this from source.
 
+IMPORTANT I STRONGLY SUGGEST YOU COPY AND PASTE THESE COMMANDS INTO THE TERMINAL AND DOUBLECHECK THAT IT IS CORRECT BEFORE ISSUING IT.
+TO PASTE FROM THE CLIPBOARD INTO THE TERMINAL USE CTRL+SHIFT+V INSTEAD OF CTRL+V.
+
 0: Please note what the codename of your ubuntu is as you will need to know later in the setup.  For most of you it should be raring
 Previous version names are quantal (12.10) and precise (12.04).  If you are using Linux Mint Olivia (15) should match with raring 14 with quantal and so on.
 If you do not know this type the following in a terminal "lsb_release -a"
