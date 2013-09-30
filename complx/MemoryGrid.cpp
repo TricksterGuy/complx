@@ -18,7 +18,7 @@ void PrintError(int error);
   * Constructor
   */
 MemoryGrid::MemoryGrid(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, long style) :
-wxGrid(parent, id, pos, size, style), timer(this, MemoryToolTipTimer)
+wxGrid(parent, id, pos, size, style), timer(this, MemoryToolTipTimer), tipWindow(NULL)
 {
     last_address = 0x3000;
     highlight = true;
