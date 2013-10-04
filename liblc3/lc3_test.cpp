@@ -213,9 +213,9 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
                     throw "An expression was malformed.";
 
                 short_cmp = (short) value_calc;
-                output.passed = lc3_test_check(output, &state.mem[state.mem[effective_address]], &short_cmp);
+                output.passed = lc3_test_check(output, &state.mem[(unsigned short)state.mem[effective_address]], &short_cmp);
 
-                actual << state.mem[state.mem[effective_address]];
+                actual << state.mem[(unsigned short)state.mem[effective_address]];
                 expected << short_cmp;
 
                 break;
@@ -240,10 +240,10 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
                     if (lc3_calculate(state, output.array[j], value_calc))
                         throw "An expression was malformed.";
 
-                    arrayexpected.push_back(state.mem[state.mem[effective_address] + j]);
+                    arrayexpected.push_back(state.mem[(unsigned short)(state.mem[effective_address] + j)]);
                     arrayactual.push_back((short)value_calc);
 
-                    actual << state.mem[state.mem[effective_address] + j] << " ";
+                    actual << state.mem[(unsigned short)(state.mem[effective_address] + j)] << " ";
                     expected << (short)value_calc << " ";
                 }
 
