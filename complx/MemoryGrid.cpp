@@ -77,15 +77,17 @@ void MemoryGrid::InitGridSizes()
     GetClientSize(&w, &h);
     w -= 24;
 
-    AutoSizeColumn(MemoryBinary);
+    // Hi I am a function call that takes 2+ seconds
+    //AutoSizeColumn(MemoryBinary);
 
-    w -= GetColSize(MemoryBinary);
+    //printf("%d\n", GetColSize(MemoryBinary));
+    w -= 140;//GetColSize(MemoryBinary);
 
     SetColSize(MemoryInfo, 22);
     SetColSize(MemoryAddress, 8 * w / 75 - 8);
     SetColSize(MemoryHexadecimal, 8 * w / 75);
     SetColSize(MemoryDecimal, 10 * w / 75);
-    //SetColSize(MemoryBinary, 25 * w / 100);
+    SetColSize(MemoryBinary, 139);
     SetColSize(MemoryLabel, 18 * w / 75);
     SetColSize(MemoryInstruction, 31 * w / 75 + 9);
 
