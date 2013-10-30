@@ -29,6 +29,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
     if (test.true_traps) lc3_set_true_traps(state, 1);
     if (test.interrupt_enabled) state.interrupt_enabled = 1;
     if (test.has_disable_plugins) disable_plugins = test.disable_plugins;
+    state.max_stack_size = 0;
 
     try
     {
@@ -120,7 +121,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
 
     if (test.has_max_executions)
     {
-        unsigned int i = 0;
+        unsigned long i = 0;
         // Do this num times or until halted.
         while (i < test.max_executions && !state.halted)
         {
