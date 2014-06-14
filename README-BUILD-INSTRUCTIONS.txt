@@ -6,8 +6,41 @@ sudo apt-get install nautilus-open-terminal
 
 When you restart your computer/linux you should now be able to right click in any directory and bring up a terminal already pointed at the directory where you opened the terminal.
 
-Automatic Install instructions
-------------------------------
+Install instructions for ubuntu 14.04
+-------------------------------------
+This is an expedited process and all you have to do is copy and paste (its Ctrl+Shift+V in the terminal) these 8 simple commands.
+
+This is assuming you haven't cloned the repo yet if you have then you can skip lines 2 and 3 and just bring a terminal to the root of the source tree (see below definition if you don't know what that is)
+
+sudo apt-get install git build-essential libwxgtk3.0-dev
+git clone https://github.com/TricksterGuy/complx.git
+cd complx
+make
+sudo make install
+sudo ldconfig
+
+If there are no error messages to run complx all you need to do is type complx
+(Note you may have to run sudo complx the first time and then you may run just complx from then on.  Some crazy ubuntu problem probably...)
+
+for an explanation of what you are doing here
+
+1. You fetch packages git build-essential and libwxgtk3.0-dev
+git allows you to use git from the command line (don't know what git is then do a google search).
+build-essential installs programs essential for building things (mainly the c++ compiler)
+libwxgtk3.0-dev is a dependency of complx you will need this to compile it.
+
+2. Clone my repository from github.  You are more than welcome to look at the source code.
+
+3. Change directory to complx the root of the source tree.
+
+4. Invoke make which will follow the rules present in the file 'Makefile' and build complx and all of the other programs.  You will be exposed to make again later in the semester.
+
+5. Install the programs and data to a known directory.
+
+6. This step is required so complx will run correctly.  If you really want to know complx uses shared libraries (think dll files on windows) and this is needed to let your system know that it should update the list of libraries available on the system. 
+
+Automatic Install instructions for ubuntu 13.10 and earlier
+-----------------------------------------------------------
 Abhijit Murthy was kind enough to write a script to do the manual instructions below.  I've changed it a little bit for my purposes.  If this works you should go thank him.
 
 Just issue the following command
