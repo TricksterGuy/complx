@@ -64,7 +64,7 @@ void PrintError(int error);
   * Constructor
   */
 ComplxFrame::ComplxFrame(long decimal, long disassemble, long stack_size, long true_traps, long interrupts, long highlight,
-                         wxString address_str, wxString state_file, wxArrayString files) : ComplxFrameDecl(NULL)
+                         wxString address_str, wxString state_file, wxArrayString files) : ComplxFrameDecl(NULL), console(NULL), memoryView(NULL)
 {
     InitImages();
 

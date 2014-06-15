@@ -30,44 +30,45 @@ class ComplxFrame : public ComplxFrameDecl
         ~ComplxFrame();
 
         // File menu event handlers
-		void OnRandomizeAndLoad(wxCommandEvent& event);
-		void OnRandomizeAndReload(wxCommandEvent& event);
-		void OnLoad(wxCommandEvent& event);
-		void OnReload(wxCommandEvent& event);
-		void OnLoadOver(wxCommandEvent& event);
-		void OnReloadOver(wxCommandEvent& event);
-		void OnLoadMachine(wxCommandEvent& event);
-		void OnSaveMachine(wxCommandEvent& event);
-		void OnQuit(wxCommandEvent& event);
+        void OnRandomizeAndLoad(wxCommandEvent& event);
+        void OnRandomizeAndReload(wxCommandEvent& event);
+        void OnLoad(wxCommandEvent& event);
+        void OnReload(wxCommandEvent& event);
+        void OnLoadOver(wxCommandEvent& event);
+        void OnReloadOver(wxCommandEvent& event);
+        void OnLoadMachine(wxCommandEvent& event);
+        void OnSaveMachine(wxCommandEvent& event);
+        void OnQuit(wxCommandEvent& event);
 
         // View menu event handlers
         void OnNewView(wxCommandEvent& event);
-		void OnGoto(wxCommandEvent& event);
-		void OnDumbDisassemble(wxCommandEvent& event);
-		void OnNormalDisassemble(wxCommandEvent& event);
-		void OnCDisassemble(wxCommandEvent& event);
-		void OnInstructionHighlight(wxCommandEvent& event);
-		void OnUnsignedDecimal(wxCommandEvent& event);
-		// Helpers for view menu actions
+        void OnGoto(wxCommandEvent& event);
+        void OnDumbDisassemble(wxCommandEvent& event);
+        void OnNormalDisassemble(wxCommandEvent& event);
+        void OnCDisassemble(wxCommandEvent& event);
+        void OnInstructionHighlight(wxCommandEvent& event);
+        void OnUnsignedDecimal(wxCommandEvent& event);
+        // Helpers for view menu actions
         void OnDestroyView(wxCloseEvent& event);
 
         // State menu event handlers
-		void OnStep(wxCommandEvent& event);
-		void OnBackStep(wxCommandEvent& event);
-		void OnNextLine(wxCommandEvent& event);
-		void OnPrevLine(wxCommandEvent& event);
-		void OnRun(wxCommandEvent& event);
-		void OnRunFor(wxCommandEvent& event);
-		void OnRunAgain(wxCommandEvent& event);
-		void OnRewind(wxCommandEvent& event);
-		void OnFinish(wxCommandEvent& event);
-		void OnRandomize(wxCommandEvent& event);
-		void OnReinitialize(wxCommandEvent& event);
-		void OnTrueTraps(wxCommandEvent& event);
-		void OnInterrupts(wxCommandEvent& event);
-		void OnClearConsole(wxCommandEvent& event);
-		void OnClearConsoleInput(wxCommandEvent& event);
-		// Helpers
+        void OnStep(wxCommandEvent& event);
+        void OnBackStep(wxCommandEvent& event);
+        void OnNextLine(wxCommandEvent& event);
+        void OnPrevLine(wxCommandEvent& event);
+        void OnRun(wxCommandEvent& event);
+        void OnRunFor(wxCommandEvent& event);
+        void OnRunAgain(wxCommandEvent& event);
+        void OnRewind(wxCommandEvent& event);
+        void OnFinish(wxCommandEvent& event);
+        void OnRandomize(wxCommandEvent& event);
+        void OnReinitialize(wxCommandEvent& event);
+        void OnTrueTraps(wxCommandEvent& event);
+        void OnInterrupts(wxCommandEvent& event);
+        void OnClearConsole(wxCommandEvent& event);
+        void OnClearConsoleInput(wxCommandEvent& event);
+        
+        // Helpers
         void OnTextKillFocus(wxFocusEvent& event);
         void OnBaseChange(wxMouseEvent& event);
         void OnEditAddress(wxCommandEvent& event);
@@ -76,12 +77,12 @@ class ComplxFrame : public ComplxFrameDecl
         // Debug menu event handlers
         void OnUndoStack(wxCommandEvent& event);
         void OnCallStack(wxCommandEvent& event);
-		void OnBreakAndWatchpoints(wxCommandEvent& event);
-		void OnTemppoint(wxCommandEvent& event);
-		void OnBreakpoint(wxCommandEvent& event);
-		void OnWatchpoint(wxCommandEvent& event);
-		void OnAdvancedBreakpoint(wxCommandEvent& event);
-		void OnBlackbox(wxCommandEvent& event);
+        void OnBreakAndWatchpoints(wxCommandEvent& event);
+        void OnTemppoint(wxCommandEvent& event);
+        void OnBreakpoint(wxCommandEvent& event);
+        void OnWatchpoint(wxCommandEvent& event);
+        void OnAdvancedBreakpoint(wxCommandEvent& event);
+        void OnBlackbox(wxCommandEvent& event);
 
         // Testing menu event handlers
         void OnRunTests(wxCommandEvent& event);
@@ -90,12 +91,12 @@ class ComplxFrame : public ComplxFrameDecl
 
         // Help menu event handlers
         void OnDocs(wxCommandEvent& event);
-		void OnISA(wxCommandEvent& event);
-		void OnChangeLog(wxCommandEvent& event);
-		void OnCheckForUpdates(wxCommandEvent& event);
-		void OnAbout(wxCommandEvent& event);
-		void OnFirstTime(wxCommandEvent& event);
-		void OnTips(wxCommandEvent& event);
+        void OnISA(wxCommandEvent& event);
+        void OnChangeLog(wxCommandEvent& event);
+        void OnCheckForUpdates(wxCommandEvent& event);
+        void OnAbout(wxCommandEvent& event);
+        void OnFirstTime(wxCommandEvent& event);
+        void OnTips(wxCommandEvent& event);
 
         // Misc event handlers required for THINGS.
         void OnActivate(wxActivateEvent& event);

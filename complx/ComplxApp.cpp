@@ -67,6 +67,7 @@ bool ComplxApp::OnInit()
     wxConfigBase::Set(config);
 
     srand(time(NULL));
+    wxMilliSleep(50);
     complxframe = new ComplxFrame(decimal, disassemble, stack_size, true_traps, interrupts, highlight, address_str, state_file, files);
     wxIcon icon(icon32_xpm);
     complxframe->SetIcon(icon);
