@@ -12,22 +12,12 @@
 #include "ComplxFrame.hpp"
 #include "version.h"
 
-#include <libgen.h>
 #include <wx/wxprec.h>
 #include <wx/cmdline.h>
 #include <wx/config.h>
 #include <wx/msgdlg.h>
 #include <wx/tipdlg.h>
 
-// PREFIX detection
-std::string getPrefix() {
-    vector<char> pathToSelf(1024,'\0');
-    ssize_t lengthOfPathToSelf = ::readlink("/proc/self/exe", &pathToSelf[0], pathToSelf->size()-1);
-    if (lengthOfPathToSelf != -1) {
-        pathToSelf.at(lengthOfPathToSelf) = '\0';
-        return std::string(dirname(dirname(&pathToSelf[0])));
-    } else { return std::string("/usr/local"); }
-}
 
 static const wxCmdLineEntryDesc cmd_descriptions[] =
 {
@@ -101,8 +91,7 @@ bool ComplxApp::OnInit()
 
     if (show)
     {
-
-        wxTipProvider* tip = wxCreateFileTipProvider(getPrefix().append("/share/complx-tools/complx-tips.txt").c_str(), currentTip);
+        wxTipProvider* tip = wxCreateFileTipProvider("/usr/local/share/complx-tools/complx-tips.txt", currentTip);
         show = wxShowTip(complxframe, tip, show);
 
         config->Write("/showtips", show);
