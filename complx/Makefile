@@ -12,7 +12,7 @@ INSTALL := install
 FILES := AddressDialog.o AddressDialogDecl.o BreakpointDialog.o BreakpointDialogDecl.o CallStackDialog.o CallStackDialogDecl.o ComplxApp.o ComplxFrame.o ComplxFrameDecl.o DebugInfoDialog.o DebugInfoDialogDecl.o DebugInfoList.o GridCellBinaryRenderer.o GridCellInfoRenderer.o LC3Console.o LC3ConsoleDecl.o LC3RunThread.o MemoryGrid.o MemoryView.o MemoryViewFrame.o MemoryViewFrameDecl.o RunForDialog.o RunForDialogDecl.o RunTestDialog.o RunTestDialogDecl.o WatchpointDialog.o WatchpointDialogDecl.o XmlTestParser.o
 
 $(OUTPUT) : $(FILES)
-	$(CC) $(LDFLAGS) $^ -o $(OUTPUT) $(LDLIBS)
+	$(CC) -DPREFIX=$(PREFIX) $(LDFLAGS) $^ -o $(OUTPUT) $(LDLIBS)
 
 clean : 
 	$(RM) -rf *.o $(OUTPUT)
