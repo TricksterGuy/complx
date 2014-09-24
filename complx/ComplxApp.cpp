@@ -91,7 +91,7 @@ bool ComplxApp::OnInit()
 
     if (show)
     {
-        wxTipProvider* tip = wxCreateFileTipProvider("PREFIX/share/complx-tools/complx-tips.txt", currentTip);
+        wxTipProvider* tip = wxCreateFileTipProvider(XSTR(PREFIX) "/share/complx-tools/complx-tips.txt", currentTip);
         show = wxShowTip(complxframe, tip, show);
 
         config->Write("/showtips", show);

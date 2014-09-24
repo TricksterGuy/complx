@@ -1,5 +1,7 @@
 #ifndef COMPLEX_FRAME_HPP
 #define COMPLEX_FRAME_HPP
+#define XSTR(S) STR(S)
+#define STR(S) #S
 
 #include <wx/grid.h>
 #include <wx/textctrl.h>
