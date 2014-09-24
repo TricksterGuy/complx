@@ -1,7 +1,7 @@
 #ifndef COMPLEX_FRAME_HPP
 #define COMPLEX_FRAME_HPP
-#define XSTR(S) STR(S)
-#define STR(S) #S
+#define EXPAND_AND_STRINGIFY(S) STRINGIFY_TOKEN(S)
+#define STRINGIFY_TOKEN(S) #S
 
 #include <wx/grid.h>
 #include <wx/textctrl.h>
