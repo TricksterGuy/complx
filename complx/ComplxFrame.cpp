@@ -1274,7 +1274,7 @@ void ComplxFrame::OnAbout(wxCommandEvent& event)
   */
 void ComplxFrame::OnDocs(wxCommandEvent& event)
 {
-    wxFileName manual(_("/usr/local/share/complx-tools/Complx.pdf"));
+    wxFileName manual(_(EXPAND_AND_STRINGIFY(PREFIX) "/share/complx-tools/Complx.pdf"));
     manual.Normalize();
     wxLaunchDefaultBrowser(manual.GetFullPath());
 }
@@ -1285,7 +1285,7 @@ void ComplxFrame::OnDocs(wxCommandEvent& event)
   */
 void ComplxFrame::OnISA(wxCommandEvent& event)
 {
-    wxFileName manual(_("/usr/local/share/complx-tools/PattPatelAppA.pdf"));
+    wxFileName manual(_(EXPAND_AND_STRINGIFY(PREFIX) "/share/complx-tools/PattPatelAppA.pdf"));
     manual.Normalize();
     wxLaunchDefaultBrowser(manual.GetFullPath());
 }
@@ -1296,7 +1296,7 @@ void ComplxFrame::OnISA(wxCommandEvent& event)
   */
 void ComplxFrame::OnChangeLog(wxCommandEvent& event)
 {
-    wxFileName manual(_("/usr/local/share/complx-tools/ComplxChangeLog.txt"));
+    wxFileName manual(_(EXPAND_AND_STRINGIFY(PREFIX) "/share/complx-tools/ComplxChangeLog.txt"));
     manual.Normalize();
     wxLaunchDefaultBrowser(manual.GetFullPath());
 }
@@ -1326,7 +1326,7 @@ void ComplxFrame::OnTips(wxCommandEvent& event)
     size_t currentTip = config->Read("/currenttip", 0l);
     bool show = true;
     config->Read("/showtips", &show);
-    wxTipProvider* tip = wxCreateFileTipProvider("/usr/local/share/complx-tools/complx-tips.txt", currentTip);
+    wxTipProvider* tip = wxCreateFileTipProvider(EXPAND_AND_STRINGIFY(PREFIX) "/share/complx-tools/complx-tips.txt", currentTip);
     show = wxShowTip(complxframe, tip, show);
 
     config->Write("/showtips", show);
