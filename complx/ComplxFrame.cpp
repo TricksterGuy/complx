@@ -1263,7 +1263,7 @@ void ComplxFrame::OnAbout(wxCommandEvent& event)
     aboutInfo.SetName("Complx");
     aboutInfo.SetVersion(AutoVersion::FULLVERSION_STRING);
     aboutInfo.SetDescription(_("LC-3 Simulator\nBug reports, thanks, and feature requests should be sent to Brandon.\nbwhitehead0308@gmail.com"));
-    aboutInfo.SetCopyright("(C) 2010-2013");
+    aboutInfo.SetCopyright("(C) 2010-2015");
     aboutInfo.AddDeveloper("Brandon Whitehead bwhitehead0308@gmail.com");
     aboutInfo.SetIcon(wxIcon(icon64_xpm));
 
