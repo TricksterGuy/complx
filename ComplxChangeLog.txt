@@ -1,3 +1,8 @@
+5 February 2015
+   released version 4.7.0 of Complx
+     Change log:
+       - Fixed: Memory consumption on infinite recursion.
+
 23 June 2013
    released version 4.5.0 of Complx
      Change log:
