@@ -7,15 +7,17 @@
 
 namespace ExpressionEvaluator
 {
+    typedef union eval_value
+    {
+        int (*func)(bool, int);
+        int value;
+    } eval_value;
 
     typedef struct eval_type
     {
         int type;
-        union eval
-        {
-            int (*func)(bool, int);
-            int value;
-        } eval;
+        eval_value eval;
+
     } eval_type;
 
     extern std::map<std::string, eval_type> symbol_table;

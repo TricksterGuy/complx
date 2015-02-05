@@ -29,6 +29,8 @@ static const wxCmdLineEntryDesc cmd_descriptions[] =
         wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL},
     { wxCMD_LINE_OPTION, "s", "stack_size", "Sets the undo stack size default 65536 instructions",
         wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL},
+    { wxCMD_LINE_OPTION, "c", "call_stack_size", "Sets the call stack size default 10000 JSR/Trap calls",
+        wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL},
     { wxCMD_LINE_OPTION, "a", "address", "Sets PC's starting address default 0x3000",
         wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL},
     { wxCMD_LINE_OPTION, "t", "true_traps", "Enables true traps 0 = no (default) 1 = yes",
@@ -44,10 +46,10 @@ static const wxCmdLineEntryDesc cmd_descriptions[] =
 };
 
 
-IMPLEMENT_APP(ComplxApp);
+IMPLEMENT_APP(ComplxApp)
 
 // Command line
-long decimal = 0, disassemble = 2, stack_size = 65536, true_traps = 0, interrupts = 0, highlight = 1;
+long decimal = 0, disassemble = 2, stack_size = 65536, call_stack_size = 10000, true_traps = 0, interrupts = 0, highlight = 1;
 wxString address_str = wxEmptyString, state_file = wxEmptyString;
 wxArrayString files;
 ComplxFrame* complxframe;
@@ -68,7 +70,7 @@ bool ComplxApp::OnInit()
 
     srand(time(NULL));
     wxMilliSleep(50);
-    complxframe = new ComplxFrame(decimal, disassemble, stack_size, true_traps, interrupts, highlight, address_str, state_file, files);
+    complxframe = new ComplxFrame(decimal, disassemble, stack_size, call_stack_size, true_traps, interrupts, highlight, address_str, state_file, files);
     wxIcon icon(icon32_xpm);
     complxframe->SetIcon(icon);
     complxframe->Show();

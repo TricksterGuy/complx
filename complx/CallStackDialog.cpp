@@ -74,7 +74,7 @@ void CallStackDialog::SetupList()
     callList->Clear();
     for (unsigned int i = 0; i < state.call_stack.size(); i++)
     {
-        lc3_subroutine_call& call = state.call_stack[i];
+        lc3_subroutine_call call = state.call_stack[i];
         if (state.subroutines.find(call.address) == state.subroutines.end())
         {
             callList->Append(wxString::Format("%s%s", call.is_trap ? "TRAP " : "", lc3_sym_rev_lookup(state, call.address)));

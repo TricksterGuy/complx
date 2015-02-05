@@ -44,7 +44,7 @@ MultiplyPlugin::~MultiplyPlugin()
   */
 std::string MultiplyPlugin::GetOpcode() const
 {
-    return "MUL";
+    return std::string("MUL");
 }
 
 /** @brief DoAssembleOne

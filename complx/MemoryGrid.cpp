@@ -339,9 +339,10 @@ void MemoryGrid::OnShowToolTip(wxTimerEvent& event)
 
     if (col == MemoryInstruction && tipWindow == NULL)
     {
-        std::string tooltip = state.comments[(unsigned short)(row-1)];
-        if (tooltip.empty())
+        unsigned short address = (unsigned short)(row-1);
+        if (state.comments.find(address) == state.comments.end())
             return;
+        const std::string& tooltip = state.comments[address];
         tipWindow = new wxTipWindow(this, tooltip);
         tipWindow->SetTipWindowPtr(&tipWindow);
         tipWindow->SetBoundingRect(wxRect(x + 30, y + 30, 100, 22));

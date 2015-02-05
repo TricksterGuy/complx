@@ -63,7 +63,7 @@ void PrintError(int error);
   *
   * Constructor
   */
-ComplxFrame::ComplxFrame(long decimal, long disassemble, long stack_size, long true_traps, long interrupts, long highlight,
+ComplxFrame::ComplxFrame(long decimal, long disassemble, long stack_size, long call_stack_size, long true_traps, long interrupts, long highlight,
                          wxString address_str, wxString state_file, wxArrayString files) : ComplxFrameDecl(NULL), console(NULL), memoryView(NULL)
 {
     InitImages();
@@ -74,6 +74,7 @@ ComplxFrame::ComplxFrame(long decimal, long disassemble, long stack_size, long t
     menuViewUnsignedDecimal->Check(decimal == 1);
 
     this->stack_size = stack_size;
+    this->call_stack_size = call_stack_size;
     OnInit();
 
     if (!address_str.IsEmpty())
@@ -236,6 +237,7 @@ void ComplxFrame::OnInit(void)
     lc3_set_true_traps(state, menuStateTrueTraps->IsChecked());
     state.interrupt_enabled = menuStateInterrupts->IsChecked();
     state.max_stack_size = stack_size;
+    state.max_call_stack_size = call_stack_size;
 }
 
 /** OnReload

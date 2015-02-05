@@ -155,25 +155,25 @@ int lc3_calculate(lc3_state& state, std::string expr, int &r)
   */
 void lc3_init_eval(void)
 {
-    symbol_table["R0"] = (eval_type){EVAL_FUNCTION, {get_r0}};
-    symbol_table["r0"] = (eval_type){EVAL_FUNCTION, {get_r0}};
-    symbol_table["R1"] = (eval_type){EVAL_FUNCTION, {get_r1}};
-    symbol_table["r1"] = (eval_type){EVAL_FUNCTION, {get_r1}};
-    symbol_table["R2"] = (eval_type){EVAL_FUNCTION, {get_r2}};
-    symbol_table["r2"] = (eval_type){EVAL_FUNCTION, {get_r2}};
-    symbol_table["R3"] = (eval_type){EVAL_FUNCTION, {get_r3}};
-    symbol_table["r3"] = (eval_type){EVAL_FUNCTION, {get_r3}};
-    symbol_table["R4"] = (eval_type){EVAL_FUNCTION, {get_r4}};
-    symbol_table["r4"] = (eval_type){EVAL_FUNCTION, {get_r4}};
-    symbol_table["R5"] = (eval_type){EVAL_FUNCTION, {get_r5}};
-    symbol_table["r5"] = (eval_type){EVAL_FUNCTION, {get_r5}};
-    symbol_table["R6"] = (eval_type){EVAL_FUNCTION, {get_r6}};
-    symbol_table["r6"] = (eval_type){EVAL_FUNCTION, {get_r6}};
-    symbol_table["R7"] = (eval_type){EVAL_FUNCTION, {get_r7}};
-    symbol_table["r7"] = (eval_type){EVAL_FUNCTION, {get_r7}};
-    symbol_table["PC"] = (eval_type){EVAL_FUNCTION, {get_pc}};
-    symbol_table["pc"] = (eval_type){EVAL_FUNCTION, {get_pc}};
-    symbol_table["MEM"] = (eval_type){EVAL_FUNCTION, {get_mem}};
-    symbol_table["mem"] = (eval_type){EVAL_FUNCTION, {get_mem}};
+    symbol_table["R0"] = {EVAL_FUNCTION, get_r0};
+    symbol_table["r0"] = {EVAL_FUNCTION, get_r0};
+    symbol_table["R1"] = {EVAL_FUNCTION, get_r1};
+    symbol_table["r1"] = {EVAL_FUNCTION, get_r1};
+    symbol_table["R2"] = {EVAL_FUNCTION, get_r2};
+    symbol_table["r2"] = {EVAL_FUNCTION, get_r2};
+    symbol_table["R3"] = {EVAL_FUNCTION, get_r3};
+    symbol_table["r3"] = {EVAL_FUNCTION, get_r3};
+    symbol_table["R4"] = {EVAL_FUNCTION, get_r4};
+    symbol_table["r4"] = {EVAL_FUNCTION, get_r4};
+    symbol_table["R5"] = {EVAL_FUNCTION, get_r5};
+    symbol_table["r5"] = {EVAL_FUNCTION, get_r5};
+    symbol_table["R6"] = {EVAL_FUNCTION, get_r6};
+    symbol_table["r6"] = {EVAL_FUNCTION, get_r6};
+    symbol_table["R7"] = {EVAL_FUNCTION, get_r7};
+    symbol_table["r7"] = {EVAL_FUNCTION, get_r7};
+    symbol_table["PC"] = {EVAL_FUNCTION, get_pc};
+    symbol_table["pc"] = {EVAL_FUNCTION, get_pc};
+    symbol_table["MEM"] = {EVAL_FUNCTION, get_mem};
+    symbol_table["mem"] = {EVAL_FUNCTION, get_mem};
 }
 

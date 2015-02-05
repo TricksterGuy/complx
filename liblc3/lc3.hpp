@@ -436,7 +436,9 @@ typedef struct lc3_state
        So treat this as a "stack" */
     std::deque<lc3_state_change> undo_stack;
 
-    // Subroutine debugging info
+    // Maximum call stack size just here for people who like to infinite loop/recurse and don't want their computers to explode.
+    unsigned int max_call_stack_size;
+    // Subroutine debugging info (again see note above)
     std::deque<lc3_subroutine_call> call_stack;
 
     // Interrupt support push things here to cause interrupt

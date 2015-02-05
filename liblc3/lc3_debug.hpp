@@ -45,6 +45,6 @@ bool lc3_remove_watch(lc3_state& state, const std::string& symbol);
 /** Tests all breakpoints and watchpoints */
 bool lc3_break_test(lc3_state& state, const lc3_state_change* changes);
 /** Tests for blackboxes */
-bool lc3_blackbox_test(lc3_state& state);;
+bool lc3_blackbox_test(lc3_state& state);
 
 #endif

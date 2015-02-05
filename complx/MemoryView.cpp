@@ -22,7 +22,6 @@ MemoryView::MemoryView()
   */
 MemoryView::~MemoryView()
 {
-    wxPuts("DEleTE");
 }
 
 

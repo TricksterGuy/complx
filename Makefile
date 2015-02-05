@@ -1,7 +1,7 @@
 # File intended only to be ran with GNU make. Use any other make program at your own risk!
 PREFIX := /usr/local
 export PREFIX
-MASTER_CPP_FLAGS := -O3 -s
+MASTER_CPP_FLAGS := -g
 export MASTER_CPP_FLAGS
 INSTALL := install
 ARCH = $(shell getconf LONG_BIT)
@@ -15,6 +15,12 @@ liblc3.so :
 as2obj : liblc3.so
 	$(MAKE) -C $@ $@ -f Makefile
 
+#comp : liblc3.so
+#	$(MAKE) -C $@ $@ -f Makefile
+	
+complx : liblc3.so
+	$(MAKE) -C $@ $@ -f Makefile
+
 lc3runner : liblc3.so
 	$(MAKE) -C $@ $@ -f Makefile
 
@@ -24,9 +30,6 @@ lc3test : liblc3.so
 lc3plugins : liblc3.so
 	$(MAKE) -C $@ all -f Makefile
 
-complx : liblc3.so
-	$(MAKE) -C $@ $@ -f Makefile
-
 clean :
 	$(MAKE) -C liblc3 clean -f Makefile
 	$(MAKE) -C as2obj clean -f Makefile
@@ -34,6 +37,7 @@ clean :
 	$(MAKE) -C lc3test clean -f Makefile
 	$(MAKE) -C lc3plugins clean -f Makefile
 	$(MAKE) -C complx clean -f Makefile
+#	$(MAKE) -C comp clean -f Makefile
 
 install : all
 	mkdir -p $(PREFIX)
@@ -48,6 +52,7 @@ install : all
 	$(MAKE) -C lc3test install -f Makefile
 	$(MAKE) -C lc3plugins install -f Makefile
 	$(MAKE) -C complx install -f Makefile
+#	$(MAKE) -C comp install -f Makefile
 	$(INSTALL) -m 0644 Complx.pdf $(PREFIX)/share/complx-tools
 	$(INSTALL) -m 0644 ComplxChangeLog.txt $(PREFIX)/share/complx-tools
 	$(INSTALL) -m 0644 ChangeLog $(PREFIX)/share/complx-tools
@@ -64,4 +69,5 @@ uninstall :
 	$(MAKE) -C lc3test uninstall -f Makefile
 	$(MAKE) -C lc3plugins uninstall -f Makefile
 	$(MAKE) -C complx uninstall -f Makefile
+#	$(MAKE) -C comp uninstall -f Makefile
 

@@ -28,7 +28,7 @@ class wxThreadEvent;
 class ComplxFrame : public ComplxFrameDecl
 {
     public:
-        ComplxFrame(long decimal, long disassemble, long stack_size, long true_traps, long interrupts, long highlight, wxString address_str, wxString state_file, wxArrayString files);
+        ComplxFrame(long decimal, long disassemble, long stack_size, long call_stack_size, long true_traps, long interrupts, long highlight, wxString address_str, wxString state_file, wxArrayString files);
         ~ComplxFrame();
 
         // File menu event handlers
@@ -124,6 +124,7 @@ class ComplxFrame : public ComplxFrameDecl
         MemoryView* memoryView;
 
         long stack_size;
+        long call_stack_size;
 
         void UpdateRegister(wxTextCtrl* text, int value, int index);
         void OnInit(void);
