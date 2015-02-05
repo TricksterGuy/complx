@@ -6,8 +6,12 @@ sudo apt-get install nautilus-open-terminal
 
 When you restart your computer/linux you should now be able to right click in any directory and bring up a terminal already pointed at the directory where you opened the terminal.
 
-Install instructions for ubuntu 14.04
--------------------------------------
+Automated Install instructions for ubuntu 14.04 and up
+------------------------------------------------------
+Just run sudo ./install.sh from a terminal
+
+Manual Install instructions for ubuntu 14.04 and up
+----------------------------------------------------
 This is an expedited process and all you have to do is copy and paste (its Ctrl+Shift+V in the terminal) these 8 simple commands.
 
 This is assuming you haven't cloned the repo yet if you have then you can skip lines 2 and 3 and just bring a terminal to the root of the source tree (see below definition if you don't know what that is)
@@ -39,13 +43,15 @@ libwxgtk3.0-dev is a dependency of complx you will need this to compile it.
 
 6. This step is required so complx will run correctly.  If you really want to know complx uses shared libraries (think dll files on windows) and this is needed to let your system know that it should update the list of libraries available on the system. 
 
+
+
 Automatic Install instructions for ubuntu 13.10 and earlier
 -----------------------------------------------------------
 Abhijit Murthy was kind enough to write a script to do the manual instructions below.  I've changed it a little bit for my purposes.  If this works you should go thank him.
 
 Just issue the following command
 
-sudo ./install.sh
+sudo ./install_script_ubuntu_13_10.sh
 
 In the same directory as the root of the source tree.  If you do not know where this is it is the same directory where this file is located on your computer.
 If you have installed nautilus-open-terminal you should be able to right click on this directory and select open terminal.  If you are still confused about this
@@ -64,7 +70,7 @@ See how the output includes install.sh and README-BUILD-INSTRUCTIONS.txt this is
 The script should work on Linux Mint, Ubuntu, Debian squeeze and wheezy.  Your mileage may vary with other debian/ubuntu based systems.
 If you want to support another distro then write an install script and send it to me.
 
-Manual Install Instructions begin here
+Manual Install Instructions for ubuntu 13.10 and under begin here
 --------------------------------------
 IMPORTANT I STRONGLY SUGGEST YOU COPY AND PASTE THESE COMMANDS INTO THE TERMINAL AND DOUBLECHECK THAT IT IS CORRECT BEFORE ISSUING IT.
 TO PASTE FROM THE CLIPBOARD INTO THE TERMINAL USE CTRL+SHIFT+V INSTEAD OF CTRL+V.
