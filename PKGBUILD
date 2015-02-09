@@ -1,17 +1,14 @@
 pkgname=complx
-pkgver=r43.11b2557
+pkgver=r44.6340dfc
 pkgrel=1
 pkgdesc="the CS2110 LC-3 simulator"
 arch=(i686 x86_64)
 url="https://github.com/TricksterGuy/complx"
 depends=('wxgtk')
 makedepends=('git' 'webkitgtk2')
-source=(complx::git+https://github.com/TricksterGuy/complx)
-md5sums=('SKIP')
-options=('makeflags')
+options=(makeflags)
 
 pkgver() {
-  cd "${srcdir}/${pkgname}"
   ( set -o pipefail
     git describe --long --tags 2>/dev/null | sed 's/\([^-]*-g\)/r\1/;s/-/./g' ||
     printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
@@ -19,12 +16,12 @@ pkgver() {
 }
 
 build() {
-  cd "${srcdir}/${pkgname}"
+  cd ..
   make PREFIX=/usr
 }
 
 package() {
-  cd "${srcdir}/${pkgname}"
+  cd ..
   mkdir -p $pkgdir/usr
   make install PREFIX=$pkgdir/usr
 }
