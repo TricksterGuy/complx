@@ -17,8 +17,30 @@ enum lc3_test_type
     TEST_ARRAY,
     TEST_STRING,
     TEST_IO,
+    TEST_SUBROUTINE,
     SIZE,
 };
+
+typedef struct lc3_subr_input
+{
+    std::string name;
+    std::string stack;
+    std::string r7_dummy;
+    std::string r5_dummy;
+    std::vector<std::string> params;
+} lc3_subr_input;
+
+typedef struct lc3_subr_output
+{
+    std::string answer;
+    std::vector<std::string> locals;
+    unsigned int points_answer;
+    unsigned int points_r7;
+    unsigned int points_r5;
+    unsigned int points_edist;
+    unsigned int points_locals;
+
+} lc3_subr_output;
 
 typedef struct lc3_test_input
 {
