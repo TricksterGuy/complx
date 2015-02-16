@@ -470,6 +470,9 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
            subr.r7 = subr_input->subroutine.r7;
            subr.r5 = subr_input->subroutine.r5;
            subr.stack = subr_input->subroutine.stack;
+
+           // Post processing part II calculate total points
+           output.points = subr.points_answer + subr.points_locals + subr.points_params + subr.points_r5 + subr.points_r7;
         }
         else if (child->GetName() != "comment")
         {
