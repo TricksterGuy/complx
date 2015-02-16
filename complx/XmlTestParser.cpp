@@ -196,6 +196,7 @@ bool XmlTestParser::LoadTest(lc3_test_suite& suite, wxXmlNode* root)
         }
         else if (child->GetName() == "output")
         {
+            if (test.input.empty()) throw "test-input must come before test-output";
             if (!LoadTestOutput(test, child)) throw "test-output improperly formatted";
         }
 
@@ -281,6 +282,31 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, wxXmlNode* root)
             if (error) throw "malformed string in test-stdin";
 
             input.type = TEST_IO;
+        }
+        else if (child->GetName() == "test-subr")
+        {
+            lc3_subr_input& subr = input.subroutine;
+            if (grandchild->GetName() != "name") throw "name must come before stack";
+            subr.name = grandchild->GetNodeContent();
+
+            grandchild = getNextNode(grandchild);
+            if (grandchild->GetName() != "stack") throw "stack must come before r7";
+            subr.stack = grandchild->GetNodeContent();
+
+            grandchild = getNextNode(grandchild);
+            if (grandchild->GetName() != "r7") throw "r7 must come before r5";
+            subr.r7 = grandchild->GetNodeContent();
+
+            grandchild = getNextNode(grandchild);
+            if (grandchild->GetName() != "r5") throw "r5 must come before params";
+            subr.r5 = grandchild->GetNodeContent();
+
+            grandchild = getNextNode(grandchild);
+            if (grandchild->GetName() != "params") throw "params tag not found";
+            std::string params = grandchild->GetNodeContent().ToStdString();
+            tokenize(params, subr.params, ",");
+
+            input.type = TEST_SUBROUTINE;
         }
         else if (child->GetName() != "comment")
         {
@@ -382,6 +408,68 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
             if (error) throw "malformed string in test-stdout";
 
             output.type = TEST_IO;
+        }
+        else if (child->GetName() == "test-subr")
+        {
+            lc3_subr_output& subr = output.subroutine;
+            if (grandchild->GetName() != "answer") throw "answer must come before locals";
+            subr.answer = grandchild->GetNodeContent();
+
+            grandchild = getNextNode(grandchild);
+            if (grandchild->GetName() != "locals") throw "locals must come before points";
+            std::string locals = grandchild->GetNodeContent().ToStdString();
+            tokenize(locals, subr.locals, ",");
+
+            grandchild = getNextNode(grandchild);
+            if (grandchild->GetName() != "points")
+                throw "points must come before deductions-per-mistake";
+
+            {
+                wxXmlNode* ggchild = grandchild->GetChildren();
+                if (ggchild->GetName() != "answer") throw "answer in points tag must come before params";
+                subr.points_answer = wxAtoi(ggchild->GetNodeContent());
+
+                ggchild = getNextNode(ggchild);
+                if (ggchild->GetName() != "params") throw "params in points tag must come before r7";
+                subr.points_params = wxAtoi(ggchild->GetNodeContent());
+
+                ggchild = getNextNode(ggchild);
+                if (ggchild->GetName() != "r7") throw "r7 in points tag must come before r5";
+                subr.points_r7 = wxAtoi(ggchild->GetNodeContent());
+
+                ggchild = getNextNode(ggchild);
+                if (ggchild->GetName() != "r5") throw "r5 in points tag must come before locals";
+                subr.points_r5 = wxAtoi(ggchild->GetNodeContent());
+
+                ggchild = getNextNode(ggchild);
+                if (ggchild->GetName() != "locals") throw "locals in points tag not found";
+                subr.points_locals = wxAtoi(ggchild->GetNodeContent());
+            }
+
+            grandchild = getNextNode(grandchild);
+            if (grandchild->GetName() != "deductions-per-mistake") throw "deductions-per-mistake tag not found";
+            subr.deductions_edist = wxAtoi(grandchild->GetNodeContent());
+
+            output.type = TEST_SUBROUTINE;
+
+            // Post processing find test-subr in input and copy attributes over
+            lc3_test_input* subr_input = NULL;
+            for (unsigned int i = 0; i < test.input.size(); i++)
+            {
+                lc3_test_input& tinput = test.input[i];
+                if (tinput.type == TEST_SUBROUTINE)
+                {
+                    subr_input = &tinput;
+                    break;
+                }
+            }
+
+            if (!subr_input) throw "Used output type of test-subr without specifying subroutine input.";
+
+           subr.params = subr_input->subroutine.params;
+           subr.r7 = subr_input->subroutine.r7;
+           subr.r5 = subr_input->subroutine.r5;
+           subr.stack = subr_input->subroutine.stack;
         }
         else if (child->GetName() != "comment")
         {

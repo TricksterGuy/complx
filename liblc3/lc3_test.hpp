@@ -25,21 +25,25 @@ typedef struct lc3_subr_input
 {
     std::string name;
     std::string stack;
-    std::string r7_dummy;
-    std::string r5_dummy;
+    std::string r7;
+    std::string r5;
     std::vector<std::string> params;
 } lc3_subr_input;
 
 typedef struct lc3_subr_output
 {
     std::string answer;
+    std::vector<std::string> params; // Same as input not present in its xml tag.
+    std::string stack; // Same as input not present in its xml tag.
+    std::string r7; // Same as input not present in its xml tag.
+    std::string r5; // Same as input not present in its xml tag.
     std::vector<std::string> locals;
     unsigned int points_answer;
+    unsigned int points_params;
     unsigned int points_r7;
     unsigned int points_r5;
-    unsigned int points_edist;
     unsigned int points_locals;
-
+    unsigned int deductions_edist;
 } lc3_subr_output;
 
 typedef struct lc3_test_input
@@ -54,6 +58,7 @@ typedef struct lc3_test_input
     std::vector<std::string> array;
     std::string text;
     std::string io;
+    lc3_subr_input subroutine;
 } lc3_test_input;
 
 typedef struct lc3_test_output
@@ -71,6 +76,7 @@ typedef struct lc3_test_output
     std::vector<std::string> array;
     std::string text;
     std::string io;
+    lc3_subr_output subroutine;
 
     std::string expected;
     std::string actual;
