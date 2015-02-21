@@ -40,6 +40,7 @@ typedef struct lc3_subr_output
     std::vector<std::string> locals;
     unsigned int points_answer;
     unsigned int points_params;
+    unsigned int points_r6;
     unsigned int points_r7;
     unsigned int points_r5;
     unsigned int points_locals;
@@ -67,6 +68,7 @@ typedef struct lc3_test_output
     unsigned int cmp_type;
     std::string address;
     bool passed;
+    unsigned int earned;
     unsigned int points;
     /// TODO only one of these will be used.  Can't do this with a union
     std::string value;
@@ -80,6 +82,7 @@ typedef struct lc3_test_output
 
     std::string expected;
     std::string actual;
+    std::string extra_output;
 } lc3_test_output;
 
 typedef struct lc3_test

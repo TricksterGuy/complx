@@ -361,6 +361,13 @@ typedef struct lc3_subroutine_call
     bool is_trap;
 } lc3_subroutine_call;
 
+typedef struct lc3_memory_stats
+{
+    lc3_memory_stats() : reads(0), writes(0) {}
+    unsigned long reads;
+    unsigned long writes;
+} lc3_memory_stats;
+
 typedef struct lc3_interrupt_req
 {
     unsigned char priority:3;
@@ -456,6 +463,15 @@ typedef struct lc3_state
     std::map<unsigned short, lc3_watchpoint_info> reg_watchpoints;
     std::map<unsigned short, std::string> comments;
     std::map<unsigned short, lc3_subroutine_info> subroutines;
+
+    // Statistics
+    std::map<unsigned short, lc3_memory_stats> memory_ops;
+    unsigned long total_reads;
+    unsigned long total_writes;
+
+    // test_only mode
+    // The only effect is that it does not pop subroutine calls from stack (max_call_stack_size is ignored)
+    bool in_lc3test;
 } lc3_state;
 
 /*

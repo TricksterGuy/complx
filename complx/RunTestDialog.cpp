@@ -334,7 +334,7 @@ void TestCaseInfoPanel::Update(lc3_test& testcase)
         lc3_test_output& output = testcase.output[j];
         if (output.passed) pass_count++;
 
-        wxString address = (output.type != TEST_IO && output.type != TEST_PC) ? output.address : "";
+        wxString address = (output.type != TEST_IO && output.type != TEST_PC && output.type != TEST_SUBROUTINE) ? output.address : "";
         testOutputs->Append(wxString::Format("(%s) %s", output.passed ? "Passed" : "Failed", lc3_test_output_string(output)));
     }
 
@@ -428,7 +428,7 @@ void CheckInfoPanel::Update(lc3_test_output& output)
     {
         pointsText->Show();
         points->Show();
-        points->SetLabel(wxString::Format("%d / %d", output.passed ? output.points : 0, output.points));
+        points->SetLabel(wxString::Format("%d / %d", output.earned, output.points));
     }
 
     Layout();

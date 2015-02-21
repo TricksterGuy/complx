@@ -434,8 +434,12 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
                 subr.points_params = wxAtoi(ggchild->GetNodeContent());
 
                 ggchild = getNextNode(ggchild);
-                if (ggchild->GetName() != "r7") throw "r7 in points tag must come before r5";
+                if (ggchild->GetName() != "r7") throw "r7 in points tag must come before r6";
                 subr.points_r7 = wxAtoi(ggchild->GetNodeContent());
+
+                ggchild = getNextNode(ggchild);
+                if (ggchild->GetName() != "r6") throw "r6 in points tag must come before r5";
+                subr.points_r6 = wxAtoi(ggchild->GetNodeContent());
 
                 ggchild = getNextNode(ggchild);
                 if (ggchild->GetName() != "r5") throw "r5 in points tag must come before locals";
@@ -472,7 +476,7 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
            subr.stack = subr_input->subroutine.stack;
 
            // Post processing part II calculate total points
-           output.points = subr.points_answer + subr.points_locals + subr.points_params + subr.points_r5 + subr.points_r7;
+           output.points = subr.points_answer + subr.points_locals * subr.locals.size() + subr.points_params * subr.params.size() + subr.points_r5 + subr.points_r7 + subr.points_r6;
         }
         else if (child->GetName() != "comment")
         {
