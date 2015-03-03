@@ -4,8 +4,8 @@
 
 #define ANSWER_FOUND "answer found on stack"
 #define R6_FOUND "r6 points to r6-1 (answer location)"
-#define R7_FOUND "r7 found on stack"
-#define R5_FOUND "r5 found on stack"
+#define R7_FOUND "r7 found on stack and r7 not clobbered"
+#define R5_FOUND "r5 found on stack and r5 not clobbered"
 #define PARAM_FOUND "param found on stack"
 #define LOCAL_FOUND "local found on stack"
 #define CHECK "      [✓] "
@@ -436,11 +436,16 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
 
             for (unsigned int j = 0; j < expected_stack.size(); j++)
                 expected << std::hex << "0x" << expected_stack[j] << " ";
-            expected << " r6: " << std::hex << "0x" << (actual_r6 - subr.params.size() - 1);
+            expected << " r5: " << std::hex << "0x" << (short)r5 <<
+                        " r6: " << std::hex << "0x" << (actual_r6 - subr.params.size() - 1) <<
+                        " r7: " << std::hex << "0x" << (short)(r7 + 1);
+
 
             for (unsigned int j = 0; j < actual_stack.size(); j++)
                 actual << std::hex << "0x" << actual_stack[j] << " ";
-            actual << " r6: " << std::hex << "0x" << state.regs[6];
+            actual << " r5: " << std::hex << "0x" << state.regs[5] <<
+                      " r6: " << std::hex << "0x" << state.regs[6] <<
+                      " r7: " << std::hex << "0x" << state.regs[7];
 
             // now that I have all information available time for some checks.
             std::map<short, int> actual_stack_map;
@@ -474,7 +479,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
                 extra << MISS << R6_FOUND << " -" << subr.points_r6 << "\n";
             }
 
-            if (actual_stack_map[(short)r7] > 0)
+            if (actual_stack_map[(short)r7] > 0 && state.regs[7] == (short)(r7+1))
             {
                 actual_stack_map[(short)r7] -= 1;
                 points += subr.points_r7;
@@ -482,11 +487,13 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
             }
             else
             {
-                ed_forgiveness++;
+                // Don't count if just r7 was clobbered
+                if (actual_stack_map[(short)r7] <= 0)
+                    ed_forgiveness++;
                 extra << MISS << R7_FOUND << " -" << subr.points_r7 << "\n";
             }
 
-            if (actual_stack_map[(short)r5] > 0)
+            if (actual_stack_map[(short)r5] > 0 && state.regs[5] == (short)r5)
             {
                 actual_stack_map[(short)r5] -= 1;
                 points += subr.points_r5;
@@ -494,7 +501,8 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
             }
             else
             {
-                ed_forgiveness++;
+                if (actual_stack_map[(short)r5] <= 0)
+                    ed_forgiveness++;
                 extra << MISS << R5_FOUND << " -" << subr.points_r5 << "\n";
             }
 
