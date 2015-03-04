@@ -12,18 +12,19 @@ Plugin* create_plugin(const PluginParams& params)
     if (instance != NULL)
         return instance;
 
-    unsigned short width, height, startaddr, initaddr;
-    unsigned int oncolor = 0x606860, offcolor = 0xa0b0a0;
+    unsigned short widthaddr, heightaddr, startaddr, initaddr;
+    //unsigned int oncolor = 0x606860, offcolor = 0xa0b0a0;
+    unsigned int oncolor = 0xFFFFFF, offcolor = 0x000000;
 
-    if (lc3_params_read_ushort(params, "width", width) == false)
+    if (lc3_params_read_ushort(params, "widthaddr", widthaddr) == false)
     {
-        fprintf(stderr, "Width param (width) not given or in incorrect format: %s\n", lc3_params_get_value(params, "width").c_str());
+        fprintf(stderr, "Width param (widthaddr) not given or in incorrect format: %s\n", lc3_params_get_value(params, "widthaddr").c_str());
         return NULL;
     }
 
-    if (lc3_params_read_ushort(params, "height", height) == false)
+    if (lc3_params_read_ushort(params, "heightaddr", heightaddr) == false)
     {
-        fprintf(stderr, "Height param (height) not given or in incorrect format: %s\n", lc3_params_get_value(params, "height").c_str());
+        fprintf(stderr, "Height param (heightaddr) not given or in incorrect format: %s\n", lc3_params_get_value(params, "heightaddr").c_str());
         return NULL;
     }
 
@@ -49,7 +50,7 @@ Plugin* create_plugin(const PluginParams& params)
         return NULL;
     }*/
 
-    instance = new BWLCDPlugin(width, height, initaddr, startaddr, offcolor, oncolor);
+    instance = new BWLCDPlugin(widthaddr, heightaddr, initaddr, startaddr, offcolor, oncolor);
     return instance;
 }
 
@@ -66,10 +67,10 @@ void destroy_plugin(Plugin* ptr = NULL)
   *
   * @todo: document this function
   */
- BWLCDPlugin::BWLCDPlugin(unsigned short _width, unsigned short _height, unsigned short _initaddr,
+ BWLCDPlugin::BWLCDPlugin(unsigned short _widthaddr, unsigned short _heightaddr, unsigned short _initaddr,
                           unsigned short _startaddr, unsigned int _offcolor, unsigned int _oncolor) :
-    Plugin(BWLCD_MAJOR_VERSION, BWLCD_MINOR_VERSION, LC3_OTHER, "Black & White LCD Display"), width(_width),
-    height(_height), initaddr(_initaddr), startaddr(_startaddr), offcolor(_offcolor), oncolor(_oncolor), lcd(NULL),
+    Plugin(BWLCD_MAJOR_VERSION, BWLCD_MINOR_VERSION, LC3_OTHER, "Black & White LCD Display"), widthaddr(_widthaddr),
+    heightaddr(_heightaddr), initaddr(_initaddr), startaddr(_startaddr), offcolor(_offcolor), oncolor(_oncolor), lcd(NULL),
     lcd_initializing(false)
 {
     Connect(wxID_ANY, wxEVT_COMMAND_CREATE_DISPLAY, wxThreadEventHandler(BWLCDPlugin::InitDisplay));
@@ -123,6 +124,8 @@ void BWLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, short 
         unsigned short data = value;
         if (data == 0x8000U && lcd == NULL)
         {
+            width = state.mem[widthaddr];
+	    height = state.mem[heightaddr];
             wxThreadEvent* evt = new wxThreadEvent(wxEVT_COMMAND_CREATE_DISPLAY);
             evt->SetPayload<lc3_state*>(&state);
             wxQueueEvent(this, evt);
@@ -145,7 +148,7 @@ void BWLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, short 
             lc3_warning(state, "Incorrect value written to BWLCD");
         }
     }
-    else if (address >= startaddr && address < startaddr + width * height && !lcd_initializing)
+    else if (address >= startaddr && !lcd_initializing && address < startaddr + lcd->width * lcd->height)
     {
         if (lcd == NULL)
         {
@@ -165,9 +168,10 @@ void BWLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, short 
   * @todo: document this function
   */
  BWLCD::BWLCD(wxWindow* top, int _width, int _height, unsigned short _startaddr, unsigned int _off, unsigned int _on) :
- BWLCDGUI(top), state(NULL), width(_width), height(_height), startaddr(_startaddr), off(_off), on(_on)
+ BWLCDGUI(top), width(_width), height(_height), startaddr(_startaddr), off(_off), on(_on)
 {
-    //Centre();
+    state = NULL;
+    SetSize(_width * TILE_SIZE, _height * TILE_SIZE);
     int x, y;
     GetParent()->GetScreenPosition(&x, &y);
     Move(x - GetSize().GetX(), y);
