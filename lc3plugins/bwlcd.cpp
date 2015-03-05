@@ -13,8 +13,7 @@ Plugin* create_plugin(const PluginParams& params)
         return instance;
 
     unsigned short widthaddr, heightaddr, startaddr, initaddr;
-    //unsigned int oncolor = 0x606860, offcolor = 0xa0b0a0;
-    unsigned int oncolor = 0xFFFFFF, offcolor = 0x000000;
+    unsigned int oncolor = 0x606860, offcolor = 0xa0b0a0, maxsize = 500;
 
     if (lc3_params_read_ushort(params, "widthaddr", widthaddr) == false)
     {
@@ -42,7 +41,7 @@ Plugin* create_plugin(const PluginParams& params)
 
     lc3_params_read_uint(params, "oncolor", oncolor);
     lc3_params_read_uint(params, "offcolor", offcolor);
-
+    lc3_params_read_uint(params, "maxsize", maxsize);
 
     /*if (wxTheApp == NULL)
     {
@@ -50,7 +49,7 @@ Plugin* create_plugin(const PluginParams& params)
         return NULL;
     }*/
 
-    instance = new BWLCDPlugin(widthaddr, heightaddr, initaddr, startaddr, offcolor, oncolor);
+    instance = new BWLCDPlugin(widthaddr, heightaddr, initaddr, startaddr, offcolor, oncolor, maxsize);
     return instance;
 }
 
@@ -68,9 +67,9 @@ void destroy_plugin(Plugin* ptr = NULL)
   * @todo: document this function
   */
  BWLCDPlugin::BWLCDPlugin(unsigned short _widthaddr, unsigned short _heightaddr, unsigned short _initaddr,
-                          unsigned short _startaddr, unsigned int _offcolor, unsigned int _oncolor) :
+                          unsigned short _startaddr, unsigned int _offcolor, unsigned int _oncolor, unsigned int _maxsize) :
     Plugin(BWLCD_MAJOR_VERSION, BWLCD_MINOR_VERSION, LC3_OTHER, "Black & White LCD Display"), widthaddr(_widthaddr),
-    heightaddr(_heightaddr), initaddr(_initaddr), startaddr(_startaddr), offcolor(_offcolor), oncolor(_oncolor), lcd(NULL),
+    heightaddr(_heightaddr), initaddr(_initaddr), startaddr(_startaddr), offcolor(_offcolor), oncolor(_oncolor), maxsize(_maxsize), lcd(NULL),
     lcd_initializing(false)
 {
     Connect(wxID_ANY, wxEVT_COMMAND_CREATE_DISPLAY, wxThreadEventHandler(BWLCDPlugin::InitDisplay));
@@ -93,7 +92,7 @@ void destroy_plugin(Plugin* ptr = NULL)
   */
 void BWLCDPlugin::InitDisplay(wxThreadEvent& event)
 {
-    lcd = new BWLCD(wxTheApp->GetTopWindow(), width, height, startaddr, offcolor, oncolor);
+    lcd = new BWLCD(wxTheApp->GetTopWindow(), width, height, startaddr, offcolor, oncolor, maxsize);
     lcd_initializing = false;
     lcd->Show();
     lcd->Connect(wxID_ANY, wxEVT_COMMAND_UPDATE_DISPLAY, wxThreadEventHandler(BWLCD::OnUpdate));
@@ -124,12 +123,19 @@ void BWLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, short 
         unsigned short data = value;
         if (data == 0x8000U && lcd == NULL)
         {
-            width = state.mem[widthaddr];
-	    height = state.mem[heightaddr];
-            wxThreadEvent* evt = new wxThreadEvent(wxEVT_COMMAND_CREATE_DISPLAY);
-            evt->SetPayload<lc3_state*>(&state);
-            wxQueueEvent(this, evt);
-            lcd_initializing = true;
+	    if (state.mem[widthaddr] && state.mem[heightaddr])
+	    {
+                width = state.mem[widthaddr];
+	        height = state.mem[heightaddr];
+                wxThreadEvent* evt = new wxThreadEvent(wxEVT_COMMAND_CREATE_DISPLAY);
+                evt->SetPayload<lc3_state*>(&state);
+                wxQueueEvent(this, evt);
+                lcd_initializing = true;
+	    }
+	    else
+	    {
+                lc3_warning(state, "BWLCD must have non-zero dimensions set before initialization!");
+	    }
         }
         else if (data == 0x8000U && (lcd != NULL || lcd_initializing))
         {
@@ -167,11 +173,38 @@ void BWLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, short 
   *
   * @todo: document this function
   */
- BWLCD::BWLCD(wxWindow* top, int _width, int _height, unsigned short _startaddr, unsigned int _off, unsigned int _on) :
- BWLCDGUI(top), width(_width), height(_height), startaddr(_startaddr), off(_off), on(_on)
+ BWLCD::BWLCD(wxWindow* top, int _width, int _height, unsigned short _startaddr, unsigned int _off, unsigned int _on, unsigned int _maxsize) :
+ BWLCDGUI(top), width(_width), height(_height), startaddr(_startaddr), off(_off), on(_on), maxsize(_maxsize)
 {
     state = NULL;
-    SetSize(_width * TILE_SIZE, _height * TILE_SIZE);
+    unsigned int sw = _width * TILE_SIZE, sh = _height * TILE_SIZE;
+    if(sw < MIN_SIZE || sh < MIN_SIZE)
+    {
+        if(sw < sh)
+	{
+            sh = sh * MIN_SIZE / sw;
+	    sw = MIN_SIZE;
+	}
+	else
+	{
+            sw = sw * MIN_SIZE / sh;
+	    sh = MIN_SIZE;
+	}
+    }
+    else if(sw > _maxsize || sh > _maxsize)
+    {
+        if(sw > sh)
+	{
+            sh = sh * _maxsize / sw;
+	    sw = _maxsize;
+	}
+	else
+	{
+            sw = sw * _maxsize / sh;
+	    sh = _maxsize;
+	}
+    }
+    SetClientSize(sw, sh);
     int x, y;
     GetParent()->GetScreenPosition(&x, &y);
     Move(x - GetSize().GetX(), y);
@@ -209,22 +242,20 @@ void BWLCD::OnPaint( wxPaintEvent& event )
     wxBrush onBrush(oncolor);
     wxBrush offBrush(offcolor);
 
-
     int cw, ch;
-    displayPanel->GetSize(&cw, &ch);
-
-    int tw = cw / width;
-    int th = ch / height;
+    displayPanel->GetClientSize(&cw, &ch);
 
     for (int i = 0; i < height; i++)
     {
+        int ty = ch * i / height;
+	int th = ch * (i + 1) / height - ty;
         for (int j = 0; j < width; j++)
         {
-            if (state->mem[startaddr + j + i * width])
-                dc.SetBrush(onBrush);
-            else
-                dc.SetBrush(offBrush);
-            dc.DrawRectangle(j * tw, i * th, tw, th);
+	    int tx = cw * j / width;
+	    int tw = cw * (j + 1) / width - tx;
+	    dc.SetBrush(state->mem[startaddr + j + i * width] ? onBrush : offBrush);
+            dc.DrawRectangle(tx, ty, tw, th);
         }
     }
 }
+

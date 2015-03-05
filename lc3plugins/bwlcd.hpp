@@ -10,6 +10,7 @@
 #define BWLCD_MINOR_VERSION 3
 
 #define TILE_SIZE 10
+#define MIN_SIZE 100
 
 wxDECLARE_EVENT(wxEVT_COMMAND_CREATE_DISPLAY, wxThreadEvent);
 wxDECLARE_EVENT(wxEVT_COMMAND_DESTROY_DISPLAY, wxThreadEvent);
@@ -18,7 +19,7 @@ wxDECLARE_EVENT(wxEVT_COMMAND_UPDATE_DISPLAY, wxThreadEvent);
 class BWLCD : public BWLCDGUI
 {
     public:
-        BWLCD(wxWindow* top, int width, int height, unsigned short startaddr, unsigned int off, unsigned int on);
+        BWLCD(wxWindow* top, int width, int height, unsigned short startaddr, unsigned int off, unsigned int on, unsigned int maxsize);
         ~BWLCD();
 		virtual void OnUpdate(wxThreadEvent& event);
 		void OnPaint( wxPaintEvent& event );
@@ -29,12 +30,13 @@ class BWLCD : public BWLCDGUI
         unsigned short startaddr;
         unsigned int off;
         unsigned int on;
+	unsigned int maxsize;
 };
 
 class BWLCDPlugin : public wxEvtHandler, public Plugin
 {
     public:
-        BWLCDPlugin(unsigned short widthaddr, unsigned short heightaddr, unsigned short initaddr, unsigned short startaddr, unsigned int offcolor = 0xa0b0a0, unsigned int oncolor = 0x606860);
+        BWLCDPlugin(unsigned short widthaddr, unsigned short heightaddr, unsigned short initaddr, unsigned short startaddr, unsigned int offcolor = 0xa0b0a0, unsigned int oncolor = 0x606860, unsigned int maxsize = 500);
         ~BWLCDPlugin();
         virtual void OnMemoryWrite(lc3_state& state, unsigned short address, short value);
         //virtual void OnTock(lc3_state& state);
@@ -50,6 +52,7 @@ class BWLCDPlugin : public wxEvtHandler, public Plugin
         unsigned short startaddr;
         unsigned int offcolor;
         unsigned int oncolor;
+	unsigned int maxsize;
         BWLCD* lcd;
         bool lcd_initializing;
 
