@@ -72,6 +72,7 @@ void destroy_plugin(Plugin* ptr = NULL)
     heightaddr(_heightaddr), initaddr(_initaddr), startaddr(_startaddr), offcolor(_offcolor), oncolor(_oncolor), maxsize(_maxsize), lcd(NULL),
     lcd_initializing(false)
 {
+    width = height = 0;
     Connect(wxID_ANY, wxEVT_COMMAND_CREATE_DISPLAY, wxThreadEventHandler(BWLCDPlugin::InitDisplay));
     Connect(wxID_ANY, wxEVT_COMMAND_DESTROY_DISPLAY, wxThreadEventHandler(BWLCDPlugin::DestroyDisplay));
 }
@@ -154,7 +155,7 @@ void BWLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, short 
             lc3_warning(state, "Incorrect value written to BWLCD");
         }
     }
-    else if (address >= startaddr && !lcd_initializing && address < startaddr + lcd->width * lcd->height)
+    else if (address >= startaddr && address < startaddr + width * height)
     {
         if (lcd == NULL)
         {
