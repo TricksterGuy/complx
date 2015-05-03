@@ -36,6 +36,7 @@ wxGrid(parent, id, pos, size, style), timer(this, MemoryToolTipTimer), tipWindow
     Connect(wxEVT_ACTIVATE, wxActivateEventHandler(MemoryGrid::OnActivate), NULL, this);
     GetGridWindow()->Connect(wxEVT_MOTION, wxMouseEventHandler(MemoryGrid::OnMotion), NULL, this);
     Connect(MemoryToolTipTimer, wxEVT_TIMER, wxTimerEventHandler(MemoryGrid::OnShowToolTip), NULL, this);
+    ShowScrollbars(wxSHOW_SB_NEVER, wxSHOW_SB_ALWAYS);
 }
 
 /** ~MemoryGrid

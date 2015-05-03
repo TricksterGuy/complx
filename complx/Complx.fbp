@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <wxFormBuilder_Project>
-    <FileVersion major="1" minor="11" />
+    <FileVersion major="1" minor="13" />
     <object class="Project" expanded="1">
         <property name="class_decoration"></property>
         <property name="code_generation">C++</property>
@@ -20,8 +20,10 @@
         <property name="path">.</property>
         <property name="precompiled_header"></property>
         <property name="relative_path">1</property>
+        <property name="skip_lua_events">1</property>
         <property name="skip_php_events">1</property>
         <property name="skip_python_events">1</property>
+        <property name="ui_table">UI</property>
         <property name="use_enum">1</property>
         <property name="use_microsoft_bom">0</property>
         <object class="Frame" expanded="1">
@@ -131,7 +133,7 @@
                 <event name="OnSetFocus"></event>
                 <event name="OnSize"></event>
                 <event name="OnUpdateUI"></event>
-                <object class="wxMenu" expanded="0">
+                <object class="wxMenu" expanded="1">
                     <property name="label">File</property>
                     <property name="name">menuFile</property>
                     <property name="permission">protected</property>
@@ -233,40 +235,6 @@
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
                         <property name="enabled">1</property>
-                        <property name="help">Loads the machine&apos;s state</property>
-                        <property name="id">ID_LOAD_MACHINE</property>
-                        <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">Load &amp;Machine</property>
-                        <property name="name">menuFileLoadMachine</property>
-                        <property name="permission">none</property>
-                        <property name="shortcut">Ctrl+L</property>
-                        <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnLoadMachine</event>
-                        <event name="OnUpdateUI"></event>
-                    </object>
-                    <object class="wxMenuItem" expanded="0">
-                        <property name="bitmap"></property>
-                        <property name="checked">0</property>
-                        <property name="enabled">1</property>
-                        <property name="help">Saves the machine&apos;s state</property>
-                        <property name="id">ID_SAVE_MACHINE</property>
-                        <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">&amp;Save Machine</property>
-                        <property name="name">menuFileSaveMachine</property>
-                        <property name="permission">none</property>
-                        <property name="shortcut">Ctrl+S</property>
-                        <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnSaveMachine</event>
-                        <event name="OnUpdateUI"></event>
-                    </object>
-                    <object class="separator" expanded="0">
-                        <property name="name">m_separator2</property>
-                        <property name="permission">none</property>
-                    </object>
-                    <object class="wxMenuItem" expanded="0">
-                        <property name="bitmap"></property>
-                        <property name="checked">0</property>
-                        <property name="enabled">1</property>
                         <property name="help">Quits the program.</property>
                         <property name="id">ID_QUIT</property>
                         <property name="kind">wxITEM_NORMAL</property>
@@ -279,7 +247,7 @@
                         <event name="OnUpdateUI"></event>
                     </object>
                 </object>
-                <object class="wxMenu" expanded="0">
+                <object class="wxMenu" expanded="1">
                     <property name="label">View</property>
                     <property name="name">menuView</property>
                     <property name="permission">protected</property>
@@ -313,7 +281,74 @@
                         <event name="OnMenuSelection">OnGoto</event>
                         <event name="OnUpdateUI"></event>
                     </object>
+                    <object class="submenu" expanded="1">
+                        <property name="bitmap"></property>
+                        <property name="label">Hide Addresses</property>
+                        <property name="name">menuViewHideAddresses</property>
+                        <property name="permission">protected</property>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help">Show all memory addresses</property>
+                            <property name="id">ID_SHOW_ALL</property>
+                            <property name="kind">wxITEM_RADIO</property>
+                            <property name="label">Show All</property>
+                            <property name="name">menuViewHideAddressesShowAll</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                            <event name="OnMenuSelection">OnUpdateHideAddresses</event>
+                            <event name="OnUpdateUI"></event>
+                        </object>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help">Show all memory addresses that have a value other than 0</property>
+                            <property name="id">ID_SHOW_NON_ZERO</property>
+                            <property name="kind">wxITEM_RADIO</property>
+                            <property name="label">Show Non Zero</property>
+                            <property name="name">menuViewHideAddressesShowNonZer</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                            <event name="OnMenuSelection">OnUpdateHideAddresses</event>
+                            <event name="OnUpdateUI"></event>
+                        </object>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help">Show all memory addresses related to your program&apos;s code and data.</property>
+                            <property name="id">ID_SHOW_ONLY_CODE</property>
+                            <property name="kind">wxITEM_RADIO</property>
+                            <property name="label">Show Only Code</property>
+                            <property name="name">menuViewHideAddressesShowOnlyCode</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                            <event name="OnMenuSelection">OnUpdateHideAddresses</event>
+                            <event name="OnUpdateUI"></event>
+                        </object>
+                        <object class="wxMenuItem" expanded="1">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help">Allows you to show/hide memory address ranges</property>
+                            <property name="id">ID_CUSTOM</property>
+                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="label">Custom...</property>
+                            <property name="name">menuViewHideAddressesCustom</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut">Ctrl+H</property>
+                            <property name="unchecked_bitmap"></property>
+                            <event name="OnMenuSelection">OnHideAddressesCustom</event>
+                            <event name="OnUpdateUI"></event>
+                        </object>
+                    </object>
                     <object class="submenu" expanded="0">
+                        <property name="bitmap"></property>
                         <property name="label">Disassemble</property>
                         <property name="name">menuViewDisassemble</property>
                         <property name="permission">protected</property>
@@ -394,11 +429,12 @@
                         <event name="OnUpdateUI"></event>
                     </object>
                 </object>
-                <object class="wxMenu" expanded="0">
+                <object class="wxMenu" expanded="1">
                     <property name="label">State</property>
                     <property name="name">menuState</property>
                     <property name="permission">protected</property>
                     <object class="submenu" expanded="0">
+                        <property name="bitmap"></property>
                         <property name="label">Control</property>
                         <property name="name">menuStateControl</property>
                         <property name="permission">protected</property>
@@ -637,7 +673,7 @@
                         <property name="permission">none</property>
                     </object>
                 </object>
-                <object class="wxMenu" expanded="0">
+                <object class="wxMenu" expanded="1">
                     <property name="label">Debug</property>
                     <property name="name">menuDebug</property>
                     <property name="permission">protected</property>
@@ -762,7 +798,7 @@
                         <event name="OnUpdateUI"></event>
                     </object>
                 </object>
-                <object class="wxMenu" expanded="0">
+                <object class="wxMenu" expanded="1">
                     <property name="label">Test</property>
                     <property name="name">menuTest</property>
                     <property name="permission">protected</property>
@@ -797,7 +833,7 @@
                         <event name="OnUpdateUI"></event>
                     </object>
                 </object>
-                <object class="wxMenu" expanded="0">
+                <object class="wxMenu" expanded="1">
                     <property name="label">Help</property>
                     <property name="name">menuHelp</property>
                     <property name="permission">protected</property>
@@ -844,21 +880,6 @@
                         <property name="shortcut"></property>
                         <property name="unchecked_bitmap"></property>
                         <event name="OnMenuSelection">OnChangeLog</event>
-                        <event name="OnUpdateUI"></event>
-                    </object>
-                    <object class="wxMenuItem" expanded="0">
-                        <property name="bitmap"></property>
-                        <property name="checked">0</property>
-                        <property name="enabled">1</property>
-                        <property name="help">Directs you to the update site</property>
-                        <property name="id">ID_CHECK_FOR_UPDATES</property>
-                        <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">Check For &amp;Updates</property>
-                        <property name="name">menuHelpCheckForUpdates</property>
-                        <property name="permission">none</property>
-                        <property name="shortcut"></property>
-                        <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnCheckForUpdates</event>
                         <event name="OnUpdateUI"></event>
                     </object>
                     <object class="wxMenuItem" expanded="0">
@@ -2045,7 +2066,7 @@
                                                     <event name="OnMouseWheel"></event>
                                                     <event name="OnPaint"></event>
                                                     <event name="OnRightDClick"></event>
-                                                    <event name="OnRightDown"></event>
+                                                    <event name="OnRightDown">OnBaseChangeContext</event>
                                                     <event name="OnRightUp"></event>
                                                     <event name="OnSetFocus"></event>
                                                     <event name="OnSize"></event>
@@ -2230,7 +2251,7 @@
                                                     <event name="OnMouseWheel"></event>
                                                     <event name="OnPaint"></event>
                                                     <event name="OnRightDClick"></event>
-                                                    <event name="OnRightDown"></event>
+                                                    <event name="OnRightDown">OnBaseChangeContext</event>
                                                     <event name="OnRightUp"></event>
                                                     <event name="OnSetFocus"></event>
                                                     <event name="OnSize"></event>
@@ -2415,7 +2436,7 @@
                                                     <event name="OnMouseWheel"></event>
                                                     <event name="OnPaint"></event>
                                                     <event name="OnRightDClick"></event>
-                                                    <event name="OnRightDown"></event>
+                                                    <event name="OnRightDown">OnBaseChangeContext</event>
                                                     <event name="OnRightUp"></event>
                                                     <event name="OnSetFocus"></event>
                                                     <event name="OnSize"></event>
@@ -2600,7 +2621,7 @@
                                                     <event name="OnMouseWheel"></event>
                                                     <event name="OnPaint"></event>
                                                     <event name="OnRightDClick"></event>
-                                                    <event name="OnRightDown"></event>
+                                                    <event name="OnRightDown">OnBaseChangeContext</event>
                                                     <event name="OnRightUp"></event>
                                                     <event name="OnSetFocus"></event>
                                                     <event name="OnSize"></event>
@@ -2785,7 +2806,7 @@
                                                     <event name="OnMouseWheel"></event>
                                                     <event name="OnPaint"></event>
                                                     <event name="OnRightDClick"></event>
-                                                    <event name="OnRightDown"></event>
+                                                    <event name="OnRightDown">OnBaseChangeContext</event>
                                                     <event name="OnRightUp"></event>
                                                     <event name="OnSetFocus"></event>
                                                     <event name="OnSize"></event>
@@ -2970,7 +2991,7 @@
                                                     <event name="OnMouseWheel"></event>
                                                     <event name="OnPaint"></event>
                                                     <event name="OnRightDClick"></event>
-                                                    <event name="OnRightDown"></event>
+                                                    <event name="OnRightDown">OnBaseChangeContext</event>
                                                     <event name="OnRightUp"></event>
                                                     <event name="OnSetFocus"></event>
                                                     <event name="OnSize"></event>
@@ -3155,7 +3176,7 @@
                                                     <event name="OnMouseWheel"></event>
                                                     <event name="OnPaint"></event>
                                                     <event name="OnRightDClick"></event>
-                                                    <event name="OnRightDown"></event>
+                                                    <event name="OnRightDown">OnBaseChangeContext</event>
                                                     <event name="OnRightUp"></event>
                                                     <event name="OnSetFocus"></event>
                                                     <event name="OnSize"></event>
@@ -3340,7 +3361,7 @@
                                                     <event name="OnMouseWheel"></event>
                                                     <event name="OnPaint"></event>
                                                     <event name="OnRightDClick"></event>
-                                                    <event name="OnRightDown"></event>
+                                                    <event name="OnRightDown">OnBaseChangeContext</event>
                                                     <event name="OnRightUp"></event>
                                                     <event name="OnSetFocus"></event>
                                                     <event name="OnSize"></event>
@@ -3710,7 +3731,7 @@
                                                     <event name="OnMouseWheel"></event>
                                                     <event name="OnPaint"></event>
                                                     <event name="OnRightDClick"></event>
-                                                    <event name="OnRightDown"></event>
+                                                    <event name="OnRightDown">OnBaseChangeContext</event>
                                                     <event name="OnRightUp"></event>
                                                     <event name="OnSetFocus"></event>
                                                     <event name="OnSize"></event>

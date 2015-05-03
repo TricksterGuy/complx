@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Apr 30 2013)
+// C++ code generated with wxFormBuilder (version Apr 25 2015)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
@@ -50,11 +50,13 @@ class ComplxFrameDecl : public wxFrame
 			ID_RELOAD,
 			ID_LOAD_OVER,
 			ID_RELOAD_OVER,
-			ID_LOAD_MACHINE,
-			ID_SAVE_MACHINE,
 			ID_QUIT,
 			ID_NEW_VIEW,
 			ID_GOTO_ADDRESS,
+			ID_SHOW_ALL,
+			ID_SHOW_NON_ZERO,
+			ID_SHOW_ONLY_CODE,
+			ID_CUSTOM,
 			ID_BASIC,
 			ID_NORMAL,
 			ID_HIGH_LEVEL,
@@ -85,7 +87,6 @@ class ComplxFrameDecl : public wxFrame
 			ID_RUN_TESTS,
 			ID_RERUN_TESTS,
 			ID_CHANGE_LOG,
-			ID_CHECK_FOR_UPDATES,
 			ID_FIRST_TIME_MESSAGE,
 			ID_TIPS,
 			ID_ABOUT
@@ -94,6 +95,7 @@ class ComplxFrameDecl : public wxFrame
 		wxMenuBar* menu;
 		wxMenu* menuFile;
 		wxMenu* menuView;
+		wxMenu* menuViewHideAddresses;
 		wxMenu* menuViewDisassemble;
 		wxMenuItem* menuViewBasic;
 		wxMenuItem* menuViewNormal;
@@ -137,11 +139,11 @@ class ComplxFrameDecl : public wxFrame
 		virtual void OnReload( wxCommandEvent& event ) = 0;
 		virtual void OnLoadOver( wxCommandEvent& event ) = 0;
 		virtual void OnReloadOver( wxCommandEvent& event ) = 0;
-		virtual void OnLoadMachine( wxCommandEvent& event ) = 0;
-		virtual void OnSaveMachine( wxCommandEvent& event ) = 0;
 		virtual void OnQuit( wxCommandEvent& event ) = 0;
 		virtual void OnNewView( wxCommandEvent& event ) = 0;
 		virtual void OnGoto( wxCommandEvent& event ) = 0;
+		virtual void OnUpdateHideAddresses( wxCommandEvent& event ) = 0;
+		virtual void OnHideAddressesCustom( wxCommandEvent& event ) = 0;
 		virtual void OnDumbDisassemble( wxCommandEvent& event ) = 0;
 		virtual void OnNormalDisassemble( wxCommandEvent& event ) = 0;
 		virtual void OnCDisassemble( wxCommandEvent& event ) = 0;
@@ -175,12 +177,12 @@ class ComplxFrameDecl : public wxFrame
 		virtual void OnDocs( wxCommandEvent& event ) = 0;
 		virtual void OnISA( wxCommandEvent& event ) = 0;
 		virtual void OnChangeLog( wxCommandEvent& event ) = 0;
-		virtual void OnCheckForUpdates( wxCommandEvent& event ) = 0;
 		virtual void OnFirstTime( wxCommandEvent& event ) = 0;
 		virtual void OnTips( wxCommandEvent& event ) = 0;
 		virtual void OnAbout( wxCommandEvent& event ) = 0;
 		virtual void OnTextKillFocus( wxFocusEvent& event ) = 0;
 		virtual void OnBaseChange( wxMouseEvent& event ) = 0;
+		virtual void OnBaseChangeContext( wxMouseEvent& event ) = 0;
 		virtual void OnRegisterChanged( wxCommandEvent& event ) = 0;
 		
 	

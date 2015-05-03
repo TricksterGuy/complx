@@ -39,8 +39,6 @@ static const wxCmdLineEntryDesc cmd_descriptions[] =
         wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL},
     { wxCMD_LINE_OPTION, "i", "highlight", "Enable instruction highlight 0 = no 1 = yes (default)",
         wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL},
-    { wxCMD_LINE_OPTION, "state", "state", "Loads an lc3 state into the program",
-        wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL},
     { wxCMD_LINE_PARAM,  NULL, NULL, "input file", wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL},
     { wxCMD_LINE_NONE }
 };
@@ -50,7 +48,7 @@ IMPLEMENT_APP(ComplxApp)
 
 // Command line
 long decimal = 0, disassemble = 2, stack_size = 65536, call_stack_size = 10000, true_traps = 0, interrupts = 0, highlight = 1;
-wxString address_str = wxEmptyString, state_file = wxEmptyString;
+wxString address_str = wxEmptyString;
 wxArrayString files;
 ComplxFrame* complxframe;
 
@@ -70,7 +68,7 @@ bool ComplxApp::OnInit()
 
     srand(time(NULL));
     wxMilliSleep(50);
-    complxframe = new ComplxFrame(decimal, disassemble, stack_size, call_stack_size, true_traps, interrupts, highlight, address_str, state_file, files);
+    complxframe = new ComplxFrame(decimal, disassemble, stack_size, call_stack_size, true_traps, interrupts, highlight, address_str, files);
     wxIcon icon(icon32_xpm);
     complxframe->SetIcon(icon);
     complxframe->Show();
@@ -137,7 +135,6 @@ bool ComplxApp::OnCmdLineParsed(wxCmdLineParser& parser)
     parser.Found(_("t"), &true_traps);
     parser.Found(_("ie"), &interrupts);
     parser.Found(_("i"), &highlight);
-    parser.Found(_("state"), &state_file);
 
     // get unnamed parameters
     for (unsigned int i = 0; i < parser.GetParamCount(); i++)

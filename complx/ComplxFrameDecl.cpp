@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Apr 30 2013)
+// C++ code generated with wxFormBuilder (version Apr 25 2015)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
@@ -54,16 +54,6 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	
 	menuFile->AppendSeparator();
 	
-	wxMenuItem* menuFileLoadMachine;
-	menuFileLoadMachine = new wxMenuItem( menuFile, ID_LOAD_MACHINE, wxString( _("Load &Machine") ) + wxT('\t') + wxT("Ctrl+L"), _("Loads the machine's state"), wxITEM_NORMAL );
-	menuFile->Append( menuFileLoadMachine );
-	
-	wxMenuItem* menuFileSaveMachine;
-	menuFileSaveMachine = new wxMenuItem( menuFile, ID_SAVE_MACHINE, wxString( _("&Save Machine") ) + wxT('\t') + wxT("Ctrl+S"), _("Saves the machine's state"), wxITEM_NORMAL );
-	menuFile->Append( menuFileSaveMachine );
-	
-	menuFile->AppendSeparator();
-	
 	wxMenuItem* menuFileQuit;
 	menuFileQuit = new wxMenuItem( menuFile, ID_QUIT, wxString( _("&Quit") ) + wxT('\t') + wxT("Ctrl+W"), _("Quits the program."), wxITEM_NORMAL );
 	menuFile->Append( menuFileQuit );
@@ -79,7 +69,28 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuViewGoto = new wxMenuItem( menuView, ID_GOTO_ADDRESS, wxString( _("Goto Address") ) + wxT('\t') + wxT("Ctrl+G"), _("Shows a specific address"), wxITEM_NORMAL );
 	menuView->Append( menuViewGoto );
 	
+	menuViewHideAddresses = new wxMenu();
+	wxMenuItem* menuViewHideAddressesItem = new wxMenuItem( menuView, wxID_ANY, _("Hide Addresses"), wxEmptyString, wxITEM_NORMAL, menuViewHideAddresses );
+	wxMenuItem* menuViewHideAddressesShowAll;
+	menuViewHideAddressesShowAll = new wxMenuItem( menuViewHideAddresses, ID_SHOW_ALL, wxString( _("Show All") ) , _("Show all memory addresses"), wxITEM_RADIO );
+	menuViewHideAddresses->Append( menuViewHideAddressesShowAll );
+	
+	wxMenuItem* menuViewHideAddressesShowNonZer;
+	menuViewHideAddressesShowNonZer = new wxMenuItem( menuViewHideAddresses, ID_SHOW_NON_ZERO, wxString( _("Show Non Zero") ) , _("Show all memory addresses that have a value other than 0"), wxITEM_RADIO );
+	menuViewHideAddresses->Append( menuViewHideAddressesShowNonZer );
+	
+	wxMenuItem* menuViewHideAddressesShowOnlyCode;
+	menuViewHideAddressesShowOnlyCode = new wxMenuItem( menuViewHideAddresses, ID_SHOW_ONLY_CODE, wxString( _("Show Only Code") ) , _("Show all memory addresses related to your program's code and data."), wxITEM_RADIO );
+	menuViewHideAddresses->Append( menuViewHideAddressesShowOnlyCode );
+	
+	wxMenuItem* menuViewHideAddressesCustom;
+	menuViewHideAddressesCustom = new wxMenuItem( menuViewHideAddresses, ID_CUSTOM, wxString( _("Custom...") ) + wxT('\t') + wxT("Ctrl+H"), _("Allows you to show/hide memory address ranges"), wxITEM_NORMAL );
+	menuViewHideAddresses->Append( menuViewHideAddressesCustom );
+	
+	menuView->Append( menuViewHideAddressesItem );
+	
 	menuViewDisassemble = new wxMenu();
+	wxMenuItem* menuViewDisassembleItem = new wxMenuItem( menuView, wxID_ANY, _("Disassemble"), wxEmptyString, wxITEM_NORMAL, menuViewDisassemble );
 	menuViewBasic = new wxMenuItem( menuViewDisassemble, ID_BASIC, wxString( _("Basic") ) , _("Disassembles ignoring symbols"), wxITEM_RADIO );
 	menuViewDisassemble->Append( menuViewBasic );
 	
@@ -90,7 +101,7 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuViewDisassemble->Append( menuViewHighLevel );
 	menuViewHighLevel->Check( true );
 	
-	menuView->Append( -1, _("Disassemble"), menuViewDisassemble );
+	menuView->Append( menuViewDisassembleItem );
 	
 	menuViewInstructionHighlighting = new wxMenuItem( menuView, ID_INSTRUCTION_HIGHLIGHTING, wxString( _("Instruction Highlighting") ) , _("Highlights bits of the instruction."), wxITEM_CHECK );
 	menuView->Append( menuViewInstructionHighlighting );
@@ -103,6 +114,7 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	
 	menuState = new wxMenu();
 	menuStateControl = new wxMenu();
+	wxMenuItem* menuStateControlItem = new wxMenuItem( menuState, wxID_ANY, _("Control"), wxEmptyString, wxITEM_NORMAL, menuStateControl );
 	wxMenuItem* menuStateControlStep;
 	menuStateControlStep = new wxMenuItem( menuStateControl, ID_STEP, wxString( _("Step") ) + wxT('\t') + wxT("F2"), _("Runs one instruction"), wxITEM_NORMAL );
 	menuStateControl->Append( menuStateControlStep );
@@ -139,7 +151,7 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuStateControlFinish = new wxMenuItem( menuStateControl, ID_FINISH, wxString( _("Finish") ) + wxT('\t') + wxT("Shift+F5"), _("Finishes current subroutine."), wxITEM_NORMAL );
 	menuStateControl->Append( menuStateControlFinish );
 	
-	menuState->Append( -1, _("Control"), menuStateControl );
+	menuState->Append( menuStateControlItem );
 	
 	wxMenuItem* menuStateRandomize;
 	menuStateRandomize = new wxMenuItem( menuState, ID_RANDOMIZE, wxString( _("Randomize") ) + wxT('\t') + wxT("Ctrl+J"), _("Randomizes Memory"), wxITEM_NORMAL );
@@ -228,12 +240,8 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuHelpChangeLog = new wxMenuItem( menuHelp, ID_CHANGE_LOG, wxString( _("&Change Log") ) , _("Shows the change log"), wxITEM_NORMAL );
 	menuHelp->Append( menuHelpChangeLog );
 	
-	wxMenuItem* menuHelpCheckForUpdates;
-	menuHelpCheckForUpdates = new wxMenuItem( menuHelp, ID_CHECK_FOR_UPDATES, wxString( _("Check For &Updates") ) , _("Directs you to the update site"), wxITEM_NORMAL );
-	menuHelp->Append( menuHelpCheckForUpdates );
-	
 	wxMenuItem* menuHelpFirstTime;
-	menuHelpFirstTime = new wxMenuItem( menuHelp, ID_FIRST_TIME_MESSAGE, wxString( _("&First Time Message / Where to report bugs") ) , _("Displays the first time running message."), wxITEM_NORMAL );
+	menuHelpFirstTime = new wxMenuItem( menuHelp, ID_FIRST_TIME_MESSAGE, wxString( _("&First Time Message") ) , _("Displays the first time running message."), wxITEM_NORMAL );
 	menuHelp->Append( menuHelpFirstTime );
 	
 	wxMenuItem* menuHelpTips;
@@ -540,11 +548,13 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	this->Connect( menuFileReload->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReload ) );
 	this->Connect( menuFileLoadOver->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnLoadOver ) );
 	this->Connect( menuFileReloadOver->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReloadOver ) );
-	this->Connect( menuFileLoadMachine->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnLoadMachine ) );
-	this->Connect( menuFileSaveMachine->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnSaveMachine ) );
 	this->Connect( menuFileQuit->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnQuit ) );
 	this->Connect( menuViewNew->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnNewView ) );
 	this->Connect( menuViewGoto->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnGoto ) );
+	this->Connect( menuViewHideAddressesShowAll->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ) );
+	this->Connect( menuViewHideAddressesShowNonZer->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ) );
+	this->Connect( menuViewHideAddressesShowOnlyCode->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ) );
+	this->Connect( menuViewHideAddressesCustom->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnHideAddressesCustom ) );
 	this->Connect( menuViewBasic->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDumbDisassemble ) );
 	this->Connect( menuViewNormal->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnNormalDisassemble ) );
 	this->Connect( menuViewHighLevel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnCDisassemble ) );
@@ -578,7 +588,6 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	this->Connect( menuHelpDocs->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDocs ) );
 	this->Connect( menuHelpISA->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnISA ) );
 	this->Connect( menuHelpChangeLog->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnChangeLog ) );
-	this->Connect( menuHelpCheckForUpdates->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnCheckForUpdates ) );
 	this->Connect( menuHelpFirstTime->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnFirstTime ) );
 	this->Connect( menuHelpTips->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTips ) );
 	this->Connect( menuHelpAbout->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnAbout ) );
@@ -592,32 +601,41 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	rewindButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnRewind ), NULL, this );
 	r0text->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	r0text->Connect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( ComplxFrameDecl::OnBaseChange ), NULL, this );
+	r0text->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ComplxFrameDecl::OnBaseChangeContext ), NULL, this );
 	r0text->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 	r1text->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	r1text->Connect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( ComplxFrameDecl::OnBaseChange ), NULL, this );
+	r1text->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ComplxFrameDecl::OnBaseChangeContext ), NULL, this );
 	r1text->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 	r2text->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	r2text->Connect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( ComplxFrameDecl::OnBaseChange ), NULL, this );
+	r2text->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ComplxFrameDecl::OnBaseChangeContext ), NULL, this );
 	r2text->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 	r3text->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	r3text->Connect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( ComplxFrameDecl::OnBaseChange ), NULL, this );
+	r3text->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ComplxFrameDecl::OnBaseChangeContext ), NULL, this );
 	r3text->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 	r4text->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	r4text->Connect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( ComplxFrameDecl::OnBaseChange ), NULL, this );
+	r4text->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ComplxFrameDecl::OnBaseChangeContext ), NULL, this );
 	r4text->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 	r5text->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	r5text->Connect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( ComplxFrameDecl::OnBaseChange ), NULL, this );
+	r5text->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ComplxFrameDecl::OnBaseChangeContext ), NULL, this );
 	r5text->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 	r6text->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	r6text->Connect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( ComplxFrameDecl::OnBaseChange ), NULL, this );
+	r6text->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ComplxFrameDecl::OnBaseChangeContext ), NULL, this );
 	r6text->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 	r7text->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	r7text->Connect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( ComplxFrameDecl::OnBaseChange ), NULL, this );
+	r7text->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ComplxFrameDecl::OnBaseChangeContext ), NULL, this );
 	r7text->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 	cctext->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	cctext->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 	pctext->Connect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	pctext->Connect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( ComplxFrameDecl::OnBaseChange ), NULL, this );
+	pctext->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ComplxFrameDecl::OnBaseChangeContext ), NULL, this );
 	pctext->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 }
 
@@ -631,11 +649,13 @@ ComplxFrameDecl::~ComplxFrameDecl()
 	this->Disconnect( ID_RELOAD, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReload ) );
 	this->Disconnect( ID_LOAD_OVER, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnLoadOver ) );
 	this->Disconnect( ID_RELOAD_OVER, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReloadOver ) );
-	this->Disconnect( ID_LOAD_MACHINE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnLoadMachine ) );
-	this->Disconnect( ID_SAVE_MACHINE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnSaveMachine ) );
 	this->Disconnect( ID_QUIT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnQuit ) );
 	this->Disconnect( ID_NEW_VIEW, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnNewView ) );
 	this->Disconnect( ID_GOTO_ADDRESS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnGoto ) );
+	this->Disconnect( ID_SHOW_ALL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ) );
+	this->Disconnect( ID_SHOW_NON_ZERO, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ) );
+	this->Disconnect( ID_SHOW_ONLY_CODE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ) );
+	this->Disconnect( ID_CUSTOM, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnHideAddressesCustom ) );
 	this->Disconnect( ID_BASIC, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDumbDisassemble ) );
 	this->Disconnect( ID_NORMAL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnNormalDisassemble ) );
 	this->Disconnect( ID_HIGH_LEVEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnCDisassemble ) );
@@ -669,7 +689,6 @@ ComplxFrameDecl::~ComplxFrameDecl()
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDocs ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnISA ) );
 	this->Disconnect( ID_CHANGE_LOG, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnChangeLog ) );
-	this->Disconnect( ID_CHECK_FOR_UPDATES, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnCheckForUpdates ) );
 	this->Disconnect( ID_FIRST_TIME_MESSAGE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnFirstTime ) );
 	this->Disconnect( ID_TIPS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTips ) );
 	this->Disconnect( ID_ABOUT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnAbout ) );
@@ -683,32 +702,41 @@ ComplxFrameDecl::~ComplxFrameDecl()
 	rewindButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnRewind ), NULL, this );
 	r0text->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	r0text->Disconnect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( ComplxFrameDecl::OnBaseChange ), NULL, this );
+	r0text->Disconnect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ComplxFrameDecl::OnBaseChangeContext ), NULL, this );
 	r0text->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 	r1text->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	r1text->Disconnect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( ComplxFrameDecl::OnBaseChange ), NULL, this );
+	r1text->Disconnect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ComplxFrameDecl::OnBaseChangeContext ), NULL, this );
 	r1text->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 	r2text->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	r2text->Disconnect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( ComplxFrameDecl::OnBaseChange ), NULL, this );
+	r2text->Disconnect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ComplxFrameDecl::OnBaseChangeContext ), NULL, this );
 	r2text->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 	r3text->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	r3text->Disconnect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( ComplxFrameDecl::OnBaseChange ), NULL, this );
+	r3text->Disconnect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ComplxFrameDecl::OnBaseChangeContext ), NULL, this );
 	r3text->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 	r4text->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	r4text->Disconnect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( ComplxFrameDecl::OnBaseChange ), NULL, this );
+	r4text->Disconnect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ComplxFrameDecl::OnBaseChangeContext ), NULL, this );
 	r4text->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 	r5text->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	r5text->Disconnect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( ComplxFrameDecl::OnBaseChange ), NULL, this );
+	r5text->Disconnect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ComplxFrameDecl::OnBaseChangeContext ), NULL, this );
 	r5text->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 	r6text->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	r6text->Disconnect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( ComplxFrameDecl::OnBaseChange ), NULL, this );
+	r6text->Disconnect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ComplxFrameDecl::OnBaseChangeContext ), NULL, this );
 	r6text->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 	r7text->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	r7text->Disconnect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( ComplxFrameDecl::OnBaseChange ), NULL, this );
+	r7text->Disconnect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ComplxFrameDecl::OnBaseChangeContext ), NULL, this );
 	r7text->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 	cctext->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	cctext->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 	pctext->Disconnect( wxEVT_KILL_FOCUS, wxFocusEventHandler( ComplxFrameDecl::OnTextKillFocus ), NULL, this );
 	pctext->Disconnect( wxEVT_LEFT_DCLICK, wxMouseEventHandler( ComplxFrameDecl::OnBaseChange ), NULL, this );
+	pctext->Disconnect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( ComplxFrameDecl::OnBaseChangeContext ), NULL, this );
 	pctext->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( ComplxFrameDecl::OnRegisterChanged ), NULL, this );
 	
 }

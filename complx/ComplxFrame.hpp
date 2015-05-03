@@ -28,7 +28,8 @@ class wxThreadEvent;
 class ComplxFrame : public ComplxFrameDecl
 {
     public:
-        ComplxFrame(long decimal, long disassemble, long stack_size, long call_stack_size, long true_traps, long interrupts, long highlight, wxString address_str, wxString state_file, wxArrayString files);
+        ComplxFrame(long decimal, long disassemble, long stack_size, long call_stack_size, long true_traps, long interrupts, long highlight, wxString address_str,
+                    wxArrayString files);
         ~ComplxFrame();
 
         // File menu event handlers
@@ -45,6 +46,8 @@ class ComplxFrame : public ComplxFrameDecl
         // View menu event handlers
         void OnNewView(wxCommandEvent& event);
         void OnGoto(wxCommandEvent& event);
+		    void OnUpdateHideAddresses(wxCommandEvent& event);
+		    void OnHideAddressesCustom(wxCommandEvent& event);
         void OnDumbDisassemble(wxCommandEvent& event);
         void OnNormalDisassemble(wxCommandEvent& event);
         void OnCDisassemble(wxCommandEvent& event);
@@ -69,10 +72,11 @@ class ComplxFrame : public ComplxFrameDecl
         void OnInterrupts(wxCommandEvent& event);
         void OnClearConsole(wxCommandEvent& event);
         void OnClearConsoleInput(wxCommandEvent& event);
-        
+
         // Helpers
         void OnTextKillFocus(wxFocusEvent& event);
         void OnBaseChange(wxMouseEvent& event);
+        void OnBaseChangeContext(wxMouseEvent& event);
         void OnEditAddress(wxCommandEvent& event);
         void OnRegisterChanged(wxCommandEvent& text);
 
@@ -130,7 +134,6 @@ class ComplxFrame : public ComplxFrameDecl
         void OnInit(void);
 
         void SetupExecution(int run_mode, int runtime = -1);
-        void DoLoadMachine(const wxFileName& filename);
         void DoLoadFile(const wxFileName& filename);
 };
 

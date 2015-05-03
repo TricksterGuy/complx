@@ -64,7 +64,7 @@ void PrintError(int error);
   * Constructor
   */
 ComplxFrame::ComplxFrame(long decimal, long disassemble, long stack_size, long call_stack_size, long true_traps, long interrupts, long highlight,
-                         wxString address_str, wxString state_file, wxArrayString files) : ComplxFrameDecl(NULL), console(NULL), memoryView(NULL)
+                         wxString address_str, wxArrayString files) : ComplxFrameDecl(NULL), console(NULL), memoryView(NULL)
 {
     InitImages();
 
@@ -84,7 +84,6 @@ ComplxFrame::ComplxFrame(long decimal, long disassemble, long stack_size, long c
         state.pc = addr;
     }
 
-    if (!state_file.IsEmpty()) DoLoadMachine(wxFileName(state_file));
     if (files.size() > 0) DoLoadFile(wxFileName(files[0]));
 
     memoryView = new MemoryView();
@@ -351,53 +350,6 @@ void ComplxFrame::DoLoadFile(const wxFileName& filename)
 
 }
 
-/** OnLoadMachine
-  *
-  * Called when the user wants to load a machine state into the program.
-  */
-void ComplxFrame::OnLoadMachine(wxCommandEvent& event)
-{
-    wxFileDialog* dialog = new wxFileDialog(NULL, _("Load .cpx file"), wxEmptyString, wxEmptyString, _("Complx State Files (*.cpx)|*.cpx"), wxFD_OPEN|wxFD_FILE_MUST_EXIST);
-    if (dialog->ShowModal() == wxID_OK)
-    {
-        wxFileName filename(dialog->GetPath());
-        DoLoadMachine(filename);
-    }
-    delete dialog;
-}
-
-/** DoLoadMachine
-  *
-  * Handles loading a machine state
-  */
-void ComplxFrame::DoLoadMachine(const wxFileName& filename)
-{
-    std::ifstream file(filename.GetFullName().c_str(), std::ios::binary);
-    file.read((char*) &state, sizeof(state));
-    file.close();
-    UpdateRegisters();
-    UpdateMemory();
-    UpdateStatus();
-}
-
-/** OnSaveMachine
-  *
-  * Called when the user wants to save the machine state
-  */
-void ComplxFrame::OnSaveMachine(wxCommandEvent& event)
-{
-    wxFileDialog* dialog = new wxFileDialog(NULL, _("Save .cpx file"), wxEmptyString, wxEmptyString, _("Complx State Files (*.cpx)|*.cpx"), wxFD_SAVE|wxFD_CHANGE_DIR);
-    if (dialog->ShowModal() == wxID_OK)
-    {
-        wxFileName filename(dialog->GetPath());
-        filename.SetExt(_("cpx"));
-        std::ofstream file(filename.GetFullName().c_str(), std::ios::binary);
-        file.write((char*) &state, sizeof(state));
-        file.close();
-    }
-    delete dialog;
-}
-
 /** OnQuit
   *
   * Called when the user quits the program.
@@ -523,6 +475,15 @@ void ComplxFrame::OnBaseChange(wxMouseEvent& event)
     register_display[index] = mode;
 
     UpdateRegister(text, value, index);
+}
+
+/** OnBaseChangeContext
+  *
+  * Called when the user right clicks on a register textbox.
+  */
+void ComplxFrame::OnBaseChangeContext(wxMouseEvent& event)
+{
+    ///TODO implement.
 }
 
 /** OnClearConsole
@@ -667,9 +628,7 @@ void ComplxFrame::SetupExecution(int run_mode, int runtime)
         if (thread->IsPaused()) return;
         if (thread->IsRunning())
         {
-            //printf("Deleting thread\n");
             thread->Delete();
-            //delete thread;
             thread = NULL;
             changed = true;
             std::cout.flush();
@@ -682,22 +641,15 @@ void ComplxFrame::SetupExecution(int run_mode, int runtime)
         }
         else
         {
-//            //printf("Deleting and Creating thread\n");
             thread->Delete();
             thread = NULL;
-            //delete thread;
-            //thread = new LC3RunThread(this, run_mode);
-            //thread->Create();
-            //UpdateStop();
             return;
         }
     }
     else
     {
-        //printf("Creating thread\n");
         thread = new LC3RunThread(this, run_mode, runtime);
         thread->Create();
-        //UpdateStop();
     }
 
     thread->SetPriority(0);
@@ -1094,6 +1046,24 @@ void ComplxFrame::OnGoto(wxCommandEvent& event)
     memory->Refresh();
 }
 
+/** OnUpdateHideAddresses
+  *
+  * Called when the user wants change the hide memory address setting
+  */
+void ComplxFrame::OnUpdateHideAddresses(wxCommandEvent& event)
+{
+    ///TODO Implement
+}
+
+/** OnGoto
+  *
+  * Called when the user wants customize what memory addresses are shown
+  */
+void ComplxFrame::OnHideAddressesCustom(wxCommandEvent& event)
+{
+    ///TODO Implement
+}
+
 /** OnDumbDisassemble
   *
   * Sets the mode to just straight disassembling
@@ -1183,8 +1153,6 @@ void ComplxFrame::OnRunTests(wxCommandEvent& event)
 
     if (!currentFile.IsOk())
     {
-        // To the person who called Brandonsim a GHETTO JAVA APPLICATION.
-        //wxMessageBox("HURRY UP AND LOAD A DAMN FILE.\nI ALREADY AXED YOU ONCE TO DO SO.\nDON'T MAKE ME SMACK YOU ACROSS YOUR HEAD", "BOY I AIN'T GOT TIME FO DIS");
         wxMessageBox("BAD STUDENT! An assembly file must be loaded to perform this operation", "Error");
         return;
     }
@@ -1317,7 +1285,7 @@ void ComplxFrame::OnFirstTime(wxCommandEvent& event)
                                   "Thing 1: Be thankful! I am the author of everything you are using.\n"
                                   "Thing 2: DO NOT start these homework assignments on the day it's due.\n"
                                   "Thing 3: Report any bugs to TAs or me directly (bwhitehead0308@gmail.com).\n\n"
-				  "  Or you may file an issue at https://github.com/TricksterGuy/complx/issues",
+                                  "  Or you may file an issue at https://github.com/TricksterGuy/complx/issues",
                                   AutoVersion::FULLVERSION_STRING),
                                   "Hi from Brandon", wxICON_INFORMATION | wxOK);
 }
