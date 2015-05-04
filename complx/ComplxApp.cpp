@@ -46,7 +46,7 @@ static const wxCmdLineEntryDesc cmd_descriptions[] =
 IMPLEMENT_APP(ComplxApp)
 
 // Command line
-long decimal = 0, disassemble = 2, stack_size = 65536, call_stack_size = 10000, true_traps = 0, interrupts = 0, highlight = 1;
+long decimal = 0, disassemble = 1, stack_size = 65536, call_stack_size = 10000, true_traps = 0, interrupts = 0, highlight = 1;
 wxString address_str = wxEmptyString;
 wxArrayString files;
 ComplxFrame* complxframe;
