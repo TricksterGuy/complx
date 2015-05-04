@@ -87,6 +87,7 @@ class ComplxFrameDecl : public wxFrame
 			ID_RUN_TESTS,
 			ID_RERUN_TESTS,
 			ID_CHANGE_LOG,
+			ID_CREATE_BUG_REPORT,
 			ID_FIRST_TIME_MESSAGE,
 			ID_TIPS,
 			ID_ABOUT
@@ -177,6 +178,7 @@ class ComplxFrameDecl : public wxFrame
 		virtual void OnDocs( wxCommandEvent& event ) = 0;
 		virtual void OnISA( wxCommandEvent& event ) = 0;
 		virtual void OnChangeLog( wxCommandEvent& event ) = 0;
+		virtual void OnCreateBugReport( wxCommandEvent& event ) = 0;
 		virtual void OnFirstTime( wxCommandEvent& event ) = 0;
 		virtual void OnTips( wxCommandEvent& event ) = 0;
 		virtual void OnAbout( wxCommandEvent& event ) = 0;

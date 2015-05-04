@@ -882,6 +882,21 @@
                         <event name="OnMenuSelection">OnChangeLog</event>
                         <event name="OnUpdateUI"></event>
                     </object>
+                    <object class="wxMenuItem" expanded="1">
+                        <property name="bitmap"></property>
+                        <property name="checked">0</property>
+                        <property name="enabled">1</property>
+                        <property name="help">Create a bug report</property>
+                        <property name="id">ID_CREATE_BUG_REPORT</property>
+                        <property name="kind">wxITEM_NORMAL</property>
+                        <property name="label">Create &amp;Bug Report</property>
+                        <property name="name">menuHelpCreateBugReport</property>
+                        <property name="permission">none</property>
+                        <property name="shortcut"></property>
+                        <property name="unchecked_bitmap"></property>
+                        <event name="OnMenuSelection">OnCreateBugReport</event>
+                        <event name="OnUpdateUI"></event>
+                    </object>
                     <object class="wxMenuItem" expanded="0">
                         <property name="bitmap"></property>
                         <property name="checked">0</property>

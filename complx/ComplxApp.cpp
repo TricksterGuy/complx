@@ -18,7 +18,6 @@
 #include <wx/msgdlg.h>
 #include <wx/tipdlg.h>
 
-
 static const wxCmdLineEntryDesc cmd_descriptions[] =
 {
     { wxCMD_LINE_SWITCH, "h", "help", "Displays help on command line parameters",
@@ -105,21 +104,8 @@ bool ComplxApp::OnInit()
 
 int ComplxApp::OnExit()
 {
-    // clean up: Set() returns the active config object as Get() does, but unlike
-    // Get() it doesn't try to create one if there is none (definitely not what
-    // we want here!)
-    delete wxConfigBase::Get();//(wxConfigBase *) NULL);
-
-    //wxPuts("HELLO");
-
+    delete wxConfigBase::Get();
     return 0;
-}
-
-int ComplxApp::OnRun()
-{
-    int exitcode = wxApp::OnRun();
-    //wxTheClipboard->Flush();
-    return exitcode;
 }
 
 /** @brief OnCmdLineParsed
@@ -138,9 +124,7 @@ bool ComplxApp::OnCmdLineParsed(wxCmdLineParser& parser)
 
     // get unnamed parameters
     for (unsigned int i = 0; i < parser.GetParamCount(); i++)
-    {
         files.Add(parser.GetParam(i));
-    }
 
     return true;
 }
@@ -155,4 +139,3 @@ void ComplxApp::OnInitCmdLine(wxCmdLineParser& parser)
     parser.SetDesc(cmd_descriptions);
     parser.SetSwitchChars (_("-"));
 }
-

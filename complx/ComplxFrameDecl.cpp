@@ -240,6 +240,10 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuHelpChangeLog = new wxMenuItem( menuHelp, ID_CHANGE_LOG, wxString( _("&Change Log") ) , _("Shows the change log"), wxITEM_NORMAL );
 	menuHelp->Append( menuHelpChangeLog );
 	
+	wxMenuItem* menuHelpCreateBugReport;
+	menuHelpCreateBugReport = new wxMenuItem( menuHelp, ID_CREATE_BUG_REPORT, wxString( _("Create &Bug Report") ) , _("Create a bug report"), wxITEM_NORMAL );
+	menuHelp->Append( menuHelpCreateBugReport );
+	
 	wxMenuItem* menuHelpFirstTime;
 	menuHelpFirstTime = new wxMenuItem( menuHelp, ID_FIRST_TIME_MESSAGE, wxString( _("&First Time Message") ) , _("Displays the first time running message."), wxITEM_NORMAL );
 	menuHelp->Append( menuHelpFirstTime );
@@ -588,6 +592,7 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	this->Connect( menuHelpDocs->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDocs ) );
 	this->Connect( menuHelpISA->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnISA ) );
 	this->Connect( menuHelpChangeLog->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnChangeLog ) );
+	this->Connect( menuHelpCreateBugReport->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnCreateBugReport ) );
 	this->Connect( menuHelpFirstTime->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnFirstTime ) );
 	this->Connect( menuHelpTips->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTips ) );
 	this->Connect( menuHelpAbout->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnAbout ) );
@@ -689,6 +694,7 @@ ComplxFrameDecl::~ComplxFrameDecl()
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDocs ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnISA ) );
 	this->Disconnect( ID_CHANGE_LOG, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnChangeLog ) );
+	this->Disconnect( ID_CREATE_BUG_REPORT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnCreateBugReport ) );
 	this->Disconnect( ID_FIRST_TIME_MESSAGE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnFirstTime ) );
 	this->Disconnect( ID_TIPS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTips ) );
 	this->Disconnect( ID_ABOUT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnAbout ) );

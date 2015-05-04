@@ -99,7 +99,7 @@ class ComplxFrame : public ComplxFrameDecl
         void OnDocs(wxCommandEvent& event);
         void OnISA(wxCommandEvent& event);
         void OnChangeLog(wxCommandEvent& event);
-        void OnCheckForUpdates(wxCommandEvent& event);
+        void OnCreateBugReport(wxCommandEvent& event);
         void OnAbout(wxCommandEvent& event);
         void OnFirstTime(wxCommandEvent& event);
         void OnTips(wxCommandEvent& event);

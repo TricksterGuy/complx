@@ -21,8 +21,6 @@ class ComplxApp : public wxApp
         virtual int OnExit();
         virtual void OnInitCmdLine(wxCmdLineParser& parser);
         virtual bool OnCmdLineParsed(wxCmdLineParser& parser);
-        int OnRun();
-
 };
 
 extern ComplxFrame* complxframe;

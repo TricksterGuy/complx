@@ -1271,9 +1271,9 @@ void ComplxFrame::OnChangeLog(wxCommandEvent& event)
     wxLaunchDefaultBrowser(manual.GetFullPath());
 }
 
-void ComplxFrame::OnCheckForUpdates(wxCommandEvent& event)
+void ComplxFrame::OnCreateBugReport(wxCommandEvent& event)
 {
-    wxFileName manual(_("https://drive.google.com/folderview?id=0B6g7zcZaFwPTWDBuYnUtU19Lcnc&usp=sharing"));
+    wxFileName manual(_("https://github.com/TricksterGuy/complx/issues/new"));
     wxLaunchDefaultBrowser(manual.GetFullPath());
 }
 
