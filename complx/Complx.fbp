@@ -347,7 +347,7 @@
                             <event name="OnUpdateUI"></event>
                         </object>
                     </object>
-                    <object class="submenu" expanded="0">
+                    <object class="submenu" expanded="1">
                         <property name="bitmap"></property>
                         <property name="label">Disassemble</property>
                         <property name="name">menuViewDisassemble</property>
