@@ -1,5 +1,5 @@
-#ifndef COMPLEX_FRAME_HPP
-#define COMPLEX_FRAME_HPP
+#ifndef COMPLX_FRAME_HPP
+#define COMPLX_FRAME_HPP
 #define EXPAND_AND_STRINGIFY(S) STRINGIFY_TOKEN(S)
 #define STRINGIFY_TOKEN(S) #S
 
@@ -28,7 +28,7 @@ class wxThreadEvent;
 class ComplxFrame : public ComplxFrameDecl
 {
     public:
-        ComplxFrame(long decimal, long disassemble, long stack_size, long call_stack_size, long true_traps, long interrupts, long highlight, wxString address_str,
+        ComplxFrame(long disassemble, long stack_size, long call_stack_size, long true_traps, long interrupts, long highlight, wxString address_str,
                     wxArrayString files);
         ~ComplxFrame();
 
@@ -52,7 +52,6 @@ class ComplxFrame : public ComplxFrameDecl
         void OnNormalDisassemble(wxCommandEvent& event);
         void OnCDisassemble(wxCommandEvent& event);
         void OnInstructionHighlight(wxCommandEvent& event);
-        void OnUnsignedDecimal(wxCommandEvent& event);
         // Helpers for view menu actions
         void OnDestroyView(wxCloseEvent& event);
 

@@ -63,7 +63,7 @@ void PrintError(int error);
   *
   * Constructor
   */
-ComplxFrame::ComplxFrame(long decimal, long disassemble, long stack_size, long call_stack_size, long true_traps, long interrupts, long highlight,
+ComplxFrame::ComplxFrame(long disassemble, long stack_size, long call_stack_size, long true_traps, long interrupts, long highlight,
                          wxString address_str, wxArrayString files) : ComplxFrameDecl(NULL), console(NULL), memoryView(NULL)
 {
     InitImages();
@@ -71,7 +71,6 @@ ComplxFrame::ComplxFrame(long decimal, long disassemble, long stack_size, long c
     menuStateTrueTraps->Check(true_traps == 1);
     menuStateInterrupts->Check(interrupts == 1);
     menuViewInstructionHighlighting->Check(highlight != 0);
-    menuViewUnsignedDecimal->Check(decimal == 1);
 
     this->stack_size = stack_size;
     this->call_stack_size = call_stack_size;
@@ -89,7 +88,7 @@ ComplxFrame::ComplxFrame(long decimal, long disassemble, long stack_size, long c
     memoryView = new MemoryView();
     memory->SetView(memoryView);
     memory->SetDisassembleLevel(disassemble > 2 ? 2 : disassemble);
-    memory->SetUnsignedMode(decimal > 1 ? 0 : decimal);
+    memory->SetUnsignedMode(false);
     memory->SetHighlight(highlight > 1 ? 1 : highlight);
 
     int widths[3] = {-7, -3, -3};
@@ -1102,16 +1101,6 @@ void ComplxFrame::OnCDisassemble(wxCommandEvent& event)
 void ComplxFrame::OnInstructionHighlight(wxCommandEvent& event)
 {
     memory->SetHighlight(event.IsChecked());
-    memory->Refresh();
-}
-
-/** OnUnsignedDecimal
-  *
-  * Changes the decimal viewing mode to unsigned or signed.
-  */
-void ComplxFrame::OnUnsignedDecimal(wxCommandEvent& event)
-{
-    memory->SetUnsignedMode(event.IsChecked());
     memory->Refresh();
 }
 

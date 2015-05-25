@@ -255,7 +255,7 @@
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
                         <property name="enabled">1</property>
-                        <property name="help">Shows a new view</property>
+                        <property name="help">Shows a new view of main memory.</property>
                         <property name="id">ID_NEW_VIEW</property>
                         <property name="kind">wxITEM_NORMAL</property>
                         <property name="label">New View</property>
@@ -270,7 +270,7 @@
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
                         <property name="enabled">1</property>
-                        <property name="help">Shows a specific address</property>
+                        <property name="help">Moves memory to a specific address.</property>
                         <property name="id">ID_GOTO_ADDRESS</property>
                         <property name="kind">wxITEM_NORMAL</property>
                         <property name="label">Goto Address</property>
@@ -290,7 +290,7 @@
                             <property name="bitmap"></property>
                             <property name="checked">0</property>
                             <property name="enabled">1</property>
-                            <property name="help">Show all memory addresses</property>
+                            <property name="help">Shows all memory addresses</property>
                             <property name="id">ID_SHOW_ALL</property>
                             <property name="kind">wxITEM_RADIO</property>
                             <property name="label">Show All</property>
@@ -320,11 +320,11 @@
                             <property name="bitmap"></property>
                             <property name="checked">0</property>
                             <property name="enabled">1</property>
-                            <property name="help">Show all memory addresses related to your program&apos;s code and data.</property>
-                            <property name="id">ID_SHOW_ONLY_CODE</property>
+                            <property name="help">Shows addresses modified when your program was loaded.</property>
+                            <property name="id">ID_SHOW_ONLY_CODEDATA</property>
                             <property name="kind">wxITEM_RADIO</property>
-                            <property name="label">Show Only Code</property>
-                            <property name="name">menuViewHideAddressesShowOnlyCode</property>
+                            <property name="label">Show Only Code/Data</property>
+                            <property name="name">menuViewHideAddressesShowOnlyCodeData</property>
                             <property name="permission">none</property>
                             <property name="shortcut"></property>
                             <property name="unchecked_bitmap"></property>
@@ -411,21 +411,6 @@
                         <property name="shortcut"></property>
                         <property name="unchecked_bitmap"></property>
                         <event name="OnMenuSelection">OnInstructionHighlight</event>
-                        <event name="OnUpdateUI"></event>
-                    </object>
-                    <object class="wxMenuItem" expanded="0">
-                        <property name="bitmap"></property>
-                        <property name="checked">0</property>
-                        <property name="enabled">1</property>
-                        <property name="help">View decimal as unsigned.</property>
-                        <property name="id">ID_UNSIGNED_DECIMAL</property>
-                        <property name="kind">wxITEM_CHECK</property>
-                        <property name="label">Unsigned Decimal</property>
-                        <property name="name">menuViewUnsignedDecimal</property>
-                        <property name="permission">protected</property>
-                        <property name="shortcut"></property>
-                        <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnUnsignedDecimal</event>
                         <event name="OnUpdateUI"></event>
                     </object>
                 </object>

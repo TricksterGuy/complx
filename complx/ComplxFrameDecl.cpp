@@ -62,26 +62,26 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	
 	menuView = new wxMenu();
 	wxMenuItem* menuViewNew;
-	menuViewNew = new wxMenuItem( menuView, ID_NEW_VIEW, wxString( _("New View") ) + wxT('\t') + wxT("Ctrl+V"), _("Shows a new view"), wxITEM_NORMAL );
+	menuViewNew = new wxMenuItem( menuView, ID_NEW_VIEW, wxString( _("New View") ) + wxT('\t') + wxT("Ctrl+V"), _("Shows a new view of main memory."), wxITEM_NORMAL );
 	menuView->Append( menuViewNew );
 	
 	wxMenuItem* menuViewGoto;
-	menuViewGoto = new wxMenuItem( menuView, ID_GOTO_ADDRESS, wxString( _("Goto Address") ) + wxT('\t') + wxT("Ctrl+G"), _("Shows a specific address"), wxITEM_NORMAL );
+	menuViewGoto = new wxMenuItem( menuView, ID_GOTO_ADDRESS, wxString( _("Goto Address") ) + wxT('\t') + wxT("Ctrl+G"), _("Moves memory to a specific address."), wxITEM_NORMAL );
 	menuView->Append( menuViewGoto );
 	
 	menuViewHideAddresses = new wxMenu();
 	wxMenuItem* menuViewHideAddressesItem = new wxMenuItem( menuView, wxID_ANY, _("Hide Addresses"), wxEmptyString, wxITEM_NORMAL, menuViewHideAddresses );
 	wxMenuItem* menuViewHideAddressesShowAll;
-	menuViewHideAddressesShowAll = new wxMenuItem( menuViewHideAddresses, ID_SHOW_ALL, wxString( _("Show All") ) , _("Show all memory addresses"), wxITEM_RADIO );
+	menuViewHideAddressesShowAll = new wxMenuItem( menuViewHideAddresses, ID_SHOW_ALL, wxString( _("Show All") ) , _("Shows all memory addresses"), wxITEM_RADIO );
 	menuViewHideAddresses->Append( menuViewHideAddressesShowAll );
 	
 	wxMenuItem* menuViewHideAddressesShowNonZer;
 	menuViewHideAddressesShowNonZer = new wxMenuItem( menuViewHideAddresses, ID_SHOW_NON_ZERO, wxString( _("Show Non Zero") ) , _("Show all memory addresses that have a value other than 0"), wxITEM_RADIO );
 	menuViewHideAddresses->Append( menuViewHideAddressesShowNonZer );
 	
-	wxMenuItem* menuViewHideAddressesShowOnlyCode;
-	menuViewHideAddressesShowOnlyCode = new wxMenuItem( menuViewHideAddresses, ID_SHOW_ONLY_CODE, wxString( _("Show Only Code") ) , _("Show all memory addresses related to your program's code and data."), wxITEM_RADIO );
-	menuViewHideAddresses->Append( menuViewHideAddressesShowOnlyCode );
+	wxMenuItem* menuViewHideAddressesShowOnlyCodeData;
+	menuViewHideAddressesShowOnlyCodeData = new wxMenuItem( menuViewHideAddresses, ID_SHOW_ONLY_CODEDATA, wxString( _("Show Only Code/Data") ) , _("Shows addresses modified when your program was loaded."), wxITEM_RADIO );
+	menuViewHideAddresses->Append( menuViewHideAddressesShowOnlyCodeData );
 	
 	wxMenuItem* menuViewHideAddressesCustom;
 	menuViewHideAddressesCustom = new wxMenuItem( menuViewHideAddresses, ID_CUSTOM, wxString( _("Custom...") ) + wxT('\t') + wxT("Ctrl+H"), _("Allows you to show/hide memory address ranges"), wxITEM_NORMAL );
@@ -106,9 +106,6 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuViewInstructionHighlighting = new wxMenuItem( menuView, ID_INSTRUCTION_HIGHLIGHTING, wxString( _("Instruction Highlighting") ) , _("Highlights bits of the instruction."), wxITEM_CHECK );
 	menuView->Append( menuViewInstructionHighlighting );
 	menuViewInstructionHighlighting->Check( true );
-	
-	menuViewUnsignedDecimal = new wxMenuItem( menuView, ID_UNSIGNED_DECIMAL, wxString( _("Unsigned Decimal") ) , _("View decimal as unsigned."), wxITEM_CHECK );
-	menuView->Append( menuViewUnsignedDecimal );
 	
 	menu->Append( menuView, _("View") ); 
 	
@@ -557,13 +554,12 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	this->Connect( menuViewGoto->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnGoto ) );
 	this->Connect( menuViewHideAddressesShowAll->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ) );
 	this->Connect( menuViewHideAddressesShowNonZer->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ) );
-	this->Connect( menuViewHideAddressesShowOnlyCode->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ) );
+	this->Connect( menuViewHideAddressesShowOnlyCodeData->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ) );
 	this->Connect( menuViewHideAddressesCustom->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnHideAddressesCustom ) );
 	this->Connect( menuViewBasic->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDumbDisassemble ) );
 	this->Connect( menuViewNormal->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnNormalDisassemble ) );
 	this->Connect( menuViewHighLevel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnCDisassemble ) );
 	this->Connect( menuViewInstructionHighlighting->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnInstructionHighlight ) );
-	this->Connect( menuViewUnsignedDecimal->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUnsignedDecimal ) );
 	this->Connect( menuStateControlStep->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnStep ) );
 	this->Connect( menuStateControlBack->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnBackStep ) );
 	this->Connect( menuStateControlNextLine->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnNextLine ) );
@@ -659,13 +655,12 @@ ComplxFrameDecl::~ComplxFrameDecl()
 	this->Disconnect( ID_GOTO_ADDRESS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnGoto ) );
 	this->Disconnect( ID_SHOW_ALL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ) );
 	this->Disconnect( ID_SHOW_NON_ZERO, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ) );
-	this->Disconnect( ID_SHOW_ONLY_CODE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ) );
+	this->Disconnect( ID_SHOW_ONLY_CODEDATA, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ) );
 	this->Disconnect( ID_CUSTOM, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnHideAddressesCustom ) );
 	this->Disconnect( ID_BASIC, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDumbDisassemble ) );
 	this->Disconnect( ID_NORMAL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnNormalDisassemble ) );
 	this->Disconnect( ID_HIGH_LEVEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnCDisassemble ) );
 	this->Disconnect( ID_INSTRUCTION_HIGHLIGHTING, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnInstructionHighlight ) );
-	this->Disconnect( ID_UNSIGNED_DECIMAL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUnsignedDecimal ) );
 	this->Disconnect( ID_STEP, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnStep ) );
 	this->Disconnect( ID_BACK, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnBackStep ) );
 	this->Disconnect( ID_NEXT_LINE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnNextLine ) );

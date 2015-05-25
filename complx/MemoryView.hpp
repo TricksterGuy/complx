@@ -1,6 +1,7 @@
 #ifndef MEMORYVIEW_HPP
 #define MEMORYVIEW_HPP
 
+#include <set>
 #include <wx/string.h>
 #include <wx/grid.h>
 #include <wx/imaglist.h>
@@ -12,7 +13,7 @@ enum class ViewAction {
   HIDE = 0,
   SHOW = 1,
   SHOW_MODDED = 2,
-};+
+};
 
 class ViewRange {
   public:

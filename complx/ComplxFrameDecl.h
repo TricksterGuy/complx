@@ -55,13 +55,12 @@ class ComplxFrameDecl : public wxFrame
 			ID_GOTO_ADDRESS,
 			ID_SHOW_ALL,
 			ID_SHOW_NON_ZERO,
-			ID_SHOW_ONLY_CODE,
+			ID_SHOW_ONLY_CODEDATA,
 			ID_CUSTOM,
 			ID_BASIC,
 			ID_NORMAL,
 			ID_HIGH_LEVEL,
 			ID_INSTRUCTION_HIGHLIGHTING,
-			ID_UNSIGNED_DECIMAL,
 			ID_STEP,
 			ID_BACK,
 			ID_NEXT_LINE,
@@ -102,7 +101,6 @@ class ComplxFrameDecl : public wxFrame
 		wxMenuItem* menuViewNormal;
 		wxMenuItem* menuViewHighLevel;
 		wxMenuItem* menuViewInstructionHighlighting;
-		wxMenuItem* menuViewUnsignedDecimal;
 		wxMenu* menuState;
 		wxMenu* menuStateControl;
 		wxMenuItem* menuStateTrueTraps;
@@ -149,7 +147,6 @@ class ComplxFrameDecl : public wxFrame
 		virtual void OnNormalDisassemble( wxCommandEvent& event ) = 0;
 		virtual void OnCDisassemble( wxCommandEvent& event ) = 0;
 		virtual void OnInstructionHighlight( wxCommandEvent& event ) = 0;
-		virtual void OnUnsignedDecimal( wxCommandEvent& event ) = 0;
 		virtual void OnStep( wxCommandEvent& event ) = 0;
 		virtual void OnBackStep( wxCommandEvent& event ) = 0;
 		virtual void OnNextLine( wxCommandEvent& event ) = 0;
