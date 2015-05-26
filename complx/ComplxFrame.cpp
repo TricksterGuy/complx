@@ -1112,7 +1112,6 @@ void ComplxFrame::OnNewView(wxCommandEvent& event)
 {
     MemoryViewFrame* frame = new MemoryViewFrame(this, memoryView);
     views.push_back(frame);
-    //frame->InitGridSizes();
     frame->Show();
 
     frame->Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(ComplxFrame::OnDestroyView), NULL, this);

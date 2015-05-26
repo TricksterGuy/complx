@@ -15,14 +15,28 @@ enum class ViewAction {
   SHOW_MODDED = 2,
 };
 
-class ViewRange {
-  public:
+// Represents a user defined memory address range with action as to whether it is viewable or not.
+struct ViewRange {
+    ViewRange(unsigned short _start, unsigned short _end, ViewAction _action) : start(_start), end(_end), action(_action) {}
     unsigned short NumElements() const {return end - start + 1;}
-
-  private:
     unsigned short start;
     unsigned short end;
     ViewAction action;
+};
+
+// Comparator that gives priority to larger ranges
+struct ViewRangeElementCompare {
+    bool operator()(const ViewRange& lhs, const ViewRange& rhs)
+    {
+        return lhs.NumElements() > rhs.NumElements();
+    }
+};
+
+// Class to map id's in view table to memory address for MemoryView
+struct ViewTableEntry {
+  ViewTableEntry(int _id, unsigned short _address) : id(_id), address(_address) {}
+  const int id;
+  const unsigned short address;
 };
 
 enum
@@ -53,7 +67,10 @@ class MemoryView : public wxGridTableBase
   private:
     int disassemble_level;
     bool unsigned_mode;
-    std::set<ViewRange> ranges;
+    void ExpandRanges();
+    std::set<ViewRange, ViewRangeElementCompare> ranges;
+    // Expanded version of ranges.
+    std::vector<ViewTableEntry> viewTable;
     ViewAction defaultView;
 };
 

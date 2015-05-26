@@ -14,6 +14,9 @@ MemoryView::MemoryView()
 {
     unsigned_mode = false;
     disassemble_level = 2;
+    /*defaultView = ViewAction::HIDE;
+    ranges.insert(ViewRange(0x3000, 0x3010, ViewAction::SHOW));
+    ExpandRanges();*/
 }
 
 /** ~MemoryView
@@ -40,7 +43,7 @@ int MemoryView::GetNumberCols()
   */
 int MemoryView::GetNumberRows()
 {
-    return 0x10000;
+    return ranges.empty() ? 0x10000 : viewTable.size();
 }
 
 /** GetValue
@@ -49,8 +52,9 @@ int MemoryView::GetNumberRows()
   */
 wxString MemoryView::GetValue(int item, int column)
 {
-    short data = state.mem[item];
-    //short data = lc3_mem_read(state, item, true);
+    unsigned short addr = ranges.empty() ? item : viewTable[item].address;
+    short data = state.mem[addr];
+
     wxString ret;
     unsigned short pc = state.pc;
     std::stringstream string;
@@ -60,7 +64,7 @@ wxString MemoryView::GetValue(int item, int column)
     switch(column)
     {
         case MemoryAddress:
-            ret = wxString::Format(_("%04X:"), (unsigned short)item);
+            ret = wxString::Format(_("%04X:"), addr);
             break;
         case MemoryHexadecimal:
             ret = wxString::Format(_("x%04X"), (unsigned short)data);
@@ -72,11 +76,11 @@ wxString MemoryView::GetValue(int item, int column)
                 ret = wxString::Format(_("%d"), (short)data);
             break;
         case MemoryLabel:
-            ret = wxString::FromUTF8(lc3_sym_rev_lookup(state, item).c_str());
+            ret = wxString::FromUTF8(lc3_sym_rev_lookup(state, addr).c_str());
             break;
         case MemoryInstruction:
             // Change the pc temporarily...
-            state.pc = (unsigned short) (item + 1);
+            state.pc = (unsigned short) (addr + 1);
             if (disassemble_level == 0)
                 instruction = lc3_basic_disassemble(state, data);
             else if (disassemble_level == 1)
@@ -100,8 +104,9 @@ wxString MemoryView::GetValue(int item, int column)
   *
   * Sets a value at a cell
   */
-void MemoryView::SetValue(int row, int col, const wxString &value)
+void MemoryView::SetValue(int item, int col, const wxString &value)
 {
+    unsigned short addr = ranges.empty() ? item : viewTable[item].address;
     int data = 0;
     wxString effvalue = value;
     std::string strdata;
@@ -116,30 +121,30 @@ void MemoryView::SetValue(int row, int col, const wxString &value)
             else if (!(value.StartsWith(_("0x")) && value.StartsWith(_("0X"))))
                 effvalue = _("0x") + value;
 
-            strdata = (std::string)effvalue.mb_str();
+            strdata = effvalue.ToStdString();
 
             data = (int)strtol(strdata.c_str(), &errstr, 16);
             if (*errstr) return;
 
-            lc3_mem_write(state, row, (short) data, true);
+            lc3_mem_write(state, addr, (short)data, true);
             break;
         case MemoryDecimal:
             if (value.StartsWith(_("#")))
                 effvalue = value.Mid(1);
 
-            strdata = (std::string)effvalue.mb_str();
+            strdata = effvalue.ToStdString();
             data = (int)strtol(strdata.c_str(), &errstr, 10);
             if (*errstr) return;
 
-            lc3_mem_write(state, row, (short) data, true);
+            lc3_mem_write(state, addr, (short)data, true);
             break;
         case MemoryLabel:
-            strdata = lc3_sym_rev_lookup(state, row);
-            newsym = (std::string)value.mb_str();
+            strdata = lc3_sym_rev_lookup(state, addr);
+            newsym = value.ToStdString();
             if (!strdata.empty()) lc3_sym_delete(state, strdata);
             data = lc3_sym_lookup(state, newsym);
             if (data == -1)
-                lc3_sym_add(state, newsym, row);
+                lc3_sym_add(state, newsym, addr);
             else
                 wxMessageBox(wxString::Format("BAD STUDENT! The symbol %s already exists at address 0x%04x",
                                               newsym, data), _("ERROR"));
@@ -148,20 +153,20 @@ void MemoryView::SetValue(int row, int col, const wxString &value)
             if (value.StartsWith(_("0b")))
                 effvalue = value.Mid(2);
 
-            strdata = (std::string)effvalue.mb_str();
+            strdata = effvalue.ToStdString();
             data = (int)strtol(strdata.c_str(), &errstr, 2);
             if (*errstr) return;
 
-            lc3_mem_write(state, row, (short) data, true);
+            lc3_mem_write(state, addr, (short)data, true);
             break;
         case MemoryInstruction:
             try
             {
-                strdata = (std::string)effvalue.mb_str();
+                strdata = effvalue.ToStdString();
                 if (!strdata.empty())
-                    lc3_mem_write(state, row, (short) lc3_assemble_one(state, row, strdata), true);
+                    lc3_mem_write(state, addr, (short)lc3_assemble_one(state, addr, strdata), true);
                 else
-                    lc3_mem_write(state, row, 0, true);
+                    lc3_mem_write(state, addr, 0, true);
             }
             catch (LC3AssembleException e)
             {
@@ -169,7 +174,6 @@ void MemoryView::SetValue(int row, int col, const wxString &value)
                 wxMessageBox(wxString::Format("BAD STUDENT! %s", effvalue), _("Assemble Error"));
             }
             catch (std::vector<LC3AssembleException> e)
-
             {
                 effvalue = e[0].what();
                 wxMessageBox(wxString::Format("BAD STUDENT! %s", effvalue), _("Assemble Error"));
@@ -221,9 +225,10 @@ wxString MemoryView::GetColLabelValue(int col)
   *
   * Gets a value as a long
   */
-long MemoryView::GetValueAsLong(int row, int col)
+long MemoryView::GetValueAsLong(int item, int col)
 {
-    return state.mem[row];
+    unsigned short addr = ranges.empty() ? item : viewTable[item].address;
+    return state.mem[addr];
 }
 
 /** SetDisassembleLevel
@@ -242,4 +247,40 @@ void MemoryView::SetDisassembleLevel(int level)
 void MemoryView::SetUnsignedMode(bool mode)
 {
     unsigned_mode = mode;
+}
+
+/** ExpandRanges
+  *
+  * Expands view table ranges
+  */
+void MemoryView::ExpandRanges()
+{
+    viewTable.clear();
+
+    std::set<unsigned short> temp_set;
+    if (defaultView == ViewAction::SHOW)
+    {
+      for (unsigned int i = 0; i <= 65535; i++)
+        temp_set.insert(i);
+    }
+    for (const auto& range : ranges)
+    {
+        if (range.action == ViewAction::HIDE)
+        {
+            for (unsigned short current = range.start; current < range.end; current++)
+                temp_set.erase(current);
+        }
+        else
+        {
+            for (unsigned short current = range.start; current < range.end; current++)
+                temp_set.insert(current);
+        }
+    }
+
+    int id = 0;
+    for (const auto& address : temp_set)
+    {
+        viewTable.push_back(ViewTableEntry(id, address));
+        id++;
+    }
 }
