@@ -14,9 +14,9 @@ MemoryView::MemoryView()
 {
     unsigned_mode = false;
     disassemble_level = 2;
-    /*defaultView = ViewAction::HIDE;
-    ranges.insert(ViewRange(0x3000, 0x3010, ViewAction::SHOW));
-    ExpandRanges();*/
+    //defaultView = ViewAction::HIDE;
+    //ranges.insert(ViewRange(0x3000, 0x3010, ViewAction::SHOW));
+    //ExpandRanges();
 }
 
 /** ~MemoryView
@@ -256,6 +256,7 @@ void MemoryView::SetUnsignedMode(bool mode)
 void MemoryView::ExpandRanges()
 {
     viewTable.clear();
+    viewTable_rev.clear();
 
     std::set<unsigned short> temp_set;
     if (defaultView == ViewAction::SHOW)
@@ -281,6 +282,38 @@ void MemoryView::ExpandRanges()
     for (const auto& address : temp_set)
     {
         viewTable.push_back(ViewTableEntry(id, address));
+        viewTable_rev[address] = id;
+        printf("%x %d\n", address, id);
         id++;
     }
+}
+
+int MemoryView::AddressToView(unsigned short address) const
+{
+  if (viewTable_rev.empty()) return address;
+  if (viewTable_rev.find(address) == viewTable_rev.end())
+  {
+    const auto& upper = viewTable_rev.upper_bound(address);
+    const auto& lower = viewTable_rev.lower_bound(address);
+    printf("%x ", address);
+    if (upper == viewTable_rev.end())
+    {
+      printf("lower %x %x\n", lower->first, lower->second);
+      return lower->second;
+    }
+    if (lower == viewTable_rev.end())
+    {
+      printf("upper %x %x\n", upper->first, upper->second);
+      return upper->second;
+    }
+    printf("%x %x %x\n", address, upper->first, lower->first);
+    if (abs(upper->first - address) > abs(lower->first - address))
+      return lower->first;
+    else
+      return upper->first;
+  }
+  else
+  {
+    return viewTable_rev.at(address);
+  }
 }

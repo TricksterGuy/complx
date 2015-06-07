@@ -64,6 +64,9 @@ class MemoryView : public wxGridTableBase
     long GetValueAsLong(int row, int col);
     void SetDisassembleLevel(int level);
     void SetUnsignedMode(bool mode);
+    // Converts address to view table id
+    // If not in the viewTable returns closest id.
+    int AddressToView(unsigned short address) const;
   private:
     int disassemble_level;
     bool unsigned_mode;
@@ -71,6 +74,7 @@ class MemoryView : public wxGridTableBase
     std::set<ViewRange, ViewRangeElementCompare> ranges;
     // Expanded version of ranges.
     std::vector<ViewTableEntry> viewTable;
+    std::map<unsigned short, int> viewTable_rev;
     ViewAction defaultView;
 };
 

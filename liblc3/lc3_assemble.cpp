@@ -155,7 +155,7 @@ std::string LC3AssembleException::what() const throw()
                 snprintf(what_str, 1023, "Invalid assembler directive %s found on line %d", params[0].c_str(), lineno);
                 break;
             case INVALID_FLAGS:
-                snprintf(what_str, 1023, "Invalid control code flags %s found on line %d", params[0].c_str(), lineno);
+                snprintf(what_str, 1023, "Invalid condition code flags %s found on line %d", params[0].c_str(), lineno);
                 break;
             case INVALID_CHARACTER:
                 snprintf(what_str, 1023, "Invalid character constant found on line %d: %s", lineno, params[0].c_str());
@@ -237,7 +237,7 @@ std::string LC3AssembleException::what() const throw()
                 snprintf(what_str, 1023, "Invalid instruction %s", params[0].c_str());
                 break;
             case INVALID_FLAGS:
-                snprintf(what_str, 1023, "Invalid control code flags %s", params[0].c_str());
+                snprintf(what_str, 1023, "Invalid condition code flags %s", params[0].c_str());
                 break;
             case INVALID_CHARACTER:
                 snprintf(what_str, 1023, "Invalid character constant %s", params[0].c_str());

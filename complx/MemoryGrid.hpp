@@ -26,32 +26,32 @@ class MemoryGrid : public wxGrid
 	public:
 		MemoryGrid(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, long style);
 		~MemoryGrid();
-        void InitGridSizes();
-        void SelectLocation(unsigned short location);
-        void OnContextMenu(wxGridEvent& event);
-        void OnBreakpoint(wxCommandEvent& event);
-        void OnTemppoint(wxCommandEvent& event);
-        void OnWatchpoint(wxCommandEvent& event);
-        void OnBlackbox(wxCommandEvent& event);
-        void OnAdvancedpoint(wxCommandEvent& event);
-        void OnPCHere(wxCommandEvent& event);
-        void SetView(MemoryView* view);
-        bool AcceptsFocusFromKeyboard() const;
+    void InitGridSizes();
+    void SelectLocation(unsigned short location);
+    void OnContextMenu(wxGridEvent& event);
+    void OnBreakpoint(wxCommandEvent& event);
+    void OnTemppoint(wxCommandEvent& event);
+    void OnWatchpoint(wxCommandEvent& event);
+    void OnBlackbox(wxCommandEvent& event);
+    void OnAdvancedpoint(wxCommandEvent& event);
+    void OnPCHere(wxCommandEvent& event);
+    void SetView(MemoryView* view);
+    bool AcceptsFocusFromKeyboard() const;
 
-        void SetDisassembleLevel(int level);
-        void SetHighlight(bool highlight);
-        void SetUnsignedMode(bool unsigned_mode);
+    void SetDisassembleLevel(int level);
+    void SetHighlight(bool highlight);
+    void SetUnsignedMode(bool unsigned_mode);
 	private:
-        int last_address;
-        wxTimer timer;
-        int toolTipLastRow;
-        bool highlight;
-        int GetSelectedRow() const;
-        void OnGridChanged(wxGridEvent& event);
-        void OnActivate(wxActivateEvent& event);
-        void OnMotion(wxMouseEvent& event);
-        void OnShowToolTip(wxTimerEvent& event);
-        wxTipWindow* tipWindow;
+    int last_address;
+    wxTimer timer;
+    int toolTipLastRow;
+    bool highlight;
+    int GetSelectedRow() const;
+    void OnGridChanged(wxGridEvent& event);
+    void OnActivate(wxActivateEvent& event);
+    void OnMotion(wxMouseEvent& event);
+    void OnShowToolTip(wxTimerEvent& event);
+    wxTipWindow* tipWindow;
 };
 
 #endif
