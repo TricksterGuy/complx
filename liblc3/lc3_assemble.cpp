@@ -890,7 +890,8 @@ void lc3_assemble(lc3_state& state, const std::string& filename, std::vector<cod
             else if (directive.compare(".blkw") == 0)
             {
                 unsigned short locs = get_imm(param, 16, true, false, context);
-                memset(state.mem + context.address, 0, locs * sizeof(short));
+                // blkw should not emit anything to memory
+                //memset(state.mem + context.address, 0, locs * sizeof(short));
                 context.address += locs;
             }
         }

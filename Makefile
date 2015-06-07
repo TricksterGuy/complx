@@ -53,7 +53,7 @@ install : all
 	$(MAKE) -C lc3plugins install -f Makefile
 	$(MAKE) -C complx install -f Makefile
 #	$(MAKE) -C comp install -f Makefile
-	$(INSTALL) -m 0644 Complx.pdf $(PREFIX)/share/complx-tools
+	$(INSTALL) -m 0644 complx-tools.pdf $(PREFIX)/share/complx-tools
 	$(INSTALL) -m 0644 ComplxChangeLog.txt $(PREFIX)/share/complx-tools
 	$(INSTALL) -m 0644 ChangeLog $(PREFIX)/share/complx-tools
 	$(INSTALL) -m 0644 PattPatelAppA.pdf $(PREFIX)/share/complx-tools

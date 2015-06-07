@@ -1232,7 +1232,7 @@ void ComplxFrame::OnAbout(wxCommandEvent& event)
   */
 void ComplxFrame::OnDocs(wxCommandEvent& event)
 {
-    wxFileName manual(_(EXPAND_AND_STRINGIFY(PREFIX) "/share/complx-tools/Complx.pdf"));
+    wxFileName manual(_(EXPAND_AND_STRINGIFY(PREFIX) "/share/complx-tools/complx-tools.pdf"));
     manual.Normalize();
     wxLaunchDefaultBrowser(manual.GetFullPath());
 }
