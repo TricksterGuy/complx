@@ -14,9 +14,11 @@ MemoryView::MemoryView()
 {
     unsigned_mode = false;
     disassemble_level = 2;
-    //defaultView = ViewAction::HIDE;
-    //ranges.insert(ViewRange(0x3000, 0x3010, ViewAction::SHOW));
-    //ExpandRanges();
+    /*defaultView = ViewAction::HIDE;
+    ranges.insert(ViewRange(0x3000, 0x3010, ViewAction::SHOW));
+    ranges.insert(ViewRange(0x301D, 0x301D, ViewAction::HIDE));
+    ranges.insert(ViewRange(0x3018, 0x3020, ViewAction::SHOW));
+    ExpandRanges();*/
 }
 
 /** ~MemoryView
@@ -261,19 +263,19 @@ void MemoryView::ExpandRanges()
     std::set<unsigned short> temp_set;
     if (defaultView == ViewAction::SHOW)
     {
-      for (unsigned int i = 0; i <= 65535; i++)
-        temp_set.insert(i);
+        for (unsigned int i = 0; i <= 65535; i++)
+            temp_set.insert(i);
     }
     for (const auto& range : ranges)
     {
         if (range.action == ViewAction::HIDE)
         {
-            for (unsigned short current = range.start; current < range.end; current++)
+            for (unsigned short current = range.start; current <= range.end; current++)
                 temp_set.erase(current);
         }
         else
         {
-            for (unsigned short current = range.start; current < range.end; current++)
+            for (unsigned short current = range.start; current <= range.end; current++)
                 temp_set.insert(current);
         }
     }
@@ -283,37 +285,33 @@ void MemoryView::ExpandRanges()
     {
         viewTable.push_back(ViewTableEntry(id, address));
         viewTable_rev[address] = id;
-        printf("%x %d\n", address, id);
         id++;
     }
 }
 
 int MemoryView::AddressToView(unsigned short address) const
 {
-  if (viewTable_rev.empty()) return address;
-  if (viewTable_rev.find(address) == viewTable_rev.end())
-  {
-    const auto& upper = viewTable_rev.upper_bound(address);
-    const auto& lower = viewTable_rev.lower_bound(address);
-    printf("%x ", address);
-    if (upper == viewTable_rev.end())
+    if (viewTable_rev.empty()) return address;
+    if (viewTable_rev.find(address) == viewTable_rev.end())
     {
-      printf("lower %x %x\n", lower->first, lower->second);
-      return lower->second;
+        auto upper = viewTable_rev.upper_bound(address);
+        auto lower = upper;
+        lower--;
+        if (upper == viewTable_rev.end())
+        {
+            return lower->second;
+        }
+        if (upper == viewTable_rev.begin())
+        {
+            return upper->second;
+        }
+        if (abs(upper->first - address) > abs(lower->first - address))
+            return lower->second;
+        else
+            return upper->second;
     }
-    if (lower == viewTable_rev.end())
-    {
-      printf("upper %x %x\n", upper->first, upper->second);
-      return upper->second;
-    }
-    printf("%x %x %x\n", address, upper->first, lower->first);
-    if (abs(upper->first - address) > abs(lower->first - address))
-      return lower->first;
     else
-      return upper->first;
-  }
-  else
-  {
-    return viewTable_rev.at(address);
-  }
+    {
+        return viewTable_rev.at(address);
+    }
 }
