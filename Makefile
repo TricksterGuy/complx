@@ -2,6 +2,7 @@
 PREFIX := /usr/local
 export PREFIX
 MASTER_CPP_FLAGS := -O3 -s -std=c++11
+#MASTER_CPP_FLAGS := -g -std=c++11
 export MASTER_CPP_FLAGS
 INSTALL := install
 ARCH = $(shell getconf LONG_BIT)

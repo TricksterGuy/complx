@@ -118,7 +118,8 @@ void MemoryGrid::InitGridSizes()
   */
 void MemoryGrid::SelectLocation(unsigned short location)
 {
-    location = dynamic_cast<MemoryView*>(GetTable())->AddressToView(location);
+    MemoryView* view = dynamic_cast<MemoryView*>(GetTable());
+    if (view) location = view->AddressToView(location);
     last_address = location;
     // Handles close to edge!
     int n_location = (location + 8 + 1) > 0xFFFF ? location : location + 8 + 1;
