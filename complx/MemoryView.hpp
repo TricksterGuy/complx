@@ -17,7 +17,8 @@ enum class ViewAction {
 
 // Represents a user defined memory address range with action as to whether it is viewable or not.
 struct ViewRange {
-    ViewRange(unsigned short _start, unsigned short _end, ViewAction _action) : start(_start), end(_end), action(_action) {}
+    ViewRange(unsigned short _start, unsigned short _end, ViewAction _action = ViewAction::SHOW) :
+       start(_start), end(_end), action(_action) {}
     unsigned short NumElements() const {return end - start + 1;}
     unsigned short start;
     unsigned short end;
@@ -56,6 +57,9 @@ class MemoryView : public wxGridTableBase
 	public:
 		MemoryView();
 		~MemoryView();
+		void ShowAllAddresses();
+		void ModifyAddresses(const std::vector<ViewRange>& addresses, bool expand_too = true);
+		void SetDefaultVisibility(ViewAction action);
     int GetNumberRows();
     int GetNumberCols();
     wxString GetValue(int row, int col);

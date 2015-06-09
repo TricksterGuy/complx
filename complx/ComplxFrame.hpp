@@ -129,6 +129,8 @@ class ComplxFrame : public ComplxFrameDecl
         long stack_size;
         long call_stack_size;
 
+        std::vector<ViewRange> modified_addresses;
+
         void UpdateRegister(wxTextCtrl* text, int value, int index);
         void OnInit(void);
 

@@ -96,6 +96,10 @@ class ComplxFrameDecl : public wxFrame
 		wxMenu* menuFile;
 		wxMenu* menuView;
 		wxMenu* menuViewHideAddresses;
+		wxMenuItem* menuViewHideAddressesShowAll;
+		wxMenuItem* menuViewHideAddressesShowNonZero;
+		wxMenuItem* menuViewHideAddressesShowOnlyCodeData;
+		wxMenuItem* menuViewHideAddressesCustom;
 		wxMenu* menuViewDisassemble;
 		wxMenuItem* menuViewBasic;
 		wxMenuItem* menuViewNormal;

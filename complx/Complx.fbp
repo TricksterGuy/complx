@@ -295,7 +295,7 @@
                             <property name="kind">wxITEM_RADIO</property>
                             <property name="label">Show All</property>
                             <property name="name">menuViewHideAddressesShowAll</property>
-                            <property name="permission">none</property>
+                            <property name="permission">protected</property>
                             <property name="shortcut"></property>
                             <property name="unchecked_bitmap"></property>
                             <event name="OnMenuSelection">OnUpdateHideAddresses</event>
@@ -309,8 +309,8 @@
                             <property name="id">ID_SHOW_NON_ZERO</property>
                             <property name="kind">wxITEM_RADIO</property>
                             <property name="label">Show Non Zero</property>
-                            <property name="name">menuViewHideAddressesShowNonZer</property>
-                            <property name="permission">none</property>
+                            <property name="name">menuViewHideAddressesShowNonZero</property>
+                            <property name="permission">protected</property>
                             <property name="shortcut"></property>
                             <property name="unchecked_bitmap"></property>
                             <event name="OnMenuSelection">OnUpdateHideAddresses</event>
@@ -325,7 +325,7 @@
                             <property name="kind">wxITEM_RADIO</property>
                             <property name="label">Show Only Code/Data</property>
                             <property name="name">menuViewHideAddressesShowOnlyCodeData</property>
-                            <property name="permission">none</property>
+                            <property name="permission">protected</property>
                             <property name="shortcut"></property>
                             <property name="unchecked_bitmap"></property>
                             <event name="OnMenuSelection">OnUpdateHideAddresses</event>
@@ -337,10 +337,10 @@
                             <property name="enabled">1</property>
                             <property name="help">Allows you to show/hide memory address ranges</property>
                             <property name="id">ID_CUSTOM</property>
-                            <property name="kind">wxITEM_NORMAL</property>
+                            <property name="kind">wxITEM_RADIO</property>
                             <property name="label">Custom...</property>
                             <property name="name">menuViewHideAddressesCustom</property>
-                            <property name="permission">none</property>
+                            <property name="permission">protected</property>
                             <property name="shortcut">Ctrl+H</property>
                             <property name="unchecked_bitmap"></property>
                             <event name="OnMenuSelection">OnHideAddressesCustom</event>

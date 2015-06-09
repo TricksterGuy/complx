@@ -71,20 +71,16 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	
 	menuViewHideAddresses = new wxMenu();
 	wxMenuItem* menuViewHideAddressesItem = new wxMenuItem( menuView, wxID_ANY, _("Hide Addresses"), wxEmptyString, wxITEM_NORMAL, menuViewHideAddresses );
-	wxMenuItem* menuViewHideAddressesShowAll;
 	menuViewHideAddressesShowAll = new wxMenuItem( menuViewHideAddresses, ID_SHOW_ALL, wxString( _("Show All") ) , _("Shows all memory addresses"), wxITEM_RADIO );
 	menuViewHideAddresses->Append( menuViewHideAddressesShowAll );
 	
-	wxMenuItem* menuViewHideAddressesShowNonZer;
-	menuViewHideAddressesShowNonZer = new wxMenuItem( menuViewHideAddresses, ID_SHOW_NON_ZERO, wxString( _("Show Non Zero") ) , _("Show all memory addresses that have a value other than 0"), wxITEM_RADIO );
-	menuViewHideAddresses->Append( menuViewHideAddressesShowNonZer );
+	menuViewHideAddressesShowNonZero = new wxMenuItem( menuViewHideAddresses, ID_SHOW_NON_ZERO, wxString( _("Show Non Zero") ) , _("Show all memory addresses that have a value other than 0"), wxITEM_RADIO );
+	menuViewHideAddresses->Append( menuViewHideAddressesShowNonZero );
 	
-	wxMenuItem* menuViewHideAddressesShowOnlyCodeData;
 	menuViewHideAddressesShowOnlyCodeData = new wxMenuItem( menuViewHideAddresses, ID_SHOW_ONLY_CODEDATA, wxString( _("Show Only Code/Data") ) , _("Shows addresses modified when your program was loaded."), wxITEM_RADIO );
 	menuViewHideAddresses->Append( menuViewHideAddressesShowOnlyCodeData );
 	
-	wxMenuItem* menuViewHideAddressesCustom;
-	menuViewHideAddressesCustom = new wxMenuItem( menuViewHideAddresses, ID_CUSTOM, wxString( _("Custom...") ) + wxT('\t') + wxT("Ctrl+H"), _("Allows you to show/hide memory address ranges"), wxITEM_NORMAL );
+	menuViewHideAddressesCustom = new wxMenuItem( menuViewHideAddresses, ID_CUSTOM, wxString( _("Custom...") ) + wxT('\t') + wxT("Ctrl+H"), _("Allows you to show/hide memory address ranges"), wxITEM_RADIO );
 	menuViewHideAddresses->Append( menuViewHideAddressesCustom );
 	
 	menuView->Append( menuViewHideAddressesItem );
@@ -553,7 +549,7 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	this->Connect( menuViewNew->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnNewView ) );
 	this->Connect( menuViewGoto->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnGoto ) );
 	this->Connect( menuViewHideAddressesShowAll->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ) );
-	this->Connect( menuViewHideAddressesShowNonZer->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ) );
+	this->Connect( menuViewHideAddressesShowNonZero->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ) );
 	this->Connect( menuViewHideAddressesShowOnlyCodeData->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ) );
 	this->Connect( menuViewHideAddressesCustom->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnHideAddressesCustom ) );
 	this->Connect( menuViewBasic->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDumbDisassemble ) );

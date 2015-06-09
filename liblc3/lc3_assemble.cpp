@@ -17,29 +17,6 @@
 #endif
 #endif
 
-// For .orig statements
-struct code_range
-{
-    unsigned short location;
-    unsigned short size;
-
-    code_range(unsigned short location, unsigned short size)
-    {
-        this->location = location;
-        this->size = size;
-    }
-
-    bool operator<(const code_range& o)
-    {
-        return location < o.location;
-    }
-
-    bool operator>(const code_range& o)
-    {
-        return location > o.location;
-    }
-};
-
 // For non line comments.
 struct code_line
 {

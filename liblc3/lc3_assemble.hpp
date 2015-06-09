@@ -6,7 +6,28 @@
 #include <vector>
 #include <stdexcept>
 
-struct code_range;
+// For .orig statements
+struct code_range
+{
+    unsigned short location;
+    unsigned short size;
+
+    code_range(unsigned short location, unsigned short size)
+    {
+        this->location = location;
+        this->size = size;
+    }
+
+    bool operator<(const code_range& o)
+    {
+        return location < o.location;
+    }
+
+    bool operator>(const code_range& o)
+    {
+        return location > o.location;
+    }
+};
 
 /// @todo reduce the number of parameters!
 unsigned short lc3_assemble_one(lc3_state& state, unsigned short address, const std::string& line, int lineno = -1, bool multiple = false, bool werror = false, bool warn = false, bool disable_plugins = false);

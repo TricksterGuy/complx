@@ -308,9 +308,12 @@ void ComplxFrame::DoLoadFile(const wxFileName& filename)
 
     try
     {
+        std::vector<code_range> ranges;
         lc3_assemble(dummy_state, filename.GetFullPath().ToStdString(), false);
-        lc3_assemble(state, filename.GetFullPath().ToStdString());
-
+        lc3_assemble(state, filename.GetFullPath().ToStdString(), ranges);
+        modified_addresses.clear();
+        for (const auto& code_range : ranges)
+            modified_addresses.push_back(ViewRange(code_range.location, code_range.location + code_range.size));
     }
     catch (LC3AssembleException e)
     {
@@ -1051,7 +1054,17 @@ void ComplxFrame::OnGoto(wxCommandEvent& event)
   */
 void ComplxFrame::OnUpdateHideAddresses(wxCommandEvent& event)
 {
-    ///TODO Implement
+    if (menuViewHideAddressesShowAll->IsChecked())
+      memoryView->ShowAllAddresses();
+    else if (menuViewHideAddressesShowOnlyCodeData->IsChecked())
+    {
+      memoryView->SetDefaultVisibility(ViewAction::HIDE);
+      memoryView->ModifyAddresses(modified_addresses);
+    }
+    ///TODO learn the interface for updating a grid's dimensions via wxGridTableMessage
+    // This is inefficient, but well...
+    memory->SetView(memoryView);
+    memory->ForceRefresh();
 }
 
 /** OnGoto

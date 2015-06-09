@@ -29,6 +29,38 @@ MemoryView::~MemoryView()
 {
 }
 
+/** ShowAllAddresses
+  *
+  * Modifies memory view to show all addresses.
+  */
+void MemoryView::ShowAllAddresses()
+{
+    defaultView = ViewAction::SHOW;
+    ranges.clear();
+    ExpandRanges();
+}
+
+/** ModifyAddresses
+  *
+  * Modifies the visibility of the addresses passed in
+  */
+void MemoryView::ModifyAddresses(const std::vector<ViewRange>& addresses, bool expand_too)
+{
+    for (const auto& view_range : addresses)
+    {
+        ranges.insert(view_range);
+    }
+    if (expand_too) ExpandRanges();
+}
+
+/** SetDefaultVisibility
+  *
+  * Sets the default visibility of an address.
+  */
+void MemoryView::SetDefaultVisibility(ViewAction action)
+{
+    defaultView = action;
+}
 
 /** GetNumberCols
   *
@@ -259,6 +291,9 @@ void MemoryView::ExpandRanges()
 {
     viewTable.clear();
     viewTable_rev.clear();
+    if (ranges.empty()) return;
+
+    unsigned int old_rows = GetNumberRows();
 
     std::set<unsigned short> temp_set;
     if (defaultView == ViewAction::SHOW)
@@ -286,6 +321,21 @@ void MemoryView::ExpandRanges()
         viewTable.push_back(ViewTableEntry(id, address));
         viewTable_rev[address] = id;
         id++;
+    }
+
+    if (GetView())
+    {
+        unsigned int new_rows = GetNumberRows();
+        if (old_rows > new_rows)
+        {
+            wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED, 0, old_rows - new_rows);
+            GetView()->ProcessTableMessage(msg);
+        }
+        else if (new_rows > old_rows)
+        {
+            wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, new_rows - old_rows);
+            GetView()->ProcessTableMessage(msg);
+        }
     }
 }
 
