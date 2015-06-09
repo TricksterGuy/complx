@@ -1064,6 +1064,8 @@ void ComplxFrame::OnUpdateHideAddresses(wxCommandEvent& event)
     ///TODO learn the interface for updating a grid's dimensions via wxGridTableMessage
     // This is inefficient, but well...
     memory->SetView(memoryView);
+    memory->SelectLocation((unsigned short) state.pc > 0xFFF0 ? 0xFFFF : 0);
+    memory->SelectLocation((unsigned short) state.pc);
     memory->ForceRefresh();
 }
 
