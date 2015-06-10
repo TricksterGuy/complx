@@ -14,11 +14,6 @@ MemoryView::MemoryView()
 {
     unsigned_mode = false;
     disassemble_level = 2;
-    /*defaultView = ViewAction::HIDE;
-    ranges.insert(ViewRange(0x3000, 0x3010, ViewAction::SHOW));
-    ranges.insert(ViewRange(0x301D, 0x301D, ViewAction::HIDE));
-    ranges.insert(ViewRange(0x3018, 0x3020, ViewAction::SHOW));
-    ExpandRanges();*/
 }
 
 /** ~MemoryView

@@ -21,10 +21,12 @@
 #include <XmlTestParser.hpp>
 #include <lc3.hpp>
 #include <lc3_assemble.hpp>
+#include <lc3_parser.hpp> // for tokenize
 #include "icon64.xpm"
 
 #include "ComplxFrame.hpp"
 #include "MemoryGrid.hpp"
+#include "MemoryViewContainer.hpp"
 #include "CallStackDialog.hpp"
 #include "DebugInfoDialog.hpp"
 #include "WatchpointDialog.hpp"
@@ -53,6 +55,9 @@ void complx_step(void);
 
 // R0-R7, PC, CC
 int register_display[10] = {BASE_10, BASE_10, BASE_10, BASE_10, BASE_10, BASE_16, BASE_16, BASE_16, BASE_16, BASE_CC};
+
+// Modified addresses provided by assembler
+std::vector<ViewRange> modified_addresses;
 
 wxImageList* infoImages = new wxImageList(22, 16, true);
 void InitImages(void);
@@ -314,6 +319,9 @@ void ComplxFrame::DoLoadFile(const wxFileName& filename)
         modified_addresses.clear();
         for (const auto& code_range : ranges)
             modified_addresses.push_back(ViewRange(code_range.location, code_range.location + code_range.size));
+        // Dummy call to update hidden addresses.
+        wxCommandEvent event;
+        OnUpdateHideAddresses(event);
     }
     catch (LC3AssembleException e)
     {
@@ -1032,20 +1040,7 @@ void ComplxFrame::OnRandomize(wxCommandEvent& event)
   */
 void ComplxFrame::OnGoto(wxCommandEvent& event)
 {
-    wxString wxaddress = wxGetTextFromUser(_("Input Address"), _("Goto Address"), wxEmptyString, this);
-    if (wxaddress.IsEmpty()) return;
-    int addr;
-    int error = lc3_calculate(state, wxaddress.ToStdString(), addr);
-
-    if (error)
-    {
-        PrintError(error);
-        return;
-    }
-
-    memory->SelectLocation((unsigned short) addr > 0xFFF0 ? 0xFFFF : 0);
-    memory->SelectLocation((unsigned short) addr);
-    memory->Refresh();
+    ::OnGoto(memory);
 }
 
 /** OnUpdateHideAddresses
@@ -1054,55 +1049,23 @@ void ComplxFrame::OnGoto(wxCommandEvent& event)
   */
 void ComplxFrame::OnUpdateHideAddresses(wxCommandEvent& event)
 {
+    int mode;
     if (menuViewHideAddressesShowAll->IsChecked())
-      memoryView->ShowAllAddresses();
+      mode = SHOW_ALL;
     else if (menuViewHideAddressesShowOnlyCodeData->IsChecked())
-    {
-      memoryView->ShowAllAddresses();
-      memoryView->SetDefaultVisibility(ViewAction::HIDE);
-      memoryView->ModifyAddresses(modified_addresses);
-    }
+      mode = SHOW_MODIFIED;
     else if ((menuViewHideAddressesShowNonZero->IsChecked()))
-    {
-        std::vector<ViewRange> ranges;
-        int start = -1;
-        int end = -1;
-        int current = 0;
-        while (current <= 0xFFFF)
-        {
-            while (current <= 0xFFFF && state.mem[current] == 0)
-            {
-                current++;
-            }
-            start = current;
-            if (current > 0xFFFF) break;
-            while (current <= 0xFFFF && state.mem[current] != 0)
-            {
-                current++;
-            }
-            end = current - 1;
-            ranges.emplace_back(start, end);
-            current++;
-        }
-        memoryView->ShowAllAddresses();
-        memoryView->SetDefaultVisibility(ViewAction::HIDE);
-        memoryView->ModifyAddresses(ranges);
-    }
-    ///TODO learn the interface for updating a grid's dimensions via wxGridTableMessage
-    // This is inefficient, but well...
-    memory->SetView(memoryView);
-    memory->SelectLocation((unsigned short) state.pc > 0xFFF0 ? 0xFFFF : 0);
-    memory->SelectLocation((unsigned short) state.pc);
-    memory->ForceRefresh();
+      mode = SHOW_NONZERO;
+    ::OnUpdateHideAddresses(memory, memoryView, mode);
 }
 
-/** OnGoto
+/** OnHideAddressesCustom
   *
   * Called when the user wants customize what memory addresses are shown
   */
 void ComplxFrame::OnHideAddressesCustom(wxCommandEvent& event)
 {
-    ///TODO Implement
+    ::OnHideAddressesCustom(memory, memoryView);
 }
 
 /** OnDumbDisassemble
@@ -1112,8 +1075,7 @@ void ComplxFrame::OnHideAddressesCustom(wxCommandEvent& event)
   */
 void ComplxFrame::OnDumbDisassemble(wxCommandEvent& event)
 {
-    memory->SetDisassembleLevel(0);
-    memory->Refresh();
+    ::OnDumbDisassemble(memory);
 }
 
 /** OnNormalDisassemble
@@ -1122,8 +1084,7 @@ void ComplxFrame::OnDumbDisassemble(wxCommandEvent& event)
   */
 void ComplxFrame::OnNormalDisassemble(wxCommandEvent& event)
 {
-    memory->SetDisassembleLevel(1);
-    memory->Refresh();
+    ::OnNormalDisassemble(memory);
 }
 
 /** OnCDisassemble
@@ -1132,8 +1093,7 @@ void ComplxFrame::OnNormalDisassemble(wxCommandEvent& event)
   */
 void ComplxFrame::OnCDisassemble(wxCommandEvent& event)
 {
-    memory->SetDisassembleLevel(2);
-    memory->Refresh();
+    ::OnCDisassemble(memory);
 }
 
 /** OnInstructionHighlight
@@ -1142,8 +1102,7 @@ void ComplxFrame::OnCDisassemble(wxCommandEvent& event)
   */
 void ComplxFrame::OnInstructionHighlight(wxCommandEvent& event)
 {
-    memory->SetHighlight(event.IsChecked());
-    memory->Refresh();
+    ::OnInstructionHighlight(memory, event.IsChecked());
 }
 
 /** OnNewView
@@ -1152,7 +1111,7 @@ void ComplxFrame::OnInstructionHighlight(wxCommandEvent& event)
   */
 void ComplxFrame::OnNewView(wxCommandEvent& event)
 {
-    MemoryViewFrame* frame = new MemoryViewFrame(this, memoryView);
+    MemoryViewFrame* frame = new MemoryViewFrame(this, new MemoryView());
     views.push_back(frame);
     frame->Show();
 
@@ -1168,6 +1127,7 @@ void ComplxFrame::OnDestroyView(wxCloseEvent& event)
     MemoryViewFrame* frame = static_cast<MemoryViewFrame*>(event.GetEventObject());
     views.erase(std::find(views.begin(), views.end(), frame));
     frame->Disconnect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(ComplxFrame::OnDestroyView), NULL, this);
+    frame->Destroy();
 }
 
 /** OnRunTests
