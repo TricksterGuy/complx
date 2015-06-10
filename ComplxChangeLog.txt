@@ -1,3 +1,8 @@
+10 June 2015
+   released version 4.8.0 of Complx
+     Change log:
+       - New: Memory Address filtering
+       
 5 February 2015
    released version 4.7.0 of Complx
      Change log:

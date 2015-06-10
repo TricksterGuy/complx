@@ -1,3 +1,8 @@
+Wednesday June 10th 2015: Version 4.8.0
+blkw no longer zeros out memory.
+updates to all documentation
+See (ComplxChangeLog)
+
 Thursday February 5th 2015: Version 4.7.0
 Updated install script for Ubuntu 14.04
 See (ComplxChangeLog)
