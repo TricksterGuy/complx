@@ -64,7 +64,9 @@ wxGrid(parent, id, pos, size, style), timer(this, MemoryToolTipTimer), tipWindow
   */
 void MemoryGrid::SetView(MemoryView* view)
 {
-    SetTable(view, true, wxGridSelectRows);
+    // DO NOT SET TO TRUE.
+    // See TODOs in MemoryViewContainer.cpp
+    SetTable(view, false, wxGridSelectRows);
     InitGridSizes();
 }
 
