@@ -1058,8 +1058,35 @@ void ComplxFrame::OnUpdateHideAddresses(wxCommandEvent& event)
       memoryView->ShowAllAddresses();
     else if (menuViewHideAddressesShowOnlyCodeData->IsChecked())
     {
+      memoryView->ShowAllAddresses();
       memoryView->SetDefaultVisibility(ViewAction::HIDE);
       memoryView->ModifyAddresses(modified_addresses);
+    }
+    else if ((menuViewHideAddressesShowNonZero->IsChecked()))
+    {
+        std::vector<ViewRange> ranges;
+        int start = -1;
+        int end = -1;
+        int current = 0;
+        while (current <= 0xFFFF)
+        {
+            while (current <= 0xFFFF && state.mem[current] == 0)
+            {
+                current++;
+            }
+            start = current;
+            if (current > 0xFFFF) break;
+            while (current <= 0xFFFF && state.mem[current] != 0)
+            {
+                current++;
+            }
+            end = current - 1;
+            ranges.emplace_back(start, end);
+            current++;
+        }
+        memoryView->ShowAllAddresses();
+        memoryView->SetDefaultVisibility(ViewAction::HIDE);
+        memoryView->ModifyAddresses(ranges);
     }
     ///TODO learn the interface for updating a grid's dimensions via wxGridTableMessage
     // This is inefficient, but well...
