@@ -18,16 +18,15 @@ extern wxCriticalSection threadCS;
   */
 int complx_reader(lc3_state& state, std::istream& file)
 {
-    char c;
+    char c = file.peek();
 
-    file.peek();
-
+    if (!file.good()) wxQueueEvent(complxframe, new wxThreadEvent(wxEVT_COMMAND_RUNTHREAD_NOIO));
     while (!file.good())
     {
         if (LC3RunThread::This()->TestDestroy())
             return -1;
-        wxQueueEvent(complxframe, new wxThreadEvent(wxEVT_COMMAND_RUNTHREAD_NOIO));
         LC3RunThread::This()->Yield();
+        c = file.peek();
     }
     file.read(&c, 1);
     wxQueueEvent(complxframe, new wxThreadEvent(wxEVT_COMMAND_RUNTHREAD_IO));
@@ -41,19 +40,21 @@ int complx_reader(lc3_state& state, std::istream& file)
   */
 int complx_peek(lc3_state& state, std::istream& file)
 {
-    char c;
+    char c = file.peek();
+
+    if (!file.good()) wxQueueEvent(complxframe, new wxThreadEvent(wxEVT_COMMAND_RUNTHREAD_NOIO));
     while (!file.good())
     {
         if (LC3RunThread::This()->TestDestroy())
             return -1;
-        wxQueueEvent(complxframe, new wxThreadEvent(wxEVT_COMMAND_RUNTHREAD_NOIO));
         LC3RunThread::This()->Yield();
+        c = file.peek();
         //printf("TESTING TESTING TESTING\n");
     }
 
-    c = file.peek();
-
-    wxQueueEvent(complxframe, new wxThreadEvent(wxEVT_COMMAND_RUNTHREAD_IO));
+    //Do not send an io event here.
+    //Sending an io event "consumes a character"
+    //No io will be unable by typing text and is handled elsewhere.
 
     return c;
 }

@@ -37,6 +37,7 @@ extern lc3_state state;
   */
 void* LC3RunThread::Entry()
 {
+    ///TODO consider writting this without rewriting next_line/prev_line.
     int depth = 0;
     lc3_instr instr;
     bool interrupt_begin = false;

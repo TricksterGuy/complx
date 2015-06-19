@@ -219,10 +219,7 @@ void ComplxFrame::OnInit(void)
     // For keyboard interrupts
     state.interrupt_test.push_back(complx_step);
 
-    //console = new LC3Console(this);
     console->Show();
-    //console->Iconize();
-    //state.input = &console->inputStream;
 
     int x, y;
     GetScreenPosition(&x, &y);
@@ -700,7 +697,7 @@ void ComplxFrame::OnRunComplete(wxThreadEvent& event)
   */
 void ComplxFrame::OnNoIo(wxThreadEvent& event)
 {
-    //printf("There is no time\n");
+    //printf("There is no time\nYour sword is enough\n");
     wxCriticalSectionLocker enter(threadCS);
     if (thread != NULL && !thread->IsPaused()) thread->Pause();
     if (!refreshednoio)
@@ -1056,6 +1053,8 @@ void ComplxFrame::OnUpdateHideAddresses(wxCommandEvent& event)
       mode = SHOW_MODIFIED;
     else if ((menuViewHideAddressesShowNonZero->IsChecked()))
       mode = SHOW_NONZERO;
+    else
+      mode = 0;
     ::OnUpdateHideAddresses(memory, memoryView, mode);
 }
 
