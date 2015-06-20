@@ -1,3 +1,4 @@
+
 #include "XmlTestParser.hpp"
 #include <sstream>
 
@@ -5,14 +6,10 @@
   *
   * Unescapes and removes quotes from string (see lc3_parser.cpp if you change this)
   */
-std::string process_str(wxString str, int& error)
-{
-    return process_str(str.ToStdString(), error);
-}
-std::string process_str(std::string str, int& error)
+wxString process_str(const wxString& wxStr, int& error)
 {
     // Preappend ""'s
-    str = "\"" + str + "\"";
+    std::string str = "\"" + wxStr.ToStdString() + "\"";
 
     std::stringstream out;
     for (size_t i = 1; i < str.size() - 1; i++)
