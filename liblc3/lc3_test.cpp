@@ -17,9 +17,7 @@ std::string join(const std::vector<std::string>& vec, const std::string& join)
 
     std::stringstream oss;
     for (unsigned int i = 0; i < vec.size() - 1; i++)
-    {
         oss << vec[i] << join;
-    }
     oss << vec[vec.size() - 1];
     return oss.str();
 }
@@ -65,14 +63,14 @@ int edit_distance(const std::vector<short>& s, const std::vector<short>& t)
     return v1[t.size()];
 }
 
-void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, bool disable_plugins)
+void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, int seed)
 {
     bool passed = true;
     unsigned int total_points = 0;
     unsigned int points = 0;
     for (unsigned int i = 0; i < suite.tests.size(); i++)
     {
-        lc3_run_test_case(suite.tests[i], filename);
+        lc3_run_test_case(suite.tests[i], filename, seed);
         passed = passed && suite.tests[i].passed;
         points += suite.tests[i].points;
         total_points += suite.tests[i].max_points;
@@ -82,16 +80,17 @@ void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, bool
     suite.max_points = total_points;
 }
 
-void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable_plugins)
+void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
 {
     lc3_state state;
     lc3_init(state);
 
     // Preliminary stuff
+    if (seed != -1) srand(seed);
     if (test.randomize) lc3_randomize(state);
     if (test.true_traps) lc3_set_true_traps(state, 1);
     if (test.interrupt_enabled) state.interrupt_enabled = 1;
-    if (test.has_disable_plugins) disable_plugins = test.disable_plugins;
+    bool disable_plugins = test.disable_plugins;
     state.max_stack_size = 0;
     state.max_call_stack_size = -1;
     state.in_lc3test = true;
@@ -118,20 +117,18 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
         ///TODO flip the condition here so that if new types are added you don't have to check for it here...
         if (input.type != TEST_IO && input.type != TEST_REGISTER && input.type != TEST_PC && input.type != TEST_SUBROUTINE &&
             lc3_calculate(state, input.address, address_calc) == -1)
-            throw "An address expression was not formed correctly.";
+            throw "An address expression " + input.address + " was not formed correctly.";
         else if (input.type == TEST_REGISTER)
         {
             if (input.address.size() != 2)
-                throw "Register format is RX where x is between 0-7";
+                throw "Register format is RX where x is between 0-7 found: " + input.address;
 
             address_calc = input.address[1] - '0';
             if (address_calc > 7 || address_calc < 0)
-                throw "Invalid register";
+                throw "Invalid register " + input.address;
         }
         else
-        {
             lc3_calculate(state, input.address, address_calc);
-        }
 
         effective_address = (unsigned short) address_calc;
 
@@ -139,22 +136,22 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
         {
             case TEST_VALUE:
                 if (lc3_calculate(state, input.value, value_calc))
-                    throw "<in test-value> A value expression was malformed.";
+                    throw "<in test-value> A value expression " + input.value + " was malformed.";
                 state.mem[effective_address] = (short) value_calc;
                 break;
             case TEST_REGISTER:
                 if (lc3_calculate(state, input.registerval, value_calc))
-                    throw "<in test-register> A value expression was malformed.";
+                    throw "<in test-register> A value expression " + input.registerval + " was malformed.";
                 state.regs[effective_address] = (short) value_calc;
                 break;
             case TEST_PC:
                 if (lc3_calculate(state, input.pcval, value_calc))
-                    throw "<in test-pc> A value expression was malformed.";
+                    throw "<in test-pc> A value expression " + input.pcval + " was malformed.";
                 state.pc = (unsigned short) value_calc;
                 break;
             case TEST_POINTER:
                 if (lc3_calculate(state, input.pointer, value_calc))
-                    throw "<in test-pointer> An expression was malformed.";
+                    throw "<in test-pointer> An expression was " + input.pointer + " malformed.";
                 state.mem[(unsigned short) state.mem[effective_address]] = (short) value_calc;
                 break;
             case TEST_STRING:
@@ -166,7 +163,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
                 for (unsigned int j = 0; j < input.array.size(); j++)
                 {
                     if (lc3_calculate(state, input.array[j], value_calc))
-                        throw "<in test-array> An expression was malformed.";
+                        throw "<in test-array> An expression was " + input.array[j] + " malformed.";
                     state.mem[(unsigned short) (state.mem[effective_address] + j)] = (short) value_calc;
                 }
                 break;
@@ -187,13 +184,13 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
             int r6;
             int r5;
             if (lc3_calculate(state, subr.name, pc) == -1)
-                throw "<in test-subr> invalid subroutine name given";
+                throw "<in test-subr> invalid subroutine name given " + subr.name;
             if (lc3_calculate(state, subr.stack, r6) == -1)
-                throw "<in test-subr> stack expression was malformed";
+                throw "<in test-subr> stack expression was malformed " + subr.stack;
             if (lc3_calculate(state, subr.r7, r7) == -1)
-                throw "<in test-subr> r7 expression was malformed";
+                throw "<in test-subr> r7 expression was malformed " + subr.r7;
             if (lc3_calculate(state, subr.r5, r5) == -1)
-                throw "<in test-subr> r5 expression was malformed";
+                throw "<in test-subr> r5 expression was malformed " + subr.r5;
 
             state.pc = (unsigned short) pc;
             state.regs[6] = (unsigned short)(r6 - subr.params.size());
@@ -204,7 +201,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
             for (unsigned int j = 0; j < subr.params.size(); j++)
             {
                 if (lc3_calculate(state, subr.params[j], value_calc))
-                    throw "<in test-subr> param expression was malformed.";
+                    throw "<in test-subr> param expression " + subr.params[j] + " was malformed.";
                 state.mem[(unsigned short)state.regs[6] + j] = (short) value_calc;
             }
         }
@@ -264,12 +261,12 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
         std::vector<short> arrayactual;
 
         if (output.type != TEST_IO && output.type != TEST_REGISTER && output.type != TEST_PC && lc3_calculate(state, output.address, address_calc) == -1)
-            throw "An address expression was not formed correctly.";
+            throw "An address expression " + output.address + " was not formed correctly.";
         else if (output.type == TEST_REGISTER)
         {
             address_calc = output.address[1] - '0';
             if (address_calc > 7)
-                throw "Invalid register";
+                throw "Invalid register " + output.address;
         }
         effective_address = (unsigned short) address_calc;
 
@@ -279,7 +276,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
         {
             case TEST_VALUE:
                 if (lc3_calculate(state, output.value, value_calc))
-                    throw "<in test-value> An expression was malformed.";
+                    throw "<in test-value> An expression " + output.value + " was malformed.";
 
                 short_cmp = (short) value_calc;
                 output.passed = lc3_test_check(output, &state.mem[effective_address], &short_cmp);
@@ -289,7 +286,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
                 break;
             case TEST_REGISTER:
                 if (lc3_calculate(state, output.registerval, value_calc))
-                    throw "<in test-register> An expression was malformed.";
+                    throw "<in test-register> An expression " + output.registerval + " was malformed.";
 
                 short_cmp = (short) value_calc;
                 output.passed = lc3_test_check(output, &state.regs[effective_address], &short_cmp);
@@ -299,7 +296,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
                 break;
             case TEST_PC:
                 if (lc3_calculate(state, output.pcval, value_calc))
-                    throw "<in test-pc> An expression was malformed.";
+                    throw "<in test-pc> An expression " + output.pcval + " was malformed.";
 
                 short_cmp = (short) value_calc;
                 output.passed = lc3_test_check(output, &state.pc, &short_cmp);
@@ -310,7 +307,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
                 break;
             case TEST_POINTER:
                 if (lc3_calculate(state, output.pointer, value_calc))
-                    throw "<in test-pointer> An expression was malformed.";
+                    throw "<in test-pointer> An expression " + output.pointer + " was malformed.";
 
                 short_cmp = (short) value_calc;
                 output.passed = lc3_test_check(output, &state.mem[(unsigned short)state.mem[effective_address]], &short_cmp);
@@ -338,7 +335,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
                 for (unsigned int j = 0; j < output.array.size(); j++)
                 {
                     if (lc3_calculate(state, output.array[j], value_calc))
-                        throw "<in test-array> An expression was malformed.";
+                        throw "<in test-array> An expression " + output.array[j] + " was malformed.";
 
                     arrayexpected.push_back(state.mem[(unsigned short)(state.mem[effective_address] + j)]);
                     arrayactual.push_back((short)value_calc);
@@ -380,7 +377,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
             for (int j = (int)subr.locals.size() - 1; j >= 0; j--)
             {
                 if (lc3_calculate(state, subr.locals[j], value_calc))
-                    throw "<in test-subr> A local variable expression was malformed.";
+                    throw "<in test-subr> A local variable expression " + subr.locals[i] + "was malformed.";
 
                 expected_stack.push_back((short)value_calc);
                 locals.push_back((short) value_calc);
@@ -391,13 +388,13 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
             int r5;
             int answer;
             if (lc3_calculate(state, subr.stack, r6) == -1)
-                throw "<in test-subr> stack expression was malformed";
+                throw "<in test-subr> stack expression " + subr.stack + " was malformed";
             if (lc3_calculate(state, subr.r7, r7) == -1)
-                throw "<in test-subr> r7 expression was malformed";
+                throw "<in test-subr> r7 expression " + subr.r7 + " was malformed";
             if (lc3_calculate(state, subr.r5, r5) == -1)
-                throw "<in test-subr> r5 expression was malformed";
+                throw "<in test-subr> r5 expression " + subr.r5 + " was malformed";
             if (lc3_calculate(state, subr.answer, answer) == -1)
-                throw "<in test-subr> answer expression was malformed";
+                throw "<in test-subr> answer expression " + subr.answer + " was malformed";
 
             expected_stack.push_back((short)r5);
             expected_stack.push_back((short)r7);
@@ -406,8 +403,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
             for (unsigned int j = 0; j < subr.params.size(); j++)
             {
                 if (lc3_calculate(state, subr.params[j], value_calc))
-                    throw "<in test-subr> A param expression was malformed.";
-
+                    throw "<in test-subr> A param expression " + subr.params[j] + " was malformed.";
                 expected_stack.push_back((short)value_calc);
                 params.push_back((short) value_calc);
             }
@@ -546,7 +542,8 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable
                 if (actual_stack.size() > subr.params.size() + 3)
                     // Truncate stack to last num_params + 3 elements the stuff we care about (don't do expected since ed forgiveness handles it).
                     actual_stack.erase(actual_stack.begin(), actual_stack.begin() + (actual_stack.size() - subr.params.size() - 3));
-                extra << "      All locals were not found, so locals aren't included in structure check\n";
+                if (!subr.locals.empty())
+                    extra << "      All locals were not found, so locals aren't included in structure check\n";
             }
             else
             {

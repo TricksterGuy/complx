@@ -1,3 +1,4 @@
+
 #include "XmlTestParser.hpp"
 #include <sstream>
 
@@ -5,14 +6,10 @@
   *
   * Unescapes and removes quotes from string (see lc3_parser.cpp if you change this)
   */
-std::string process_str(wxString str, int& error)
-{
-    return process_str(str.ToStdString(), error);
-}
-std::string process_str(std::string str, int& error)
+wxString process_str(const wxString& wxStr, int& error)
 {
     // Preappend ""'s
-    str = "\"" + str + "\"";
+    std::string str = "\"" + wxStr.ToStdString() + "\"";
 
     std::stringstream out;
     for (size_t i = 1; i < str.size() - 1; i++)
@@ -133,10 +130,6 @@ bool XmlTestParser::LoadTestSuite(lc3_test_suite& suite, const std::string filen
     wxXmlDocument doc;
     if (!doc.Load(filename.c_str())) return false;
 
-    suite.passed = false;
-    suite.points = 0;
-    suite.max_points = 0;
-
     wxXmlNode* child = doc.GetRoot()->GetChildren();
 
     while (child)
@@ -157,21 +150,6 @@ bool XmlTestParser::LoadTest(lc3_test_suite& suite, wxXmlNode* root)
     wxXmlNode* child = root->GetChildren();
 
     lc3_test test;
-
-    test.has_halted = false;
-    test.executions = 0;
-    test.has_max_executions = false;
-    test.has_disable_plugins = false;
-    test.disable_plugins = false;
-    test.max_executions = 0;
-    test.passed = false;
-    test.randomize = false;
-    test.true_traps = false;
-    test.interrupt_enabled = false;
-    test.warnings = false;
-    test.points = 0;
-    test.max_points = 0;
-
     while(child)
     {
         if (child->GetName() == "name")
@@ -180,8 +158,6 @@ bool XmlTestParser::LoadTest(lc3_test_suite& suite, wxXmlNode* root)
             test.true_traps = wxAtoi(child->GetNodeContent()) != 0;
         else if (child->GetName() == "has-max-executions")
             test.has_max_executions = wxAtoi(child->GetNodeContent()) != 0;
-        else if (child->GetName() == "has-disable-plugins")
-            test.has_disable_plugins = wxAtoi(child->GetNodeContent()) != 0;
         else if (child->GetName() == "disable-plugins")
             test.disable_plugins = wxAtoi(child->GetNodeContent()) != 0;
         else if (child->GetName() == "max-executions")
@@ -196,7 +172,6 @@ bool XmlTestParser::LoadTest(lc3_test_suite& suite, wxXmlNode* root)
         }
         else if (child->GetName() == "output")
         {
-            if (test.input.empty()) throw "test-input must come before test-output";
             if (!LoadTestOutput(test, child)) throw "test-output improperly formatted";
         }
 
@@ -218,94 +193,120 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, wxXmlNode* root)
         wxXmlNode* grandchild = child->GetChildren();
         if (child->GetName() == "test-value")
         {
-            if (grandchild->GetName() != "address") throw "address must come before value";
-            input.address = grandchild->GetNodeContent();
-            grandchild = getNextNode(grandchild);
-            if (grandchild->GetName() != "value") throw "value tag not found";
-            input.value = grandchild->GetNodeContent();
-
+            while (grandchild)
+            {
+                if (grandchild->GetName() == "address")
+                    input.address = grandchild->GetNodeContent();
+                else if (grandchild->GetName() == "value")
+                    input.value = grandchild->GetNodeContent();
+                else
+                    throw "Unknown tag found in test-value" + grandchild->GetName();
+                grandchild = getNextNode(grandchild);
+            }
             input.type = TEST_VALUE;
         }
         else if (child->GetName() == "test-register")
         {
-            if (grandchild->GetName() != "register") throw "register must come before value";
-            input.address = grandchild->GetNodeContent();
-            grandchild = getNextNode(grandchild);
-            if (grandchild->GetName() != "value") throw "value tag not found";
-            input.registerval = grandchild->GetNodeContent();
-
+            while (grandchild)
+            {
+                if (grandchild->GetName() == "register")
+                    input.address = grandchild->GetNodeContent();
+                else if (grandchild->GetName() == "value")
+                    input.registerval = grandchild->GetNodeContent();
+                else
+                    throw "Unknown tag found in test-register" + grandchild->GetName();
+                grandchild = getNextNode(grandchild);
+            }
             input.type = TEST_REGISTER;
         }
         else if (child->GetName() == "test-pc")
         {
-            if (grandchild->GetName() != "value") throw "value tag not found";
-            input.pcval = grandchild->GetNodeContent();
-
+            while (grandchild)
+            {
+                if (grandchild->GetName() == "value")
+                    input.pcval = grandchild->GetNodeContent();
+                else
+                    throw "Unknown tag found in test-pc" + grandchild->GetName();
+                grandchild = getNextNode(grandchild);
+            }
             input.type = TEST_PC;
         }
         else if (child->GetName() == "test-pointer")
         {
-            if (grandchild->GetName() != "address") throw "address must come before value";
-            input.address = grandchild->GetNodeContent();
-            grandchild = getNextNode(grandchild);
-            if (grandchild->GetName() != "value") throw "value tag not found";
-            input.pointer = grandchild->GetNodeContent();
-
+            while (grandchild)
+            {
+                if (grandchild->GetName() == "address")
+                    input.address = grandchild->GetNodeContent();
+                else if (grandchild->GetName() == "value")
+                    input.pointer = grandchild->GetNodeContent();
+                else
+                    throw "Unknown tag found in test-pointer" + grandchild->GetName();
+                grandchild = getNextNode(grandchild);
+            }
             input.type = TEST_POINTER;
         }
         else if (child->GetName() == "test-string")
         {
-            if (grandchild->GetName() != "address") throw "address must come before value";
-            input.address = grandchild->GetNodeContent();
-            grandchild = getNextNode(grandchild);
-            if (grandchild->GetName() != "value") throw "value tag not found";
-            input.text = process_str(grandchild->GetNodeContent(), error);
-            if (error) throw "malformed string in test-string";
+            while (grandchild)
+            {
+                if (grandchild->GetName() == "address")
+                    input.address = grandchild->GetNodeContent();
+                else if (grandchild->GetName() == "value")
+                    input.text = process_str(grandchild->GetNodeContent(), error);
+                else
+                    throw "Unknown tag found in test-string" + grandchild->GetName();
 
+                if (error) throw "malformed string" + grandchild->GetNodeContent() + " in test-string";
+                grandchild = getNextNode(grandchild);
+            }
             input.type = TEST_STRING;
         }
         else if (child->GetName() == "test-array")
         {
-            if (grandchild->GetName() != "address") throw "address must come before value";
-            input.address = grandchild->GetNodeContent();
-            grandchild = getNextNode(grandchild);
-            if (grandchild->GetName() != "value") throw "value tag not found";
-            std::string array = grandchild->GetNodeContent().ToStdString();
-            tokenize(array, input.array, ",");
-
+            while (grandchild)
+            {
+                if (grandchild->GetName() == "address")
+                    input.address = grandchild->GetNodeContent();
+                else if (grandchild->GetName() == "value")
+                    tokenize(grandchild->GetNodeContent().ToStdString(), input.array, ",");
+                else
+                    throw "Unknown tag found in test-array" + grandchild->GetName();
+                grandchild = getNextNode(grandchild);
+            }
             input.type = TEST_ARRAY;
         }
         else if (child->GetName() == "test-stdin")
         {
-            if (grandchild->GetName() != "value") throw "value tag not found";
-            input.io = process_str(grandchild->GetNodeContent(), error);
-            if (error) throw "malformed string in test-stdin";
-
+            while (grandchild)
+            {
+                if (grandchild->GetName() == "value")
+                    input.io = process_str(grandchild->GetNodeContent(), error);
+                else
+                    throw "Unknown tag found in test-stdin" + grandchild->GetName();
+                if (error) throw "malformed string" + grandchild->GetNodeContent() + " in test-stdin";
+                grandchild = getNextNode(grandchild);
+            }
             input.type = TEST_IO;
         }
         else if (child->GetName() == "test-subr")
         {
             lc3_subr_input& subr = input.subroutine;
-            if (grandchild->GetName() != "name") throw "name must come before stack";
-            subr.name = grandchild->GetNodeContent();
-
-            grandchild = getNextNode(grandchild);
-            if (grandchild->GetName() != "stack") throw "stack must come before r7";
-            subr.stack = grandchild->GetNodeContent();
-
-            grandchild = getNextNode(grandchild);
-            if (grandchild->GetName() != "r7") throw "r7 must come before r5";
-            subr.r7 = grandchild->GetNodeContent();
-
-            grandchild = getNextNode(grandchild);
-            if (grandchild->GetName() != "r5") throw "r5 must come before params";
-            subr.r5 = grandchild->GetNodeContent();
-
-            grandchild = getNextNode(grandchild);
-            if (grandchild->GetName() != "params") throw "params tag not found";
-            std::string params = grandchild->GetNodeContent().ToStdString();
-            tokenize(params, subr.params, ",");
-
+            while (grandchild)
+            {
+                if (grandchild->GetName() == "name")
+                    subr.name = grandchild->GetNodeContent();
+                else if (grandchild->GetName() == "stack")
+                    subr.stack = grandchild->GetNodeContent();
+                else if (grandchild->GetName() == "r7")
+                    subr.r7 = grandchild->GetNodeContent();
+                else if (grandchild->GetName() == "r5")
+                    subr.r5 = grandchild->GetNodeContent();
+                else if (grandchild->GetName() == "params")
+                    tokenize(grandchild->GetNodeContent().ToStdString(), subr.params, ",");
+                else
+                    throw "Unknown tag found in test-subr" + grandchild->GetName();
+                grandchild = getNextNode(grandchild);
+            }
             input.type = TEST_SUBROUTINE;
         }
         else if (child->GetName() != "comment")
@@ -317,9 +318,7 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, wxXmlNode* root)
             child = getNextNode(child);
             continue;
         }
-
         test.input.push_back(input);
-
         child = getNextNode(child);
     }
 
@@ -344,116 +343,137 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
 
         if (child->GetName() == "test-value")
         {
-            if (grandchild->GetName() != "address") throw "address must come before value";
-            output.address = grandchild->GetNodeContent();
-            grandchild = getNextNode(grandchild);
-            if (grandchild->GetName() != "value") throw "value tag not found";
-            output.value = grandchild->GetNodeContent();
-
+            while (grandchild)
+            {
+                if (grandchild->GetName() == "address")
+                    output.address = grandchild->GetNodeContent();
+                else if (grandchild->GetName() == "value")
+                    output.value = grandchild->GetNodeContent();
+                else
+                    throw "Unknown tag found in test-value" + grandchild->GetName();
+                grandchild = getNextNode(grandchild);
+            }
             output.type = TEST_VALUE;
         }
         else if (child->GetName() == "test-register")
         {
-            if (grandchild->GetName() != "register") throw "register must come before value";
-            output.address = grandchild->GetNodeContent();
-            grandchild = getNextNode(grandchild);
-            if (grandchild->GetName() != "value") throw "value tag not found";
-            output.registerval = grandchild->GetNodeContent();
-
+            while (grandchild)
+            {
+                if (grandchild->GetName() == "address")
+                    output.address = grandchild->GetNodeContent();
+                else if (grandchild->GetName() == "value")
+                    output.registerval = grandchild->GetNodeContent();
+                else
+                    throw "Unknown tag found in test-value" + grandchild->GetName();
+                grandchild = getNextNode(grandchild);
+            }
             output.type = TEST_REGISTER;
         }
         else if (child->GetName() == "test-pc")
         {
-            if (grandchild->GetName() != "value") throw "value tag not found";
-            output.pcval = grandchild->GetNodeContent();
-
+            while (grandchild)
+            {
+                if (grandchild->GetName() == "value")
+                    output.pcval = grandchild->GetNodeContent();
+                else
+                    throw "Unknown tag found in test-pc" + grandchild->GetName();
+                grandchild = getNextNode(grandchild);
+            }
             output.type = TEST_PC;
         }
         else if (child->GetName() == "test-pointer")
         {
-            if (grandchild->GetName() != "address") throw "address must come before value";
-            output.address = grandchild->GetNodeContent();
-            grandchild = getNextNode(grandchild);
-            if (grandchild->GetName() != "value") throw "value tag not found";
-            output.pointer = grandchild->GetNodeContent();
-
+            while (grandchild)
+            {
+                if (grandchild->GetName() == "address")
+                    output.address = grandchild->GetNodeContent();
+                else if (grandchild->GetName() == "value")
+                    output.pointer = grandchild->GetNodeContent();
+                else
+                    throw "Unknown tag found in test-pointer" + grandchild->GetName();
+                grandchild = getNextNode(grandchild);
+            }
             output.type = TEST_POINTER;
         }
         else if (child->GetName() == "test-string")
         {
-            if (grandchild->GetName() != "address") throw "address must come before value";
-            output.address = grandchild->GetNodeContent();
-            grandchild = getNextNode(grandchild);
-            if (grandchild->GetName() != "value") throw "value tag not found";
-            output.text = process_str(grandchild->GetNodeContent(), error);
-            if (error) throw "malformed string in test-string";
-
+            while (grandchild)
+            {
+                if (grandchild->GetName() == "address")
+                    output.address = grandchild->GetNodeContent();
+                else if (grandchild->GetName() == "value")
+                    output.text = process_str(grandchild->GetNodeContent(), error);
+                else
+                    throw "Unknown tag found in test-string" + grandchild->GetName();
+                if (error) throw "malformed string" + grandchild->GetNodeContent() + " in test-string";
+                grandchild = getNextNode(grandchild);
+            }
             output.type = TEST_STRING;
         }
         else if (child->GetName() == "test-array")
         {
-            if (grandchild->GetName() != "address") throw "address must come before value";
-            output.address = grandchild->GetNodeContent();
-            grandchild = getNextNode(grandchild);
-            if (grandchild->GetName() != "value") throw "value tag not found";
-            std::string array = grandchild->GetNodeContent().ToStdString();
-            tokenize(array, output.array, ",");
-
+            while (grandchild)
+            {
+                if (grandchild->GetName() == "address")
+                    output.address = grandchild->GetNodeContent();
+                else if (grandchild->GetName() == "value")
+                    tokenize(grandchild->GetNodeContent().ToStdString(), output.array, ",");
+                else
+                    throw "Unknown tag found in test-array" + grandchild->GetName();
+                grandchild = getNextNode(grandchild);
+            }
             output.type = TEST_ARRAY;
         }
         else if (child->GetName() == "test-stdout")
         {
-            if (grandchild->GetName() != "value") throw "value tag not found";
-            output.io = process_str(grandchild->GetNodeContent(), error);
-            if (error) throw "malformed string in test-stdout";
-
+            while (grandchild)
+            {
+                if (grandchild->GetName() == "value")
+                    output.io = process_str(grandchild->GetNodeContent(), error);
+                else
+                    throw "Unknown tag found in test-stdout" + grandchild->GetName();
+                if (error) throw "malformed string" + grandchild->GetNodeContent() + " in test-stdout";
+                grandchild = getNextNode(grandchild);
+            }
             output.type = TEST_IO;
         }
         else if (child->GetName() == "test-subr")
         {
             lc3_subr_output& subr = output.subroutine;
-            if (grandchild->GetName() != "answer") throw "answer must come before locals";
-            subr.answer = grandchild->GetNodeContent();
-
-            grandchild = getNextNode(grandchild);
-            if (grandchild->GetName() != "locals") throw "locals must come before points";
-            std::string locals = grandchild->GetNodeContent().ToStdString();
-            tokenize(locals, subr.locals, ",");
-
-            grandchild = getNextNode(grandchild);
-            if (grandchild->GetName() != "points")
-                throw "points must come before deductions-per-mistake";
-
+            while (grandchild)
             {
-                wxXmlNode* ggchild = grandchild->GetChildren();
-                if (ggchild->GetName() != "answer") throw "answer in points tag must come before params";
-                subr.points_answer = wxAtoi(ggchild->GetNodeContent());
-
-                ggchild = getNextNode(ggchild);
-                if (ggchild->GetName() != "params") throw "params in points tag must come before r7";
-                subr.points_params = wxAtoi(ggchild->GetNodeContent());
-
-                ggchild = getNextNode(ggchild);
-                if (ggchild->GetName() != "r7") throw "r7 in points tag must come before r6";
-                subr.points_r7 = wxAtoi(ggchild->GetNodeContent());
-
-                ggchild = getNextNode(ggchild);
-                if (ggchild->GetName() != "r6") throw "r6 in points tag must come before r5";
-                subr.points_r6 = wxAtoi(ggchild->GetNodeContent());
-
-                ggchild = getNextNode(ggchild);
-                if (ggchild->GetName() != "r5") throw "r5 in points tag must come before locals";
-                subr.points_r5 = wxAtoi(ggchild->GetNodeContent());
-
-                ggchild = getNextNode(ggchild);
-                if (ggchild->GetName() != "locals") throw "locals in points tag not found";
-                subr.points_locals = wxAtoi(ggchild->GetNodeContent());
+                if (grandchild->GetName() == "answer")
+                    subr.answer = grandchild->GetNodeContent();
+                else if (grandchild->GetName() == "locals")
+                    tokenize(grandchild->GetNodeContent().ToStdString(), subr.locals, ",");
+                else if (grandchild->GetName() == "points")
+                {
+                    wxXmlNode* ggchild = grandchild->GetChildren();
+                    while (ggchild)
+                    {
+                        if (ggchild->GetName() == "answer")
+                            subr.points_answer = wxAtoi(ggchild->GetNodeContent());
+                        else if (ggchild->GetName() == "params")
+                            subr.points_params = wxAtoi(ggchild->GetNodeContent());
+                        else if (ggchild->GetName() == "r7")
+                            subr.points_r7 = wxAtoi(ggchild->GetNodeContent());
+                        else if (ggchild->GetName() == "r6")
+                            subr.points_r6 = wxAtoi(ggchild->GetNodeContent());
+                        else if (ggchild->GetName() == "r5")
+                            subr.points_r5 = wxAtoi(ggchild->GetNodeContent());
+                        else if (ggchild->GetName() == "locals")
+                            subr.points_locals = wxAtoi(ggchild->GetNodeContent());
+                        else
+                            throw "Unknown tag found within points in test-subr" + grandchild->GetName();
+                        ggchild = getNextNode(ggchild);
+                    }
+                }
+                else if (grandchild->GetName() == "deductions-per-mistake")
+                    subr.deductions_edist = wxAtoi(grandchild->GetNodeContent());
+                else
+                    throw "Unknown tag found within points in test-subr" + grandchild->GetName();
+                grandchild = getNextNode(grandchild);
             }
-
-            grandchild = getNextNode(grandchild);
-            if (grandchild->GetName() != "deductions-per-mistake") throw "deductions-per-mistake tag not found";
-            subr.deductions_edist = wxAtoi(grandchild->GetNodeContent());
-
             output.type = TEST_SUBROUTINE;
 
             // Post processing find test-subr in input and copy attributes over
@@ -468,7 +488,8 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
                 }
             }
 
-            if (!subr_input) throw "Used output type of test-subr without specifying subroutine input.";
+            if (!subr_input) throw "Used output type of test-subr without specifying subroutine input, "
+                                   "Please specify test-input first";
 
            subr.params = subr_input->subroutine.params;
            subr.r7 = subr_input->subroutine.r7;
@@ -476,29 +497,26 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
            subr.stack = subr_input->subroutine.stack;
 
            // Post processing part II calculate total points
-           output.points = subr.points_answer + subr.points_locals * subr.locals.size() + subr.points_params * subr.params.size() + subr.points_r5 + subr.points_r7 + subr.points_r6;
+           output.points = subr.points_locals * subr.locals.size() +
+                           subr.points_params * subr.params.size() +
+                           subr.points_answer + subr.points_r5 + subr.points_r7 + subr.points_r6;
         }
         else if (child->GetName() != "comment")
-        {
             return false;
-        }
         else
         {
             child = getNextNode(child);
             continue;
         }
-
-        output.cmp_type = GetCompareType(output.type, mode);
-
+        output.cmp_type = GetCompareType(output.type, mode, child->GetName());
         test.output.push_back(output);
-
         child = getNextNode(child);
     }
 
     return true;
 }
 
-int XmlTestParser::GetCompareType(int type, const wxString& mode)
+int XmlTestParser::GetCompareType(int type, const wxString& mode, const wxString& node_name)
 {
     // -1, all 0 integral, 1 string, 2 array
     int detected_type = 0;
@@ -532,7 +550,6 @@ int XmlTestParser::GetCompareType(int type, const wxString& mode)
         detected_type = -1;
         comp_type = CMP_NOTEQUAL;
     }
-
     else if (mode.IsSameAs("equalsignorecase", false))
     {
         detected_type = 1;
@@ -564,12 +581,7 @@ int XmlTestParser::GetCompareType(int type, const wxString& mode)
         comp_type = CMP_STRING_NOTCONTAINSIC;
     }
     else
-    {
-        std::stringstream oss;
-        oss << "Unknown comparison condition ";
-        oss << mode;
-        throw oss.str();
-    }
+        throw "Unknown comparison condition " + mode;
 
     // Get Real type
     switch(type)
@@ -612,7 +624,7 @@ int XmlTestParser::GetCompareType(int type, const wxString& mode)
     }
 
     if (detected_type != real_type)
-        throw "Used a condition that is not applicable for the types given";
+        throw "Condition " + mode + " is not applicable for " + node_name;
 
     return comp_type;
 }

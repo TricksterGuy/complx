@@ -19,62 +19,22 @@ int main(int argc, char** argv)
     // Typical
     if (argc < 3)
     {
-        printf("Usage: lc3test testfile.xml asmfile.asm -disable_plugins\n");
+        printf("Usage: lc3test testfile.xml asmfile.asm -disable_plugins -random_seed=int\n");
         printf("by default -disable_plugins is false\n");
         abort();
     }
 
+    lc3_test_suite suite;
     std::string xmlfile = argv[1];
     std::string asmfile = argv[2];
+    int random_seed = -1;
 
-    bool disable_plugins = (argc >= 4) ? std::string(argv[3]).compare("-disable_plugins") == 0 : false;
-
-    lc3_test_suite suite;
-
-    /*lc3_test_input test_atom_a;
-    test_atom_a.type = TEST_VALUE;
-    test_atom_a.address = "A" ;
-    test_atom_a.data.value.value = 157;
-
-    lc3_test_input test_atom_b;
-    test_atom_b.type = TEST_VALUE;
-    test_atom_b.address = "B" ;
-    test_atom_b.data.value.value = 257;
-
-    lc3_test_output test_atom_a1;
-    test_atom_a1.type = TEST_POINTER;
-    test_atom_a1.address = "A1" ;
-    test_atom_a1.data.pointer.value = 157+257;
-
-    lc3_test_output test_atom_a2;
-    test_atom_a2.type = TEST_POINTER;
-    test_atom_a2.address = "A2" ;
-    test_atom_a2.data.pointer.value = 157&257;
-
-    lc3_test_output test_atom_a3;
-    test_atom_a3.type = TEST_POINTER;
-    test_atom_a3.address = "A3" ;
-    test_atom_a3.data.pointer.value = -157;
-
-    lc3_test_output test_atom_a4;
-    test_atom_a4.type = TEST_POINTER;
-    test_atom_a4.address = "A4" ;
-    test_atom_a4.data.pointer.value = 2*157+3*257;
-
-    lc3_test test;
-    test.name = "Default";
-    test.true_traps = 0;
-    test.interrupt_enabled = 0;
-    test.randomize = 0;
-    test.has_max_executions = 0;
-    test.input.push_back(test_atom_a);
-    test.input.push_back(test_atom_b);
-    test.output.push_back(test_atom_a1);
-    test.output.push_back(test_atom_a2);
-    test.output.push_back(test_atom_a3);
-    test.output.push_back(test_atom_a4);
-
-    suite.tests.push_back(test);*/
+    for (int i = 3; i < argc; i++)
+    {
+        const std::string& arg = argv[i];
+        if (arg.compare("-random_seed"))
+            random_seed = atoi(arg.substr(arg.find("=") + 1).c_str());
+    }
 
     try
     {
@@ -90,10 +50,9 @@ int main(int argc, char** argv)
         abort();
     }
 
-
     try
     {
-        lc3_run_test_suite(suite, asmfile, disable_plugins);
+        lc3_run_test_suite(suite, asmfile, random_seed);
     }
     catch (const char* x)
     {

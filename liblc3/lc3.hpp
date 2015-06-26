@@ -508,7 +508,7 @@ int lc3_write_str(lc3_state& state, int (*writer)(lc3_state& state, std::ostream
 /** Enables true traps loads the OS code into the lc3 */
 void lc3_set_true_traps(lc3_state& state, int value);
 /** Generate a random number LC-3 */
-inline unsigned short lc3_random(void) {return random() & 0xFFFF;}
+inline unsigned short lc3_random(void) {return rand() & 0xFFFF;}
 /** Randomize LC-3 Memory */
 void lc3_randomize(lc3_state& state);
 

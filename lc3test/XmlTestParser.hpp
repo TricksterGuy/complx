@@ -24,7 +24,7 @@ class XmlTestParser
         bool LoadTest(lc3_test_suite& suite, wxXmlNode* root);
         bool LoadTestInput(lc3_test& suite, wxXmlNode* root);
         bool LoadTestOutput(lc3_test& suite, wxXmlNode* root);
-        int GetCompareType(int type, const wxString& mode);
+        int GetCompareType(int type, const wxString& mode, const wxString& node_name);
 
 };
 

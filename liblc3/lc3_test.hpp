@@ -32,6 +32,8 @@ typedef struct lc3_subr_input
 
 typedef struct lc3_subr_output
 {
+    lc3_subr_output() : points_answer(0), points_params(0), points_r6(0),  points_r7(0), points_r5(0), points_locals(0),
+    deductions_edist(0) {}
     std::string answer;
     std::vector<std::string> params; // Same as input not present in its xml tag.
     std::string stack; // Same as input not present in its xml tag.
@@ -49,6 +51,7 @@ typedef struct lc3_subr_output
 
 typedef struct lc3_test_input
 {
+    lc3_test_input() : type(0) {}
     unsigned int type;
     std::string address;
     /// TODO only one of these will be used.  Can't do this with a union
@@ -64,6 +67,7 @@ typedef struct lc3_test_input
 
 typedef struct lc3_test_output
 {
+    lc3_test_output() : type(0), cmp_type(0), passed(false), earned(0), points(0) {}
     unsigned int type;
     unsigned int cmp_type;
     std::string address;
@@ -87,6 +91,9 @@ typedef struct lc3_test_output
 
 typedef struct lc3_test
 {
+    lc3_test() : points(0), max_points(0), passed(false), true_traps(false), interrupt_enabled(false),
+                 disable_plugins(false), randomize(false), has_max_executions(false), has_halted(false),
+                 executions(0), max_executions(0), warnings(0) {}
     std::string name;
     std::string warning;
     std::vector<lc3_test_input> input;
@@ -96,8 +103,7 @@ typedef struct lc3_test
     bool passed;
     bool true_traps;
     bool interrupt_enabled;
-    bool has_disable_plugins; // Override lc3test parameter
-    bool disable_plugins; // With this value
+    bool disable_plugins;
     bool randomize;
     bool has_max_executions;
     bool has_halted;
@@ -108,14 +114,15 @@ typedef struct lc3_test
 
 typedef struct lc3_test_suite
 {
+    lc3_test_suite() : passed(false), points(0), max_points(0) {}
     bool passed;
     unsigned int points;
     unsigned int max_points;
     std::vector<lc3_test> tests;
 } lc3_test_suite;
 
-void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, bool disable_plugins = false);
-void lc3_run_test_case(lc3_test& test, const std::string& filename, bool disable_plugins = false);
+void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, int seed = -1);
+void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed = -1);
 void lc3_write_test_report(std::stringstream& oss, lc3_test_suite& suite, const std::string& filename);
 void lc3_write_test_report(std::stringstream& oss, lc3_test& test, int& minipass_count, int& total_minitests);
 std::string lc3_test_input_string(lc3_test_input& test);
