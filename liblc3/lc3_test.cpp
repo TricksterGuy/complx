@@ -412,8 +412,13 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
             unsigned short actual_r6 = (unsigned short) r6;
             if (state.call_stack.size() >= 1)
             {
-                int num_params = subr.params.size();
-                actual_stack.assign(state.mem + (state.call_stack[0].r6 + num_params), state.mem + actual_r6);
+                unsigned short start = state.call_stack[0].r6 + subr.params.size();
+                // Screams...
+                if (start >= actual_r6)
+                    extra << "      [WARNING] Could not get students stack frame.\n"
+                             "      Is the student managing the stack correctly?\n";
+                else
+                    actual_stack.assign(state.mem + start, state.mem + actual_r6);
             }
             else if (state.call_stack.size() == 0)
             {
