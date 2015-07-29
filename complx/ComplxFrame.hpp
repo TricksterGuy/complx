@@ -82,6 +82,7 @@ class ComplxFrame : public ComplxFrameDecl
         // Debug menu event handlers
         void OnUndoStack(wxCommandEvent& event);
         void OnCallStack(wxCommandEvent& event);
+        void OnSubroutineCall(wxCommandEvent& event);
         void OnBreakAndWatchpoints(wxCommandEvent& event);
         void OnTemppoint(wxCommandEvent& event);
         void OnBreakpoint(wxCommandEvent& event);

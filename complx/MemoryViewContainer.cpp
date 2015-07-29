@@ -38,35 +38,26 @@ void OnUpdateHideAddresses(MemoryGrid* memory, MemoryView* memoryView, int mode)
 {
     if (!memoryView) return;
     if (mode == SHOW_ALL)
-      memoryView->ShowAllAddresses();
+        memoryView->ShowAllAddresses();
     else if (mode == SHOW_MODIFIED)
     {
-      memoryView->ShowAllAddresses();
-      memoryView->SetDefaultVisibility(ViewAction::HIDE);
-      memoryView->ModifyAddresses(modified_addresses);
+        memoryView->ShowAllAddresses();
+        memoryView->SetDefaultVisibility(ViewAction::HIDE);
+        memoryView->ModifyAddresses(modified_addresses);
     }
     else if (mode == SHOW_NONZERO)
     {
         std::vector<ViewRange> ranges;
-        int start = -1;
-        int end = -1;
-        int current = 0;
-        while (current <= 0xFFFF)
+        int start = 0;
+        for (int current = 1; current <= 0xFFFF; current++)
         {
-            while (current <= 0xFFFF && state.mem[current] == 0)
-            {
-                current++;
-            }
-            start = current;
-            if (current > 0xFFFF) break;
-            while (current <= 0xFFFF && state.mem[current] != 0)
-            {
-                current++;
-            }
-            end = current - 1;
-            ranges.emplace_back(start, end);
-            current++;
+            if (state.mem[current] != 0 && state.mem[current - 1] == 0)
+                start = current;
+            else if (state.mem[current] == 0 && state.mem[current - 1] != 0)
+                ranges.emplace_back(start, current - 1);
         }
+        if (state.mem[0xFFFF] != 0)
+            ranges.emplace_back(start, 0xFFFF);
         memoryView->ShowAllAddresses();
         memoryView->SetDefaultVisibility(ViewAction::HIDE);
         memoryView->ModifyAddresses(ranges);

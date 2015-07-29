@@ -77,6 +77,7 @@ class ComplxFrameDecl : public wxFrame
 			ID_CLEAR_CONSOLE,
 			ID_UNDO_STACK,
 			ID_CALL_STACK,
+			ID_SUBROUTINE_CALL,
 			ID_BREAKPOINTS_AND_WATCHPOINTS,
 			ID_ADD_TEMPORARY_BREAKPOINT,
 			ID_ADD_BREAKPOINT,
@@ -168,6 +169,7 @@ class ComplxFrameDecl : public wxFrame
 		virtual void OnClearConsoleInput( wxCommandEvent& event ) = 0;
 		virtual void OnUndoStack( wxCommandEvent& event ) = 0;
 		virtual void OnCallStack( wxCommandEvent& event ) = 0;
+		virtual void OnSubroutineCall( wxCommandEvent& event ) = 0;
 		virtual void OnBreakAndWatchpoints( wxCommandEvent& event ) = 0;
 		virtual void OnTemppoint( wxCommandEvent& event ) = 0;
 		virtual void OnBreakpoint( wxCommandEvent& event ) = 0;

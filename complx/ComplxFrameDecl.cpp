@@ -183,6 +183,12 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuDebugCallStack = new wxMenuItem( menuDebug, ID_CALL_STACK, wxString( _("&Call Stack") ) , _("Views the call stack."), wxITEM_NORMAL );
 	menuDebug->Append( menuDebugCallStack );
 	
+	wxMenuItem* menuDebugSubroutineCall;
+	menuDebugSubroutineCall = new wxMenuItem( menuDebug, ID_SUBROUTINE_CALL, wxString( _("&Subroutine Call...") ) , _("Simulates a subroutine call."), wxITEM_NORMAL );
+	menuDebug->Append( menuDebugSubroutineCall );
+	
+	menuDebug->AppendSeparator();
+	
 	wxMenuItem* menuDebugBreakWatchpoints;
 	menuDebugBreakWatchpoints = new wxMenuItem( menuDebug, ID_BREAKPOINTS_AND_WATCHPOINTS, wxString( _("Breakpoints &and Watchpoints") ) + wxT('\t') + wxT("F7"), _("View all breakpoints and watchpoints"), wxITEM_NORMAL );
 	menuDebug->Append( menuDebugBreakWatchpoints );
@@ -573,6 +579,7 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	this->Connect( menuStateClearConsoleInput->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnClearConsoleInput ) );
 	this->Connect( menuDebugUndoStack->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUndoStack ) );
 	this->Connect( menuDebugCallStack->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnCallStack ) );
+	this->Connect( menuDebugSubroutineCall->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnSubroutineCall ) );
 	this->Connect( menuDebugBreakWatchpoints->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnBreakAndWatchpoints ) );
 	this->Connect( menuDebugTemporary->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTemppoint ) );
 	this->Connect( menuDebugBreakpoint->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnBreakpoint ) );
@@ -674,6 +681,7 @@ ComplxFrameDecl::~ComplxFrameDecl()
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnClearConsoleInput ) );
 	this->Disconnect( ID_UNDO_STACK, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUndoStack ) );
 	this->Disconnect( ID_CALL_STACK, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnCallStack ) );
+	this->Disconnect( ID_SUBROUTINE_CALL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnSubroutineCall ) );
 	this->Disconnect( ID_BREAKPOINTS_AND_WATCHPOINTS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnBreakAndWatchpoints ) );
 	this->Disconnect( ID_ADD_TEMPORARY_BREAKPOINT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTemppoint ) );
 	this->Disconnect( ID_ADD_BREAKPOINT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnBreakpoint ) );
