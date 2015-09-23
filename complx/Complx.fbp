@@ -697,10 +697,10 @@
                         <property name="checked">0</property>
                         <property name="enabled">1</property>
                         <property name="help">Simulates a subroutine call.</property>
-                        <property name="id">ID_SUBROUTINE_CALL</property>
+                        <property name="id">ID_SIMULATE_SUBROUTINE_CALL</property>
                         <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">&amp;Subroutine Call...</property>
-                        <property name="name">menuDebugSubroutineCall</property>
+                        <property name="label">&amp;Simulate Subroutine Call...</property>
+                        <property name="name">menuDebugSimulateSubroutineCall</property>
                         <property name="permission">none</property>
                         <property name="shortcut"></property>
                         <property name="unchecked_bitmap"></property>

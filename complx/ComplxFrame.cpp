@@ -21,13 +21,13 @@
 #include <XmlTestParser.hpp>
 #include <lc3.hpp>
 #include <lc3_assemble.hpp>
-#include <lc3_parser.hpp> // for tokenize
 #include "icon64.xpm"
 
 #include "ComplxFrame.hpp"
 #include "MemoryGrid.hpp"
 #include "MemoryViewContainer.hpp"
 #include "CallStackDialog.hpp"
+#include "CallSubroutineDialog.hpp"
 #include "DebugInfoDialog.hpp"
 #include "WatchpointDialog.hpp"
 #include "AddressDialog.hpp"
@@ -964,9 +964,9 @@ void ComplxFrame::OnUndoStack(wxCommandEvent& event)
     state.max_stack_size = data;
 }
 
-/** OnUndoStack
+/** OnCallStack
   *
-  * Sets the undo stack's size
+  * Sets the call stack's size
   */
 void ComplxFrame::OnCallStack(wxCommandEvent& event)
 {
@@ -1006,6 +1006,91 @@ void ComplxFrame::OnCallStack(wxCommandEvent& event)
     delete infos;
 }
 
+/** OnSubroutineCall
+  *
+  * "Calls" a subroutine uses same environment as lc3test
+  */
+void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
+{
+    if (Running()) return;
+
+    if (!currentFile.IsOk())
+        OnLoad(event);
+
+    if (!currentFile.IsOk())
+    {
+        wxMessageBox("BAD STUDENT! An assembly file must be loaded to perform this operation", "Error");
+        return;
+    }
+
+    CallSubroutineDialog* dialog = new CallSubroutineDialog(this);
+    int stack_location = 0;
+    int subroutine_location = 0;
+    std::vector<short> params;
+    unsigned short halt_statement = 0;
+
+    if (dialog->ShowModal() != wxID_OK)
+        goto end;
+
+    stack_location = lc3_sym_lookup(state, dialog->GetStack());
+    subroutine_location = lc3_sym_lookup(state, dialog->GetSubroutine());
+    if (stack_location == -1)
+    {
+        wxMessageBox(wxString::Format("BAD STUDENT! Stack location: %s was not found in symbol table", dialog->GetStack()), "Error");
+        goto end;
+    }
+    if (subroutine_location == -1)
+    {
+        wxMessageBox(wxString::Format("BAD STUDENT! Subroutine location: %s was not found in symbol table", dialog->GetSubroutine()), "Error");
+        goto end;
+    }
+    for (const auto& expr : dialog->GetParams())
+    {
+        int value_calc;
+        if (lc3_calculate(state, expr, value_calc))
+        {
+            wxMessageBox(wxString::Format("BAD STUDENT! Parameter %s is a malformed expression", expr), "Error");
+            goto end;
+        }
+        params.push_back((short)value_calc);
+    }
+    // Meh... find a halt statement there needs to be somewhere to go afterward.
+    for (unsigned int i = 0x3000; i < 0x10000; i++)
+    {
+        if ((unsigned short)state.mem[i] == 0xF025)
+        {
+            halt_statement = i;
+            break;
+        }
+    }
+    if ((unsigned short)state.mem[halt_statement] != 0xF025)
+    {
+        wxMessageBox("BAD STUDENT! No halt statement found in your program", "Error");
+        goto end;
+    }
+
+    OnInit();
+    if (dialog->IsRandomMemory()) lc3_randomize(state);
+    if (dialog->IsRandomRegisters())
+    {
+        for (int i = 0; i < 8; i++)
+            state.regs[i] = lc3_random();
+    }
+    DoLoadFile(currentFile);
+
+    state.regs[6] = state.mem[(unsigned short)stack_location] - params.size();
+    state.pc = (unsigned short) subroutine_location;
+    for (unsigned int i = 0; i < params.size(); i++)
+      state.mem[(unsigned short)state.regs[6] + i] = params[i];
+    state.regs[7] = halt_statement;
+
+    UpdateRegisters();
+    UpdateMemory();
+    UpdateStatus();
+
+end:
+    delete dialog;
+}
 
 /** OnReinitialize
   *

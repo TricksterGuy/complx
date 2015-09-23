@@ -21,9 +21,9 @@ class CallStackDialog : public CallStackDialogDecl
         int GetRewindId() const;
         int GetViewStackId() const;
     private:
-		void OnRewindToCall(wxCommandEvent& event);
-		void OnViewStackFrame(wxCommandEvent& event);
-		void SetupList();
+		    void OnRewindToCall(wxCommandEvent& event);
+		    void OnViewStackFrame(wxCommandEvent& event);
+		    void SetupList();
 };
 
 #endif
