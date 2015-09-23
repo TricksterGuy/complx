@@ -37,10 +37,10 @@ echo >&2 "Updating list of packages..."
 sudo apt-get update
  
 echo >&2 "Installing package build-essential..."
-gksu apt-get install build-essential
+gksu apt-get install -y build-essential
 
 echo >&2 "Installing wxwidgets 3.0..."
-sudo apt-get install libwxbase3.0-0-unofficial libwxbase3.0-dev libwxgtk3.0-0-unofficial libwxgtk3.0-dev wx3.0-headers wx-common
+sudo apt-get install -y libwxbase3.0-0-unofficial libwxbase3.0-dev libwxgtk3.0-0-unofficial libwxgtk3.0-dev wx3.0-headers wx-common
 
 echo >&2 "Building complx..."
 make
