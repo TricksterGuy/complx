@@ -13,6 +13,7 @@
 MemoryView::MemoryView()
 {
     unsigned_mode = false;
+    flipped_mode = false;
     disassemble_level = 2;
 }
 
@@ -81,7 +82,7 @@ int MemoryView::GetNumberRows()
   */
 wxString MemoryView::GetValue(int item, int column)
 {
-    unsigned short addr = ranges.empty() ? item : viewTable[item].address;
+    unsigned short addr = GetAddress(item);
     short data = state.mem[addr];
 
     wxString ret;
@@ -135,7 +136,7 @@ wxString MemoryView::GetValue(int item, int column)
   */
 void MemoryView::SetValue(int item, int col, const wxString &value)
 {
-    unsigned short addr = ranges.empty() ? item : viewTable[item].address;
+    unsigned short addr = GetAddress(item);
     int data = 0;
     wxString effvalue = value;
     std::string strdata;
@@ -256,7 +257,7 @@ wxString MemoryView::GetColLabelValue(int col)
   */
 long MemoryView::GetValueAsLong(int item, int col)
 {
-    unsigned short addr = ranges.empty() ? item : viewTable[item].address;
+    unsigned short addr = GetAddress(item);
     return state.mem[addr];
 }
 
@@ -276,6 +277,30 @@ void MemoryView::SetDisassembleLevel(int level)
 void MemoryView::SetUnsignedMode(bool mode)
 {
     unsigned_mode = mode;
+}
+
+
+/** SetFlippedMode
+  *
+  * Sets the flipped display mode.
+  */
+void MemoryView::SetFlippedMode(bool mode)
+{
+    flipped_mode = mode;
+}
+
+/** GetAddress
+  *
+  * Gets the address corresponding to row in grid
+  */
+unsigned short MemoryView::GetAddress(int index)
+{
+    // If not in view range mode then index maps directly to address
+    // If in view range mode then index maps to an address specified in view range table.
+    if (ranges.empty())
+        return flipped_mode ? 0xFFFF - index : index;
+    else
+        return flipped_mode ? viewTable[viewTable.size() - 1 - index].address : viewTable[index].address;
 }
 
 /** ExpandRanges
@@ -336,7 +361,9 @@ void MemoryView::ExpandRanges()
 
 int MemoryView::AddressToView(unsigned short address) const
 {
-    if (viewTable_rev.empty()) return address;
+    if (viewTable_rev.empty())
+        return flipped_mode ? 0xFFFF - address : address;
+
     if (viewTable_rev.find(address) == viewTable_rev.end())
     {
         auto upper = viewTable_rev.upper_bound(address);
@@ -357,6 +384,6 @@ int MemoryView::AddressToView(unsigned short address) const
     }
     else
     {
-        return viewTable_rev.at(address);
+        return flipped_mode ? viewTable_rev.size() - 1 - viewTable_rev.at(address) : viewTable_rev.at(address);
     }
 }

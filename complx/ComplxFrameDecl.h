@@ -61,6 +61,7 @@ class ComplxFrameDecl : public wxFrame
 			ID_NORMAL,
 			ID_HIGH_LEVEL,
 			ID_INSTRUCTION_HIGHLIGHTING,
+			ID_FLIP_MEMORY,
 			ID_STEP,
 			ID_BACK,
 			ID_NEXT_LINE,
@@ -152,6 +153,7 @@ class ComplxFrameDecl : public wxFrame
 		virtual void OnNormalDisassemble( wxCommandEvent& event ) = 0;
 		virtual void OnCDisassemble( wxCommandEvent& event ) = 0;
 		virtual void OnInstructionHighlight( wxCommandEvent& event ) = 0;
+		virtual void OnFlipMemory( wxCommandEvent& event ) = 0;
 		virtual void OnStep( wxCommandEvent& event ) = 0;
 		virtual void OnBackStep( wxCommandEvent& event ) = 0;
 		virtual void OnNextLine( wxCommandEvent& event ) = 0;

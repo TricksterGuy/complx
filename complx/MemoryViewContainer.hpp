@@ -19,5 +19,6 @@ void OnDumbDisassemble(MemoryGrid* memory);
 void OnNormalDisassemble(MemoryGrid* memory);
 void OnCDisassemble(MemoryGrid* memory);
 void OnInstructionHighlight(MemoryGrid* memory, bool set);
+void OnFlipMemory(MemoryGrid* memory, bool set);
 
 #endif

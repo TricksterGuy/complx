@@ -103,6 +103,10 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuView->Append( menuViewInstructionHighlighting );
 	menuViewInstructionHighlighting->Check( true );
 	
+	wxMenuItem* menuViewFlipMemory;
+	menuViewFlipMemory = new wxMenuItem( menuView, ID_FLIP_MEMORY, wxString( _("Flip Memory") ) , _("Reverses memory such that high addresses come first."), wxITEM_CHECK );
+	menuView->Append( menuViewFlipMemory );
+	
 	menu->Append( menuView, _("View") ); 
 	
 	menuState = new wxMenu();
@@ -562,6 +566,7 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	this->Connect( menuViewNormal->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnNormalDisassemble ) );
 	this->Connect( menuViewHighLevel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnCDisassemble ) );
 	this->Connect( menuViewInstructionHighlighting->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnInstructionHighlight ) );
+	this->Connect( menuViewFlipMemory->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnFlipMemory ) );
 	this->Connect( menuStateControlStep->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnStep ) );
 	this->Connect( menuStateControlBack->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnBackStep ) );
 	this->Connect( menuStateControlNextLine->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnNextLine ) );
@@ -664,6 +669,7 @@ ComplxFrameDecl::~ComplxFrameDecl()
 	this->Disconnect( ID_NORMAL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnNormalDisassemble ) );
 	this->Disconnect( ID_HIGH_LEVEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnCDisassemble ) );
 	this->Disconnect( ID_INSTRUCTION_HIGHLIGHTING, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnInstructionHighlight ) );
+	this->Disconnect( ID_FLIP_MEMORY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnFlipMemory ) );
 	this->Disconnect( ID_STEP, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnStep ) );
 	this->Disconnect( ID_BACK, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnBackStep ) );
 	this->Disconnect( ID_NEXT_LINE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnNextLine ) );

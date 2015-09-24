@@ -46,7 +46,8 @@ class MemoryViewFrameDecl : public wxFrame
 			ID_BASIC,
 			ID_NORMAL,
 			ID_HIGH_LEVEL,
-			ID_INSTRUCTION_HIGHLIGHTING
+			ID_INSTRUCTION_HIGHLIGHTING,
+			ID_FLIP_MEMORY
 		};
 		
 		wxMenuBar* menu;
@@ -61,6 +62,7 @@ class MemoryViewFrameDecl : public wxFrame
 		wxMenuItem* menuViewNormal;
 		wxMenuItem* menuViewHighLevel;
 		wxMenuItem* menuViewInstructionHighlighting;
+		wxMenuItem* menuViewMemoryFlip;
 		MemoryGrid* memory;
 		
 		// Virtual event handlers, overide them in your derived class
@@ -71,6 +73,7 @@ class MemoryViewFrameDecl : public wxFrame
 		virtual void OnNormalDisassemble( wxCommandEvent& event ) = 0;
 		virtual void OnCDisassemble( wxCommandEvent& event ) = 0;
 		virtual void OnInstructionHighlight( wxCommandEvent& event ) = 0;
+		virtual void OnFlipMemory( wxCommandEvent& event ) = 0;
 		
 	
 	public:

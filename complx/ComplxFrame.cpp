@@ -1189,6 +1189,16 @@ void ComplxFrame::OnInstructionHighlight(wxCommandEvent& event)
     ::OnInstructionHighlight(memory, event.IsChecked());
 }
 
+/** OnFlipMemory
+  *
+  * Turns on/off flipped memory display
+  */
+void ComplxFrame::OnFlipMemory(wxCommandEvent& event)
+{
+    ::OnFlipMemory(memory, event.IsChecked());
+    memory->SelectLocation(state.pc);
+}
+
 /** OnNewView
   *
   * Called when the user wants to create a new memory view

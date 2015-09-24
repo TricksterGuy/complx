@@ -55,6 +55,9 @@ MemoryViewFrameDecl::MemoryViewFrameDecl( wxWindow* parent, wxWindowID id, const
 	menuView1->Append( menuViewInstructionHighlighting );
 	menuViewInstructionHighlighting->Check( true );
 	
+	menuViewMemoryFlip = new wxMenuItem( menuView1, ID_FLIP_MEMORY, wxString( _("Memory Flip") ) , _("Reverses memory such that high addresses come first."), wxITEM_CHECK );
+	menuView1->Append( menuViewMemoryFlip );
+	
 	menu->Append( menuView1, _("View") ); 
 	
 	this->SetMenuBar( menu );
@@ -106,6 +109,7 @@ MemoryViewFrameDecl::MemoryViewFrameDecl( wxWindow* parent, wxWindowID id, const
 	this->Connect( menuViewNormal->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MemoryViewFrameDecl::OnNormalDisassemble ) );
 	this->Connect( menuViewHighLevel->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MemoryViewFrameDecl::OnCDisassemble ) );
 	this->Connect( menuViewInstructionHighlighting->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MemoryViewFrameDecl::OnInstructionHighlight ) );
+	this->Connect( menuViewMemoryFlip->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MemoryViewFrameDecl::OnFlipMemory ) );
 }
 
 MemoryViewFrameDecl::~MemoryViewFrameDecl()
@@ -120,5 +124,6 @@ MemoryViewFrameDecl::~MemoryViewFrameDecl()
 	this->Disconnect( ID_NORMAL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MemoryViewFrameDecl::OnNormalDisassemble ) );
 	this->Disconnect( ID_HIGH_LEVEL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MemoryViewFrameDecl::OnCDisassemble ) );
 	this->Disconnect( ID_INSTRUCTION_HIGHLIGHTING, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MemoryViewFrameDecl::OnInstructionHighlight ) );
+	this->Disconnect( ID_FLIP_MEMORY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( MemoryViewFrameDecl::OnFlipMemory ) );
 	
 }

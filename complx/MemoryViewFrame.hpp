@@ -17,6 +17,7 @@ class MemoryViewFrame : public MemoryViewFrameDecl
     void OnNormalDisassemble(wxCommandEvent& event);
     void OnCDisassemble(wxCommandEvent& event);
     void OnInstructionHighlight(wxCommandEvent& event);
+    void OnFlipMemory(wxCommandEvent& event);
   private:
     MemoryView* memoryView;
 };

@@ -116,7 +116,7 @@ void complx_step(void)
 LC3Console::LC3Console(wxWindow* parent) : LC3ConsoleDecl(parent)
 {
     stdinput = input_text;
-    output->SetValue("The output will appear in this textbox.\nYou may specify input in the textbox below.\nYou should ideally enter your text beforehand.\nIf there is no text the program will wait for your input and all buttons will say \"NO IO\".\n-------\n\x44\x4f\x20\x4e\x4f\x54\x20\x55\x53\x45\x20\x46\x4f\x52\x20\x48\x4f\x4d\x45\x57\x4f\x52\x4b\x53\x20\x54\x41\x53\x20\x49\x46\x20\x59\x4f\x55\x20\x53\x45\x45\x20\x54\x48\x49\x53\x20\x50\x4c\x45\x41\x53\x45\x20\x54\x45\x4c\x4c\x20\x53\x54\x55\x44\x45\x4e\x54\x20\x54\x4f\x20\x52\x45\x49\x4e\x53\x54\x41\x4c\x4c\x20\x50\x52\x4f\x47\x52\x41\x4d");
+    output->SetValue("The output will appear in this textbox.\nYou may specify input in the textbox below.\nYou should ideally enter your text beforehand.\nIf there is no text the program will wait for your input and all buttons will say \"NO IO\".\n-------\n");
     //stotxt = new wxStreamToTextRedirector(output, &std::cout);
 
     oldcout = std::cout.rdbuf();

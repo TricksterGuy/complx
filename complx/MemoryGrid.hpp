@@ -41,6 +41,7 @@ class MemoryGrid : public wxGrid
     void SetDisassembleLevel(int level);
     void SetHighlight(bool highlight);
     void SetUnsignedMode(bool unsigned_mode);
+    void SetFlippedMode(bool flipped_mode);
 	private:
     int last_address;
     wxTimer timer;

@@ -382,3 +382,13 @@ void MemoryGrid::SetUnsignedMode(bool unsigned_mode)
 {
     static_cast<MemoryView*>(GetTable())->SetUnsignedMode(unsigned_mode);
 }
+
+/** SetFlippedMode
+  *
+  * Sets the flipped mode
+  */
+void MemoryGrid::SetFlippedMode(bool flipped_mode)
+{
+    static_cast<MemoryView*>(GetTable())->SetFlippedMode(flipped_mode);
+}
+

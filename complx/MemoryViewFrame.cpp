@@ -94,3 +94,12 @@ void MemoryViewFrame::OnInstructionHighlight(wxCommandEvent& event)
 {
     ::OnInstructionHighlight(memory, event.IsChecked());
 }
+
+/** OnFlipMemory
+  *
+  * Turns on/off flipped memory display
+  */
+void MemoryViewFrame::OnFlipMemory(wxCommandEvent& event)
+{
+    ::OnFlipMemory(memory, event.IsChecked());
+}

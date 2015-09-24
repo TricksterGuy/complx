@@ -52,6 +52,7 @@ class ComplxFrame : public ComplxFrameDecl
         void OnNormalDisassemble(wxCommandEvent& event);
         void OnCDisassemble(wxCommandEvent& event);
         void OnInstructionHighlight(wxCommandEvent& event);
+        void OnFlipMemory(wxCommandEvent& event);
         // Helpers for view menu actions
         void OnDestroyView(wxCloseEvent& event);
 

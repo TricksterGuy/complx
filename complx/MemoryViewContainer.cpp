@@ -155,3 +155,13 @@ void OnInstructionHighlight(MemoryGrid* memory, bool set)
     memory->SetHighlight(set);
     memory->Refresh();
 }
+
+/** OnFlipMemory
+  *
+  * Turns on/off Flipped memory display
+  */
+void OnFlipMemory(MemoryGrid* memory, bool set)
+{
+    memory->SetFlippedMode(set);
+    memory->Refresh();
+}
