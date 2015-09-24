@@ -1,3 +1,9 @@
+24 September 2015
+   released version 4.10.0 of Complx
+     Change log:
+       - New: Memory View Flipping
+       - New: Simulate Subroutine call.
+
 10 June 2015
    released version 4.8.0 of Complx
      Change log:

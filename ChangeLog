@@ -1,3 +1,8 @@
+Thursday September 24th 2015: Version 4.10.0
+simulate subroutine call (same environment as lc3test)
+flipping memory views so highest address comes first.
+See (ComplxChangeLog)
+
 Wednesday June 10th 2015: Version 4.8.0
 blkw no longer zeros out memory.
 updates to all documentation
