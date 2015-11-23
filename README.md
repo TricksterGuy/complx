@@ -4,7 +4,7 @@ complx
 Complx the LC-3 Simulator used in CS2110 at Georgia Tech currently maintained and authored by Brandon (bwhitehead0308 [AT] gmail [DOT] com)
 
 # Screenshot
-* ![Main Screen](https://github.com/TricksterGuy/complx/blob/master/doc/main_screen.png)
+![Main Screen](https://github.com/TricksterGuy/complx/blob/master/doc/main_screen.png)
 
 # Overview
 complx is a suite of educational tools for learning lc3 assembly. It includes both a gui and cli based simulator (named complx and comp respectively), an assembler (as2obj), a very simple program that runs lc3 assembly files and spits out whats printed to the console (lc3runner), and a framework for testing and grading lc3 assembly code (lc3test).  Complx also be extended with plugins that add additional functionality to the LC3.  The tools also come with a C++ interface to the LC3 (liblc3). Complx was written using the wxWidgets library.
