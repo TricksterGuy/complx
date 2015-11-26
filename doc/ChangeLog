@@ -1,0 +1,56 @@
+Thursday September 24th 2015: Version 4.10.0
+simulate subroutine call (same environment as lc3test)
+flipping memory views so highest address comes first.
+See (ComplxChangeLog)
+
+Wednesday June 10th 2015: Version 4.8.0
+blkw no longer zeros out memory.
+updates to all documentation
+See (ComplxChangeLog)
+
+Thursday February 5th 2015: Version 4.7.0
+Updated install script for Ubuntu 14.04
+See (ComplxChangeLog)
+
+Friday September 20th 2013: Version 4.6.0
+Hereby deemed the brandon is a nice guy release
+Easy compilation system
+
+Sunday June 23th 2013: Version 4.5.0
+See (ComplxChangeLog)
+
+Wednesday June 19th 2013: Version 4.4.3
+Update to liblc3 that fixes a bug that existed since version 2.0
+
+Sunday June 16th 2013: Version 4.4.2
+assembler update "DD R0, R2, R3" was assembling.
+as2obj warnings are enabled
+bug fixes for complx see (ComplxChangeLog)
+
+Sunday June 9th 2013: Version 4.4.1
+bug fixes for complx see (ComplxChangeLog)
+
+Saturday June 8th 2013: Version 4.4
+bug fixes for complx see (ComplxChangeLog)
+
+Thursday February 24th 2013: Version 4.1
+lc3test was broken was only printing a memory address
+minor changes/bug fixes to complx.
+
+Thursday February 7th 2013: Version 4.0
+Now versions numbers are based off Complx to not confuse anyone.
+lc3test xml structure updated.  Now supports more things then just checking equality
+Complx gets testing integrated into it (see Complx Changelog)
+
+Tuesday October 16th 2012: Version 2.2
+New testing functionality.
+New program lc3test that takes in an xml file and assmebly file and runs tests.
+
+Sunday September 30th 2012: Version 2.1
+Fixed a couple of plugins
+Fixed a couple of problems with the assembler (.fill 32768)
+Complx updates (fixed race condition, added run for button)
+
+Monday July 2th 2012: Version 2.0
+Support for Plugins (Devices, Traps, Instructions, etc).
+Various architecture related changes.

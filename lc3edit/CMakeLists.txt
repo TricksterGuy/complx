@@ -8,6 +8,11 @@ include_directories(${complx-tools_SOURCE_DIR}/lc3edit/wxScintilla/src/scintilla
 
 add_definitions(-DSCI_LEXER -DLINK_LEXERS -DGTK -D__WX__)
 
+set(wxWidgets_USE_LIBS xrc xml html adv gl net core base)
+find_package(wxWidgets REQUIRED)
+execute_process(COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}" --cxxflags)
+include(${wxWidgets_USE_FILE})
+
 set(SRC_wxFlatNotebook
     wxFlatNotebook/fnb_customize_dlg.cpp
     wxFlatNotebook/fnb_resources.cpp
@@ -19,128 +24,128 @@ set(SRC_wxFlatNotebook
 
 set(SRC_wxScintilla
     wxScintilla/src/PlatWX.cpp
-	wxScintilla/src/ScintillaWX.cpp
-	wxScintilla/src/wxscintilla.cpp
-	wxScintilla/src/scintilla/lexers/LexA68k.cxx
-	wxScintilla/src/scintilla/lexers/LexAPDL.cxx
-	wxScintilla/src/scintilla/lexers/LexASY.cxx
-	wxScintilla/src/scintilla/lexers/LexAU3.cxx
-	wxScintilla/src/scintilla/lexers/LexAVE.cxx
-	wxScintilla/src/scintilla/lexers/LexAVS.cxx
-	wxScintilla/src/scintilla/lexers/LexAbaqus.cxx
-	wxScintilla/src/scintilla/lexers/LexAda.cxx
-	wxScintilla/src/scintilla/lexers/LexAsm.cxx
-	wxScintilla/src/scintilla/lexers/LexAsn1.cxx
-	wxScintilla/src/scintilla/lexers/LexBaan.cxx
-	wxScintilla/src/scintilla/lexers/LexBash.cxx
-	wxScintilla/src/scintilla/lexers/LexBasic.cxx
-	wxScintilla/src/scintilla/lexers/LexBullant.cxx
-	wxScintilla/src/scintilla/lexers/LexCLW.cxx
-	wxScintilla/src/scintilla/lexers/LexCOBOL.cxx
-	wxScintilla/src/scintilla/lexers/LexCPP.cxx
-	wxScintilla/src/scintilla/lexers/LexCSS.cxx
-	wxScintilla/src/scintilla/lexers/LexCaml.cxx
-	wxScintilla/src/scintilla/lexers/LexCmake.cxx
-	wxScintilla/src/scintilla/lexers/LexCoffeeScript.cxx
-	wxScintilla/src/scintilla/lexers/LexConf.cxx
-	wxScintilla/src/scintilla/lexers/LexCrontab.cxx
-	wxScintilla/src/scintilla/lexers/LexCsound.cxx
-	wxScintilla/src/scintilla/lexers/LexD.cxx
-	wxScintilla/src/scintilla/lexers/LexECL.cxx
-	wxScintilla/src/scintilla/lexers/LexEScript.cxx
-	wxScintilla/src/scintilla/lexers/LexEiffel.cxx
-	wxScintilla/src/scintilla/lexers/LexErlang.cxx
-	wxScintilla/src/scintilla/lexers/LexFlagship.cxx
-	wxScintilla/src/scintilla/lexers/LexForth.cxx
-	wxScintilla/src/scintilla/lexers/LexFortran.cxx
-	wxScintilla/src/scintilla/lexers/LexGAP.cxx
-	wxScintilla/src/scintilla/lexers/LexGui4Cli.cxx
-	wxScintilla/src/scintilla/lexers/LexHTML.cxx
-	wxScintilla/src/scintilla/lexers/LexHaskell.cxx
-	wxScintilla/src/scintilla/lexers/LexInno.cxx
-	wxScintilla/src/scintilla/lexers/LexKix.cxx
-	wxScintilla/src/scintilla/lexers/LexLisp.cxx
-	wxScintilla/src/scintilla/lexers/LexLout.cxx
-	wxScintilla/src/scintilla/lexers/LexLua.cxx
-	wxScintilla/src/scintilla/lexers/LexMMIXAL.cxx
-	wxScintilla/src/scintilla/lexers/LexMPT.cxx
-	wxScintilla/src/scintilla/lexers/LexMSSQL.cxx
-	wxScintilla/src/scintilla/lexers/LexMagik.cxx
-	wxScintilla/src/scintilla/lexers/LexMarkdown.cxx
-	wxScintilla/src/scintilla/lexers/LexMatlab.cxx
-	wxScintilla/src/scintilla/lexers/LexMetapost.cxx
-	wxScintilla/src/scintilla/lexers/LexModula.cxx
-	wxScintilla/src/scintilla/lexers/LexMySQL.cxx
-	wxScintilla/src/scintilla/lexers/LexNimrod.cxx
-	wxScintilla/src/scintilla/lexers/LexNsis.cxx
-	wxScintilla/src/scintilla/lexers/LexOScript.cxx
-	wxScintilla/src/scintilla/lexers/LexOpal.cxx
-	wxScintilla/src/scintilla/lexers/LexOthers.cxx
-	wxScintilla/src/scintilla/lexers/LexPB.cxx
-	wxScintilla/src/scintilla/lexers/LexPLM.cxx
-	wxScintilla/src/scintilla/lexers/LexPO.cxx
-	wxScintilla/src/scintilla/lexers/LexPOV.cxx
-	wxScintilla/src/scintilla/lexers/LexPS.cxx
-	wxScintilla/src/scintilla/lexers/LexPascal.cxx
-	wxScintilla/src/scintilla/lexers/LexPerl.cxx
-	wxScintilla/src/scintilla/lexers/LexPowerPro.cxx
-	wxScintilla/src/scintilla/lexers/LexPowerShell.cxx
-	wxScintilla/src/scintilla/lexers/LexProgress.cxx
-	wxScintilla/src/scintilla/lexers/LexPython.cxx
-	wxScintilla/src/scintilla/lexers/LexR.cxx
-	wxScintilla/src/scintilla/lexers/LexRebol.cxx
-	wxScintilla/src/scintilla/lexers/LexRuby.cxx
-	wxScintilla/src/scintilla/lexers/LexSML.cxx
-	wxScintilla/src/scintilla/lexers/LexSQL.cxx
-	wxScintilla/src/scintilla/lexers/LexScriptol.cxx
-	wxScintilla/src/scintilla/lexers/LexSmalltalk.cxx
-	wxScintilla/src/scintilla/lexers/LexSorcus.cxx
-	wxScintilla/src/scintilla/lexers/LexSpecman.cxx
-	wxScintilla/src/scintilla/lexers/LexSpice.cxx
-	wxScintilla/src/scintilla/lexers/LexTACL.cxx
-	wxScintilla/src/scintilla/lexers/LexTADS3.cxx
-	wxScintilla/src/scintilla/lexers/LexTAL.cxx
-	wxScintilla/src/scintilla/lexers/LexTCL.cxx
-	wxScintilla/src/scintilla/lexers/LexTCMD.cxx
-	wxScintilla/src/scintilla/lexers/LexTeX.cxx
-	wxScintilla/src/scintilla/lexers/LexTxt2tags.cxx
-	wxScintilla/src/scintilla/lexers/LexVB.cxx
-	wxScintilla/src/scintilla/lexers/LexVHDL.cxx
-	wxScintilla/src/scintilla/lexers/LexVerilog.cxx
-	wxScintilla/src/scintilla/lexers/LexVisualProlog.cxx
-	wxScintilla/src/scintilla/lexers/LexYAML.cxx
-	wxScintilla/src/scintilla/lexlib/Accessor.cxx
-	wxScintilla/src/scintilla/lexlib/CharacterSet.cxx
-	wxScintilla/src/scintilla/lexlib/LexerBase.cxx
-	wxScintilla/src/scintilla/lexlib/LexerModule.cxx
-	wxScintilla/src/scintilla/lexlib/LexerNoExceptions.cxx
-	wxScintilla/src/scintilla/lexlib/LexerSimple.cxx
-	wxScintilla/src/scintilla/lexlib/PropSetSimple.cxx
-	wxScintilla/src/scintilla/lexlib/StyleContext.cxx
-	wxScintilla/src/scintilla/lexlib/WordList.cxx
-	wxScintilla/src/scintilla/src/AutoComplete.cxx
-	wxScintilla/src/scintilla/src/CallTip.cxx
-	wxScintilla/src/scintilla/src/Catalogue.cxx
-	wxScintilla/src/scintilla/src/CellBuffer.cxx
-	wxScintilla/src/scintilla/src/CharClassify.cxx
-	wxScintilla/src/scintilla/src/ContractionState.cxx
-	wxScintilla/src/scintilla/src/Decoration.cxx
-	wxScintilla/src/scintilla/src/Document.cxx
-	wxScintilla/src/scintilla/src/Editor.cxx
-	wxScintilla/src/scintilla/src/ExternalLexer.cxx
-	wxScintilla/src/scintilla/src/Indicator.cxx
-	wxScintilla/src/scintilla/src/KeyMap.cxx
-	wxScintilla/src/scintilla/src/LineMarker.cxx
-	wxScintilla/src/scintilla/src/PerLine.cxx
-	wxScintilla/src/scintilla/src/PositionCache.cxx
-	wxScintilla/src/scintilla/src/RESearch.cxx
-	wxScintilla/src/scintilla/src/RunStyles.cxx
-	wxScintilla/src/scintilla/src/ScintillaBase.cxx
-	wxScintilla/src/scintilla/src/Selection.cxx
-	wxScintilla/src/scintilla/src/Style.cxx
-	wxScintilla/src/scintilla/src/UniConversion.cxx
-	wxScintilla/src/scintilla/src/ViewStyle.cxx
-	wxScintilla/src/scintilla/src/XPM.cxx
+    wxScintilla/src/ScintillaWX.cpp
+    wxScintilla/src/wxscintilla.cpp
+    wxScintilla/src/scintilla/lexers/LexA68k.cxx
+    wxScintilla/src/scintilla/lexers/LexAPDL.cxx
+    wxScintilla/src/scintilla/lexers/LexASY.cxx
+    wxScintilla/src/scintilla/lexers/LexAU3.cxx
+    wxScintilla/src/scintilla/lexers/LexAVE.cxx
+    wxScintilla/src/scintilla/lexers/LexAVS.cxx
+    wxScintilla/src/scintilla/lexers/LexAbaqus.cxx
+    wxScintilla/src/scintilla/lexers/LexAda.cxx
+    wxScintilla/src/scintilla/lexers/LexAsm.cxx
+    wxScintilla/src/scintilla/lexers/LexAsn1.cxx
+    wxScintilla/src/scintilla/lexers/LexBaan.cxx
+    wxScintilla/src/scintilla/lexers/LexBash.cxx
+    wxScintilla/src/scintilla/lexers/LexBasic.cxx
+    wxScintilla/src/scintilla/lexers/LexBullant.cxx
+    wxScintilla/src/scintilla/lexers/LexCLW.cxx
+    wxScintilla/src/scintilla/lexers/LexCOBOL.cxx
+    wxScintilla/src/scintilla/lexers/LexCPP.cxx
+    wxScintilla/src/scintilla/lexers/LexCSS.cxx
+    wxScintilla/src/scintilla/lexers/LexCaml.cxx
+    wxScintilla/src/scintilla/lexers/LexCmake.cxx
+    wxScintilla/src/scintilla/lexers/LexCoffeeScript.cxx
+    wxScintilla/src/scintilla/lexers/LexConf.cxx
+    wxScintilla/src/scintilla/lexers/LexCrontab.cxx
+    wxScintilla/src/scintilla/lexers/LexCsound.cxx
+    wxScintilla/src/scintilla/lexers/LexD.cxx
+    wxScintilla/src/scintilla/lexers/LexECL.cxx
+    wxScintilla/src/scintilla/lexers/LexEScript.cxx
+    wxScintilla/src/scintilla/lexers/LexEiffel.cxx
+    wxScintilla/src/scintilla/lexers/LexErlang.cxx
+    wxScintilla/src/scintilla/lexers/LexFlagship.cxx
+    wxScintilla/src/scintilla/lexers/LexForth.cxx
+    wxScintilla/src/scintilla/lexers/LexFortran.cxx
+    wxScintilla/src/scintilla/lexers/LexGAP.cxx
+    wxScintilla/src/scintilla/lexers/LexGui4Cli.cxx
+    wxScintilla/src/scintilla/lexers/LexHTML.cxx
+    wxScintilla/src/scintilla/lexers/LexHaskell.cxx
+    wxScintilla/src/scintilla/lexers/LexInno.cxx
+    wxScintilla/src/scintilla/lexers/LexKix.cxx
+    wxScintilla/src/scintilla/lexers/LexLisp.cxx
+    wxScintilla/src/scintilla/lexers/LexLout.cxx
+    wxScintilla/src/scintilla/lexers/LexLua.cxx
+    wxScintilla/src/scintilla/lexers/LexMMIXAL.cxx
+    wxScintilla/src/scintilla/lexers/LexMPT.cxx
+    wxScintilla/src/scintilla/lexers/LexMSSQL.cxx
+    wxScintilla/src/scintilla/lexers/LexMagik.cxx
+    wxScintilla/src/scintilla/lexers/LexMarkdown.cxx
+    wxScintilla/src/scintilla/lexers/LexMatlab.cxx
+    wxScintilla/src/scintilla/lexers/LexMetapost.cxx
+    wxScintilla/src/scintilla/lexers/LexModula.cxx
+    wxScintilla/src/scintilla/lexers/LexMySQL.cxx
+    wxScintilla/src/scintilla/lexers/LexNimrod.cxx
+    wxScintilla/src/scintilla/lexers/LexNsis.cxx
+    wxScintilla/src/scintilla/lexers/LexOScript.cxx
+    wxScintilla/src/scintilla/lexers/LexOpal.cxx
+    wxScintilla/src/scintilla/lexers/LexOthers.cxx
+    wxScintilla/src/scintilla/lexers/LexPB.cxx
+    wxScintilla/src/scintilla/lexers/LexPLM.cxx
+    wxScintilla/src/scintilla/lexers/LexPO.cxx
+    wxScintilla/src/scintilla/lexers/LexPOV.cxx
+    wxScintilla/src/scintilla/lexers/LexPS.cxx
+    wxScintilla/src/scintilla/lexers/LexPascal.cxx
+    wxScintilla/src/scintilla/lexers/LexPerl.cxx
+    wxScintilla/src/scintilla/lexers/LexPowerPro.cxx
+    wxScintilla/src/scintilla/lexers/LexPowerShell.cxx
+    wxScintilla/src/scintilla/lexers/LexProgress.cxx
+    wxScintilla/src/scintilla/lexers/LexPython.cxx
+    wxScintilla/src/scintilla/lexers/LexR.cxx
+    wxScintilla/src/scintilla/lexers/LexRebol.cxx
+    wxScintilla/src/scintilla/lexers/LexRuby.cxx
+    wxScintilla/src/scintilla/lexers/LexSML.cxx
+    wxScintilla/src/scintilla/lexers/LexSQL.cxx
+    wxScintilla/src/scintilla/lexers/LexScriptol.cxx
+    wxScintilla/src/scintilla/lexers/LexSmalltalk.cxx
+    wxScintilla/src/scintilla/lexers/LexSorcus.cxx
+    wxScintilla/src/scintilla/lexers/LexSpecman.cxx
+    wxScintilla/src/scintilla/lexers/LexSpice.cxx
+    wxScintilla/src/scintilla/lexers/LexTACL.cxx
+    wxScintilla/src/scintilla/lexers/LexTADS3.cxx
+    wxScintilla/src/scintilla/lexers/LexTAL.cxx
+    wxScintilla/src/scintilla/lexers/LexTCL.cxx
+    wxScintilla/src/scintilla/lexers/LexTCMD.cxx
+    wxScintilla/src/scintilla/lexers/LexTeX.cxx
+    wxScintilla/src/scintilla/lexers/LexTxt2tags.cxx
+    wxScintilla/src/scintilla/lexers/LexVB.cxx
+    wxScintilla/src/scintilla/lexers/LexVHDL.cxx
+    wxScintilla/src/scintilla/lexers/LexVerilog.cxx
+    wxScintilla/src/scintilla/lexers/LexVisualProlog.cxx
+    wxScintilla/src/scintilla/lexers/LexYAML.cxx
+    wxScintilla/src/scintilla/lexlib/Accessor.cxx
+    wxScintilla/src/scintilla/lexlib/CharacterSet.cxx
+    wxScintilla/src/scintilla/lexlib/LexerBase.cxx
+    wxScintilla/src/scintilla/lexlib/LexerModule.cxx
+    wxScintilla/src/scintilla/lexlib/LexerNoExceptions.cxx
+    wxScintilla/src/scintilla/lexlib/LexerSimple.cxx
+    wxScintilla/src/scintilla/lexlib/PropSetSimple.cxx
+    wxScintilla/src/scintilla/lexlib/StyleContext.cxx
+    wxScintilla/src/scintilla/lexlib/WordList.cxx
+    wxScintilla/src/scintilla/src/AutoComplete.cxx
+    wxScintilla/src/scintilla/src/CallTip.cxx
+    wxScintilla/src/scintilla/src/Catalogue.cxx
+    wxScintilla/src/scintilla/src/CellBuffer.cxx
+    wxScintilla/src/scintilla/src/CharClassify.cxx
+    wxScintilla/src/scintilla/src/ContractionState.cxx
+    wxScintilla/src/scintilla/src/Decoration.cxx
+    wxScintilla/src/scintilla/src/Document.cxx
+    wxScintilla/src/scintilla/src/Editor.cxx
+    wxScintilla/src/scintilla/src/ExternalLexer.cxx
+    wxScintilla/src/scintilla/src/Indicator.cxx
+    wxScintilla/src/scintilla/src/KeyMap.cxx
+    wxScintilla/src/scintilla/src/LineMarker.cxx
+    wxScintilla/src/scintilla/src/PerLine.cxx
+    wxScintilla/src/scintilla/src/PositionCache.cxx
+    wxScintilla/src/scintilla/src/RESearch.cxx
+    wxScintilla/src/scintilla/src/RunStyles.cxx
+    wxScintilla/src/scintilla/src/ScintillaBase.cxx
+    wxScintilla/src/scintilla/src/Selection.cxx
+    wxScintilla/src/scintilla/src/Style.cxx
+    wxScintilla/src/scintilla/src/UniConversion.cxx
+    wxScintilla/src/scintilla/src/ViewStyle.cxx
+    wxScintilla/src/scintilla/src/XPM.cxx
 )
 
 set(SRC_LC3EDIT
@@ -152,15 +157,15 @@ set(SRC_LC3EDIT
 )
 
 add_library(
-	wxScintilla
-	STATIC
-	${SRC_wxScintilla}
+    wxScintilla
+    STATIC
+    ${SRC_wxScintilla}
 )
 
 add_library(
-	wxFlatNotebook
-	STATIC
-	${SRC_wxFlatNotebook}
+    wxFlatNotebook
+    STATIC
+    ${SRC_wxFlatNotebook}
 )
 
 add_executable(
@@ -168,17 +173,13 @@ add_executable(
     ${SRC_LC3EDIT}
 )
 
-set(wxWidgets_USE_LIBS xrc xml html adv gl net core base)
-find_package(wxWidgets REQUIRED)
-execute_process(COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}" --cxxflags)
-include(${wxWidgets_USE_FILE})
-
 target_link_libraries(
-	lc3edit
-	lc3
+    lc3edit
+    lc3
     wxScintilla
     wxFlatNotebook
-   	${wxWidgets_LIBRARIES}
+    ${wxWidgets_LIBRARIES}
 )
 
-#INSTALL(TARGETS lc3_bwlcd LIBRARY DESTINATION lib)
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/lc3edit DESTINATION bin)
+
