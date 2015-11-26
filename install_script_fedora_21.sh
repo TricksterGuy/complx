@@ -1,3 +1,4 @@
+#TODO update this file...
 if [ "$(id -u)" != "0" ]; then
 	echo "Sorry, you are not root. Use the command sudo ./install_script_fedora_21.sh"
 	exit 1

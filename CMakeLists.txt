@@ -34,6 +34,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     add_definitions(-DLINUX)
 ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
+add_definitions(-DPREFIX=${CMAKE_INSTALL_PREFIX})
 set(wxWidgets_USE_LIBS stc xrc xml html adv gl net core base)
 find_package(wxWidgets REQUIRED)
 execute_process(COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}" --cxxflags)
@@ -170,9 +171,8 @@ install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/lc3runner DESTINATION bin)
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/lc3test DESTINATION bin)
 
 
-install(FILES doc/Complx.pdf DESTINATION share/doc/complx-tools)
+install(FILES doc/complx-tools.pdf DESTINATION share/doc/complx-tools)
 install(FILES doc/ComplxChangeLog.txt DESTINATION share/doc/complx-tools)
-install(FILES doc/ChangeLog DESTINATION share/doc/complx-tools)
 install(FILES doc/PattPatelAppA.pdf DESTINATION share/doc/complx-tools)
 install(FILES doc/complx-tips.txt DESTINATION share/doc/complx-tools)
 install(FILES complx.png DESTINATION share/icons)

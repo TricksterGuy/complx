@@ -73,8 +73,6 @@ bool ComplxApp::OnInit()
     complxframe->SetIcon(icon);
     complxframe->Show();
 
-    size_t currentTip = 0;
-    bool show = true;
     std::string last_ver = config->Read("/firstrun", "").ToStdString();
     // use our config object...
     if (last_ver.empty()) {
@@ -82,22 +80,6 @@ bool ComplxApp::OnInit()
         complxframe->OnFirstTime(event);
         config->Write("/firstrun", AutoVersion::FULLVERSION_STRING);
         config->Flush();
-    }
-    else
-    {
-        currentTip = config->Read("/currenttip", 0l);
-        config->Read("/showtips", &show);
-    }
-
-    if (show)
-    {
-        wxTipProvider* tip = wxCreateFileTipProvider(_(EXPAND_AND_STRINGIFY(PREFIX) "/share/complx-tools/complx-tips.txt"), currentTip);
-        show = wxShowTip(complxframe, tip, show);
-
-        config->Write("/showtips", show);
-        config->Write("/currenttip", tip->GetCurrentTip());
-        config->Flush();
-        delete tip;
     }
 
     return true;

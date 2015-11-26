@@ -46,6 +46,8 @@ void MemoryViewFrame::OnUpdateHideAddresses(wxCommandEvent& event)
       mode = SHOW_MODIFIED;
     else if ((menuViewHideAddressesShowNonZero->IsChecked()))
       mode = SHOW_NONZERO;
+    else
+      mode = SHOW_ALL;
     ::OnUpdateHideAddresses(memory, memoryView, mode);
 }
 

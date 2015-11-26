@@ -1,5 +1,6 @@
 option(ENABLE_UDIV "Enable the UDIV Trap Plugin" ON)
 include_directories(${complx-tools_SOURCE_DIR}/liblc3)
+set(CMAKE_SKIP_RPATH TRUE)
 
 if(ENABLE_UDIV)
 

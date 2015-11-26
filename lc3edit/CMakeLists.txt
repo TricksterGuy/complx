@@ -12,6 +12,7 @@ set(wxWidgets_USE_LIBS xrc xml html adv gl net core base)
 find_package(wxWidgets REQUIRED)
 execute_process(COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}" --cxxflags)
 include(${wxWidgets_USE_FILE})
+set(CMAKE_SKIP_RPATH TRUE)
 
 set(SRC_wxFlatNotebook
     wxFlatNotebook/fnb_customize_dlg.cpp

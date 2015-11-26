@@ -2,6 +2,7 @@ option(ENABLE_RANDOM "Enable the Random Value Plugin" ON)
 option(ENABLE_SECOND_TIMER "Enable the Second Timer Plugin" ON)
 option(ENABLE_TIMER "Enable the Timer Plugin" ON)
 include_directories(${complx-tools_SOURCE_DIR}/liblc3)
+set(CMAKE_SKIP_RPATH TRUE)
 
 if(ENABLE_RANDOM)
 
