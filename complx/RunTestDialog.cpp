@@ -361,13 +361,13 @@ void TestCaseInfoPanel::Update(lc3_test& testcase)
         warningButton->Show();
     }
 
-    checksPassed->SetLabel(wxString::Format("%d / %d", pass_count, testcase.output.size()));
+    checksPassed->SetLabel(wxString::Format("%d / %lu", pass_count, testcase.output.size()));
 
     if (testcase.max_points)
     {
         pointsText->Show();
         points->Show();
-        points->SetLabel(wxString::Format("%d / %d", testcase.points, testcase.max_points));
+        points->SetLabel(wxString::Format("%u / %u", testcase.points, testcase.max_points));
     }
 
     Layout();
