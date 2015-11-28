@@ -21,7 +21,7 @@ int main(int argc, char** argv)
     {
         printf("Usage: lc3test testfile.xml asmfile.asm -disable_plugins -random_seed=int\n");
         printf("by default -disable_plugins is false\n");
-        abort();
+        return EXIT_FAILURE;
     }
 
     lc3_test_suite suite;
@@ -41,18 +41,13 @@ int main(int argc, char** argv)
         if (!XmlTestParser().LoadTestSuite(suite, xmlfile))
         {
             printf("Xml file not found or parse errors found\n");
-            abort();
+            return EXIT_FAILURE;
         }
     }
-    catch (const char* x)
+    catch (XmlTestParserException x)
     {
-        printf("%s\n", x);
-        abort();
-    }
-    catch (const wxString x)
-    {
-        printf("%s\n", x.ToStdString().c_str());
-        abort();
+        printf("%s\n", x.what().c_str());
+        return EXIT_FAILURE;
     }
 
     try
@@ -62,12 +57,12 @@ int main(int argc, char** argv)
     catch (const char* x)
     {
         printf("%s\n", x);
-        abort();
+        return EXIT_FAILURE;
     }
     catch (std::string x)
     {
         printf("%s\n", x.c_str());
-        abort();
+        return EXIT_FAILURE;
     }
 
     std::stringstream oss;

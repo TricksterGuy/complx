@@ -7,6 +7,20 @@
 #include <wx/xml/xml.h>
 #include <wx/wx.h>
 
+struct XmlTestParserException
+{
+    XmlTestParserException(const wxString& msg, const wxXmlNode* child) : message(msg), node(child) {}
+    std::string what()
+    {
+        if (node->GetLineNumber() != -1)
+            return wxString::Format("Found at line: %d %s", node->GetLineNumber(), message).ToStdString();
+        else
+            return message.ToStdString();
+    }
+    wxString message;
+    const wxXmlNode* node;
+};
+
 class XmlTestParser
 {
 	public:
@@ -15,7 +29,6 @@ class XmlTestParser
             static XmlTestParser singleton;
             return singleton;
         }
-		~XmlTestParser();
 		bool LoadTestSuite(lc3_test_suite& suite, const std::string filename);
 	private:
         XmlTestParser() {};                                     // Private constructor
@@ -24,13 +37,10 @@ class XmlTestParser
         bool LoadTest(lc3_test_suite& suite, wxXmlNode* root);
         bool LoadTestInput(lc3_test& suite, wxXmlNode* root);
         bool LoadTestOutput(lc3_test& suite, wxXmlNode* root);
-        int GetCompareType(int type, const wxString& mode, const wxString& node_name);
-
 };
 
 inline XmlTestParser& XmlTestParser()
 {
     return XmlTestParser::Instance();
 }
-
 #endif
