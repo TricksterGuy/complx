@@ -4,7 +4,6 @@ include_directories(${complx-tools_SOURCE_DIR}/liblc3)
 
 set(wxWidgets_USE_LIBS stc xrc xml html adv gl net core base)
 find_package(wxWidgets REQUIRED)
-execute_process(COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}" --cxxflags)
 include(${wxWidgets_USE_FILE})
 set(CMAKE_SKIP_RPATH TRUE)
 
