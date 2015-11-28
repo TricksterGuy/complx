@@ -122,9 +122,9 @@ void GridCellBinaryRenderer::Draw(wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, 
 void GridCellBinaryRenderer::InstructionColor(wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRect &srect, int item, int column, bool isSelected)
 {
     wxRect rect = srect;
-    int width = 8/*dc.GetCharWidth()*/, height = rect.GetHeight();
+    int width = dc.GetCharWidth(), height = rect.GetHeight();
     int textwidth = dc.GetTextExtent(grid.GetCellValue(item, column)).GetWidth();
-    rect.Offset((srect.GetWidth() - textwidth) / 2 - 3, 0 );
+    rect.Offset(2, 0);
 
     dc.SetBrush(*wxBLACK);
     dc.DrawRectangle(srect.GetX(), srect.GetY(), srect.GetWidth(), srect.GetHeight());
