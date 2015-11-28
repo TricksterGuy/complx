@@ -1,38 +1,48 @@
 cmake_minimum_required(VERSION 2.6)
+cmake_policy(SET CMP0042 NEW) # ignore warnings about rpath behavior on OS X
 project(complx-tools)
 
 option(ENABLE_PLUGINS "Enable Official Plugins" ON)
-option(ENABLE_DEBUG "Build debug version" OFF)
 option(ENABLE_LC3EDIT "Build lc3edit" OFF)
 option(ENABLE_COMP "Build comp" OFF)
 option(ENABLE_DEV "Build dev version" OFF)
 
-IF(ENABLE_PLUGINS)
+if(ENABLE_PLUGINS)
     add_subdirectory(plugins)
-ENDIF(ENABLE_PLUGINS)
+endif(ENABLE_PLUGINS)
 
 if(ENABLE_LC3EDIT)
     add_subdirectory(lc3edit)
-ENDIF(ENABLE_LC3EDIT)
+endif(ENABLE_LC3EDIT)
 
 if(ENABLE_COMP)
     add_subdirectory(comp)
-ENDIF(ENABLE_COMP)
+endif(ENABLE_COMP)
 
-IF(ENABLE_DEBUG)
-    set(CMAKE_CXX_FLAGS "-g -pg -Wall -std=c++11")
-ELSE()
-    set(CMAKE_CXX_FLAGS "-O3 -Wall -std=c++11")
-    set(CMAKE_EXE_LINKER_FLAGS "-s")
-ENDIF(ENABLE_DEBUG)
+# Require C++11 build
+if(NOT CMAKE_CXX_FLAGS MATCHES "-std=(c|gnu)\\+\\+11")
+    message(STATUS "This project requires C++11. Adding -std=c++11 to CXXFLAGS.")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" CACHE STRING "Flags used by the compiler during all build types." FORCE)
+endif()
 
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+# Enable all warning on debug builds
+set(CMAKE_CXX_FLAGS_DEBUG "-g -pg -Wall")
+
+# Default to release build if not specified
+if(NOT CMAKE_BUILD_TYPE)
+    message(STATUS "Setting build type to 'Release' as none was specified.")
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
+    "MinSizeRel" "RelWithDebInfo")
+endif(NOT CMAKE_BUILD_TYPE)
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     add_definitions(-DLINUX)
-ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     add_definitions(-DLINUX)
-ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 add_definitions(-DPREFIX=${CMAKE_INSTALL_PREFIX})
 add_definitions(-DSO_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}")
@@ -177,5 +187,3 @@ install(FILES doc/PattPatelAppA.pdf DESTINATION share/doc/complx-tools)
 install(FILES doc/complx-tips.txt DESTINATION share/doc/complx-tools)
 install(FILES complx.png DESTINATION share/icons)
 install(FILES complx.desktop DESTINATION share/applications)
-
-
