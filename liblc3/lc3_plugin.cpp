@@ -65,7 +65,7 @@ std::vector<RLEColorEntry> InstructionPlugin::GetInstructionColoring(unsigned sh
   */
 bool lc3_install_plugin(lc3_state& state, const std::string& filename, const PluginParams& params)
 {
-    std::string realfilename = "lib" + filename + ".so";
+    std::string realfilename = "lib" + filename + SO_SUFFIX;
     void *hndl = dlopen(realfilename.c_str(), RTLD_NOW);
     // Failed to load.
     if(hndl == NULL)
