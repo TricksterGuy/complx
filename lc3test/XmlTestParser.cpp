@@ -200,7 +200,7 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, wxXmlNode* root)
                 else if (grandchild->GetName() == "value")
                     input.value = grandchild->GetNodeContent();
                 else
-                    throw "Unknown tag found in test-value" + grandchild->GetName();
+                    throw "Unknown tag found in test-value " + grandchild->GetName();
                 grandchild = getNextNode(grandchild);
             }
             input.type = TEST_VALUE;
@@ -214,7 +214,7 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, wxXmlNode* root)
                 else if (grandchild->GetName() == "value")
                     input.registerval = grandchild->GetNodeContent();
                 else
-                    throw "Unknown tag found in test-register" + grandchild->GetName();
+                    throw "Unknown tag found in test-register " + grandchild->GetName();
                 grandchild = getNextNode(grandchild);
             }
             input.type = TEST_REGISTER;
@@ -226,7 +226,7 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, wxXmlNode* root)
                 if (grandchild->GetName() == "value")
                     input.pcval = grandchild->GetNodeContent();
                 else
-                    throw "Unknown tag found in test-pc" + grandchild->GetName();
+                    throw "Unknown tag found in test-pc " + grandchild->GetName();
                 grandchild = getNextNode(grandchild);
             }
             input.type = TEST_PC;
@@ -240,7 +240,7 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, wxXmlNode* root)
                 else if (grandchild->GetName() == "value")
                     input.pointer = grandchild->GetNodeContent();
                 else
-                    throw "Unknown tag found in test-pointer" + grandchild->GetName();
+                    throw "Unknown tag found in test-pointer " + grandchild->GetName();
                 grandchild = getNextNode(grandchild);
             }
             input.type = TEST_POINTER;
@@ -254,9 +254,9 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, wxXmlNode* root)
                 else if (grandchild->GetName() == "value")
                     input.text = process_str(grandchild->GetNodeContent(), error);
                 else
-                    throw "Unknown tag found in test-string" + grandchild->GetName();
+                    throw "Unknown tag found in test-string " + grandchild->GetName();
 
-                if (error) throw "malformed string" + grandchild->GetNodeContent() + " in test-string";
+                if (error) throw "malformed string " + grandchild->GetNodeContent() + " in test-string";
                 grandchild = getNextNode(grandchild);
             }
             input.type = TEST_STRING;
@@ -270,7 +270,7 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, wxXmlNode* root)
                 else if (grandchild->GetName() == "value")
                     tokenize(grandchild->GetNodeContent().ToStdString(), input.array, ",");
                 else
-                    throw "Unknown tag found in test-array" + grandchild->GetName();
+                    throw "Unknown tag found in test-array " + grandchild->GetName();
                 grandchild = getNextNode(grandchild);
             }
             input.type = TEST_ARRAY;
@@ -283,7 +283,7 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, wxXmlNode* root)
                     input.io = process_str(grandchild->GetNodeContent(), error);
                 else
                     throw "Unknown tag found in test-stdin" + grandchild->GetName();
-                if (error) throw "malformed string" + grandchild->GetNodeContent() + " in test-stdin";
+                if (error) throw "malformed string " + grandchild->GetNodeContent() + " in test-stdin";
                 grandchild = getNextNode(grandchild);
             }
             input.type = TEST_IO;
@@ -304,7 +304,7 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, wxXmlNode* root)
                 else if (grandchild->GetName() == "params")
                     tokenize(grandchild->GetNodeContent().ToStdString(), subr.params, ",");
                 else
-                    throw "Unknown tag found in test-subr" + grandchild->GetName();
+                    throw "Unknown tag found in test-subr " + grandchild->GetName();
                 grandchild = getNextNode(grandchild);
             }
             input.type = TEST_SUBROUTINE;
@@ -350,7 +350,7 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
                 else if (grandchild->GetName() == "value")
                     output.value = grandchild->GetNodeContent();
                 else
-                    throw "Unknown tag found in test-value" + grandchild->GetName();
+                    throw "Unknown tag found in test-value " + grandchild->GetName();
                 grandchild = getNextNode(grandchild);
             }
             output.type = TEST_VALUE;
@@ -364,7 +364,7 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
                 else if (grandchild->GetName() == "value")
                     output.registerval = grandchild->GetNodeContent();
                 else
-                    throw "Unknown tag found in test-value" + grandchild->GetName();
+                    throw "Unknown tag found in test-value " + grandchild->GetName();
                 grandchild = getNextNode(grandchild);
             }
             output.type = TEST_REGISTER;
@@ -376,7 +376,7 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
                 if (grandchild->GetName() == "value")
                     output.pcval = grandchild->GetNodeContent();
                 else
-                    throw "Unknown tag found in test-pc" + grandchild->GetName();
+                    throw "Unknown tag found in test-pc " + grandchild->GetName();
                 grandchild = getNextNode(grandchild);
             }
             output.type = TEST_PC;
@@ -390,7 +390,7 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
                 else if (grandchild->GetName() == "value")
                     output.pointer = grandchild->GetNodeContent();
                 else
-                    throw "Unknown tag found in test-pointer" + grandchild->GetName();
+                    throw "Unknown tag found in test-pointer " + grandchild->GetName();
                 grandchild = getNextNode(grandchild);
             }
             output.type = TEST_POINTER;
@@ -404,8 +404,8 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
                 else if (grandchild->GetName() == "value")
                     output.text = process_str(grandchild->GetNodeContent(), error);
                 else
-                    throw "Unknown tag found in test-string" + grandchild->GetName();
-                if (error) throw "malformed string" + grandchild->GetNodeContent() + " in test-string";
+                    throw "Unknown tag found in test-string " + grandchild->GetName();
+                if (error) throw "malformed string " + grandchild->GetNodeContent() + " in test-string";
                 grandchild = getNextNode(grandchild);
             }
             output.type = TEST_STRING;
@@ -419,7 +419,7 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
                 else if (grandchild->GetName() == "value")
                     tokenize(grandchild->GetNodeContent().ToStdString(), output.array, ",");
                 else
-                    throw "Unknown tag found in test-array" + grandchild->GetName();
+                    throw "Unknown tag found in test-array " + grandchild->GetName();
                 grandchild = getNextNode(grandchild);
             }
             output.type = TEST_ARRAY;
@@ -431,8 +431,8 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
                 if (grandchild->GetName() == "value")
                     output.io = process_str(grandchild->GetNodeContent(), error);
                 else
-                    throw "Unknown tag found in test-stdout" + grandchild->GetName();
-                if (error) throw "malformed string" + grandchild->GetNodeContent() + " in test-stdout";
+                    throw "Unknown tag found in test-stdout " + grandchild->GetName();
+                if (error) throw "malformed string " + grandchild->GetNodeContent() + " in test-stdout";
                 grandchild = getNextNode(grandchild);
             }
             output.type = TEST_IO;
@@ -464,14 +464,14 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
                         else if (ggchild->GetName() == "locals")
                             subr.points_locals = wxAtoi(ggchild->GetNodeContent());
                         else
-                            throw "Unknown tag found within points in test-subr" + grandchild->GetName();
+                            throw "Unknown tag found within points in test-subr " + grandchild->GetName();
                         ggchild = getNextNode(ggchild);
                     }
                 }
                 else if (grandchild->GetName() == "deductions-per-mistake")
                     subr.deductions_edist = wxAtoi(grandchild->GetNodeContent());
                 else
-                    throw "Unknown tag found within points in test-subr" + grandchild->GetName();
+                    throw "Unknown tag found within points in test-subr " + grandchild->GetName();
                 grandchild = getNextNode(grandchild);
             }
             output.type = TEST_SUBROUTINE;

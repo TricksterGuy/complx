@@ -49,6 +49,11 @@ int main(int argc, char** argv)
         printf("%s\n", x);
         abort();
     }
+    catch (const wxString x)
+    {
+        printf("%s\n", x.ToStdString().c_str());
+        abort();
+    }
 
     try
     {

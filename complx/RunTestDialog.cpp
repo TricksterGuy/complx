@@ -147,7 +147,6 @@ void RunTestDialog::UpdateTests()
     {
         lc3_test& test = suite.tests[i];
         wxTreeItemId testId = testTree->AppendItem(root, test.name, -1, -1, new TestTreeItem(&test));
-        //printf("Test case %d - %s - %s %d/%d %s\n", i + 1, test.name.c_str(), test.passed ? "Passed" : "Failed", test.points, test.max_points, test.has_halted ? "" : "(Did not finish!)");
         for (unsigned int j = 0; j < test.output.size(); j++)
         {
             lc3_test_output& output = test.output[j];
