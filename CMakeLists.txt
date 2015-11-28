@@ -43,7 +43,6 @@ include(${wxWidgets_USE_FILE})
 
 include_directories(${complx-tools_SOURCE_DIR}/liblc3)
 include_directories(${complx-tools_SOURCE_DIR}/lc3test)
-link_directories(${complx-tools_BINARY_DIR}/liblc3) 
 
 set(SRC_LIBLC3
     liblc3/ExpressionEvaluator.cpp
