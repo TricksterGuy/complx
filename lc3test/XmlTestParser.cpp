@@ -474,7 +474,7 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
         {
             while (grandchild)
             {
-                if (grandchild->GetName() == "address")
+                if (grandchild->GetName() == "register")
                     output.address = grandchild->GetNodeContent();
                 else if (grandchild->GetName() == "value")
                     output.registerval = grandchild->GetNodeContent();
