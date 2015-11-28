@@ -54,6 +54,11 @@ complx is a suite of educational tools for learning lc3 assembly. It includes bo
   6. Build the program (make)
   7. Install the program (sudo make install)
   8. Run ldconfig (sudo ldconfig)
+Alternatively you can run one of the install scripts depending on your platform.
 
-# Installation from Packages via apt-get
-  Coming soon!
+# Installation from Packages via apt-get (for ubuntu versions trusty and beyond)
+Execute these commands
+* sudo add-apt-repository ppa:tricksterguy87/ppa-gt-cs2110
+* sudo apt-get update
+* sudo apt-get install complx-tools
+
