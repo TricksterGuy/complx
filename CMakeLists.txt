@@ -25,8 +25,13 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=(c|gnu)\\+\\+11")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" CACHE STRING "Flags used by the compiler during all build types." FORCE)
 endif()
 
-# Enable all warning on debug builds
-set(CMAKE_CXX_FLAGS_DEBUG "-g -pg -Wall")
+# Additional debug flags
+set(CMAKE_CXX_FLAGS_DEBUG "-g -pg")
+
+# Set default warning flags
+set(PROJECT_WARNING_FLAGS "-Wall" CACHE STRING "Compiler warning flags to include")
+mark_as_advanced(PROJECT_WARNING_FLAGS)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROJECT_WARNING_FLAGS}")
 
 # Default to release build if not specified
 if(NOT CMAKE_BUILD_TYPE)
