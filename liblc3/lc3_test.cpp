@@ -8,8 +8,8 @@
 #define R5_FOUND "r5 found on stack and r5 not clobbered"
 #define PARAM_FOUND "param found on stack"
 #define LOCAL_FOUND "local found on stack"
-#define CHECK "      [✓] "
-#define MISS "      [x] "
+#define CHECK "      [+] "
+#define MISS "      [-] "
 
 std::string join(const std::vector<std::string>& vec, const std::string& join)
 {

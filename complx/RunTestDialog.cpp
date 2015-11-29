@@ -29,10 +29,6 @@ RunTestDialog::RunTestDialog(wxWindow* parent, const std::string& _filename, lc3
 	OnRunTests(dummy);
 }
 
-RunTestDialog::~RunTestDialog()
-{
-}
-
 void RunTestDialog::OnSelectTestItem(wxTreeEvent& event)
 {
     wxTreeItemId id = event.GetItem();
@@ -200,8 +196,7 @@ void RunTestDialog::OnTestReport(wxCommandEvent& event)
     int tweedle_dum = 0;
     lc3_write_test_report(oss, *test, tweedle_dee, tweedle_dum);
 
-    std::string report = oss.str();
-    TestReportDialog* dialog = new TestReportDialog(this, test->name, report);
+    TestReportDialog* dialog = new TestReportDialog(this, test->name, oss.str());
 
     dialog->ShowModal();
 
@@ -216,16 +211,6 @@ TestSuiteInfoPanel::TestSuiteInfoPanel(wxWindow* parent, lc3_test_suite& _suite)
 {
     Update();
     Hide();
-}
-
-
-/** @brief ~TestSuiteInfoPanel
-  *
-  * @todo: document this function
-  */
- TestSuiteInfoPanel::~TestSuiteInfoPanel()
-{
-
 }
 
 /** @brief Update
@@ -279,15 +264,6 @@ void TestSuiteInfoPanel::Update()
  TestCaseInfoPanel::TestCaseInfoPanel(wxWindow* parent) : TestCaseInfoPanelDecl(parent), testcase(NULL)
 {
     Hide();
-}
-
-/** @brief ~TestCaseInfoPanel
-  *
-  * @todo: document this function
-  */
- TestCaseInfoPanel::~TestCaseInfoPanel()
-{
-
 }
 
 /** @brief Update
@@ -383,15 +359,6 @@ void TestCaseInfoPanel::OnWarnings(wxCommandEvent& event)
     Hide();
 }
 
-/** @brief ~CheckInfoPanel
-  *
-  * @todo: document this function
-  */
- CheckInfoPanel::~CheckInfoPanel()
-{
-
-}
-
 /** @brief Update
   *
   * @todo: document this function
@@ -441,13 +408,4 @@ TestReportDialog::TestReportDialog(wxWindow* parent, const wxString& test_name, 
 {
     name->SetLabel(test_name);
     report->SetValue(report_str);
-}
-
-/** @brief ~TestReportDialog
-  *
-  * @todo: document this function
-  */
-TestReportDialog::~TestReportDialog()
-{
-
 }

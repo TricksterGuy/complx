@@ -21,7 +21,6 @@ class RunTestDialog : public RunTestDialogDecl
 {
 	public:
 		RunTestDialog(wxWindow* parent, const std::string& filename, lc3_test_suite& test);
-		~RunTestDialog();
         void UpdateTests();
 	protected:
 		void OnSelectTestItem(wxTreeEvent& event);
@@ -41,7 +40,6 @@ class TestSuiteInfoPanel : public TestSuiteInfoPanelDecl
 {
 	public:
 		TestSuiteInfoPanel(wxWindow* parent, lc3_test_suite& suite);
-		~TestSuiteInfoPanel();
 		void Update();
     private:
 		lc3_test_suite& suite;
@@ -51,7 +49,6 @@ class TestCaseInfoPanel : public TestCaseInfoPanelDecl
 {
     public:
         TestCaseInfoPanel(wxWindow* parent);
-        ~TestCaseInfoPanel();
         void Update();
         void Update(lc3_test& testcase);
         void OnWarnings(wxCommandEvent& event);
@@ -63,7 +60,6 @@ class CheckInfoPanel : public CheckInfoPanelDecl
 {
 	public:
 		CheckInfoPanel(wxWindow* parent);
-		~CheckInfoPanel();
 		void Update();
 		void Update(lc3_test_output& output);
 	private:
@@ -74,8 +70,6 @@ class TestReportDialog : public TestReportDialogDecl
 {
 	public:
 		TestReportDialog(wxWindow* parent, const wxString& name, const wxString& report);
-		~TestReportDialog();
 };
-
 
 #endif
