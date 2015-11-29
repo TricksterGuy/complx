@@ -322,7 +322,7 @@ void ComplxFrame::DoLoadFile(const wxFileName& filename)
     }
     catch (LC3AssembleException e)
     {
-        wxMessageBox(wxString::Format("BAD STUDENT! %s", e.what()), _("Loading ") + filename.GetFullName() + _(" Failed"));
+        wxMessageBox(wxString::Format("ERROR! %s", e.what()), _("Loading ") + filename.GetFullName() + _(" Failed"));
         goto merge;
     }
     catch (std::vector<LC3AssembleException> e)
@@ -330,7 +330,7 @@ void ComplxFrame::DoLoadFile(const wxFileName& filename)
         std::stringstream oss;
         for (unsigned int i = 0; i < e.size(); i++)
             oss << e[i].what() << std::endl;
-        wxMessageBox(wxString::Format("BAD STUDENT! %s", oss.str()), _("Loading ") + filename.GetFullName() + _(" Failed"));
+        wxMessageBox(wxString::Format("ERROR! %s", oss.str()), _("Loading ") + filename.GetFullName() + _(" Failed"));
         goto merge;
     }
 
@@ -827,7 +827,7 @@ void ComplxFrame::OnWatchpoint(wxCommandEvent& event)
                 multiple = state.mem_watchpoints.find(info.data) != state.mem_watchpoints.end();
 
             if (multiple)
-                wxMessageBox(_("BAD STUDENT! You can't have two watchpoints refer to the same target"), _("Error"));
+                wxMessageBox(_("ERROR! You can't have two watchpoints refer to the same target"), _("Error"));
             else
             {
                 if (info.is_reg)
@@ -974,7 +974,7 @@ void ComplxFrame::OnCallStack(wxCommandEvent& event)
 
     if (state.call_stack.empty())
     {
-        wxMessageBox("BAD STUDENT! You are not even in a subroutine.", "Complx");
+        wxMessageBox("ERROR! You are not even in a subroutine.", "Complx");
         return;
     }
 
@@ -1019,7 +1019,7 @@ void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
 
     if (!currentFile.IsOk())
     {
-        wxMessageBox("BAD STUDENT! An assembly file must be loaded to perform this operation", "Error");
+        wxMessageBox("ERROR! An assembly file must be loaded to perform this operation", "Error");
         return;
     }
 
@@ -1036,12 +1036,12 @@ void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
     subroutine_location = lc3_sym_lookup(state, dialog->GetSubroutine());
     if (stack_location == -1)
     {
-        wxMessageBox(wxString::Format("BAD STUDENT! Stack location: %s was not found in symbol table", dialog->GetStack()), "Error");
+        wxMessageBox(wxString::Format("ERROR! Stack location: %s was not found in symbol table", dialog->GetStack()), "Error");
         goto end;
     }
     if (subroutine_location == -1)
     {
-        wxMessageBox(wxString::Format("BAD STUDENT! Subroutine location: %s was not found in symbol table", dialog->GetSubroutine()), "Error");
+        wxMessageBox(wxString::Format("ERROR! Subroutine location: %s was not found in symbol table", dialog->GetSubroutine()), "Error");
         goto end;
     }
     for (const auto& expr : dialog->GetParams())
@@ -1049,7 +1049,7 @@ void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
         int value_calc;
         if (lc3_calculate(state, expr, value_calc))
         {
-            wxMessageBox(wxString::Format("BAD STUDENT! Parameter %s is a malformed expression", expr), "Error");
+            wxMessageBox(wxString::Format("ERROR! Parameter %s is a malformed expression", expr), "Error");
             goto end;
         }
         params.push_back((short)value_calc);
@@ -1065,7 +1065,7 @@ void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
     }
     if ((unsigned short)state.mem[halt_statement] != 0xF025)
     {
-        wxMessageBox("BAD STUDENT! No halt statement found in your program", "Error");
+        wxMessageBox("ERROR! No halt statement found in your program", "Error");
         goto end;
     }
 
@@ -1237,7 +1237,7 @@ void ComplxFrame::OnRunTests(wxCommandEvent& event)
 
     if (!currentFile.IsOk())
     {
-        wxMessageBox("BAD STUDENT! An assembly file must be loaded to perform this operation", "Error");
+        wxMessageBox("ERROR! An assembly file must be loaded to perform this operation", "Error");
         return;
     }
 
@@ -1287,19 +1287,14 @@ bool ComplxFrame::TryLoadTests(lc3_test_suite& suite, const wxString& path)
     {
         if (!XmlTestParser().LoadTestSuite(suite, path.ToStdString()))
         {
-            wxMessageBox(_("BAD STUDENT! Xml file not found or parse errors found"), _("Error"));
+            wxMessageBox(_("ERROR! Xml file not found or parse errors found"), _("Error"));
             return true;
         }
     }
-    catch (const char* c)
+    catch (XmlTestParserException x)
     {
-        wxMessageBox(wxString::Format("BAD STUDENT! %s", c), _("Error"));
-        return true;
-    }
-    catch (std::string c)
-    {
-        wxMessageBox(wxString::Format("BAD STUDENT! %s", c), _("Error"));
-        return true;
+        wxMessageBox(wxString::Format("ERROR %s\n", x.what().c_str()), _("Error"));
+        return EXIT_FAILURE;
     }
 
     return false;
@@ -1454,7 +1449,7 @@ bool ComplxFrame::Running()
     if (thread == NULL) return false;
     if (thread->IsPaused() || thread->IsRunning())
     {
-        wxMessageBox("BAD STUDENT! Pause execution first", "Complx");
+        wxMessageBox("ERROR! Pause execution first", "Complx");
         return true;
     }
     return false;
@@ -1471,22 +1466,22 @@ void PrintError(int error)
     switch(error)
     {
         case 1:
-            msg = _("BAD STUDENT! Error evaluating expression: Unbalanced parethesis");
+            msg = _("ERROR! Error evaluating expression: Unbalanced parethesis");
             break;
         case 2:
-            msg = _("BAD STUDENT! Error evaluating expression: Invalid Operator");
+            msg = _("ERROR! Error evaluating expression: Invalid Operator");
             break;
         case 3:
-            msg = _("BAD STUDENT! Error evaluating expression: Invalid operand");
+            msg = _("ERROR! Error evaluating expression: Invalid operand");
             break;
         case 4:
-            msg = _("BAD STUDENT! Error evaluating expression: Malformed reference");
+            msg = _("ERROR! Error evaluating expression: Malformed reference");
             break;
         case 5:
-            msg = _("BAD STUDENT! Error evaluating expression: Undefined symbol");
+            msg = _("ERROR! Error evaluating expression: Undefined symbol");
             break;
         default:
-            msg = _("BAD STUDENT! Error evaluating expression.");
+            msg = _("ERROR! Error evaluating expression.");
             break;
     }
 

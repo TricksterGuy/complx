@@ -104,12 +104,12 @@ void RunTestDialog::OnRunTest(wxCommandEvent& event)
     }
     catch (const char* x)
     {
-        wxMessageBox(wxString::Format("BAD STUDENT! %s", x), "Run Tests Failed");
+        wxMessageBox(wxString::Format("ERROR! %s", x), "Run Tests Failed");
         return;
     }
     catch (std::string x)
     {
-        wxMessageBox(wxString::Format("BAD STUDENT! %s", x), "Run Tests Failed");
+        wxMessageBox(wxString::Format("ERROR! %s", x), "Run Tests Failed");
         return;
     }
 
@@ -126,12 +126,12 @@ void RunTestDialog::OnRunTests(wxCommandEvent& event)
     }
     catch (const char* x)
     {
-        wxMessageBox(wxString::Format("BAD STUDENT! %s", x), "Run Tests Failed");
+        wxMessageBox(wxString::Format("ERROR! %s", x), "Run Tests Failed");
         return;
     }
     catch (std::string x)
     {
-        wxMessageBox(wxString::Format("BAD STUDENT! %s", x), "Run Tests Failed");
+        wxMessageBox(wxString::Format("ERROR! %s", x), "Run Tests Failed");
         return;
     }
     tspanel->Update();
@@ -160,14 +160,11 @@ void RunTestDialog::OnReport(wxCommandEvent& event)
     std::stringstream oss;
 
     lc3_write_test_report(oss, suite, currentFile.GetFullName().ToStdString());
+    std::string report = oss.str();
 
-    TestReportDialog* dialog = new TestReportDialog(this, currentFile.GetFullName(), oss.str());
+    TestReportDialog* dialog = new TestReportDialog(this, currentFile.GetFullName(), report);
 
-    if (dialog->ShowModal() == wxID_OK)
-    {
-        delete dialog;
-        return;
-    }
+    dialog->ShowModal();
 
     delete dialog;
 }
@@ -203,13 +200,10 @@ void RunTestDialog::OnTestReport(wxCommandEvent& event)
     int tweedle_dum = 0;
     lc3_write_test_report(oss, *test, tweedle_dee, tweedle_dum);
 
-    TestReportDialog* dialog = new TestReportDialog(this, test->name, oss.str());
+    std::string report = oss.str();
+    TestReportDialog* dialog = new TestReportDialog(this, test->name, report);
 
-    if (dialog->ShowModal() == wxID_OK)
-    {
-        delete dialog;
-        return;
-    }
+    dialog->ShowModal();
 
     delete dialog;
 }
@@ -413,23 +407,29 @@ void CheckInfoPanel::Update()
   *
   * @todo: document this function
   */
-void CheckInfoPanel::Update(lc3_test_output& output)
+void CheckInfoPanel::Update(lc3_test_output& new_output)
 {
-    this->output = &output;
+    output = &new_output;
     pointsText->Hide();
     points->Hide();
-    passed->SetLabel(output.passed ? "Yes" : "No");
-    condition->SetLabel(lc3_test_output_string(output));
-    expected->SetLabel(output.expected);
-    actual->SetLabel(output.actual);
+    extra_output->Hide();
+    passed->SetLabel(output->passed ? "Yes" : "No");
+    condition->SetLabel(lc3_test_output_string(*output));
+    expected->SetLabel(output->expected);
+    actual->SetLabel(output->actual);
 
-    if (output.points)
+    if (output->points)
     {
         pointsText->Show();
         points->Show();
-        points->SetLabel(wxString::Format("%d / %d", output.earned, output.points));
+        points->SetLabel(wxString::Format("%u / %u", output->earned, output->points));
     }
 
+    if (!output->extra_output.empty())
+    {
+        extra_output->Show();
+        extra_output->SetValue(output->extra_output);
+    }
     Layout();
 }
 
@@ -437,10 +437,10 @@ void CheckInfoPanel::Update(lc3_test_output& output)
   *
   * @todo: document this function
   */
-TestReportDialog::TestReportDialog(wxWindow* parent, wxString name, wxString report) : TestReportDialogDecl(parent)
+TestReportDialog::TestReportDialog(wxWindow* parent, const wxString& test_name, const wxString& report_str) : TestReportDialogDecl(parent)
 {
-    this->name->SetLabel(name);
-    this->report->SetValue(report);
+    name->SetLabel(test_name);
+    report->SetValue(report_str);
 }
 
 /** @brief ~TestReportDialog

@@ -317,7 +317,7 @@ void DebugInfoList::OnWatchpoint(wxCommandEvent& event)
             }
 
             if (multiple)
-                wxMessageBox(_("BAD STUDENT! You can't have two watchpoints refer to the same target"), _("Error"));
+                wxMessageBox(_("ERROR! You can't have two watchpoints refer to the same target"), _("Error"));
             else
             {
                 if (info.is_reg)
@@ -367,7 +367,7 @@ void DebugInfoList::OnBreakpoint(wxCommandEvent& event)
             }
 
             if (multiple)
-                wxMessageBox(_("BAD STUDENT! You can't have two breakpoints refer to the same address"), _("Error"));
+                wxMessageBox(_("ERROR! You can't have two breakpoints refer to the same address"), _("Error"));
             else
             {
                 breakpoints.push_back(info);

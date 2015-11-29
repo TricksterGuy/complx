@@ -176,7 +176,7 @@ void MemoryView::SetValue(int item, int col, const wxString &value)
             if (data == -1)
                 lc3_sym_add(state, newsym, addr);
             else
-                wxMessageBox(wxString::Format("BAD STUDENT! The symbol %s already exists at address 0x%04x",
+                wxMessageBox(wxString::Format("ERROR! The symbol %s already exists at address 0x%04x",
                                               newsym, data), _("ERROR"));
             break;
         case MemoryBinary:
@@ -201,12 +201,12 @@ void MemoryView::SetValue(int item, int col, const wxString &value)
             catch (LC3AssembleException e)
             {
                 effvalue = e.what();
-                wxMessageBox(wxString::Format("BAD STUDENT! %s", effvalue), _("Assemble Error"));
+                wxMessageBox(wxString::Format("ERROR! %s", effvalue), _("Assemble Error"));
             }
             catch (std::vector<LC3AssembleException> e)
             {
                 effvalue = e[0].what();
-                wxMessageBox(wxString::Format("BAD STUDENT! %s", effvalue), _("Assemble Error"));
+                wxMessageBox(wxString::Format("ERROR! %s", effvalue), _("Assemble Error"));
             }
             break;
         default:

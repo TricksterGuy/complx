@@ -73,7 +73,7 @@ class CheckInfoPanel : public CheckInfoPanelDecl
 class TestReportDialog : public TestReportDialogDecl
 {
 	public:
-		TestReportDialog(wxWindow* parent, wxString name, wxString report);
+		TestReportDialog(wxWindow* parent, const wxString& name, const wxString& report);
 		~TestReportDialog();
 };
 

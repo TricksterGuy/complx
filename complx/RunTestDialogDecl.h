@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Oct  8 2012)
+// C++ code generated with wxFormBuilder (version Apr 25 2015)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
@@ -134,6 +134,7 @@ class CheckInfoPanelDecl : public wxPanel
 		wxStaticText* condition;
 		wxStaticText* expected;
 		wxStaticText* actual;
+		wxTextCtrl* extra_output;
 	
 	public:
 		

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Oct  8 2012)
+// C++ code generated with wxFormBuilder (version Apr 25 2015)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
@@ -407,7 +407,10 @@ CheckInfoPanelDecl::CheckInfoPanelDecl( wxWindow* parent, wxWindowID id, const w
 	bSizer2411->Add( actual, 0, wxALL, 4 );
 	
 	
-	bSizer14->Add( bSizer2411, 1, wxEXPAND, 5 );
+	bSizer14->Add( bSizer2411, 0, wxEXPAND, 5 );
+	
+	extra_output = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
+	bSizer14->Add( extra_output, 1, wxEXPAND|wxALL, 4 );
 	
 	
 	this->SetSizer( bSizer14 );
