@@ -9,14 +9,10 @@
 // For .orig statements
 struct code_range
 {
-    unsigned short location;
-    unsigned short size;
+    unsigned int location;
+    unsigned int size;
 
-    code_range(unsigned short location, unsigned short size)
-    {
-        this->location = location;
-        this->size = size;
-    }
+    code_range(unsigned int loc, unsigned int sz) : location(loc), size(sz) {}
 
     bool operator<(const code_range& o)
     {

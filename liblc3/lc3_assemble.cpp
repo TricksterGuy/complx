@@ -499,6 +499,7 @@ void lc3_assemble(lc3_state& state, const std::string& filename, std::vector<cod
     context.disable_plugins = disable_plugins;
 
     bool in_orig = false;
+
     // First pass get all symbols.
     while (!file.eof())
     {
@@ -750,8 +751,8 @@ void lc3_assemble(lc3_state& state, const std::string& filename, std::vector<cod
         }
 
         // Can't wrap around memory ex. .orig xFFFF .fill xFFFF .fill x0000 .end
-        // This is bad anyway you slice it
-        if (last_addr == 0xFFFF && context.address == 0)
+        //// This is bad anyway you slice it
+        if (current_location.location + current_location.size > 65536)
         {
             THROW(LC3AssembleException(context.line, "", SCAN_OVERFLOW, context.lineno));
         }
@@ -942,7 +943,7 @@ bool lc3_assemble(const std::string& filename, const std::string& output_prefix,
         obj.write((char*)(&lol), sizeof(short));
         lol = htons(range.size);
         obj.write((char*)(&lol), sizeof(short));
-        for (int j = 0; j < range.size; j++)
+        for (unsigned int j = 0; j < range.size; j++)
         {
             lol = htons(state.mem[range.location + j]);
             obj.write((char*)(&lol), sizeof(short));
