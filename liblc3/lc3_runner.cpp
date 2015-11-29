@@ -12,19 +12,21 @@
   * Initializes the state of the lc3
   *
   * @param state An LC3 state
-  * @param randomize Randomizes everything!
+  * @param randomize_registers if true randomizes registers
+  * @param randomize_memory if true randomizes memory
+  * @param fill_value ignored if randomize_XXX is true otherwise sets registers/memory to this value (except R7).
   */
-void lc3_init(lc3_state& state, bool randomize)
+void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory, short fill_value)
 {
     // Set Registers
-    state.regs[0] = randomize * lc3_random();
-    state.regs[1] = randomize ? lc3_random() : 32767;
-    state.regs[2] = randomize * lc3_random();
-    state.regs[3] = randomize * lc3_random();
-    state.regs[4] = randomize * lc3_random();
-    state.regs[5] = randomize * lc3_random();
-    state.regs[6] = randomize * lc3_random();
-    state.regs[7] = randomize ? lc3_random() : 0x490;
+    state.regs[0] = randomize_registers ? lc3_random() : fill_value;
+    state.regs[1] = randomize_registers ? lc3_random() : fill_value;
+    state.regs[2] = randomize_registers ? lc3_random() : fill_value;
+    state.regs[3] = randomize_registers ? lc3_random() : fill_value;
+    state.regs[4] = randomize_registers ? lc3_random() : fill_value;
+    state.regs[5] = randomize_registers ? lc3_random() : fill_value;
+    state.regs[6] = randomize_registers ? lc3_random() : fill_value;
+    state.regs[7] = randomize_registers ? lc3_random() : 0x490;
 
     // PC is initially at address 3000
     state.pc = 0x3000;
@@ -63,7 +65,16 @@ void lc3_init(lc3_state& state, bool randomize)
     state.warning = &std::cout;
 
     // Clear memory
-    memset(state.mem, 0, sizeof(short) * 65536);
+    if (randomize_memory)
+    {
+        lc3_randomize(state);
+    }
+    else
+    {
+        for (unsigned int i = 0; i < 65536; i++)
+            state.mem[i] = fill_value;
+    }
+
     // Add LC3 OS
     memcpy(state.mem, lc3_os, LC3_OS_SIZE * sizeof(unsigned short));
 

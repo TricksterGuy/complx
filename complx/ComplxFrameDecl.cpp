@@ -158,6 +158,10 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuStateReinitialize = new wxMenuItem( menuState, ID_REINITIALIZE, wxString( _("Reinitialize") ) + wxT('\t') + wxT("Ctrl+K"), _("Reinitializes Memory"), wxITEM_NORMAL );
 	menuState->Append( menuStateReinitialize );
 	
+	wxMenuItem* menuStateFillMemoryWith;
+	menuStateFillMemoryWith = new wxMenuItem( menuState, ID_FILL_MEMORY_WITH, wxString( _("Fill Memory With...") ) , _("Fills memory with a specified value"), wxITEM_NORMAL );
+	menuState->Append( menuStateFillMemoryWith );
+	
 	menuStateTrueTraps = new wxMenuItem( menuState, ID_TRUE_TRAPS, wxString( _("True Traps") ) + wxT('\t') + wxT("Ctrl+T"), _("Enables True Traps"), wxITEM_CHECK );
 	menuState->Append( menuStateTrueTraps );
 	
@@ -338,7 +342,7 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	
 	controlSizer->Add( finishButton, 0, wxALL|wxEXPAND, 2 );
 	
-	rewindButton = new wxButton( mainPanel, wxID_ANY, _("Re&wind"), wxDefaultPosition, wxDefaultSize, 0 );
+	rewindButton = new wxButton( mainPanel, wxID_ANY, _("Rewin&d"), wxDefaultPosition, wxDefaultSize, 0 );
 	rewindButton->SetToolTip( _("Rewinds back to start (or undoes all of the instructions in the stack)") );
 	
 	controlSizer->Add( rewindButton, 0, wxALL, 2 );
@@ -578,6 +582,7 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	this->Connect( menuStateControlFinish->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnFinish ) );
 	this->Connect( menuStateRandomize->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnRandomize ) );
 	this->Connect( menuStateReinitialize->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReinitialize ) );
+	this->Connect( menuStateFillMemoryWith->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnFillMemoryWith ) );
 	this->Connect( menuStateTrueTraps->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTrueTraps ) );
 	this->Connect( menuStateInterrupts->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnInterrupts ) );
 	this->Connect( menuStateClearConsole->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnClearConsole ) );
@@ -681,6 +686,7 @@ ComplxFrameDecl::~ComplxFrameDecl()
 	this->Disconnect( ID_FINISH, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnFinish ) );
 	this->Disconnect( ID_RANDOMIZE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnRandomize ) );
 	this->Disconnect( ID_REINITIALIZE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReinitialize ) );
+	this->Disconnect( ID_FILL_MEMORY_WITH, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnFillMemoryWith ) );
 	this->Disconnect( ID_TRUE_TRAPS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTrueTraps ) );
 	this->Disconnect( ID_INTERRUPTS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnInterrupts ) );
 	this->Disconnect( ID_CLEAR_CONSOLE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnClearConsole ) );

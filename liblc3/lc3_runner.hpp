@@ -9,7 +9,7 @@ Initialization and Play Functions
 =================================
 */
 /** Initializes the lc3 state */
-void lc3_init(lc3_state& state, bool randomize = true);
+void lc3_init(lc3_state& state, bool randomize_registers = true, bool randomize_memory = false, short fill_value = 0);
 /** Removes all installed plugins */
 void lc3_remove_plugins(lc3_state& state);
 /** Runs until halt */

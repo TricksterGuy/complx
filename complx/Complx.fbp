@@ -604,6 +604,21 @@
                         <event name="OnMenuSelection">OnReinitialize</event>
                         <event name="OnUpdateUI"></event>
                     </object>
+                    <object class="wxMenuItem" expanded="1">
+                        <property name="bitmap"></property>
+                        <property name="checked">0</property>
+                        <property name="enabled">1</property>
+                        <property name="help">Fills memory with a specified value</property>
+                        <property name="id">ID_FILL_MEMORY_WITH</property>
+                        <property name="kind">wxITEM_NORMAL</property>
+                        <property name="label">Fill Memory With...</property>
+                        <property name="name">menuStateFillMemoryWith</property>
+                        <property name="permission">none</property>
+                        <property name="shortcut"></property>
+                        <property name="unchecked_bitmap"></property>
+                        <event name="OnMenuSelection">OnFillMemoryWith</event>
+                        <event name="OnUpdateUI"></event>
+                    </object>
                     <object class="wxMenuItem" expanded="0">
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
@@ -1855,7 +1870,7 @@
                                             <property name="gripper">0</property>
                                             <property name="hidden">0</property>
                                             <property name="id">wxID_ANY</property>
-                                            <property name="label">Re&amp;wind</property>
+                                            <property name="label">Rewin&amp;d</property>
                                             <property name="max_size"></property>
                                             <property name="maximize_button">0</property>
                                             <property name="maximum_size"></property>

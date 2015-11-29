@@ -158,8 +158,7 @@ void ComplxFrame::OnRandomizeAndLoad(wxCommandEvent& event)
     if (dialog->ShowModal() == wxID_OK)
     {
         wxFileName filename(dialog->GetPath());
-        OnInit();
-        lc3_randomize(state);
+        OnInit(true, true);
         DoLoadFile(filename);
     }
 }
@@ -177,8 +176,7 @@ void ComplxFrame::OnRandomizeAndReload(wxCommandEvent& event)
         return;
     }
 
-    OnInit();
-    lc3_randomize(state);
+    OnInit(true, true);
     DoLoadFile(currentFile);
 }
 
@@ -204,10 +202,10 @@ void ComplxFrame::OnLoad(wxCommandEvent& event)
   *
   * Called when the machine needs to be initialized
   */
-void ComplxFrame::OnInit(void)
+void ComplxFrame::OnInit(bool randomize_registers, bool randomize_memory, short fill_value)
 {
     static bool first = true;
-    lc3_init(state, true);
+    lc3_init(state, randomize_registers, randomize_memory, fill_value);
 
     if (console != NULL) delete console;
     console = new LC3Console(this);
@@ -1069,13 +1067,7 @@ void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
         goto end;
     }
 
-    OnInit();
-    if (dialog->IsRandomMemory()) lc3_randomize(state);
-    if (dialog->IsRandomRegisters())
-    {
-        for (int i = 0; i < 8; i++)
-            state.regs[i] = lc3_random();
-    }
+    OnInit(dialog->IsRandomRegisters(), dialog->IsRandomMemory());
     DoLoadFile(currentFile);
 
     state.regs[6] = state.mem[(unsigned short)stack_location] - params.size();
@@ -1110,7 +1102,37 @@ void ComplxFrame::OnReinitialize(wxCommandEvent& event)
   */
 void ComplxFrame::OnRandomize(wxCommandEvent& event)
 {
-    lc3_randomize(state);
+    OnInit(true, true);
+    UpdateRegisters();
+    UpdateMemory();
+    UpdateStatus();
+}
+
+/** @brief OnFillMemoryWith
+  *
+  * Allows user to specify a value to fill the entire memory with
+  */
+void ComplxFrame::OnFillMemoryWith(wxCommandEvent& event)
+{
+
+    wxString fill_value_str = wxGetTextFromUser(_("Please enter value to fill memory with"),
+                                                _("Fill Memory With"),
+                                                _("0"),
+                                                this);
+	if (fill_value_str.IsEmpty()) return;
+
+    std::string strdata = fill_value_str.ToStdString();
+
+    int data;
+    int error = lc3_calculate(state, strdata, data);
+    if (error) PrintError(error);
+    if (data < -32768 || data > 32767)
+    {
+        wxMessageBox(wxString::Format("ERROR value must be a 16 bit 2's complement number got %d", data), _("Error"));
+        return;
+    }
+
+    OnInit(false, false, (short)data);
     UpdateRegisters();
     UpdateMemory();
     UpdateStatus();

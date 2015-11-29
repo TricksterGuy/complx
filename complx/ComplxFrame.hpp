@@ -68,6 +68,7 @@ class ComplxFrame : public ComplxFrameDecl
         void OnFinish(wxCommandEvent& event);
         void OnRandomize(wxCommandEvent& event);
         void OnReinitialize(wxCommandEvent& event);
+        void OnFillMemoryWith(wxCommandEvent& event);
         void OnTrueTraps(wxCommandEvent& event);
         void OnInterrupts(wxCommandEvent& event);
         void OnClearConsole(wxCommandEvent& event);
@@ -132,7 +133,7 @@ class ComplxFrame : public ComplxFrameDecl
         long call_stack_size;
 
         void UpdateRegister(wxTextCtrl* text, int value, int index);
-        void OnInit(void);
+        void OnInit(bool randomize_registers = true, bool randomize_memory = false, short fill_value = 0);
 
         void SetupExecution(int run_mode, int runtime = -1);
         void DoLoadFile(const wxFileName& filename);

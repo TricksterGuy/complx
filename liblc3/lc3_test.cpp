@@ -83,11 +83,10 @@ void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, int 
 void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
 {
     lc3_state state;
-    lc3_init(state);
 
     // Preliminary stuff
     if (seed != -1) srand(seed);
-    if (test.randomize) lc3_randomize(state);
+    lc3_init(state, test.randomize, test.randomize);
     if (test.true_traps) lc3_set_true_traps(state, 1);
     if (test.interrupt_enabled) state.interrupt_enabled = 1;
     bool disable_plugins = test.disable_plugins;

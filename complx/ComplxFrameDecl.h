@@ -73,6 +73,7 @@ class ComplxFrameDecl : public wxFrame
 			ID_FINISH,
 			ID_RANDOMIZE,
 			ID_REINITIALIZE,
+			ID_FILL_MEMORY_WITH,
 			ID_TRUE_TRAPS,
 			ID_INTERRUPTS,
 			ID_CLEAR_CONSOLE,
@@ -165,6 +166,7 @@ class ComplxFrameDecl : public wxFrame
 		virtual void OnFinish( wxCommandEvent& event ) = 0;
 		virtual void OnRandomize( wxCommandEvent& event ) = 0;
 		virtual void OnReinitialize( wxCommandEvent& event ) = 0;
+		virtual void OnFillMemoryWith( wxCommandEvent& event ) = 0;
 		virtual void OnTrueTraps( wxCommandEvent& event ) = 0;
 		virtual void OnInterrupts( wxCommandEvent& event ) = 0;
 		virtual void OnClearConsole( wxCommandEvent& event ) = 0;

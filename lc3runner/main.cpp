@@ -61,8 +61,7 @@ int main(int argc, char** argv)
     fprintf(stderr, "[INFO] Assembling your code\n");
 
 
-    lc3_init(state, false);
-    if (randomize) lc3_randomize(state);
+    lc3_init(state, randomize, randomize);
 
     try
     {
