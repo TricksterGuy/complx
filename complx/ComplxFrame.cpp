@@ -1330,7 +1330,7 @@ void ComplxFrame::OnAbout(wxCommandEvent& event)
 {
     wxAboutDialogInfo aboutInfo;
     aboutInfo.SetName("Complx");
-    aboutInfo.SetVersion(AutoVersion::FULLVERSION_STRING);
+    aboutInfo.SetVersion(Version::FULLVERSION_STRING);
     aboutInfo.SetDescription(_("LC-3 Simulator\nBug reports, thanks, and feature requests should be sent to Brandon.\nbwhitehead0308@gmail.com"));
     aboutInfo.SetCopyright("(C) 2010-2015");
     aboutInfo.AddDeveloper("Brandon Whitehead bwhitehead0308@gmail.com");
@@ -1387,7 +1387,7 @@ void ComplxFrame::OnFirstTime(wxCommandEvent& event)
                                   "Thing 2: DO NOT start these homework assignments on the day it's due.\n"
                                   "Thing 3: Report any bugs to TAs or me directly (bwhitehead0308@gmail.com).\n\n"
                                   "  Or you may file an issue at https://github.com/TricksterGuy/complx/issues",
-                                  AutoVersion::FULLVERSION_STRING),
+                                  Version::FULLVERSION_STRING),
                                   "Hi from Brandon", wxICON_INFORMATION | wxOK);
 }
 

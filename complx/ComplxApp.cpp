@@ -78,7 +78,7 @@ bool ComplxApp::OnInit()
     if (last_ver.empty()) {
         wxCommandEvent event;
         complxframe->OnFirstTime(event);
-        config->Write("/firstrun", AutoVersion::FULLVERSION_STRING);
+        config->Write("/firstrun", Version::FULLVERSION_STRING);
         config->Flush();
     }
 
@@ -117,7 +117,7 @@ bool ComplxApp::OnCmdLineParsed(wxCmdLineParser& parser)
   */
 void ComplxApp::OnInitCmdLine(wxCmdLineParser& parser)
 {
-    parser.SetLogo(wxString::Format(_("Complx Version %ld.%ld"), AutoVersion::MAJOR, AutoVersion::MINOR));
+    parser.SetLogo(wxString::Format(_("Complx Version %ld.%ld"), Version::MAJOR, Version::MINOR));
     parser.SetDesc(cmd_descriptions);
     parser.SetSwitchChars (_("-"));
 }
