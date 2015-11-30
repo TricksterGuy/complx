@@ -1441,7 +1441,7 @@ void ComplxFrame::UpdatePlay(void)
     nextLineButton->SetLabel(_("&Next Line"));
     prevLineButton->SetLabel(_("&Prev Line"));
     finishButton->SetLabel(_("&Finish"));
-    rewindButton->SetLabel(_("Re&wind"));
+    rewindButton->SetLabel(_("Rewin&d"));
 }
 
 /** UpdatePhrase
