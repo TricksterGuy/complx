@@ -10,7 +10,6 @@ add_definitions(-DSCI_LEXER -DLINK_LEXERS -DGTK -D__WX__)
 
 set(wxWidgets_USE_LIBS xrc xml html adv gl net core base)
 find_package(wxWidgets REQUIRED)
-execute_process(COMMAND sh "${wxWidgets_CONFIG_EXECUTABLE}" --cxxflags)
 include(${wxWidgets_USE_FILE})
 set(CMAKE_SKIP_RPATH TRUE)
 
