@@ -1,4 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
+if(CMAKE_VERSION VERSION_EQUAL 3.0 OR CMAKE_VERSION VERSION_GREATER 3.0)
+    # Ignore warnings about rpath behavior on OS X
+    cmake_policy(SET CMP0042 NEW)
+endif()
 project(complx-tools)
 
 option(ENABLE_PLUGINS "Enable Official Plugins" ON)
