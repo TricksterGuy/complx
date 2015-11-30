@@ -737,9 +737,10 @@ void lc3_assemble(lc3_state& state, const std::string& filename, std::vector<cod
         {
             // Should have a valid instruction here.
             int specialop;
-            int op = get_opcode(tokens[0], specialop, context, false);
+            get_opcode(tokens[0], specialop, context, false);
+            /*int op = get_opcode(tokens[0], specialop, context, false);
             if (!context.multiple)
-                assert(!(op == -1 && specialop == -1));
+                assert(!(op == -1 && specialop == -1));*/
             context.address += 1;
             current_location.size += 1;
         }

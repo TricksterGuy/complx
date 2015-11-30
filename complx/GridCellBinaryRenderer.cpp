@@ -123,7 +123,6 @@ void GridCellBinaryRenderer::InstructionColor(wxGrid &grid, wxGridCellAttr &attr
 {
     wxRect rect = srect;
     int width = dc.GetCharWidth(), height = rect.GetHeight();
-    int textwidth = dc.GetTextExtent(grid.GetCellValue(item, column)).GetWidth();
     rect.Offset(2, 0);
 
     dc.SetBrush(*wxBLACK);
