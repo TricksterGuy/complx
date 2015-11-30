@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 2.6)
-cmake_policy(SET CMP0042 NEW) # ignore warnings about rpath behavior on OS X
 project(complx-tools)
 
 option(ENABLE_PLUGINS "Enable Official Plugins" ON)
