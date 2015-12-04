@@ -1,8 +1,7 @@
 #ifndef BWLCD_HPP
 #define BWLCD_HPP
 
-#include <lc3_plugin.hpp>
-#include <lc3_parser.hpp>
+#include <lc3_all.hpp>
 #include <wx/wx.h>
 #include "bwlcdgui.h"
 
@@ -17,7 +16,6 @@ class BWLCD : public BWLCDGUI
 {
     public:
         BWLCD(wxWindow* top, int width, int height, unsigned short startaddr, unsigned int off, unsigned int on);
-        ~BWLCD();
 		virtual void OnUpdate(wxThreadEvent& event);
 		void OnPaint( wxPaintEvent& event );
     private:

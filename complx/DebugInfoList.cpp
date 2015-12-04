@@ -3,6 +3,7 @@
 #include "WatchpointDialog.hpp"
 #include <wx/msgdlg.h>
 
+extern lc3_state state;
 void PrintError(int error);
 
 /** DebugInfoList
@@ -29,15 +30,6 @@ DebugInfoList::DebugInfoList(wxWindow *parent, wxWindowID id, const wxPoint &pos
         mem_watchpoints.push_back(j->second);
 
     InitList();
-}
-
-/** ~DebugInfoList
-  *
-  * Destructor
-  */
-DebugInfoList::~DebugInfoList()
-{
-
 }
 
 /** GetMemWatchpoints

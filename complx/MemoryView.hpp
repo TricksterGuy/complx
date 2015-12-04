@@ -1,13 +1,12 @@
 #ifndef MEMORYVIEW_HPP
 #define MEMORYVIEW_HPP
 
+#include <map>
 #include <set>
+#include <vector>
 #include <wx/string.h>
 #include <wx/grid.h>
 #include <wx/imaglist.h>
-#include "lc3.hpp"
-
-extern lc3_state state;
 
 enum class ViewAction {
   HIDE = 0,
@@ -55,34 +54,33 @@ enum
 class MemoryView : public wxGridTableBase
 {
 	public:
-		MemoryView();
-		~MemoryView();
+		MemoryView() : disassemble_level(2), unsigned_mode(false), flipped_mode(false) {}
 		void ShowAllAddresses();
 		void ModifyAddresses(const std::vector<ViewRange>& addresses, bool expand_too = true);
 		void SetDefaultVisibility(ViewAction action);
-    int GetNumberRows();
-    int GetNumberCols();
-    wxString GetValue(int row, int col);
-    void SetValue(int row, int col, const wxString &value);
-    wxString GetColLabelValue(int col);
-    long GetValueAsLong(int row, int col);
-    void SetDisassembleLevel(int level);
-    void SetUnsignedMode(bool mode);
-    void SetFlippedMode(bool mode);
-    // Converts address to view table id
-    // If not in the viewTable returns closest id.
-    int AddressToView(unsigned short address) const;
-  private:
-    int disassemble_level;
-    bool unsigned_mode;
-    bool flipped_mode;
-    void ExpandRanges();
-    unsigned short GetAddress(int index);
-    std::set<ViewRange, ViewRangeElementCompare> ranges;
-    // Expanded version of ranges.
-    std::vector<ViewTableEntry> viewTable;
-    std::map<unsigned short, int> viewTable_rev;
-    ViewAction defaultView;
+        int GetNumberRows();
+        int GetNumberCols();
+        wxString GetValue(int row, int col);
+        void SetValue(int row, int col, const wxString &value);
+        wxString GetColLabelValue(int col);
+        long GetValueAsLong(int row, int col);
+        void SetDisassembleLevel(int level);
+        void SetUnsignedMode(bool mode);
+        void SetFlippedMode(bool mode);
+        // Converts address to view table id
+        // If not in the viewTable returns closest id.
+        int AddressToView(unsigned short address) const;
+    private:
+        int disassemble_level;
+        bool unsigned_mode;
+        bool flipped_mode;
+        void ExpandRanges();
+        unsigned short GetAddress(int index);
+        std::set<ViewRange, ViewRangeElementCompare> ranges;
+        // Expanded version of ranges.
+        std::vector<ViewTableEntry> viewTable;
+        std::map<unsigned short, int> viewTable_rev;
+        ViewAction defaultView;
 };
 
 #endif

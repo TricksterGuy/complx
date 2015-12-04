@@ -8,9 +8,6 @@
 #include <sstream>
 
 #include "LC3ConsoleDecl.h"
-#include "lc3.hpp"
-
-extern lc3_state state;
 
 class LC3Console : public LC3ConsoleDecl
 {

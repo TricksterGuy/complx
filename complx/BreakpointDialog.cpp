@@ -1,6 +1,8 @@
 #include <wx/string.h>
 #include "BreakpointDialog.hpp"
 
+extern lc3_state state;
+
 /** BreakpointDialog
   *
   * Constructor
@@ -18,15 +20,6 @@ BreakpointDialog::BreakpointDialog(wxWindow* parent, lc3_breakpoint_info info, b
     hits = info.hit_count;
 
     if (!addr_change) address_text->Disable();
-}
-
-/** ~BreakpointDialog
-  *
-  * Destructor
-  */
-BreakpointDialog::~BreakpointDialog()
-{
-
 }
 
 /** GetInfo

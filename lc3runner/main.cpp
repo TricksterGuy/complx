@@ -1,9 +1,7 @@
-#include <lc3.hpp>
+#include <lc3_all.hpp>
 #include <string>
 
 lc3_state state;
-
-
 
 int main(int argc, char** argv)
 {

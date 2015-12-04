@@ -1,4 +1,6 @@
 #include "lc3_parser.hpp"
+#include "lc3_plugin.hpp"
+#include "lc3_symbol.hpp"
 #include <algorithm>
 #include <iostream>
 #include <sstream>

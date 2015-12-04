@@ -5,7 +5,9 @@
 #include <cstring>
 #include <cassert>
 #include "lc3.hpp"
+#include "lc3_execute.hpp"
 #include "lc3_expressions.hpp"
+#include "lc3_plugin.hpp"
 #include "lc3_symbol.hpp"
 #include "lc3_os.hpp"
 

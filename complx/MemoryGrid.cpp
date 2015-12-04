@@ -10,7 +10,9 @@
 #include "GridCellInfoRenderer.hpp"
 #include "GridCellBinaryRenderer.hpp"
 #include "BreakpointDialog.hpp"
+#include <lc3_all.hpp>
 
+extern lc3_state state;
 void PrintError(int error);
 
 /** MemoryGrid

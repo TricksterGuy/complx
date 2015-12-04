@@ -2,19 +2,15 @@
 #define CALL_SUBROUTINE_DIALOG_HPP
 
 #include "CallSubroutineDialogDecl.h"
-#include <wx/event.h>
-#include <wx/window.h>
 #include <string>
 #include <vector>
-#include <lc3.hpp>
-
-extern lc3_state state;
+#include <wx/event.h>
+#include <wx/window.h>
 
 class CallSubroutineDialog : public CallSubroutineDialogDecl
 {
     public:
         CallSubroutineDialog(wxWindow* parent = NULL)  : CallSubroutineDialogDecl(parent) {SetupSubroutines();}
-        ~CallSubroutineDialog() {}
         const std::string GetSubroutine() const;
         const std::string GetStack() const;
         const std::vector<std::string> GetParams() const;

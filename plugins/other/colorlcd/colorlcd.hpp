@@ -1,8 +1,7 @@
 #ifndef COLORLCD_HPP
 #define COLORLCD_HPP
 
-#include <lc3_plugin.hpp>
-#include <lc3_parser.hpp>
+#include <lc3_all.hpp>
 #include <wx/wx.h>
 #include "colorlcdgui.h"
 
@@ -17,9 +16,8 @@ class ColorLCD : public COLORLCDGUI
 {
     public:
         ColorLCD(wxWindow* top, int width, int height, unsigned short startaddr);
-        ~ColorLCD();
 		virtual void OnUpdate(wxThreadEvent& event);
-		void OnPaint( wxPaintEvent& event );
+		void OnPaint(wxPaintEvent& event);
     private:
         lc3_state* state;
         int width;

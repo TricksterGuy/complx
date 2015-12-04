@@ -1,11 +1,13 @@
+#include "lc3_runner.hpp"
+#include "lc3_debug.hpp"
+#include "lc3_execute.hpp"
+#include "lc3_os.hpp"
+#include "lc3_plugin.hpp"
 #include <iostream>
 #include <cstring>
 #include <cassert>
 #include <cstdlib>
 #include <dlfcn.h>
-#include "lc3_runner.hpp"
-#include "lc3_execute.hpp"
-#include "lc3_os.hpp"
 
 /** lc3_init
   *

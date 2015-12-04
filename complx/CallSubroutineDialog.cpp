@@ -1,6 +1,7 @@
 #include "CallSubroutineDialog.hpp"
+#include <lc3_all.hpp>
 
-#include <lc3_parser.hpp> // for tokenize
+extern lc3_state state;
 
 const std::string CallSubroutineDialog::GetSubroutine() const
 {

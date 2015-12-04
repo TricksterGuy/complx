@@ -1,8 +1,7 @@
 #ifndef MULTIPLY_HPP
 #define MULTIPLY_HPP
 
-#include <lc3_plugin.hpp>
-#include <lc3_parser.hpp>
+#include <lc3_all.hpp>
 
 #define MULTIPLY_MAJOR_VERSION 1
 #define MULTIPLY_MINOR_VERSION 3
@@ -10,8 +9,7 @@
 class MultiplyPlugin : public InstructionPlugin
 {
 	public:
-		MultiplyPlugin();
-		~MultiplyPlugin();
+		MultiplyPlugin() : InstructionPlugin(MULTIPLY_MAJOR_VERSION, MULTIPLY_MINOR_VERSION, "Multiplication Plugin") {}
         virtual std::string GetOpcode() const;
         virtual unsigned short DoAssembleOne(lc3_state& state, LC3AssembleContext& context);
         virtual void OnDecode(lc3_state& state, unsigned short data, lc3_instr& instr);

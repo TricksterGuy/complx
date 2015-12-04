@@ -28,35 +28,6 @@ void destroy_plugin(Plugin* ptr = NULL)
     }
 }
 
-/** @brief UdivPlugin
-  *
-  * @todo: document this function
-  */
- UdivPlugin::UdivPlugin(unsigned char vector) : TrapFunctionPlugin(UDIV_MAJOR_VERSION, UDIV_MINOR_VERSION, "Division and Modulus Trap", vector)
-{
-
-}
-
-/** @brief ~UdivPlugin
-  *
-  * @todo: document this function
-  */
- UdivPlugin::~UdivPlugin()
-{
-
-}
-
-
-/** @brief GetTrapName
-  *
-  * @todo: document this function
-  */
-std::string UdivPlugin::GetTrapName() const
-{
-    return "UDIV";
-}
-
-
 /** @brief OnExecute
   *
   * @todo: document this function

@@ -2,42 +2,15 @@
 #define LC3_PARSER_HPP
 
 #include "lc3.hpp"
+#include "lc3_assemble.hpp"
 #include <string>
 #include <vector>
 
-enum LC3AssembleExceptionTypes
-{
-    UNKNOWN_ERROR = 0,
-    SYNTAX_ERROR,
-    ORIG_MATCHUP,
-    ORIG_OVERLAP,
-    STRAY_END,
-    STRAY_DATA,
-    UNDEFINED_SYMBOL,
-    DUPLICATE_SYMBOL, // Two of the same symbol was used
-    MULTIPLE_SYMBOL, // Multiple symbols was defined for an address.
-    INVALID_SYMBOL,
-    INVALID_REGISTER,
-    INVALID_INSTRUCTION,
-    INVALID_DIRECTIVE,
-    INVALID_FLAGS,
-    INVALID_CHARACTER,
-    INVALID_NUMBER, // Signed number given to unsigned value.
-    NUMBER_OVERFLOW,
-    OFFSET_OVERFLOW,
-    MEMORY_OVERFLOW,
-    SCAN_OVERFLOW, // Like MEMORY OVERFLOW except you were at xFFFF and the next address would be x0000.
-    FILE_ERROR,
-    UNTERMINATED_STRING,
-    MALFORMED_STRING,
-    EXTRA_INPUT,
-    PLUGIN_FAILED_TO_LOAD,
-};
-
+class LC3AssembleContext;
 
 #define THROW(exception) do \
 { \
-    if (context.multiple) \
+    if (context.options.multiple_errors) \
     { \
         context.exceptions.push_back(exception);\
     } \
@@ -49,11 +22,11 @@ enum LC3AssembleExceptionTypes
 
 #define WARN(exception) do \
 { \
-    if (context.werror) \
+    if (context.options.warnings_as_errors) \
     { \
         THROW(exception); \
     } \
-    else if (context.warn) \
+    else if (context.options.enable_warnings) \
     { \
         printf("Warning: %s\n", exception.what().c_str());\
     } \
@@ -61,7 +34,7 @@ enum LC3AssembleExceptionTypes
 
 #define THROWANDDO(exception, do_this) do \
 { \
-    if (context.multiple) \
+    if (context.options.multiple_errors) \
     { \
         context.exceptions.push_back(exception);\
         do_this; \
@@ -71,23 +44,6 @@ enum LC3AssembleExceptionTypes
         throw exception;\
     } \
 } while(0) \
-
-class LC3AssembleException;
-
-struct LC3AssembleContext
-{
-    std::vector<std::string> tokens;
-    mutable std::vector<LC3AssembleException> exceptions;
-    std::string line;
-    lc3_state* state;
-    int lineno;
-    unsigned short address;
-    bool multiple;
-    bool werror;
-    bool warn;
-    bool debug;
-    bool disable_plugins;
-};
 
 /* Removes leading and trailing whitespace*/
 void trim(std::string& line);

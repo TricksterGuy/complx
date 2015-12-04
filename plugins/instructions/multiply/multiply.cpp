@@ -18,26 +18,6 @@ void destroy_plugin(Plugin* ptr = NULL)
     }
 }
 
-/** @brief MultiplyPlugin
-  *
-  * @todo: document this function
-  */
-MultiplyPlugin::MultiplyPlugin() : InstructionPlugin(MULTIPLY_MAJOR_VERSION, MULTIPLY_MINOR_VERSION, "Multiplication Plugin")
-{
-
-}
-
-
-/** @brief ~MultiplyPlugin
-  *
-  * @todo: document this function
-  */
-MultiplyPlugin::~MultiplyPlugin()
-{
-
-}
-
-
 /** @brief GetOpcode
   *
   * @todo: document this function

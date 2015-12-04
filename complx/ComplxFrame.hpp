@@ -3,6 +3,7 @@
 #define EXPAND_AND_STRINGIFY(S) STRINGIFY_TOKEN(S)
 #define STRINGIFY_TOKEN(S) #S
 
+#include <lc3_all.hpp>
 #include <wx/grid.h>
 #include <wx/textctrl.h>
 #include <wx/event.h>
@@ -46,8 +47,8 @@ class ComplxFrame : public ComplxFrameDecl
         // View menu event handlers
         void OnNewView(wxCommandEvent& event);
         void OnGoto(wxCommandEvent& event);
-		    void OnUpdateHideAddresses(wxCommandEvent& event);
-		    void OnHideAddressesCustom(wxCommandEvent& event);
+        void OnUpdateHideAddresses(wxCommandEvent& event);
+        void OnHideAddressesCustom(wxCommandEvent& event);
         void OnDumbDisassemble(wxCommandEvent& event);
         void OnNormalDisassemble(wxCommandEvent& event);
         void OnCDisassemble(wxCommandEvent& event);

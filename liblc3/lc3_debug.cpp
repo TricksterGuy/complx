@@ -1,5 +1,6 @@
 #include "lc3_debug.hpp"
 #include "lc3_symbol.hpp"
+#include "lc3_execute.hpp"
 #include "lc3_expressions.hpp"
 #include <cassert>
 

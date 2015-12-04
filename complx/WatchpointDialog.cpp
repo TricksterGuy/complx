@@ -1,7 +1,7 @@
-// *** ADDED BY HEADER FIXUP ***
-#include <wx/string.h>
-// *** END ***
 #include "WatchpointDialog.hpp"
+#include <wx/string.h>
+
+extern lc3_state state;
 
 /** WatchpointDialog
   *
@@ -28,15 +28,6 @@ WatchpointDialog::WatchpointDialog(wxWindow* parent, lc3_watchpoint_info info, b
 
     if (!target_change)
         target_text->Disable();
-}
-
-/** ~WatchpointDialog
-  *
-  * Destructor
-  */
-WatchpointDialog::~WatchpointDialog()
-{
-
 }
 
 /** GetInfo

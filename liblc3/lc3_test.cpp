@@ -1,5 +1,9 @@
 #include "lc3_test.hpp"
+#include "lc3_assemble.hpp"
 #include "lc3_cmp.hpp"
+#include "lc3_expressions.hpp"
+#include "lc3_runner.hpp"
+#include "lc3_plugin.hpp"
 #include <sstream>
 
 #define ANSWER_FOUND "answer found on stack"
@@ -96,7 +100,13 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
 
     try
     {
-        lc3_assemble(state, filename, false, false, false, false, disable_plugins);
+        LC3AssembleOptions options;
+        options.multiple_errors = false;
+        options.warnings_as_errors = false;
+        options.process_debug_comments = false;
+        options.enable_warnings = false;
+        options.disable_plugins = disable_plugins;
+        lc3_assemble(state, filename, options);
     }
     catch (LC3AssembleException e)
     {

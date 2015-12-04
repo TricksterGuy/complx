@@ -1,24 +1,8 @@
 #include "GridCellInfoRenderer.hpp"
+#include <lc3_all.hpp>
 
 extern wxImageList* infoImages;
-
-/** GridCellInfoRenderer
-  *
-  * Constructor
-  */
-GridCellInfoRenderer::GridCellInfoRenderer()
-{
-
-}
-
-/** ~GridCellInfoRenderer
-  *
-  * Destructor
-  */
-GridCellInfoRenderer::~GridCellInfoRenderer()
-{
-
-}
+extern lc3_state state;
 
 /** Draw
   *

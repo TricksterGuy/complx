@@ -1,5 +1,5 @@
-
 #include "XmlTestParser.hpp"
+#include <lc3_all.hpp>
 #include <sstream>
 
 /** process_str

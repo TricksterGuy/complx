@@ -37,23 +37,6 @@ void destroy_plugin(Plugin* ptr = NULL)
     }
 }
 
-/** @brief RandomPlugin
-  *
-  * @todo: document this function
-  */
- RandomPlugin::RandomPlugin(unsigned short address, unsigned int _seed) : DeviceRegisterPlugin(RANDOM_MAJOR_VERSION, RANDOM_MINOR_VERSION, "Random Generator plugin", address), seed(_seed)
-{
-}
-
-/** @brief ~RandomPlugin
-  *
-  * @todo: document this function
-  */
- RandomPlugin::~RandomPlugin()
-{
-
-}
-
 /** @brief OnRead
   *
   * @todo: document this function

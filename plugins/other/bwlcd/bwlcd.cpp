@@ -173,15 +173,6 @@ void BWLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, short 
     Move(x - GetSize().GetX(), y);
 }
 
-/** @brief ~BWLCD
-  *
-  * @todo: document this function
-  */
- BWLCD::~BWLCD()
-{
-
-}
-
 /** @brief OnUpdate
   *
   * @todo: document this function

@@ -5,12 +5,14 @@
 #include "LC3Console.hpp"
 #include "LC3RunThread.hpp"
 #include "ComplxApp.hpp"
+#include <lc3_all.hpp>
 
 wxTextCtrl* stdinput;
 std::stringstream oss;
 std::streambuf* oldcout;
 
 extern wxCriticalSection threadCS;
+extern lc3_state state;
 
 /** complx_reader
   *

@@ -1,4 +1,7 @@
 #include "CallStackDialog.hpp"
+#include <lc3_all.hpp>
+
+extern lc3_state state;
 
 /** CallStackDialog
   *
@@ -7,15 +10,6 @@
 CallStackDialog::CallStackDialog(wxWindow* parent) : CallStackDialogDecl(parent)
 {
     SetupList();
-}
-
-/** ~CallStackDialog
-  *
-  *
-  */
-CallStackDialog::~CallStackDialog()
-{
-
 }
 
 /** GetFrame

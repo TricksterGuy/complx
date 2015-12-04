@@ -33,23 +33,6 @@ void destroy_plugin(Plugin* ptr = NULL)
     }
 }
 
-/** @brief TimerPlugin
-  *
-  * @todo: document this function
-  */
-TimerPlugin::TimerPlugin(unsigned short address, unsigned char vector) : DeviceRegisterPlugin(TIMER_MAJOR_VERSION, TIMER_MINOR_VERSION, "Timer plugin", address, true, vector)
-{
-}
-
-/** @brief ~TimerPlugin
-  *
-  * @todo: document this function
-  */
-TimerPlugin::~TimerPlugin()
-{
-
-}
-
 /** @brief OnRead
   *
   * @todo: document this function

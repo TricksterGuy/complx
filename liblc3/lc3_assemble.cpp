@@ -1,5 +1,9 @@
 #include "lc3_assemble.hpp"
-#include "lc3_parser.hpp"
+#include "lc3_plugin.hpp"
+#include "lc3_symbol.hpp"
+#include "lc3_runner.hpp"
+#include "lc3_debug.hpp"
+
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -20,29 +24,19 @@
 // For non line comments.
 struct code_line
 {
+    code_line(const std::string& line_str, unsigned int loc) : line(line_str), location(loc) {}
     std::string line;
     unsigned int location;
-
-    code_line(const std::string& line, unsigned int location)
-    {
-        this->line = line;
-        this->location = location;
-    }
 };
 
 // For comments with debugging information
 struct debug_statement
 {
+    debug_statement(const std::string& lineno, unsigned int loc, unsigned short addr) :
+        line(lineno), location(loc), address(addr) {}
     std::string line;
     unsigned int location;
     unsigned short address;
-
-    debug_statement(const std::string& line, unsigned int location, unsigned short address)
-    {
-        this->line = line;
-        this->location = location;
-        this->address = address;
-    }
 };
 
 unsigned short lc3_assemble_one(lc3_state& state, LC3AssembleContext& context);
@@ -50,39 +44,6 @@ unsigned short lc3_assemble_one(lc3_state& state, LC3AssembleContext& context);
 void process_debug_info(lc3_state& state, const debug_statement& statement);
 void process_plugin_info(lc3_state& state, const LC3AssembleContext& context);
 void parse_params(const std::string& line, std::map<std::string, std::string>& params);
-
-/** LC3AssembleException
-  *
-  * Generates a new assemble exception.
-  */
-LC3AssembleException::LC3AssembleException(const std::string& line, const std::vector<std::string>& params, int id, int lineno) throw()
-{
-    this->line = line;
-    this->id = id;
-    this->lineno = lineno;
-    this->params = params;
-}
-
-/** LC3AssembleException
-  *
-  * Generates a new assemble exception.
-  */
-LC3AssembleException::LC3AssembleException(const std::string& line, const std::string& param, int id, int lineno) throw()
-{
-    this->line = line;
-    this->id = id;
-    this->lineno = lineno;
-    params.push_back(param);
-}
-
-/** ~LC3AssembleException
-  *
-  * Destructor
-  */
-LC3AssembleException::~LC3AssembleException() throw()
-{
-
-}
 
 /** what
   *
@@ -263,44 +224,25 @@ std::string LC3AssembleException::what() const throw()
   *
   * Assembles one instruction.
   */
-unsigned short lc3_assemble_one(lc3_state& state, unsigned short address, const std::string& line, int lineno, bool multiple, bool werror, bool warn, bool disable_plugins)
+unsigned short lc3_assemble_one(lc3_state& state, unsigned short address, const std::string& line, int lineno, const LC3AssembleOptions& options)
 {
-    //std::vector<std::string> tokens;
-    //tokenize(line, tokens, " \t,");
-
     LC3AssembleContext context;
     context.line = line;
-    //context.tokens = tokens;
     context.lineno = lineno;
     context.state = &state;
     context.address = address;
-    context.multiple = multiple;
-    context.werror = werror;
-    context.warn = warn;
-    context.disable_plugins = disable_plugins;
+    context.options = options;
 
     unsigned short ret = lc3_assemble_one(state, context);
 
-    if (context.multiple && !context.exceptions.empty())
+    if (context.options.multiple_errors && !context.exceptions.empty())
         throw context.exceptions;
 
     return ret;
 }
 
-/** lc3_assemble_one
-  *
-  * Assembles one instruction given in the LC3AssembleContext
-  */
 unsigned short lc3_assemble_one(lc3_state& state, LC3AssembleContext& context)
 {
-
-    /*LC3AssembleContext context;
-    context.line = line;
-    context.tokens = tokens;
-    context.lineno = lineno;
-    context.state = state;
-    context.address = address;*/
-
     size_t pos = context.line.find_first_of(" \t");
     std::string opcode = context.line.substr(0, pos);
     trim(opcode);
@@ -313,14 +255,6 @@ unsigned short lc3_assemble_one(lc3_state& state, LC3AssembleContext& context)
     // Remove spaces
     for (unsigned int i = 0; i < tokens.size(); i++)
         trim(tokens[i]);
-
-    /*int specialop;
-    int opcode = get_opcode(tokens[0], specialop, context, false);
-    if (opcode == -1 && specialop == -1)
-    {
-        tokens.erase(tokens.begin());
-        opcode = get_opcode(tokens[0], specialop, context);
-    }*/
 
     int specialop;
     int opcode_id = get_opcode(opcode, specialop, context);
@@ -464,10 +398,10 @@ unsigned short lc3_assemble_one(lc3_state& state, LC3AssembleContext& context)
   *
   * Assembles a file pointed to by filename to the lc3_state given
   */
-void lc3_assemble(lc3_state& state, const std::string& filename, bool multiple, bool werror, bool debug, bool warn, bool disable_plugins)
+void lc3_assemble(lc3_state& state, const std::string& filename, const LC3AssembleOptions& options)
 {
     std::vector<code_range> ranges;
-    lc3_assemble(state, filename, ranges, multiple, werror, debug, warn, disable_plugins);
+    lc3_assemble(state, filename, ranges, options);
 }
 
 /** lc3_assemble
@@ -475,7 +409,7 @@ void lc3_assemble(lc3_state& state, const std::string& filename, bool multiple, 
   * Assembles a file pointed to by filename to the lc3_state given
   * @note this overload is not meant to be used externally use the version without the vector.
   */
-void lc3_assemble(lc3_state& state, const std::string& filename, std::vector<code_range>& ranges, bool multiple, bool werror, bool debug, bool warn, bool disable_plugins)
+void lc3_assemble(lc3_state& state, const std::string& filename, std::vector<code_range>& ranges, const LC3AssembleOptions& options)
 {
     std::ifstream file(filename.c_str());
     if (!file.good())
@@ -492,12 +426,7 @@ void lc3_assemble(lc3_state& state, const std::string& filename, std::vector<cod
     context.line = "";
     context.lineno = 0;
     context.state = &state;
-    context.multiple = multiple;
-    context.werror = werror;
-    context.warn = warn;
-    context.debug = debug;
-    context.disable_plugins = disable_plugins;
-
+    context.options = options;
     bool in_orig = false;
 
     // First pass get all symbols.
@@ -512,11 +441,11 @@ void lc3_assemble(lc3_state& state, const std::string& filename, std::vector<cod
         remove_comments(line, comment);
 
         // Plugins are mission critical especially if they are instruction plugins that modify the assembling process!
-        if (comment.size() > 2 && comment.substr(1, 7) == std::string("@plugin") && !context.disable_plugins)
+        if (comment.size() > 2 && comment.substr(1, 7) == std::string("@plugin") && !context.options.disable_plugins)
         {
             process_plugin_info(state, context);
         }
-        else if (context.debug && comment.size() > 2 && comment[1] == '@')
+        else if (context.options.process_debug_comments && comment.size() > 2 && comment[1] == '@')
         {
             debugging.push_back(debug_statement(comment.substr(2), context.lineno, context.address));
         }
@@ -900,7 +829,7 @@ void lc3_assemble(lc3_state& state, const std::string& filename, std::vector<cod
     }
 
 
-    if (context.multiple && !context.exceptions.empty())
+    if (context.options.multiple_errors && !context.exceptions.empty())
     {
         throw context.exceptions;
     }
@@ -910,12 +839,12 @@ void lc3_assemble(lc3_state& state, const std::string& filename, std::vector<cod
   *
   * Assembles a file to an .obj and .sym file
   */
-bool lc3_assemble(const std::string& filename, const std::string& output_prefix, bool multiple, bool werror, bool debug, bool warn, bool disable_plugins)
+bool lc3_assemble(const std::string& filename, const std::string& output_prefix, const LC3AssembleOptions& options)
 {
     lc3_state state;
     lc3_init(state);
     std::vector<code_range> ranges;
-    lc3_assemble(state, filename, ranges, multiple, werror, debug, warn, disable_plugins);
+    lc3_assemble(state, filename, ranges, options);
     std::string prefix = output_prefix;
     if (output_prefix.empty())
         prefix = filename.substr(0, filename.rfind('.'));
@@ -996,12 +925,12 @@ void process_debug_info(lc3_state& state, const debug_statement& statement)
 
     LC3AssembleContext dummy;
     dummy.address = 0;
-    dummy.debug = false;
     dummy.line = "";
     dummy.lineno = -1;
-    dummy.multiple = true;
     dummy.state = &state;
-    dummy.werror = false;
+    dummy.options.process_debug_comments = false;
+    dummy.options.multiple_errors = true;
+    dummy.options.warnings_as_errors = false;
 
     size_t index = statement.line.find_first_of(" \t");
     std::string debug_params = (index == std::string::npos) ? "" : statement.line.substr(index + 1);

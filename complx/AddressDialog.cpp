@@ -1,6 +1,8 @@
-#include <wx/string.h>
 #include "AddressDialog.hpp"
-#include "lc3_expressions.hpp"
+#include <lc3_all.hpp>
+#include <wx/string.h>
+
+extern lc3_state state;
 
 /** AddressDialog
   *
@@ -15,15 +17,6 @@ AddressDialog::AddressDialog(wxWindow* parent, unsigned short addr, bool change_
 
     if (!change_addr)
         address_text->Disable();
-}
-
-/** ~AddressDialog
-  *
-  * Destructor
-  */
- AddressDialog::~AddressDialog()
-{
-
 }
 
 /** GetAddress

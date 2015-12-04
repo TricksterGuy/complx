@@ -166,15 +166,6 @@ void ColorLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, sho
     Move(x - GetSize().GetX(), y);
 }
 
-/** @brief ~ColorLCD
-  *
-  * @todo: document this function
-  */
- ColorLCD::~ColorLCD()
-{
-
-}
-
 /** @brief OnUpdate
   *
   * @todo: document this function

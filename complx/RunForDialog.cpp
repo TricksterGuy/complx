@@ -1,6 +1,5 @@
 #include <wx/string.h>
 #include "RunForDialog.hpp"
-#include "lc3_expressions.hpp"
 
 /** RunForDialog
   *
@@ -9,15 +8,6 @@
 RunForDialog::RunForDialog(wxWindow* parent, int invalue) : RunForDialogDecl(parent)
 {
     value = invalue;
-}
-
-/** ~RunForDialog
-  *
-  * Destructor
-  */
- RunForDialog::~RunForDialog()
-{
-
 }
 
 /** GetValue

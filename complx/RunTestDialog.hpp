@@ -2,8 +2,7 @@
 #define RUN_TEST_DIALOG_HPP
 
 #include "RunTestDialogDecl.h"
-#include "lc3.hpp"
-#include "lc3_test.hpp"
+#include <lc3_all.hpp>
 #include <string>
 
 class TestSuiteInfoPanel;

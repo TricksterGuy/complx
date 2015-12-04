@@ -1,5 +1,6 @@
 #include "MemoryViewContainer.hpp"
 
+#include <lc3_all.hpp>
 #include <vector>
 #include <wx/msgdlg.h>
 #include <wx/textdlg.h>

@@ -1,7 +1,7 @@
 #ifndef COMP_HPP
 #define COMP_HPP
 
-#include <lc3.hpp>
+#include <lc3_all.hpp>
 
 /*start simulator with nothing loaded into memory*/
 void start_simulator(lc3_state& state);

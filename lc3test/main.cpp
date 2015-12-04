@@ -1,12 +1,10 @@
-#include <vector>
-#include <string>
+#include <lc3_all.hpp>
+
 #include <algorithm>
 #include <iostream>
-#include <lc3.hpp>
-#include <lc3_test.hpp>
-#include <string>
-#include <lc3_parser.hpp>
 #include <sstream>
+#include <string>
+#include <vector>
 
 #include <wx/tokenzr.h>
 #include <wx/xml/xml.h>

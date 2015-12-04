@@ -1,25 +1,6 @@
 #include "DebugInfoDialog.hpp"
 #include "DebugInfoList.hpp"
 
-/** DebugInfoDialog
-  *
-  * Constructor
-  */
-DebugInfoDialog::DebugInfoDialog(wxWindow* parent) : DebugInfoDialogDecl(parent)
-{
-
-}
-
-
-/** ~DebugInfoDialog
-  *
-  * Destructor
-  */
-DebugInfoDialog::~DebugInfoDialog()
-{
-
-}
-
 /** GetMemWatchpoints
   */
 std::vector<lc3_watchpoint_info> DebugInfoDialog::GetMemWatchpoints() const

@@ -3,7 +3,6 @@
 
 #include "MemoryGrid.hpp"
 #include "MemoryView.hpp"
-#include <lc3.hpp>
 
 enum ViewMode
 {

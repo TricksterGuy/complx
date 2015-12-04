@@ -2,7 +2,7 @@
 #include <string>
 #include <algorithm>
 #include <iostream>
-#include <lc3.hpp>
+#include <lc3_all.hpp>
 #include <string>
 
 int main(int argc, char** argv)
@@ -47,7 +47,13 @@ int main(int argc, char** argv)
             outfile = argv[4][0] == '-' ? (argv[3][0] == '-' ? argv[2] : argv[3]) : argv[4];
             if (outfile[0] == '-') goto usage;
         }
-        lc3_assemble(filename, outfile, nonfatal_errors, false, true, true, disable_plugins);
+        LC3AssembleOptions options;
+        options.multiple_errors = nonfatal_errors;
+        options.warnings_as_errors = false;
+        options.process_debug_comments = true;
+        options.enable_warnings = true;
+        options.disable_plugins = disable_plugins;
+        lc3_assemble(filename, outfile, options);
     }
     catch (std::vector<LC3AssembleException> e)
     {

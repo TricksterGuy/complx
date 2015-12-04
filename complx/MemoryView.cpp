@@ -4,26 +4,9 @@
 #include <wx/msgdlg.h>
 #include "MemoryView.hpp"
 #include "BreakpointDialog.hpp"
-#include "lc3_assemble.hpp"
+#include <lc3_all.hpp>
 
-/** MemoryView
-  *
-  * Constructor
-  */
-MemoryView::MemoryView()
-{
-    unsigned_mode = false;
-    flipped_mode = false;
-    disassemble_level = 2;
-}
-
-/** ~MemoryView
-  *
-  * Destructor
-  */
-MemoryView::~MemoryView()
-{
-}
+extern lc3_state state;
 
 /** ShowAllAddresses
   *

@@ -1,6 +1,5 @@
 #include "LC3RunThread.hpp"
-#include "lc3.hpp"
-#include <wx/thread.h>
+#include <lc3_all.hpp>
 
 wxDEFINE_EVENT(wxEVT_COMMAND_RUNTHREAD_COMPLETED, wxThreadEvent);
 wxDEFINE_EVENT(wxEVT_COMMAND_RUNTHREAD_UPDATE, wxThreadEvent);
@@ -11,22 +10,9 @@ wxDEFINE_EVENT(wxEVT_COMMAND_RUNTHREAD_OUTPUT, wxThreadEvent);
 extern LC3RunThread* thread;
 extern lc3_state state;
 
-/** LC3RunThread
-  *
-  *
-  */
- LC3RunThread::LC3RunThread(ComplxFrame* frame, int run_mode, int run_for)
-{
-    this->frame = frame;
-    this->run_mode = run_mode;
-    this->runtime = run_for;
-}
 
-/** ~LC3RunThread
-  *
-  *
-  */
- LC3RunThread::~LC3RunThread()
+///TODO consider making this a singleton
+LC3RunThread::~LC3RunThread()
 {
     thread = NULL;
 }

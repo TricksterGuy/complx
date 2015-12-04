@@ -19,8 +19,6 @@
 #include <algorithm>
 #include <iostream>
 #include <XmlTestParser.hpp>
-#include <lc3.hpp>
-#include <lc3_assemble.hpp>
 #include "icon64.xpm"
 
 #include "ComplxFrame.hpp"
@@ -309,8 +307,17 @@ void ComplxFrame::DoLoadFile(const wxFileName& filename)
     try
     {
         std::vector<code_range> ranges;
-        lc3_assemble(dummy_state, filename.GetFullPath().ToStdString(), false);
-        lc3_assemble(state, filename.GetFullPath().ToStdString(), ranges);
+        LC3AssembleOptions options;
+        options.multiple_errors = false;
+        lc3_assemble(dummy_state, filename.GetFullPath().ToStdString(), options);
+        options.multiple_errors = true;
+        options.warnings_as_errors = false;
+        options.process_debug_comments = true;
+        options.enable_warnings = false;
+        options.disable_plugins = false;
+        lc3_assemble(state, filename.GetFullPath().ToStdString(), ranges, options);
+
+        // Update list of addresses modified for Show only Code/Data option.
         modified_addresses.clear();
         for (const auto& code_range : ranges)
             modified_addresses.push_back(ViewRange(code_range.location, code_range.location + code_range.size));

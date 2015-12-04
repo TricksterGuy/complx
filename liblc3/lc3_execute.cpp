@@ -1,4 +1,6 @@
 #include "lc3_execute.hpp"
+#include "lc3_plugin.hpp"
+#include "lc3_runner.hpp"
 #include <cstdlib>
 
 const char* WARNING_MESSAGES[LC3_WARNINGS] =

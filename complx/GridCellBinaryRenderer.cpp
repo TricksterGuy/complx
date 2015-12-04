@@ -1,7 +1,8 @@
 #include "GridCellBinaryRenderer.hpp"
+#include <lc3_all.hpp>
 #include <wx/settings.h>
 
-
+extern lc3_state state;
 
 enum Colorings
 {
@@ -31,24 +32,6 @@ RLEColorEntry instrColorings[COLORINGS_SIZE][4] =
     {{96, 0, 0, 3}, {0, 0, 80, 3}, {48, 48, 72, 6}},
     {{0, 0, 0, 12}},
 };
-
-/** GridCellBinaryRenderer
-  *
-  * Constructor
-  */
-GridCellBinaryRenderer::GridCellBinaryRenderer()
-{
-
-}
-
-/** ~GridCellBinaryRenderer
-  *
-  * Destructor
-  */
-GridCellBinaryRenderer::~GridCellBinaryRenderer()
-{
-
-}
 
 /** GetBestSize
   *
@@ -135,7 +118,6 @@ void GridCellBinaryRenderer::InstructionColor(wxGrid &grid, wxGridCellAttr &attr
 
     dc.SetBrush(wxColour(0, 96, 96));
     dc.DrawRectangle(rect.GetX() - 2, rect.GetY(), width * 4 + 2, height);
-
 
     std::vector<RLEColorEntry> colors;
 

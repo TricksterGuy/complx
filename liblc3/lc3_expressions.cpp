@@ -1,5 +1,6 @@
 #include "ExpressionEvaluator.hpp"
 #include "lc3_expressions.hpp"
+#include "lc3_symbol.hpp"
 #include <cassert>
 
 using namespace ExpressionEvaluator;
