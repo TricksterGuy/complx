@@ -4,6 +4,7 @@ if(CMAKE_VERSION VERSION_EQUAL 3.0 OR CMAKE_VERSION VERSION_GREATER 3.0)
     cmake_policy(SET CMP0042 NEW)
 endif()
 project(complx-tools)
+enable_testing()
 
 option(ENABLE_PLUGINS "Enable Official Plugins" ON)
 option(ENABLE_LC3EDIT "Build lc3edit" OFF)
@@ -21,6 +22,8 @@ endif(ENABLE_LC3EDIT)
 if(ENABLE_COMP)
     add_subdirectory(comp)
 endif(ENABLE_COMP)
+
+add_subdirectory(tests)
 
 # Require C++11 build
 if(NOT CMAKE_CXX_FLAGS MATCHES "-std=(c|gnu)\\+\\+11")

@@ -163,7 +163,7 @@ typedef struct arithimm_instruction
     unsigned short dr:3;
     unsigned short sr1:3;
     unsigned short is_imm:1;
-    short imm:5;
+    signed short imm:5;
 } arithimm_instruction;
 
 typedef struct not_instruction
@@ -188,7 +188,7 @@ typedef struct br_instruction
     unsigned short n:1;
     unsigned short z:1;
     unsigned short p:1;
-    short pc_offset:9;
+    signed short pc_offset:9;
 } br_instruction;
 
 // JMP RET
@@ -205,7 +205,7 @@ typedef struct jsr_instruction
 {
     unsigned short opcode:4;
     unsigned short is_jsr:1;
-    short pc_offset:11;
+    signed short pc_offset:11;
 } jsr_instruction;
 
 typedef struct jsrr_instruction
@@ -228,7 +228,7 @@ typedef struct memoryoffset_instruction
 {
     unsigned short opcode:4;
     unsigned short reg:3;
-    short pc_offset:9;
+    signed short pc_offset:9;
 } memoryoffset_instruction;
 
 // LDR STR
@@ -237,7 +237,7 @@ typedef struct memoryreg_instruction
     unsigned short opcode:4;
     unsigned short reg:3;
     unsigned short base_r:3;
-    short offset:6;
+    signed short offset:6;
 } memoryreg_instruction;
 
 typedef union memory_instruction
