@@ -96,5 +96,7 @@ unsigned short lc3_assemble_one(lc3_state& state, unsigned short address, const 
 void lc3_assemble(lc3_state& state, const std::string& filename, std::vector<code_range>& ranges, const LC3AssembleOptions& options = LC3AssembleOptions());
 void lc3_assemble(lc3_state& state, const std::string& filename, const LC3AssembleOptions& options = LC3AssembleOptions());
 bool lc3_assemble(const std::string& filename, const std::string& output_prefix = "", const LC3AssembleOptions& options = LC3AssembleOptions());
+// test only
+void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>& ranges, const LC3AssembleOptions& options);
 
 #endif

@@ -11,20 +11,6 @@ option(ENABLE_LC3EDIT "Build lc3edit" OFF)
 option(ENABLE_COMP "Build comp" OFF)
 option(ENABLE_DEV "Build dev version" OFF)
 
-if(ENABLE_PLUGINS)
-    add_subdirectory(plugins)
-endif(ENABLE_PLUGINS)
-
-if(ENABLE_LC3EDIT)
-    add_subdirectory(lc3edit)
-endif(ENABLE_LC3EDIT)
-
-if(ENABLE_COMP)
-    add_subdirectory(comp)
-endif(ENABLE_COMP)
-
-add_subdirectory(tests)
-
 # Require C++11 build
 if(NOT CMAKE_CXX_FLAGS MATCHES "-std=(c|gnu)\\+\\+11")
     message(STATUS "This project requires C++11. Adding -std=c++11 to CXXFLAGS.")
@@ -32,7 +18,7 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=(c|gnu)\\+\\+11")
 endif()
 
 # Additional debug flags
-set(CMAKE_CXX_FLAGS_DEBUG "-g -pg")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -pg -fprofile-arcs -ftest-coverage --coverage")
 
 # Set default warning flags
 set(PROJECT_WARNING_FLAGS "-Wall" CACHE STRING "Compiler warning flags to include")
@@ -46,6 +32,10 @@ if(NOT CMAKE_BUILD_TYPE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
     "MinSizeRel" "RelWithDebInfo")
 endif(NOT CMAKE_BUILD_TYPE)
+
+if(CMAKE_BUILD_TYPE MATCHES "Debug")
+    SET(CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -ftest-coverage")
+endif(CMAKE_BUILD_TYPE MATCHES "Debug")
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     add_definitions(-DLINUX)
@@ -197,3 +187,17 @@ install(FILES doc/PattPatelAppA.pdf DESTINATION share/doc/complx-tools)
 install(FILES doc/complx-tips.txt DESTINATION share/doc/complx-tools)
 install(FILES complx.png DESTINATION share/icons)
 install(FILES complx.desktop DESTINATION share/applications)
+
+if(ENABLE_PLUGINS)
+    add_subdirectory(plugins)
+endif(ENABLE_PLUGINS)
+
+if(ENABLE_LC3EDIT)
+    add_subdirectory(lc3edit)
+endif(ENABLE_LC3EDIT)
+
+if(ENABLE_COMP)
+    add_subdirectory(comp)
+endif(ENABLE_COMP)
+
+add_subdirectory(tests)

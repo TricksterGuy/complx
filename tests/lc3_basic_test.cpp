@@ -1,4 +1,3 @@
-// LCOV_EXCL_START
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/auto_unit_test.hpp>
@@ -1351,6 +1350,3 @@ BOOST_FIXTURE_TEST_CASE(InstructionAssembleTest, LC3Test)
     BOOST_CHECK_EQUAL(state.symbols["A"], 0x3004);
     BOOST_CHECK_EQUAL(state.symbols["B"], 0x3005);
 }
-
-
-// LCOV_EXCL_STOP

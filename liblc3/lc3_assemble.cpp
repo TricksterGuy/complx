@@ -415,6 +415,12 @@ void lc3_assemble(lc3_state& state, const std::string& filename, std::vector<cod
     if (!file.good())
         throw LC3AssembleException("", filename, FILE_ERROR);
 
+    lc3_assemble(state, file, ranges, options);
+}
+
+
+void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>& ranges, const LC3AssembleOptions& options)
+{
     std::vector<code_line> code;
     std::vector<debug_statement> debugging;
     std::stringstream comments;

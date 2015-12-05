@@ -11,4 +11,5 @@
 	MUL R0, R1, R2
 
 	MUL R0, R0, R0
+	HALT
 .end
