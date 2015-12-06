@@ -116,7 +116,7 @@ const char* MUL_DISASSEMBLE_LOOKUP[2] =
 const char* MUL_ADVANCED_DISASSEMBLE[7] =
 {
     "TEST R%d",         // MUL R0, R0, 1
-    "R%d = R%d",        //  MUL R0, R1, 1
+    "R%d = R%d",        // MUL R0, R1, 1
     "R%d = 0",          // MUL R0, R0, 0
     "R%d *= %s%d",      // MUL R0, R0, 3
     "R%d = R%d * %s%d", // MUL R0, R1, 3
