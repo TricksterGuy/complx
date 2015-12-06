@@ -103,6 +103,54 @@ BOOST_FIXTURE_TEST_CASE(TestInstructionPluginDisassemble, LC3Test)
     for (unsigned int i = 0; i < answers_basic.size(); i++)
         BOOST_CHECK_EQUAL(lc3_basic_disassemble(state, state.mem[0x3000 + i]), answers_basic[i]);
 
+    for (unsigned int i = 0; i < answers_basic.size(); i++)
+        BOOST_CHECK_EQUAL(lc3_disassemble(state, state.mem[0x3000 + i]), answers_basic[i]);
+
     for (unsigned int i = 0; i < answers_advanced.size(); i++)
         BOOST_CHECK_EQUAL(lc3_smart_disassemble(state, state.mem[0x3000 + i]), answers_advanced[i]);
+}
+
+BOOST_FIXTURE_TEST_CASE(TestTrapPlugin, LC3Test)
+{
+    const std::string asm_file =
+    ";@plugin filename=lc3_udiv vector=x80\n"
+    ".orig x3000\n"
+    "    LD R0, A\n"
+    "    LD R1, B\n"
+    "    UDIV\n"
+    "    HALT\n"
+    "A .fill 2000\n"
+    "B .fill 8\n"
+    ".end";
+
+    std::stringstream file(asm_file);
+    std::vector<code_range> ranges;
+    lc3_assemble(state, file, ranges, options);
+    BOOST_REQUIRE_EQUAL(state.mem[0x3002], short(0xF080));
+    lc3_run(state, 4);
+    BOOST_REQUIRE(state.halted);
+    BOOST_CHECK_EQUAL(state.regs[0], 250);
+    BOOST_CHECK_EQUAL(state.regs[1], 0);
+}
+
+BOOST_FIXTURE_TEST_CASE(TestTrapPluginDisassemble, LC3Test)
+{
+    const std::string asm_file =
+    ";@plugin filename=lc3_udiv vector=x80\n"
+    ".orig x3000\n"
+    "    LD R0, A\n"
+    "    LD R1, B\n"
+    "    UDIV\n"
+    "    HALT\n"
+    "A .fill 2000\n"
+    "B .fill 8\n"
+    ".end";
+
+    std::stringstream file(asm_file);
+    std::vector<code_range> ranges;
+    lc3_assemble(state, file, ranges, options);
+    BOOST_REQUIRE_EQUAL(state.mem[0x3002], short(0xF080));
+    BOOST_CHECK_EQUAL(lc3_basic_disassemble(state, state.mem[0x3002]), "TRAP x80");
+    BOOST_CHECK_EQUAL(lc3_disassemble(state, state.mem[0x3002]), "TRAP x80");
+    BOOST_CHECK_EQUAL(lc3_smart_disassemble(state, state.mem[0x3002]), "UDIV");
 }
