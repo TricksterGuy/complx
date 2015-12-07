@@ -19,6 +19,9 @@ endif()
 
 # Additional debug flags
 set(CMAKE_CXX_FLAGS_DEBUG "-g -pg -fprofile-arcs -ftest-coverage --coverage")
+# Install directories
+set(CMAKE_INSTALL_LIBDIR lib CACHE STRING "where to install libraries/plugins")
+set(CMAKE_INSTALL_BINDIR bin CACHE STRING "where to install programs")
 
 # Set default warning flags
 set(PROJECT_WARNING_FLAGS "-Wall" CACHE STRING "Compiler warning flags to include")
@@ -34,16 +37,8 @@ if(NOT CMAKE_BUILD_TYPE)
 endif(NOT CMAKE_BUILD_TYPE)
 
 if(CMAKE_BUILD_TYPE MATCHES "Debug")
-    SET(CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -ftest-coverage")
+    set(CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -ftest-coverage")
 endif(CMAKE_BUILD_TYPE MATCHES "Debug")
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    add_definitions(-DLINUX)
-endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    add_definitions(-DLINUX)
-endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 add_definitions(-DPREFIX=${CMAKE_INSTALL_PREFIX})
 add_definitions(-DSO_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}")
@@ -51,6 +46,19 @@ set(wxWidgets_USE_LIBS stc xrc xml html adv gl net core base)
 find_package(wxWidgets REQUIRED)
 set(CMAKE_SKIP_RPATH TRUE)
 include(${wxWidgets_USE_FILE})
+
+if(CMAKE_HOST_UNIX)
+    add_definitions(-DLINUX)
+endif(CMAKE_HOST_UNIX)
+
+if(CMAKE_HOST_WIN32)
+    add_definitions(-DWINDOWS)
+    # Needed for htons
+    set(LIBLC3_EXTRA_LIBS ws2_32)
+    # Windows doesn't set include directories correctly?
+    #include_directories("C:/msys/1.0/local/lib/wx/include/msw-unicode-3.0")
+    #include_directories("C:/msys/1.0/local/include/wx-3.0")
+endif(CMAKE_HOST_WIN32)
 
 include_directories(${complx-tools_SOURCE_DIR}/liblc3)
 include_directories(${complx-tools_SOURCE_DIR}/lc3test)
@@ -130,6 +138,7 @@ add_library(
 target_link_libraries(
     lc3
     dl
+    ${LIBLC3_EXTRA_LIBS}
 )
 
 add_executable(
@@ -174,12 +183,11 @@ target_link_libraries(
     ${wxWidgets_LIBRARIES}
 )
 
-install(TARGETS lc3 LIBRARY DESTINATION lib)
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/complx DESTINATION bin)
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/as2obj DESTINATION bin)
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/lc3runner DESTINATION bin)
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/lc3test DESTINATION bin)
-
+install(TARGETS lc3 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/complx DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/as2obj DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/lc3runner DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/lc3test DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 install(FILES doc/complx-tools.pdf DESTINATION share/doc/complx-tools)
 install(FILES doc/ComplxChangeLog.txt DESTINATION share/doc/complx-tools)

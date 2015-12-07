@@ -18,7 +18,7 @@ enum lc3_test_type
     TEST_STRING,
     TEST_IO,
     TEST_SUBROUTINE,
-    SIZE,
+    TEST_SIZE,
 };
 
 typedef struct lc3_subr_input

@@ -1408,7 +1408,7 @@ void ComplxFrame::OnTips(wxCommandEvent& event)
     show = wxShowTip(complxframe, tip, show);
 
     config->Write("/showtips", show);
-    config->Write("/currenttip", tip->GetCurrentTip());
+    config->Write("/currenttip", (long)tip->GetCurrentTip());
     config->Flush();
     delete tip;
 }

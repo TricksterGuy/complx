@@ -17,5 +17,5 @@ target_link_libraries(
     lc3
 )
 
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/comp DESTINATION bin)
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/comp DESTINATION ${CMAKE_INSTALL_BINDIR})
 

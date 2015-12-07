@@ -18,7 +18,7 @@ target_link_libraries(
     lc3
 )
 
-install(TARGETS lc3_multiply LIBRARY DESTINATION lib)
+install(TARGETS lc3_multiply LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 endif(ENABLE_MULTIPLY)
 

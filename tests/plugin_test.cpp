@@ -1,5 +1,7 @@
 #define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
+#if !defined(WINDOWS)
+    #define BOOST_TEST_DYN_LINK
+#endif
 #include <boost/test/auto_unit_test.hpp>
 #include <iostream>
 #include <fstream>

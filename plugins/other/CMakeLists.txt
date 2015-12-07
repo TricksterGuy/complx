@@ -26,7 +26,7 @@ target_link_libraries(
     ${wxWidgets_LIBRARIES}
 )
 
-install(TARGETS lc3_bwlcd LIBRARY DESTINATION lib)
+install(TARGETS lc3_bwlcd LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 endif(ENABLE_BWLCD)
 
@@ -49,7 +49,7 @@ target_link_libraries(
     ${wxWidgets_LIBRARIES}
 )
 
-install(TARGETS lc3_colorlcd LIBRARY DESTINATION lib)
+install(TARGETS lc3_colorlcd LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 endif (ENABLE_COLORLCD)
 

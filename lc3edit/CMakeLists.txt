@@ -181,5 +181,5 @@ target_link_libraries(
     ${wxWidgets_LIBRARIES}
 )
 
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/lc3edit DESTINATION bin)
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/lc3edit DESTINATION ${CMAKE_INSTALL_BINDIR})
 

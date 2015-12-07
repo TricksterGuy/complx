@@ -12,11 +12,12 @@
 #include "ComplxFrame.hpp"
 #include "version.h"
 
-#include <wx/wxprec.h>
 #include <wx/cmdline.h>
 #include <wx/config.h>
+#include <wx/fileconf.h>
 #include <wx/msgdlg.h>
 #include <wx/tipdlg.h>
+#include <wx/wxprec.h>
 
 static const wxCmdLineEntryDesc cmd_descriptions[] =
 {

@@ -21,7 +21,7 @@ target_link_libraries(
     lc3
 )
 
-install(TARGETS lc3_random LIBRARY DESTINATION lib)
+install(TARGETS lc3_random LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 endif(ENABLE_RANDOM)
 
@@ -43,7 +43,7 @@ target_link_libraries(
     lc3
 )
 
-install(TARGETS lc3_second_timer LIBRARY DESTINATION lib)
+install(TARGETS lc3_second_timer LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 endif(ENABLE_SECOND_TIMER)
 
@@ -64,7 +64,7 @@ target_link_libraries(
     lc3
 )
 
-install(TARGETS lc3_timer LIBRARY DESTINATION lib)
+install(TARGETS lc3_timer LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 endif(ENABLE_TIMER)
 

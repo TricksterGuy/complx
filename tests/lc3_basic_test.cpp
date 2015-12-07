@@ -1,5 +1,7 @@
 #define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
+#if !defined(WINDOWS)
+    #define BOOST_TEST_DYN_LINK
+#endif
 #include <boost/test/auto_unit_test.hpp>
 #include <iostream>
 #include <fstream>
@@ -542,7 +544,7 @@ BOOST_FIXTURE_TEST_CASE(TestErrorInstructions, LC3Test)
     lc3_execute(state, instr);
     BOOST_CHECK_EQUAL(state.pc, 0x2FFFU);
     BOOST_CHECK_EQUAL(state.halted, 1);
-    BOOST_CHECK_EQUAL(state.warnings, 1);
+    BOOST_CHECK_EQUAL(state.warnings, 1U);
 
     state.pc = 0x3000U;
     state.halted = 0;
@@ -551,7 +553,7 @@ BOOST_FIXTURE_TEST_CASE(TestErrorInstructions, LC3Test)
     lc3_execute(state, instr);
     BOOST_CHECK_EQUAL(state.pc, 0x2FFFU);
     BOOST_CHECK_EQUAL(state.halted, 1);
-    BOOST_CHECK_EQUAL(state.warnings, 1);
+    BOOST_CHECK_EQUAL(state.warnings, 1U);
 
     state.pc = 0x3000U;
     state.halted = 0;
@@ -560,7 +562,7 @@ BOOST_FIXTURE_TEST_CASE(TestErrorInstructions, LC3Test)
     lc3_execute(state, instr);
     BOOST_CHECK_EQUAL(state.pc, 0x2FFFU);
     BOOST_CHECK_EQUAL(state.halted, 1);
-    BOOST_CHECK_EQUAL(state.warnings, 1);
+    BOOST_CHECK_EQUAL(state.warnings, 1U);
 }
 
 BOOST_FIXTURE_TEST_CASE(TestMemoryInstructions, LC3Test)
