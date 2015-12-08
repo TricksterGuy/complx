@@ -24,7 +24,7 @@ set(CMAKE_INSTALL_LIBDIR lib CACHE STRING "where to install libraries/plugins")
 set(CMAKE_INSTALL_BINDIR bin CACHE STRING "where to install programs")
 
 # Set default warning flags
-set(PROJECT_WARNING_FLAGS "-Wall" CACHE STRING "Compiler warning flags to include")
+set(PROJECT_WARNING_FLAGS "-Wall -Wno-deprecated -Wno-deprecated-declarations" CACHE STRING "Compiler warning flags to include")
 mark_as_advanced(PROJECT_WARNING_FLAGS)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROJECT_WARNING_FLAGS}")
 

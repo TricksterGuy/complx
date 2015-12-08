@@ -1419,7 +1419,10 @@ void ComplxFrame::OnTips(wxCommandEvent& event)
   */
 void ComplxFrame::UpdateMemory(void)
 {
+///TODO see if this is still needed on Linux.
+#ifndef WINDOWS
     memory->SelectLocation(0);
+#endif
     memory->SelectLocation(state.pc);
     for (unsigned int i = 0; i < views.size(); i++)
         views[i]->Refresh();

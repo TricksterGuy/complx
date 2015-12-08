@@ -9,6 +9,14 @@ extern lc3_state state;
 extern std::vector<ViewRange> modified_addresses;
 void PrintError(int error);
 
+void MakeCellVisible(MemoryGrid* memory, unsigned short addr)
+{
+#ifndef WINDOWS
+    memory->SelectLocation(addr > 0xFFF0 ? 0xFFFF : 0);
+#endif
+    memory->SelectLocation(addr);
+}
+
 /** OnGoto
   *
   * Called when the user wants to goto a certain address
@@ -26,9 +34,7 @@ void OnGoto(MemoryGrid* memory)
         return;
     }
 
-    memory->SelectLocation((unsigned short) addr > 0xFFF0 ? 0xFFFF : 0);
-    memory->SelectLocation((unsigned short) addr);
-    memory->Refresh();
+    MakeCellVisible(memory, addr);
 }
 
 /** OnUpdateHideAddresses
@@ -66,8 +72,7 @@ void OnUpdateHideAddresses(MemoryGrid* memory, MemoryView* memoryView, int mode)
     ///TODO learn the interface for updating a grid's dimensions via wxGridTableMessage
     // This is inefficient, but well...
     memory->SetView(memoryView);
-    memory->SelectLocation((unsigned short) state.pc > 0xFFF0 ? 0xFFFF : 0);
-    memory->SelectLocation((unsigned short) state.pc);
+    MakeCellVisible(memory, state.pc);
     memory->ForceRefresh();
 }
 
@@ -83,11 +88,11 @@ void OnHideAddressesCustom(MemoryGrid* memory, MemoryView* memoryView)
         "Ending address for range is inclusive\n"
         "Example x3000-x3010,xE000-xF000",
         "Custom Hide Addresses").ToStdString();
-		if (rangesStr.empty()) return;
-		std::vector<std::string> parsed_ranges;
-		tokenize(rangesStr, parsed_ranges, ",");
-		std::vector<ViewRange> ranges;
-		for (const auto& parsed_range : parsed_ranges)
+    if (rangesStr.empty()) return;
+    std::vector<std::string> parsed_ranges;
+    tokenize(rangesStr, parsed_ranges, ",");
+    std::vector<ViewRange> ranges;
+    for (const auto& parsed_range : parsed_ranges)
     {
         int start, end;
         std::vector<std::string> start_end;
@@ -111,8 +116,7 @@ void OnHideAddressesCustom(MemoryGrid* memory, MemoryView* memoryView)
     ///TODO learn the interface for updating a grid's dimensions via wxGridTableMessage
     // This is inefficient, but well...
     memory->SetView(memoryView);
-    memory->SelectLocation((unsigned short) state.pc > 0xFFF0 ? 0xFFFF : 0);
-    memory->SelectLocation((unsigned short) state.pc);
+    MakeCellVisible(memory, state.pc);
     memory->ForceRefresh();
 }
 
