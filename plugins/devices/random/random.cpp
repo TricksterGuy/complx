@@ -43,8 +43,7 @@ void destroy_plugin(Plugin* ptr = NULL)
   */
 short RandomPlugin::OnRead(lc3_state& state)
 {
-    ///TODO rand_r is not defined on windows find alternative.
-    short retVal = (short) rand_r(&seed);
+    short retVal = (short) distribution(generator);
     state.mem[GetAddress()] = retVal;
     return retVal;
 }
@@ -55,5 +54,5 @@ short RandomPlugin::OnRead(lc3_state& state)
   */
 void RandomPlugin::OnWrite(lc3_state& state, short value)
 {
-    seed = (unsigned int) value;
+    generator.seed(value);
 }
