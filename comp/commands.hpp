@@ -26,6 +26,7 @@ void do_tempbreak(unsigned short address);
 void do_break(unsigned short address, const std::string& condition = "", int times = -1, const std::string& name = "");
 /** Sets a watchpoint on target with condition cond, times number of hits before becoming inactive, and name name */
 void do_watch(const std::string& target, const std::string& condition, int times = -1, const std::string& name = "");
+void do_watch(unsigned char reg, const std::string& condition, int times = -1, const std::string& name = "");
 /** Marks address as a blackbox with name name and condition to activate. An address marked as a blackbox will never be stepped into */
 void do_blackbox(unsigned short address, const std::string& name = "", const std::string& condition = "1");
 /** Sets size of undo stack */
@@ -38,9 +39,9 @@ void do_delete(unsigned short address);
 /** Sets register/cc/pc/address to value */
 void do_set(const std::string& thing, short value);
 void do_set(const std::string& thing, const std::string& value);
-/** Sets source for console input */
+/** Sets source for console input cin to reset */
 void do_input(const std::string& source);
-/** Sets source for console output */
+/** Sets source for console output cout to reset*/
 void do_output(const std::string& sink);
 /** Resets lc3 state */
 void do_reset(void);
@@ -66,7 +67,7 @@ void do_debug_info(void);
 void do_debug_info(const std::string& name);
 void do_debug_info(unsigned short address);
 /** Displays all registers cc and pc in both decimal and hex.  Also displays total number of instructions executed */
-void info(void);
+void do_info(void);
 
 // File
 /** Reinitializes and loads filename */
@@ -74,11 +75,11 @@ void do_load(const std::string& filename);
 /** Reinitializes and Reloads last file if there was a file already loaded */
 void do_reload(const std::string& filename);
 /** Loads filename over current state */
-void loadover(const std::string& filename);
+void do_loadover(const std::string& filename);
 /** Reloads last filename over current state */
-void reloadover(const std::string& filename);
+void do_reloadover(const std::string& filename);
 /** Quits the program */
-void quit(void);
-void exit(void);
+void do_quit(void);
+void do_exit(void);
 
 #endif
