@@ -80,6 +80,10 @@ set(SRC_LIBLC3
     liblc3/lc3_cmp.cpp
 )
 
+set(SRC_LOGGING
+    logging/logger.cpp
+)
+
 set(SRC_AS2OBJ
     as2obj/main.cpp
 )
@@ -139,6 +143,11 @@ target_link_libraries(
     lc3
     dl
     ${LIBLC3_EXTRA_LIBS}
+)
+
+add_library(
+    logger
+    ${SRC_LOGGING}
 )
 
 add_executable(
