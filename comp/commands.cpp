@@ -1,8 +1,13 @@
 #include "commands.hpp"
-#include <lc3_all.hpp>
 #include <logger.hpp>
+#include <bitset>
 
 extern lc3_state state;
+std::string current_filename;
+
+#define NUM_LIST_DEFAULT 16
+
+std::string binary_instruction_string(unsigned short data);
 
 void do_run(void)
 {
@@ -229,75 +234,252 @@ void do_print(const std::string& symbol)
 
 void do_list(void)
 {
-
+    int size = NUM_LIST_DEFAULT / 2;
+    int pc = state.pc;
+    unsigned short start, end;
+    if (pc - size < 0)
+    {
+        start = 0;
+        end = NUM_LIST_DEFAULT + 1;
+    }
+    else if (pc + size > 0xffff)
+    {
+        start = 0xffff - NUM_LIST_DEFAULT - 1;
+        end = 0xffff;
+    }
+    else
+    {
+        start = pc - size;
+        end = pc + size;
+    }
+    do_list(start, end);
 }
 
 void do_list(unsigned short start)
 {
-
+    do_list(start, start);
 }
 
 void do_list(unsigned short start, unsigned short end, int level)
 {
-
+    for (unsigned int i = start; i <= end; i++)
+    {
+        unsigned short data = state.mem[i];
+        std::string output;
+        switch(level)
+        {
+            case LC3_BASIC_DISASSEMBLE:
+                output = lc3_basic_disassemble(state, data);
+            case LC3_NORMAL_DISASSEMBLE:
+                output = lc3_disassemble(state, data);
+            case LC3_ADVANCED_DISASSEMBLE:
+                output = lc3_smart_disassemble(state, data);
+            default:
+                return;
+        }
+        std::string binstr = binary_instruction_string(data);
+        const auto& comment = state.comments.find(i);
+        printf("x%04hx : %s %s %s\n", i, binstr.c_str(), output.c_str(), comment == state.comments.end() ? "" : comment->second.c_str());
+    }
 }
 
 void do_dump(unsigned short start)
 {
-
+    do_dump(start, start);
 }
 
 void do_dump(unsigned short start, unsigned short end)
 {
-
+    for (unsigned int i = start; i <= end; i++)
+    {
+        short data = state.mem[i];
+        printf("x%04hx : %hd x%04hx\n", i, data, data);
+    }
 }
 
 void do_debug_info(void)
 {
-
+    for (const auto& addr_break : state.breakpoints)
+    {
+        const auto& breakp = addr_break.second;
+        const std::string symbol = lc3_sym_rev_lookup(state, breakp.addr);
+        printf("Breakpoint %s ", breakp.label.c_str());
+        if (symbol.empty())
+            printf("at x%04hx", breakp.addr);
+        else
+            printf("at %s", symbol.c_str());
+        printf(" - Condition: %s Times: %d Times Triggered: %d\n", breakp.condition.c_str(), breakp.max_hits, breakp.hit_count);
+    }
+    for (const auto& addr_watch : state.mem_watchpoints)
+    {
+        const auto& watch = addr_watch.second;
+        const std::string symbol = lc3_sym_rev_lookup(state, watch.data);
+        printf("Watchpoint %s ", watch.label.c_str());
+        if (symbol.empty())
+            printf("targeting MEM[x%04hx]", watch.data);
+        else
+            printf("targeting %s", symbol.c_str());
+        printf(" - Condition: %s Times: %d Times Triggered: %d\n", watch.condition.c_str(), watch.max_hits, watch.hit_count);
+    }
+    for (const auto& reg_watch : state.reg_watchpoints)
+    {
+        const auto& watch = reg_watch.second;
+        printf("Watchpoint %s targeting R%d - Condition: %s Times: %d Times Triggered: %d\n", watch.label.c_str(), watch.data, watch.condition.c_str(), watch.max_hits, watch.hit_count);
+    }
+    for (const auto& addr_bbox : state.blackboxes)
+    {
+        const auto& bbox = addr_bbox.second;
+        const std::string symbol = lc3_sym_rev_lookup(state, bbox.addr);
+        printf("Blackbox %s ", bbox.label.c_str());
+        if (symbol.empty())
+            printf("at MEM[x%04hx]", bbox.addr);
+        else
+            printf("at %s", symbol.c_str());
+        printf(" - Condition: %s Times Triggered: %d\n", bbox.condition.c_str(), bbox.hit_count);
+    }
 }
 
-void do_debug_info(const std::string& name)
+void do_debug_info(const std::string& symbol)
 {
-
+    int lookup = lc3_sym_lookup(state, symbol);
+    if (lookup == -1)
+        return;
+    do_debug_info((unsigned short)lookup);
 }
 
 void do_debug_info(unsigned short address)
 {
+    const auto& breakp_it = state.breakpoints.find(address);
+    const auto& mwatch_it = state.mem_watchpoints.find(address);
+    const auto& rwatch_it = state.reg_watchpoints.find(address);
+    const auto& bbox_it = state.blackboxes.find(address);
 
+    if (breakp_it != state.breakpoints.end())
+    {
+        const auto& breakp = breakp_it->second;
+        const std::string symbol = lc3_sym_rev_lookup(state, breakp.addr);
+        printf("Breakpoint %s ", breakp.label.c_str());
+        if (symbol.empty())
+            printf("at x%04hx", breakp.addr);
+        else
+            printf("at %s", symbol.c_str());
+        printf(" - Condition: %s Times: %d Times Triggered: %d\n", breakp.condition.c_str(), breakp.max_hits, breakp.hit_count);
+    }
+    if (mwatch_it != state.mem_watchpoints.end())
+    {
+        const auto& watch = mwatch_it->second;
+        const std::string symbol = lc3_sym_rev_lookup(state, watch.data);
+        printf("Watchpoint %s ", watch.label.c_str());
+        if (symbol.empty())
+            printf("targeting MEM[x%04hx]", watch.data);
+        else
+            printf("targeting %s", symbol.c_str());
+        printf(" - Condition: %s Times: %d Times Triggered: %d\n", watch.condition.c_str(), watch.max_hits, watch.hit_count);
+    }
+    if (rwatch_it != state.reg_watchpoints.end())
+    {
+        const auto& watch = rwatch_it->second;
+        printf("Watchpoint %s targeting R%d - Condition: %s Times: %d Times Triggered: %d\n", watch.label.c_str(), watch.data, watch.condition.c_str(), watch.max_hits, watch.hit_count);
+    }
+    if (bbox_it != state.blackboxes.end())
+    {
+        const auto& bbox = bbox_it->second;
+        const std::string symbol = lc3_sym_rev_lookup(state, bbox.addr);
+        printf("Blackbox %s ", bbox.label.c_str());
+        if (symbol.empty())
+            printf("at MEM[x%04hx]", bbox.addr);
+        else
+            printf("at %s", symbol.c_str());
+        printf(" - Condition: %s Times Triggered: %d\n", bbox.condition.c_str(), bbox.hit_count);
+    }
 }
 
 void do_info(void)
 {
-
+    printf("x%04hx: %s\n", state.pc, lc3_disassemble(state, state.mem[state.pc]).c_str());
+    printf("R0 %6hd|x%04hx\tR1 %6hd|x%04hx\tR2 %6hd|x%04hx\tR3 %6hd|x%04hx\nR4 %6hd|x%04hx\tR5 %6hd|x%04hx\tR6 %6hd|x%04hx\tR7 %6hd|x%04hx\nCC: %s\n",
+           state.regs[0], state.regs[0], state.regs[1], state.regs[1], state.regs[2], state.regs[2],
+           state.regs[3], state.regs[3], state.regs[4], state.regs[4], state.regs[5], state.regs[5],
+           state.regs[6], state.regs[6], state.regs[7], state.regs[7], (state.n ? "N" : (state.z ? "Z" : "P")));
 }
 
 void do_load(const std::string& filename)
 {
-
+    lc3_init(state);
+    try
+    {
+        lc3_assemble(state, filename);
+    }
+    catch (LC3AssembleException e)
+    {
+        fprintf(stderr, "[ERROR] %s failed to assemble. %s\n", filename.c_str(), e.what().c_str());
+        return;
+    }
+    current_filename = filename;
 }
 
-void do_reload(const std::string& filename)
+void do_reload()
 {
+    if (current_filename.empty())
+        return;
 
+    lc3_init(state);
+    try
+    {
+        lc3_assemble(state, current_filename);
+    }
+    catch (LC3AssembleException e)
+    {
+        fprintf(stderr, "[ERROR] %s failed to assemble. %s\n", current_filename.c_str(), e.what().c_str());
+        return;
+    }
 }
 
 void do_loadover(const std::string& filename)
 {
-
+    try
+    {
+        lc3_assemble(state, filename);
+    }
+    catch (LC3AssembleException e)
+    {
+        fprintf(stderr, "[ERROR] %s failed to assemble. %s\n", filename.c_str(), e.what().c_str());
+        return;
+    }
+    current_filename = filename;
 }
 
 void do_reloadover(const std::string& filename)
 {
+    if (current_filename.empty())
+        return;
 
+    try
+    {
+        lc3_assemble(state, current_filename);
+    }
+    catch (LC3AssembleException e)
+    {
+        fprintf(stderr, "[ERROR] %s failed to assemble. %s\n", current_filename.c_str(), e.what().c_str());
+        return;
+    }
 }
 
 void do_quit(void)
 {
-
+    exit(EXIT_SUCCESS);
 }
 
 void do_exit(void)
 {
+    exit(EXIT_SUCCESS);
+}
 
+
+std::string binary_instruction_string(unsigned short data)
+{
+    std::bitset<16> b = data;
+    std::stringstream stringstr;
+    stringstr << b;
+    return stringstr.str();
 }

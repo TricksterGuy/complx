@@ -2,6 +2,7 @@
 #define COMMANDS_HPP
 
 #include <string>
+#include <lc3_all.hpp>
 
 // Execution
 /** Runs until it halts */
@@ -71,7 +72,7 @@ void do_print(const std::string& symbol);
 /** Without any parameters displays the instructions around the pc.  If level is given affects the disassemble level (dumb, normal, highlevel) */
 void do_list(void);
 void do_list(unsigned short start);
-void do_list(unsigned short start, unsigned short end, int level = 1);
+void do_list(unsigned short start, unsigned short end, int level = LC3_NORMAL_DISASSEMBLE);
 /** Prints out the data (in decimal and hex) between start and end (or start if end isn't given) */
 void do_dump(unsigned short start);
 void do_dump(unsigned short start, unsigned short end);
