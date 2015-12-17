@@ -36,8 +36,6 @@ WORKDIR /home/developer/
 ADD . complx
 WORKDIR /home/developer/complx
 
-RUN sudo apt-get update --fix-missing && sudo apt-get install -y g++ build-essential libwxgtk3.0-dev && sudo apt-get clean
-RUN sudo chmod +x install.sh
 RUN sudo ./install.sh
 
 CMD [ "complx" ]

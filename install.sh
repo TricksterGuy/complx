@@ -9,10 +9,14 @@ type apt-get >/dev/null 2>&1 || { echo >&2 "APT required, perhaps you don't have
 
 echo >&2 "Installing package build-essential"
 apt-get install -y build-essential > /dev/null
+echo >&2 "Installing g++"
+apt-get install -y g++ > /dev/null
 echo >&2 "Installing wxWidgets 3.0"
 apt-get install -y libwxgtk3.0-dev > /dev/null
 echo >&2 "Installing CMake"
 apt-get install -y cmake > /dev/null
+echo >&2 "Installing Boost Tests"
+apt-get install -y libboost-test-dev > /dev/null
 echo >&2 "Creating build directory"
 mkdir build
 cd build
