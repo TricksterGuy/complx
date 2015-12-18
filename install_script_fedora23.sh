@@ -1,18 +1,34 @@
-#TODO update this file...
+#!/bin/bash
+#
+# Install script for complx on fedora 23
+
+# Exit on err
+set -e
+
 if [ "$(id -u)" != "0" ]; then
 	echo "Sorry, you are not root. Use the command sudo ./install_script_fedora_21.sh"
 	exit 1
 fi
 
-type yum >/dev/null 2>&1 || { echo >&2 "yum required, perhaps you don't have a Fedora variant installed?"; exit 1; }
+if ! type dnf >/dev/null 2>&1; then
+	echo >&2 "dnf required, perhaps you don't have a Fedora variant installed?"
+	exit 1
+fi
 
 echo "Installing Development Tools and Development Libraries"
-yum -y groupinstall "Development Tools" "Development Libraries" > /dev/null
-yum -y install gcc-c++ > /dev/null
+dnf -y groupinstall "Development Tools" "Development Libraries" > /dev/null
+dnf -y install gcc-c++ > /dev/null
 echo "Installing wxWidgets 3.0"
-yum -y install wxBase3 wxGTK3 wxGTK3-devel > /dev/null
+dnf -y install wxBase3 wxGTK3 wxGTK3-devel > /dev/null
+echo "Installing cmake"
+dnf -y install cmake
 echo "Creating link for wx-config"
 ln -s /usr/libexec/wxGTK3/wx-config /usr/bin/wx-config
+
+mkdir -p build
+cd build
+cmake ../
+
 echo "Building program"
 make
 echo "Installing program"
