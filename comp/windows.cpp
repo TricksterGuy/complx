@@ -145,14 +145,8 @@ void MemoryWindow::Display(unsigned short start, unsigned short end, int level)
 
 void MemoryWindow::Update(void)
 {
-    Display(state.pc, state.pc, 1);
-    /*window->clear();
-    for (int i = 0; i < height - 2; i++)
-    {
-        WriteRow(i + 1, state.pc + i);
-    }
-    window->box();
-    window->refresh();*/
+    int half = (height - 2) / 2;
+    Display(state.pc - half, state.pc + half, 1);
 }
 
 void MemoryWindow::WriteRow(int row, unsigned short addr, int level)
@@ -246,6 +240,7 @@ void MemoryWindow::WriteInstruction(unsigned short instr)
             colors.assign(instrColorings[TRAP_TYPE], instrColorings[TRAP_TYPE] + 4);
             break;
         case ERROR_INSTR:
+            ///TODO Add interface for plugins.
             //if (state.instructionPlugin)
             //    colors = state.instructionPlugin->GetInstructionColoring(instr);
             //else

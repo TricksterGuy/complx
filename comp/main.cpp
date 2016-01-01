@@ -203,14 +203,6 @@ void init(void)
 {
     //yydebug = 1;
     lc3_init(state);
-    try
-    {
-        lc3_assemble(state, "comptest.asm");
-    }
-    catch (LC3AssembleException e)
-    {
-        return;
-    }
     initscr();
     keypad(stdscr, 1);
     raw();

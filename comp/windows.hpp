@@ -30,5 +30,4 @@ private:
     std::unique_ptr<CursesWindow> window;
 };
 
-
 #endif
