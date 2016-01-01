@@ -68,10 +68,8 @@ void do_interrupt(bool set);
 
 // Display
 /** Displays the address given or tries to display a range of addresses */
-void do_list(unsigned short start);
-void do_list(const std::string& start);
-void do_list(unsigned short start, unsigned short end, int level = LC3_NORMAL_DISASSEMBLE);
-void do_list(const std::string& start, const std::string& end, int level = LC3_NORMAL_DISASSEMBLE);
+void do_list(unsigned short start, int level = LC3_NORMAL_DISASSEMBLE);
+void do_list(const std::string& start, int level = LC3_NORMAL_DISASSEMBLE);
 /** Displays all registers cc and pc in both decimal and hex.  Also displays total number of instructions executed */
 void do_info(void);
 

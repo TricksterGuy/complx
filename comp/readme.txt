@@ -35,15 +35,7 @@ interrupt bool - Toggles interrupts if no param given else true sets interrupts 
 
 Display
 -------
-list start[, end[, level=1]] - Without any parameters displays the instructions around the pc.  If level is given affects the disassemble level (dumb, normal, highlevel)
-breakpoints - Displays all breakpoints watchpoints and blackboxes
-
-Hide Addresses?
-Flip Memory?
-Instruction Highlight?
-Show Console Output
-Call Stack?
-
+list addr[, level=1] - Displays memory addresses starting from start. If level is given affects the disassemble level (basic=0, normal=1, highlevel=2)
 
 File
 ----
@@ -57,20 +49,21 @@ quit - quits the program
 Other stuff
 -----------
 multiple commands may be given in a single line separated by semicolons i.e. this is valid
-set R0 14; set R1 19; set CC Z
+set R0 14; set R1 19; set CC 0
 
 If no command is given execute the last command given.
+If up is pressed then it should go through commands history
 
-[bonus]If up is pressed then it should go through commands history
 
+
+Roadmap
+-----
+The following features from complx
+Hide Addresses?
+Flip Memory?
+Instruction Highlight toggling.
+Show Console Output
+Call Stack?
+
+Another command to repeat the previous command.
 repeat num should repeat the last command num times
-usage is as follows
-
-step
-repeat 25
-
-or
-
-step ; repeat 25
-
-The first will execute step 1 + 25 times the second will execute step 25 times.

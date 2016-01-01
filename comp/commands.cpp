@@ -269,40 +269,22 @@ void do_interrupt(bool set)
     state.interrupt_enabled = set;
 }
 
-void do_list(unsigned short start)
+void do_list(unsigned short start, int level)
 {
-    do_list(start, start);
+    memory->Display(start, start, level);
 }
 
-void do_list(unsigned short start, unsigned short end, int level)
-{
-    memory->Display(start, end, level);
-}
-
-void do_list(const std::string& start)
+void do_list(const std::string& start, int level)
 {
     int lookup = lc3_sym_lookup(state, start);
     if (lookup == -1)
         return;
-    do_list(lookup, lookup);
-}
-
-void do_list(const std::string& start, const std::string& end, int level)
-{
-    int slookup = lc3_sym_lookup(state, start);
-    int elookup = lc3_sym_lookup(state, end);
-    if (slookup == -1 || elookup == -1)
-        return;
-    do_list(slookup, elookup, level);
+    do_list(lookup, level);
 }
 
 void do_info(void)
 {
-    printf("x%04hx: %s\n", state.pc, lc3_disassemble(state, state.mem[state.pc]).c_str());
-    printf("R0 %6hd|x%04hx\tR1 %6hd|x%04hx\tR2 %6hd|x%04hx\tR3 %6hd|x%04hx\nR4 %6hd|x%04hx\tR5 %6hd|x%04hx\tR6 %6hd|x%04hx\tR7 %6hd|x%04hx\nCC: %s\n",
-           state.regs[0], state.regs[0], state.regs[1], state.regs[1], state.regs[2], state.regs[2],
-           state.regs[3], state.regs[3], state.regs[4], state.regs[4], state.regs[5], state.regs[5],
-           state.regs[6], state.regs[6], state.regs[7], state.regs[7], (state.n ? "N" : (state.z ? "Z" : "P")));
+    ///TODO implement.
 }
 
 void do_load(const std::string& filename)

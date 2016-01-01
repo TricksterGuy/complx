@@ -236,11 +236,7 @@ interrupt_command: INTERRUPT NUMBER
     }
     ;
 list_command: LIST list_args;
-list_args: ADDR ADDR NUMBER
-    {
-        do_list($1, $2, $3);
-    }
-    | ADDR ADDR
+list_args: ADDR NUMBER
     {
         do_list($1, $2);
     }
@@ -248,11 +244,7 @@ list_args: ADDR ADDR NUMBER
     {
         do_list($1);
     }
-    | STRING STRING NUMBER
-    {
-        do_list($1, $2, $3);
-    }
-    | STRING STRING
+    | STRING NUMBER
     {
         do_list($1, $2);
     }

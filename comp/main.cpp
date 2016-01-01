@@ -218,13 +218,19 @@ void cmd_loop(void)
     while(1)
     {
         std::string command = read_command();
-        cmd_history.push_back(command);
-        cmd_history_index = cmd_history.size();
+        if (command.empty() && !cmd_history.empty())
+        {
+            command = cmd_history.back();
+        }
+        else
+        {
+            cmd_history.push_back(command);
+            cmd_history_index = cmd_history.size();
+        }
         move(LINES - 2, 0);
         clrtoeol();
         move(LINES - 1, 0);
         clrtoeol();
-        mvprintw(LINES - 1, 0, "your command: %s", command.c_str());
         mvprintw(LINES - 2, 0, "> ");
 
         yy_scan_string(command.c_str());
