@@ -147,12 +147,9 @@ std::string read_command(void)
             else
             {
                 std::stringstream* new_cmd = new std::stringstream;
-                for (int i = 0; i < size; i++)
-                {
-                    char ch = cmd->get();
-                    if (i != curpos - 1)
-                        new_cmd->put(ch);
-                }
+                std::string cur = cmd->str();
+                cur.erase(curpos - 1, 1);
+                (*new_cmd) << cur;
                 cmd.reset(new_cmd);
                 curpos--;
                 size--;
@@ -167,12 +164,9 @@ std::string read_command(void)
             else
             {
                 std::stringstream* new_cmd = new std::stringstream;
-                for (int i = 0; i < size; i++)
-                {
-                    char ch = cmd->get();
-                    if (i != curpos)
-                        new_cmd->put(ch);
-                }
+                std::string cur = cmd->str();
+                cur.erase(curpos, 1);
+                (*new_cmd) << cur;
                 cmd.reset(new_cmd);
                 size--;
             }
@@ -187,6 +181,7 @@ std::string read_command(void)
         clrtoeol();
         std::string command = cmd->str();
         printw("%s", command.c_str());
+        //mvprintw(LINES - 1, 0, "%d %d %d", curpos, size, cmd_history_index);
         move(y, curpos + x);
         refresh();
         if (cmd_history_index == cmd_history.size())
@@ -219,14 +214,10 @@ void cmd_loop(void)
     {
         std::string command = read_command();
         if (command.empty() && !cmd_history.empty())
-        {
             command = cmd_history.back();
-        }
         else
-        {
             cmd_history.push_back(command);
-            cmd_history_index = cmd_history.size();
-        }
+        cmd_history_index = cmd_history.size();
         move(LINES - 2, 0);
         clrtoeol();
         move(LINES - 1, 0);
