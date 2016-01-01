@@ -1,5 +1,5 @@
-comp
-    Text based simulator based on liblc3. 
+`comp
+    Text based simulator based on liblc3.
 
 commands
 
@@ -15,32 +15,35 @@ rewind - Backsteps until undo stack empty
 
 Debugging
 ---------
-temp addr - Puts a temporary breakpoint at addr (this is equivalent to break addr, name, 1, 1)
+tempbreak addr - Puts a temporary breakpoint at addr (this is equivalent to break addr, name, 1, 1)
 break addr[, cond[, times[, name]]] - Puts breakpoint at addr with condition cond, times number of hits before becoming inactive, and name name
 watch target, condition[, times[, name]] - Sets a watchpoint on target with condition cond, times number of hits before becoming inactive, and name name
 blackbox addr[, name[, condition]] - Marks addr as a blackbox.
-undo_stack num - Sets the undo stack length
+undostack num - Sets the undo stack length
+callstack num - Sets the call stack length
 delete name/addr - Deletes the breakpoint/watchpoint/blackbox with name or address
 
 Manipulation
 set thing value - Sets register/cc/pc/address to value
+fillmem value - Fills entire lc3 memory with value
 input fname/cin - Sets source for console input
 output fname/cout - Sets source for console output
 reset - Resets the lc3 state
 randomize - Randomizes the lc3 state
-true_traps bool - Toggles true_traps if no param given else true sets true_traps false unsets true_traps
+truetraps bool - Toggles true_traps if no param given else true sets true_traps false unsets true_traps
 interrupt bool - Toggles interrupts if no param given else true sets interrupts false unsets interrupts
 
 Display
 -------
-print thing - Prints register/cc/pc/address
 list start[, end[, level=1]] - Without any parameters displays the instructions around the pc.  If level is given affects the disassemble level (dumb, normal, highlevel)
-dump start[, end] - Prints out the data (in decimal and hex) between start and end (or start if end isn't given)
-dbreak addr/name - Displays breakpoint info for address or name
-dwatch target/name - Displays watchpoint info for target or name
-dblackbox addr/name - Displays blackbox info for address or name
 breakpoints - Displays all breakpoints watchpoints and blackboxes
-info - Displays all registers cc and pc in both decimal and hex.  Also displays total number of instructions executed.
+
+Hide Addresses?
+Flip Memory?
+Instruction Highlight?
+Show Console Output
+Call Stack?
+
 
 File
 ----
@@ -60,10 +63,10 @@ If no command is given execute the last command given.
 
 [bonus]If up is pressed then it should go through commands history
 
-repeat num should repeat the last command num times 
+repeat num should repeat the last command num times
 usage is as follows
 
-step 
+step
 repeat 25
 
 or

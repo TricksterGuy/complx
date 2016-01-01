@@ -1,8 +1,11 @@
 #include "commands.hpp"
+#include "windows.hpp"
 #include <logger.hpp>
-#include <bitset>
+#include <ncurses.h>
 
 extern lc3_state state;
+extern std::unique_ptr<MemoryWindow> memory;
+extern std::unique_ptr<RegisterWindow> registers;
 std::string current_filename;
 
 #define NUM_LIST_DEFAULT 16
@@ -11,87 +14,119 @@ std::string binary_instruction_string(unsigned short data);
 
 void do_run(void)
 {
+    state.halted = 0;
     lc3_run(state);
+    memory->Update();
+    registers->Update();
 }
 
 void do_step(unsigned int times)
 {
+    state.halted = 0;
     lc3_run(state, times);
+    memory->Update();
+    registers->Update();
 }
 
 void do_back(unsigned int times)
 {
     lc3_rewind(state, times);
+    memory->Update();
+    registers->Update();
 }
 
 void do_next(unsigned int times)
 {
+    state.halted = 0;
     for (unsigned int i = 0; i < times; i++)
         lc3_next_line(state);
+    memory->Update();
+    registers->Update();
 }
 
 void do_prev(unsigned int times)
 {
     for (unsigned int i = 0; i < times; i++)
         lc3_prev_line(state);
+    memory->Update();
+    registers->Update();
 }
 
 void do_finish(void)
 {
+    state.halted = 0;
     lc3_finish(state);
+    memory->Update();
+    registers->Update();
 }
 
 void do_rewind(void)
 {
     lc3_rewind(state);
+    memory->Update();
+    registers->Update();
 }
 
 void do_tempbreak(unsigned short address)
 {
-    lc3_add_break(state, address);
+    lc3_add_break(state, address, "", "1", 1);
+    memory->Update();
 }
 
 void do_tempbreak(const std::string& symbol)
 {
-    lc3_add_break(state, symbol);
+    lc3_add_break(state, symbol, "", "1", 1);
+    memory->Update();
 }
 
 void do_break(unsigned short address, const std::string& name, const std::string& condition, int times)
 {
     lc3_add_break(state, address, name, condition, times);
+    memory->Update();
+}
+
+void do_break(const std::string& symbol, const std::string& name, const std::string& condition, int times)
+{
+    lc3_add_break(state, symbol, name, condition, times);
+    memory->Update();
 }
 
 void do_watch(const std::string& symbol, const std::string& condition, const std::string& name, int times)
 {
     lc3_add_watch(state, symbol, condition, name, times);
+    memory->Update();
 }
 
 void do_watch(unsigned char reg, const std::string& condition, const std::string& name, int times)
 {
     lc3_add_watch(state, true, reg, condition, name, times);
+    registers->Update();
 }
 
 void do_watch(unsigned short address, const std::string& condition, const std::string& name, int times)
 {
     lc3_add_watch(state, false, address, condition, name, times);
+    memory->Update();
 }
 
 void do_blackbox(unsigned short address, const std::string& name, const std::string& condition)
 {
     lc3_add_blackbox(state, address, name, condition);
+    memory->Update();
 }
 
 void do_blackbox(const std::string& symbol, const std::string& name, const std::string& condition)
 {
     lc3_add_blackbox(state, symbol, name, condition);
+    memory->Update();
 }
 
-void do_undo_stack(unsigned short num)
+void do_undostack(unsigned int num)
 {
     state.max_stack_size = num;
 }
 
-void do_call_stack(unsigned short num)
+void do_callstack(unsigned int num)
 {
     state.max_call_stack_size = num;
 }
@@ -101,6 +136,7 @@ void do_delete(const std::string& symbol)
     lc3_remove_blackbox(state, symbol);
     lc3_remove_break(state, symbol);
     lc3_remove_watch(state, symbol);
+    memory->Update();
 }
 
 void do_delete(unsigned short address)
@@ -108,17 +144,28 @@ void do_delete(unsigned short address)
     lc3_remove_blackbox(state, address);
     lc3_remove_break(state, address);
     lc3_remove_watch(state, false, address);
+    memory->Update();
 }
 
 void do_delete(unsigned char reg)
 {
     lc3_remove_watch(state, true, reg);
+    registers->Update();
 }
 
 void do_set(unsigned char reg, short value)
 {
-    state.regs[reg] = value;
-    ///TODO Handle PC,CC
+    if (reg <= 7)
+        state.regs[reg] = value;
+    if (reg == 8)
+        state.pc = value;
+    if (reg == 9)
+    {
+        state.n = value < 0;
+        state.z = value == 0;
+        state.p = value > 0;
+    }
+    registers->Update();
 }
 
 void do_set(unsigned char reg, const std::string& expr)
@@ -132,6 +179,7 @@ void do_set(unsigned char reg, const std::string& expr)
 void do_set(unsigned short address, short value)
 {
     state.mem[address] = value;
+    memory->Display(address, address, LC3_NORMAL_DISASSEMBLE);
 }
 
 void do_set(unsigned short address, const std::string& expr)
@@ -156,6 +204,13 @@ void do_set(const std::string& symbol, const std::string& expr)
     if (lookup == -1)
         return;
     do_set((unsigned short)lookup, expr);
+}
+
+void do_fillmem(short value)
+{
+    for (int i = 0; i < 0x10000; i++)
+        state.mem[i] = value;
+    memory->Update();
 }
 
 void do_input(const std::string& source)
@@ -193,14 +248,18 @@ void do_output(const std::string& sink)
 void do_reset(void)
 {
     lc3_init(state);
+    registers->Update();
+    memory->Update();
 }
 
 void do_randomize(void)
 {
     lc3_init(state, true, true);
+    registers->Update();
+    memory->Update();
 }
 
-void do_true_traps(bool set)
+void do_truetraps(bool set)
 {
     lc3_set_true_traps(state, set);
 }
@@ -210,51 +269,6 @@ void do_interrupt(bool set)
     state.interrupt_enabled = set;
 }
 
-void do_print(unsigned char reg)
-{
-    ///TODO better formatting
-    short value = state.regs[reg];
-    printf("R%d\t%hd\tx%04hx\n", reg, value, value);
-}
-
-void do_print(unsigned short address)
-{
-    short value = state.mem[address];
-    printf("MEM[x%04hx]\t%hd\tx%04hx\n", address, value, value);
-}
-
-void do_print(const std::string& symbol)
-{
-    int lookup = lc3_sym_lookup(state, symbol);
-    if (lookup == -1)
-        return;
-    short value = state.mem[(unsigned short)lookup];
-    printf("MEM[%s]\t%hd\tx%04hx\n", symbol.c_str(), value, value);
-}
-
-void do_list(void)
-{
-    int size = NUM_LIST_DEFAULT / 2;
-    int pc = state.pc;
-    unsigned short start, end;
-    if (pc - size < 0)
-    {
-        start = 0;
-        end = NUM_LIST_DEFAULT + 1;
-    }
-    else if (pc + size > 0xffff)
-    {
-        start = 0xffff - NUM_LIST_DEFAULT - 1;
-        end = 0xffff;
-    }
-    else
-    {
-        start = pc - size;
-        end = pc + size;
-    }
-    do_list(start, end);
-}
-
 void do_list(unsigned short start)
 {
     do_list(start, start);
@@ -262,136 +276,24 @@ void do_list(unsigned short start)
 
 void do_list(unsigned short start, unsigned short end, int level)
 {
-    for (unsigned int i = start; i <= end; i++)
-    {
-        unsigned short data = state.mem[i];
-        std::string output;
-        switch(level)
-        {
-            case LC3_BASIC_DISASSEMBLE:
-                output = lc3_basic_disassemble(state, data);
-            case LC3_NORMAL_DISASSEMBLE:
-                output = lc3_disassemble(state, data);
-            case LC3_ADVANCED_DISASSEMBLE:
-                output = lc3_smart_disassemble(state, data);
-            default:
-                return;
-        }
-        std::string binstr = binary_instruction_string(data);
-        const auto& comment = state.comments.find(i);
-        printf("x%04hx : %s %s %s\n", i, binstr.c_str(), output.c_str(), comment == state.comments.end() ? "" : comment->second.c_str());
-    }
+    memory->Display(start, end, level);
 }
 
-void do_dump(unsigned short start)
+void do_list(const std::string& start)
 {
-    do_dump(start, start);
-}
-
-void do_dump(unsigned short start, unsigned short end)
-{
-    for (unsigned int i = start; i <= end; i++)
-    {
-        short data = state.mem[i];
-        printf("x%04hx : %hd x%04hx\n", i, data, data);
-    }
-}
-
-void do_debug_info(void)
-{
-    for (const auto& addr_break : state.breakpoints)
-    {
-        const auto& breakp = addr_break.second;
-        const std::string symbol = lc3_sym_rev_lookup(state, breakp.addr);
-        printf("Breakpoint %s ", breakp.label.c_str());
-        if (symbol.empty())
-            printf("at x%04hx", breakp.addr);
-        else
-            printf("at %s", symbol.c_str());
-        printf(" - Condition: %s Times: %d Times Triggered: %d\n", breakp.condition.c_str(), breakp.max_hits, breakp.hit_count);
-    }
-    for (const auto& addr_watch : state.mem_watchpoints)
-    {
-        const auto& watch = addr_watch.second;
-        const std::string symbol = lc3_sym_rev_lookup(state, watch.data);
-        printf("Watchpoint %s ", watch.label.c_str());
-        if (symbol.empty())
-            printf("targeting MEM[x%04hx]", watch.data);
-        else
-            printf("targeting %s", symbol.c_str());
-        printf(" - Condition: %s Times: %d Times Triggered: %d\n", watch.condition.c_str(), watch.max_hits, watch.hit_count);
-    }
-    for (const auto& reg_watch : state.reg_watchpoints)
-    {
-        const auto& watch = reg_watch.second;
-        printf("Watchpoint %s targeting R%d - Condition: %s Times: %d Times Triggered: %d\n", watch.label.c_str(), watch.data, watch.condition.c_str(), watch.max_hits, watch.hit_count);
-    }
-    for (const auto& addr_bbox : state.blackboxes)
-    {
-        const auto& bbox = addr_bbox.second;
-        const std::string symbol = lc3_sym_rev_lookup(state, bbox.addr);
-        printf("Blackbox %s ", bbox.label.c_str());
-        if (symbol.empty())
-            printf("at MEM[x%04hx]", bbox.addr);
-        else
-            printf("at %s", symbol.c_str());
-        printf(" - Condition: %s Times Triggered: %d\n", bbox.condition.c_str(), bbox.hit_count);
-    }
-}
-
-void do_debug_info(const std::string& symbol)
-{
-    int lookup = lc3_sym_lookup(state, symbol);
+    int lookup = lc3_sym_lookup(state, start);
     if (lookup == -1)
         return;
-    do_debug_info((unsigned short)lookup);
+    do_list(lookup, lookup);
 }
 
-void do_debug_info(unsigned short address)
+void do_list(const std::string& start, const std::string& end, int level)
 {
-    const auto& breakp_it = state.breakpoints.find(address);
-    const auto& mwatch_it = state.mem_watchpoints.find(address);
-    const auto& rwatch_it = state.reg_watchpoints.find(address);
-    const auto& bbox_it = state.blackboxes.find(address);
-
-    if (breakp_it != state.breakpoints.end())
-    {
-        const auto& breakp = breakp_it->second;
-        const std::string symbol = lc3_sym_rev_lookup(state, breakp.addr);
-        printf("Breakpoint %s ", breakp.label.c_str());
-        if (symbol.empty())
-            printf("at x%04hx", breakp.addr);
-        else
-            printf("at %s", symbol.c_str());
-        printf(" - Condition: %s Times: %d Times Triggered: %d\n", breakp.condition.c_str(), breakp.max_hits, breakp.hit_count);
-    }
-    if (mwatch_it != state.mem_watchpoints.end())
-    {
-        const auto& watch = mwatch_it->second;
-        const std::string symbol = lc3_sym_rev_lookup(state, watch.data);
-        printf("Watchpoint %s ", watch.label.c_str());
-        if (symbol.empty())
-            printf("targeting MEM[x%04hx]", watch.data);
-        else
-            printf("targeting %s", symbol.c_str());
-        printf(" - Condition: %s Times: %d Times Triggered: %d\n", watch.condition.c_str(), watch.max_hits, watch.hit_count);
-    }
-    if (rwatch_it != state.reg_watchpoints.end())
-    {
-        const auto& watch = rwatch_it->second;
-        printf("Watchpoint %s targeting R%d - Condition: %s Times: %d Times Triggered: %d\n", watch.label.c_str(), watch.data, watch.condition.c_str(), watch.max_hits, watch.hit_count);
-    }
-    if (bbox_it != state.blackboxes.end())
-    {
-        const auto& bbox = bbox_it->second;
-        const std::string symbol = lc3_sym_rev_lookup(state, bbox.addr);
-        printf("Blackbox %s ", bbox.label.c_str());
-        if (symbol.empty())
-            printf("at MEM[x%04hx]", bbox.addr);
-        else
-            printf("at %s", symbol.c_str());
-        printf(" - Condition: %s Times Triggered: %d\n", bbox.condition.c_str(), bbox.hit_count);
-    }
+    int slookup = lc3_sym_lookup(state, start);
+    int elookup = lc3_sym_lookup(state, end);
+    if (slookup == -1 || elookup == -1)
+        return;
+    do_list(slookup, elookup, level);
 }
 
 void do_info(void)
@@ -416,9 +318,10 @@ void do_load(const std::string& filename)
         return;
     }
     current_filename = filename;
+    memory->Update();
 }
 
-void do_reload()
+void do_reload(void)
 {
     if (current_filename.empty())
         return;
@@ -433,6 +336,7 @@ void do_reload()
         fprintf(stderr, "[ERROR] %s failed to assemble. %s\n", current_filename.c_str(), e.what().c_str());
         return;
     }
+    memory->Update();
 }
 
 void do_loadover(const std::string& filename)
@@ -447,13 +351,13 @@ void do_loadover(const std::string& filename)
         return;
     }
     current_filename = filename;
+    memory->Update();
 }
 
-void do_reloadover(const std::string& filename)
+void do_reloadover(void)
 {
     if (current_filename.empty())
         return;
-
     try
     {
         lc3_assemble(state, current_filename);
@@ -463,6 +367,7 @@ void do_reloadover(const std::string& filename)
         fprintf(stderr, "[ERROR] %s failed to assemble. %s\n", current_filename.c_str(), e.what().c_str());
         return;
     }
+    memory->Update();
 }
 
 void do_quit(void)
@@ -473,13 +378,4 @@ void do_quit(void)
 void do_exit(void)
 {
     exit(EXIT_SUCCESS);
-}
-
-
-std::string binary_instruction_string(unsigned short data)
-{
-    std::bitset<16> b = data;
-    std::stringstream stringstr;
-    stringstr << b;
-    return stringstr.str();
 }

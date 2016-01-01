@@ -60,8 +60,9 @@ if(CMAKE_HOST_WIN32)
     #include_directories("C:/msys/1.0/local/include/wx-3.0")
 endif(CMAKE_HOST_WIN32)
 
-include_directories(${complx-tools_SOURCE_DIR}/liblc3)
 include_directories(${complx-tools_SOURCE_DIR}/lc3test)
+include_directories(${complx-tools_SOURCE_DIR}/liblc3)
+include_directories(${complx-tools_SOURCE_DIR}/logging)
 
 set(SRC_LIBLC3
     liblc3/ExpressionEvaluator.cpp

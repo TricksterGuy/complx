@@ -35,9 +35,9 @@ void do_watch(unsigned short address, const std::string& condition, const std::s
 void do_blackbox(unsigned short address, const std::string& name = "", const std::string& condition = "1");
 void do_blackbox(const std::string& symbol, const std::string& name = "", const std::string& condition = "1");
 /** Sets size of undo stack */
-void do_undo_stack(unsigned short num);
+void do_undostack(unsigned int num);
 /** Sets size of call stack */
-void do_call_stack(unsigned short num);
+void do_callstack(unsigned int num);
 /** Deletes all breakpoints/watchpoints/blackboxes with symbol or address */
 void do_delete(const std::string& name);
 void do_delete(unsigned short address);
@@ -51,6 +51,8 @@ void do_set(unsigned short address, short value);
 void do_set(unsigned short address, const std::string& expr);
 void do_set(const std::string& symbol, short value);
 void do_set(const std::string& symbol, const std::string& expr);
+/** Fills memory with value */
+void do_fillmem(short value);
 /** Sets source for console input cin to reset */
 void do_input(const std::string& source);
 /** Sets source for console output cout to reset*/
@@ -60,26 +62,16 @@ void do_reset(void);
 /** Randomizes lc3 state */
 void do_randomize(void);
 /** Turns on or off the true traps setting.  Will step into traps if set */
-void do_true_traps(bool set);
+void do_truetraps(bool set);
 /** Toggles interrupts if no param given else true sets interrupts false unsets interrupts */
 void do_interrupt(bool set);
 
 // Display
-/** Prints register/cc/pc/address */
-void do_print(unsigned char reg);
-void do_print(unsigned short address);
-void do_print(const std::string& symbol);
-/** Without any parameters displays the instructions around the pc.  If level is given affects the disassemble level (dumb, normal, highlevel) */
-void do_list(void);
+/** Displays the address given or tries to display a range of addresses */
 void do_list(unsigned short start);
+void do_list(const std::string& start);
 void do_list(unsigned short start, unsigned short end, int level = LC3_NORMAL_DISASSEMBLE);
-/** Prints out the data (in decimal and hex) between start and end (or start if end isn't given) */
-void do_dump(unsigned short start);
-void do_dump(unsigned short start, unsigned short end);
-/** Displays breakpoint/watchpoint/blackbox info for address or name, or if no params displays all breakpoints/watchpoints/blackboxes */
-void do_debug_info(void);
-void do_debug_info(const std::string& name);
-void do_debug_info(unsigned short address);
+void do_list(const std::string& start, const std::string& end, int level = LC3_NORMAL_DISASSEMBLE);
 /** Displays all registers cc and pc in both decimal and hex.  Also displays total number of instructions executed */
 void do_info(void);
 
@@ -87,11 +79,11 @@ void do_info(void);
 /** Reinitializes and loads filename */
 void do_load(const std::string& filename);
 /** Reinitializes and Reloads last file if there was a file already loaded */
-void do_reload(const std::string& filename);
+void do_reload(void);
 /** Loads filename over current state */
 void do_loadover(const std::string& filename);
 /** Reloads last filename over current state */
-void do_reloadover(const std::string& filename);
+void do_reloadover(void);
 /** Quits the program */
 void do_quit(void);
 void do_exit(void);
