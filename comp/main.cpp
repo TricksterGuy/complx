@@ -47,15 +47,15 @@ void initialize_colors(void)
 
 void warning(const char* s, char* t)
 {
-    printw("%s: %s\n", "comp", s);
+    mvprintw(LINES - 1, 0, "comp: %s", s);
     if (t)
-        printw(" %s\n", t);
+        printw(" %s", t);
+    move(LINES - 2, 2);
 }
 
 void yyerror(const char* s)
 {
     warning(s, NULL);
-    //yyparse();
 }
 
 std::string read_command(void)
