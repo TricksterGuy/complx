@@ -8,8 +8,9 @@ enable_testing()
 
 option(ENABLE_PLUGINS "Enable Official Plugins" ON)
 option(ENABLE_LC3EDIT "Build lc3edit" OFF)
-option(ENABLE_COMP "Build comp" OFF)
+option(ENABLE_COMP "Build comp" ON)
 option(ENABLE_DEV "Build dev version" OFF)
+option(ENABLE_TESTS "Enable testing" OFF)
 
 # Require C++11 build
 if(NOT CMAKE_CXX_FLAGS MATCHES "-std=(c|gnu)\\+\\+11")
@@ -218,4 +219,6 @@ if(ENABLE_COMP)
     add_subdirectory(comp)
 endif(ENABLE_COMP)
 
-add_subdirectory(tests)
+if(ENABLE_TESTS) 
+    add_subdirectory(tests)
+endif(ENABLE_TESTS)
