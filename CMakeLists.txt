@@ -7,7 +7,7 @@ project(complx-tools)
 
 option(ENABLE_PLUGINS "Enable Official Plugins" ON)
 option(ENABLE_LC3EDIT "Build lc3edit" OFF)
-option(ENABLE_COMP "Build comp" ON)
+option(ENABLE_COMP "Build comp" OFF)
 option(ENABLE_DEV "Build dev version" OFF)
 option(ENABLE_TESTS "Enable testing" OFF)
 
