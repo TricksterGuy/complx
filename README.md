@@ -3,6 +3,8 @@
 
 Complx the LC-3 Simulator used in CS2110 at Georgia Tech currently maintained and authored by Brandon (bwhitehead0308 [AT] gmail [DOT] com)
 
+#_Note if you are here via CS2110, software and install instructions will be finalized on Saturday_
+
 # Screenshot
 ![Main Screen](https://github.com/TricksterGuy/complx/blob/master/doc/main_screen.png)
 
