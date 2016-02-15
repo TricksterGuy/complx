@@ -1,3 +1,8 @@
+15 February 2016
+   released version 4.12.1 of complx-tools
+     Change log:
+       - New: Wip version of comp
+
 24 September 2015
    released version 4.10.0 of complx-tools
      Change log:
