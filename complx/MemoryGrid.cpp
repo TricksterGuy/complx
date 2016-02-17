@@ -5,12 +5,14 @@
 #include <wx/colour.h>
 #include <wx/brush.h>
 #include <wx/menu.h>
+#include <wx/dcclient.h>
 #include "MemoryGrid.hpp"
 #include "MemoryView.hpp"
 #include "GridCellInfoRenderer.hpp"
 #include "GridCellBinaryRenderer.hpp"
 #include "BreakpointDialog.hpp"
 #include <lc3_all.hpp>
+#include <wx/settings.h>
 
 extern lc3_state state;
 void PrintError(int error);
@@ -25,7 +27,10 @@ wxGrid(parent, id, pos, size, style), timer(this, MemoryToolTipTimer), tipWindow
     last_address = 0x3000;
     highlight = true;
     SetUseNativeColLabels();
-    SetDefaultRowSize(12);
+
+    wxFont font = wxSystemSettings::GetFont(wxSYS_ANSI_FIXED_FONT);
+    SetFont(font);
+    SetDefaultRowSize(font.GetPointSize());
 
     Connect(MemoryMenuBreakpoint, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryGrid::OnBreakpoint));
     Connect(MemoryMenuTemppoint, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryGrid::OnTemppoint));
@@ -82,11 +87,16 @@ void MemoryGrid::InitGridSizes()
     GetClientSize(&w, &h);
     w -= 24;
 
+    wxClientDC dc(this);
+    dc.SetFont(GetFont());
+    wxSize size = dc.GetTextExtent("0000000000000000");
+    printf("%d %d", size.GetWidth(), size.GetHeight());
     // Hi I am a function call that takes 2+ seconds
     //AutoSizeColumn(MemoryBinary);
 
+
     //printf("%d\n", GetColSize(MemoryBinary));
-    w -= 140;//GetColSize(MemoryBinary);
+    w -= size.GetWidth();//GetColSize(MemoryBinary);
 
     SetColSize(MemoryInfo, 22);
     SetColSize(MemoryAddress, 8 * w / 75 - 8);
