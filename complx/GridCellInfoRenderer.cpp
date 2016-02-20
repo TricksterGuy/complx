@@ -12,13 +12,16 @@ void GridCellInfoRenderer::Draw(wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, co
 {
     if (column != 0) return;
 
-    bool pc = state.pc == item ? IMAGE_PC : 0;
-    int bp = state.breakpoints.find(item) != state.breakpoints.end() ? IMAGE_BREAKPOINT : 0;
-    bp = (bp == IMAGE_BREAKPOINT && !state.breakpoints[item].enabled) ? IMAGE_DISABLEDBP : bp;
-    int bb = state.blackboxes.find(item) != state.blackboxes.end() ? IMAGE_BLACKBOX : 0;
-    bb = (bb == IMAGE_BLACKBOX && !state.blackboxes[item].enabled) ? IMAGE_DISABLEDBB : bb;
-
     wxGridCellStringRenderer::Draw(grid, attr, dc, rect, item, column, isSelected);
+
+    int address = view ? view->ViewToAddress(item) : -1;
+    if (address == -1) return;
+
+    bool pc = state.pc == address ? IMAGE_PC : 0;
+    int bp = state.breakpoints.find(address) != state.breakpoints.end() ? IMAGE_BREAKPOINT : 0;
+    bp = (bp == IMAGE_BREAKPOINT && !state.breakpoints[address].enabled) ? IMAGE_DISABLEDBP : bp;
+    int bb = state.blackboxes.find(address) != state.blackboxes.end() ? IMAGE_BLACKBOX : 0;
+    bb = (bb == IMAGE_BLACKBOX && !state.blackboxes[address].enabled) ? IMAGE_DISABLEDBB : bb;
 
     if (pc)
         infoImages->Draw(pc, dc, rect.GetX(), rect.GetY(), wxIMAGELIST_DRAW_TRANSPARENT | (isSelected ? wxIMAGELIST_DRAW_SELECTED : 0));

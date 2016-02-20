@@ -65,7 +65,7 @@ int MemoryView::GetNumberRows()
   */
 wxString MemoryView::GetValue(int item, int column)
 {
-    unsigned short addr = GetAddress(item);
+    unsigned short addr = ViewToAddress(item);
     short data = state.mem[addr];
 
     wxString ret = wxEmptyString;
@@ -126,7 +126,7 @@ wxString MemoryView::GetValue(int item, int column)
   */
 void MemoryView::SetValue(int item, int col, const wxString &value)
 {
-    unsigned short addr = GetAddress(item);
+    unsigned short addr = ViewToAddress(item);
     int data = 0;
     wxString effvalue = value;
     std::string strdata;
@@ -250,7 +250,7 @@ wxString MemoryView::GetColLabelValue(int col)
   */
 long MemoryView::GetValueAsLong(int item, int col)
 {
-    unsigned short addr = GetAddress(item);
+    unsigned short addr = ViewToAddress(item);
     return state.mem[addr];
 }
 
@@ -286,7 +286,7 @@ void MemoryView::SetFlippedMode(bool mode)
   *
   * Gets the address corresponding to row in grid
   */
-unsigned short MemoryView::GetAddress(int index)
+unsigned short MemoryView::ViewToAddress(int index) const
 {
     // If not in view range mode then index maps directly to address
     // If in view range mode then index maps to an address specified in view range table.

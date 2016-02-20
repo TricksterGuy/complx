@@ -117,15 +117,18 @@ void MemoryGrid::InitGridSizes()
     SetColSize(MemoryComment, w - 10);
 
     wxGridCellAttr* info = new wxGridCellAttr; info->SetReadOnly(); info->SetTextColour(*wxBLACK);
-    info->SetRenderer(new GridCellInfoRenderer());
+    /// TODO abstract out Memory View address->row translation into an object and pass it in here
+    info->SetRenderer(new GridCellInfoRenderer(dynamic_cast<MemoryView*>(GetTable())));
     wxGridCellAttr* addr = new wxGridCellAttr; addr->SetReadOnly(); addr->SetTextColour(*wxBLACK);
     wxGridCellAttr* instr = new wxGridCellAttr; instr->SetTextColour(*wxBLACK);
     wxGridCellAttr* hex = new wxGridCellAttr; hex->SetTextColour(*wxBLUE);
     wxGridCellAttr* decimal = new wxGridCellAttr; decimal->SetTextColour(*wxRED);
     wxGridCellAttr* binary = new wxGridCellAttr; binary->SetTextColour(*wxWHITE); binary->SetBackgroundColour(wxTransparentColor);
+    // Passing the view here is not needed because we call GetTableValueAsLong which takes care of view<=>address translation
     binary->SetRenderer(new GridCellBinaryRenderer());
     //binary->SetFont(wxFont( 10, 70, 90, wxFONTWEIGHT_BOLD, false, wxT("Courier New")));
     wxGridCellAttr* label = new wxGridCellAttr; label->SetTextColour(wxColour(64, 64, 64));
+    wxGridCellAttr* comment = new wxGridCellAttr; comment->SetReadOnly(); comment->SetTextColour(wxColour(128, 128, 255));
 
     SetColAttr(MemoryInfo, info);
     SetColAttr(MemoryAddress, addr);
@@ -134,6 +137,7 @@ void MemoryGrid::InitGridSizes()
     SetColAttr(MemoryBinary, binary);
     SetColAttr(MemoryLabel, label);
     SetColAttr(MemoryInstruction, instr);
+    SetColAttr(MemoryComment, comment);
 }
 
 /** SelectLocation
@@ -177,8 +181,7 @@ void MemoryGrid::OnContextMenu(wxGridEvent& event)
   */
 void MemoryGrid::OnBreakpoint(wxCommandEvent& event)
 {
-    int addr = -1;
-    addr = GetSelectedRow();
+    int addr = GetSelectedAddress();
     if (addr == -1) return;
 
     bool exist = lc3_add_break(state, (unsigned short) addr);
@@ -192,8 +195,7 @@ void MemoryGrid::OnBreakpoint(wxCommandEvent& event)
   */
 void MemoryGrid::OnWatchpoint(wxCommandEvent& event)
 {
-    int addr = -1;
-    addr = GetSelectedRow();
+    int addr = GetSelectedAddress();
     if (addr == -1) return;
 
     bool exist = lc3_add_watch(state, false, (unsigned short) addr, "1");
@@ -207,8 +209,7 @@ void MemoryGrid::OnWatchpoint(wxCommandEvent& event)
   */
 void MemoryGrid::OnBlackbox(wxCommandEvent& event)
 {
-    int addr = -1;
-    addr = GetSelectedRow();
+    int addr = GetSelectedAddress();
     if (addr == -1) return;
 
     bool exist = lc3_add_blackbox(state, (unsigned short) addr);
@@ -222,8 +223,7 @@ void MemoryGrid::OnBlackbox(wxCommandEvent& event)
   */
 void MemoryGrid::OnTemppoint(wxCommandEvent& event)
 {
-    int addr = -1;
-    addr = GetSelectedRow();
+    int addr = GetSelectedAddress();
     if (addr == -1) return;
 
     bool exist = lc3_add_break(state, (unsigned short) addr, "", "1", 1);
@@ -239,8 +239,7 @@ void MemoryGrid::OnAdvancedpoint(wxCommandEvent& event)
 {
     lc3_breakpoint_info info;
 
-    int addr = -1;
-    addr = GetSelectedRow();
+    int addr = GetSelectedAddress();
     if (addr == -1) return;
 
     bool new_bp = state.breakpoints.find(addr) == state.breakpoints.end();
@@ -280,8 +279,7 @@ void MemoryGrid::OnAdvancedpoint(wxCommandEvent& event)
   */
 void MemoryGrid::OnPCHere(wxCommandEvent& event)
 {
-    int addr = -1;
-    addr = GetSelectedRow();
+    int addr = GetSelectedAddress();
     if (addr == -1) return;
 
     Refresh(state.pc);
@@ -289,15 +287,20 @@ void MemoryGrid::OnPCHere(wxCommandEvent& event)
     Refresh(addr);
 }
 
-/** GetSelectedRow
+/** GetSelectedAddress
   *
-  * Gets the first selected row
+  * Gets the first selected address
   */
-int MemoryGrid::GetSelectedRow() const
+int MemoryGrid::GetSelectedAddress() const
 {
     if (!IsSelection()) return -1;
 
-    return GetSelectedRows()[0];
+    int row = GetSelectedRows()[0];
+
+    MemoryView* view = dynamic_cast<MemoryView*>(GetTable());
+    row = view ? view->ViewToAddress(row) : -1;
+
+    return row;
 }
 
 /** OnGridChange
@@ -349,7 +352,6 @@ void MemoryGrid::OnMotion(wxMouseEvent& event)
 
     if (col == MemoryComment && tipWindow == NULL)
     {
-        toolTipLastRow = row;
         timer.Start(500, wxTIMER_ONE_SHOT);
     }
 
@@ -366,7 +368,11 @@ void MemoryGrid::OnShowToolTip(wxTimerEvent& event)
 
     if (col == MemoryComment && tipWindow == NULL)
     {
-        unsigned short address = (unsigned short)(row-1);
+        MemoryView* view = dynamic_cast<MemoryView*>(GetTable());
+        row = view ? view->ViewToAddress(row - 1) : -1;
+        if (row == -1)
+            return;
+        unsigned short address = (unsigned short)(row);
         if (state.comments.find(address) == state.comments.end())
             return;
         const std::string& tooltip = state.comments[address];

@@ -44,9 +44,8 @@ class MemoryGrid : public wxGrid
 	private:
         int last_address;
         wxTimer timer;
-        int toolTipLastRow;
         bool highlight;
-        int GetSelectedRow() const;
+        int GetSelectedAddress() const;
         void OnGridChanged(wxGridEvent& event);
         void OnActivate(wxActivateEvent& event);
         void OnMotion(wxMouseEvent& event);
