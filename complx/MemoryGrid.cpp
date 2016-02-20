@@ -93,7 +93,7 @@ void MemoryGrid::InitGridSizes()
     int addrSize = dc.GetTextExtent("FFFF: ").GetWidth();
     int hexSize = dc.GetTextExtent("xFFFF ").GetWidth();
     int decimalSize = std::max(dc.GetTextExtent("-32768 ").GetWidth(), GetColSize(MemoryDecimal));
-    int instrSize = dc.GetTextExtent("ABC 123456789012345 ").GetWidth();
+    int instrSize = dc.GetTextExtent("ABC 12345678901234567890 ").GetWidth();
     int labelSize = dc.GetTextExtent("1234567890 ").GetWidth();
     // Hi I am a function call that takes 2+ seconds
     //AutoSizeColumn(MemoryBinary);
@@ -128,7 +128,7 @@ void MemoryGrid::InitGridSizes()
     binary->SetRenderer(new GridCellBinaryRenderer());
     //binary->SetFont(wxFont( 10, 70, 90, wxFONTWEIGHT_BOLD, false, wxT("Courier New")));
     wxGridCellAttr* label = new wxGridCellAttr; label->SetTextColour(wxColour(64, 64, 64));
-    wxGridCellAttr* comment = new wxGridCellAttr; comment->SetReadOnly(); comment->SetTextColour(wxColour(128, 128, 255));
+    wxGridCellAttr* comment = new wxGridCellAttr; comment->SetTextColour(wxColour(128, 128, 255));
 
     SetColAttr(MemoryInfo, info);
     SetColAttr(MemoryAddress, addr);
