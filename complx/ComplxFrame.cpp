@@ -74,6 +74,9 @@ ComplxFrame::ComplxFrame(long disassemble, long stack_size, long call_stack_size
     menuStateTrueTraps->Check(true_traps == 1);
     menuStateInterrupts->Check(interrupts == 1);
     menuViewInstructionHighlighting->Check(highlight != 0);
+    menuViewBasic->Check(disassemble == 0);
+    menuViewNormal->Check(disassemble == 1);
+    menuViewHighLevel->Check(disassemble == 2);
 
     this->stack_size = stack_size;
     this->call_stack_size = call_stack_size;
