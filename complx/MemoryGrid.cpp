@@ -89,22 +89,32 @@ void MemoryGrid::InitGridSizes()
 
     wxClientDC dc(this);
     dc.SetFont(GetFont());
-    wxSize size = dc.GetTextExtent("0000000000000000");
-    printf("%d %d", size.GetWidth(), size.GetHeight());
+    int binSize = dc.GetTextExtent("0000000000000000 ").GetWidth();
+    int addrSize = dc.GetTextExtent("FFFF: ").GetWidth();
+    int hexSize = dc.GetTextExtent("xFFFF ").GetWidth();
+    int decimalSize = std::max(dc.GetTextExtent("-32768 ").GetWidth(), GetColSize(MemoryDecimal));
+    int instrSize = dc.GetTextExtent("ABC 123456789012345 ").GetWidth();
+    int labelSize = dc.GetTextExtent("1234567890 ").GetWidth();
     // Hi I am a function call that takes 2+ seconds
     //AutoSizeColumn(MemoryBinary);
 
 
     //printf("%d\n", GetColSize(MemoryBinary));
-    w -= size.GetWidth();//GetColSize(MemoryBinary);
+    w -= binSize;//GetColSize(MemoryBinary);
+    w -= addrSize;
+    w -= hexSize;
+    w -= decimalSize;
+    w -= instrSize;
+    w -= labelSize;
 
     SetColSize(MemoryInfo, 22);
-    SetColSize(MemoryAddress, 8 * w / 75 - 8);
-    SetColSize(MemoryHexadecimal, 8 * w / 75);
-    SetColSize(MemoryDecimal, 10 * w / 75);
-    SetColSize(MemoryBinary, 139);
-    SetColSize(MemoryLabel, 18 * w / 75);
-    SetColSize(MemoryInstruction, 31 * w / 75 + 9);
+    SetColSize(MemoryAddress, addrSize);
+    SetColSize(MemoryHexadecimal, hexSize);
+    SetColSize(MemoryDecimal, decimalSize);
+    SetColSize(MemoryBinary, binSize);
+    SetColSize(MemoryLabel, labelSize);
+    SetColSize(MemoryInstruction, instrSize);
+    SetColSize(MemoryComment, w - 10);
 
     wxGridCellAttr* info = new wxGridCellAttr; info->SetReadOnly(); info->SetTextColour(*wxBLACK);
     info->SetRenderer(new GridCellInfoRenderer());
@@ -337,7 +347,7 @@ void MemoryGrid::OnMotion(wxMouseEvent& event)
         return;
     }
 
-    if (col == MemoryInstruction && tipWindow == NULL)
+    if (col == MemoryComment && tipWindow == NULL)
     {
         toolTipLastRow = row;
         timer.Start(500, wxTIMER_ONE_SHOT);
@@ -354,7 +364,7 @@ void MemoryGrid::OnShowToolTip(wxTimerEvent& event)
     int row = YToRow(y);
     int col = XToCol(x);
 
-    if (col == MemoryInstruction && tipWindow == NULL)
+    if (col == MemoryComment && tipWindow == NULL)
     {
         unsigned short address = (unsigned short)(row-1);
         if (state.comments.find(address) == state.comments.end())

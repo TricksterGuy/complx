@@ -48,6 +48,7 @@ enum
     MemoryBinary,
     MemoryLabel,
     MemoryInstruction,
+    MemoryComment,
     MemorySize,
 };
 

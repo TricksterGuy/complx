@@ -457,7 +457,10 @@ void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>&
         }
         else if (!comment.empty() && in_orig)
         {
-            comments << comment;
+
+            std::string trimmed = comment.substr(1, std::string::npos);
+            trim(trimmed);
+            comments << trimmed;
             comments << "\n";
         }
 

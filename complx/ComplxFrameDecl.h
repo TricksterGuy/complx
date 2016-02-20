@@ -197,7 +197,7 @@ class ComplxFrameDecl : public wxFrame
 	
 	public:
 		
-		ComplxFrameDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Complx LC-3 Simulator"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 704,576 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxTAB_TRAVERSAL );
+		ComplxFrameDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Complx LC-3 Simulator"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 800,600 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxTAB_TRAVERSAL );
 		
 		~ComplxFrameDecl();
 	

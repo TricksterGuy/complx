@@ -68,7 +68,7 @@ wxString MemoryView::GetValue(int item, int column)
     unsigned short addr = GetAddress(item);
     short data = state.mem[addr];
 
-    wxString ret;
+    wxString ret = wxEmptyString;
     unsigned short pc = state.pc;
     std::stringstream string;
     std::bitset<16> b = data;
@@ -106,6 +106,13 @@ wxString MemoryView::GetValue(int item, int column)
         case MemoryBinary:
             string << b;
             ret = wxString::FromUTF8(string.str().c_str());
+            break;
+        case MemoryComment:
+            if (state.comments.find(addr) != state.comments.end())
+            {
+                ret = wxString::FromUTF8(state.comments[addr].c_str());
+                ret.Replace(_("\n"), _(" "), true);
+            }
             break;
         default:
             ret = wxEmptyString;
@@ -226,6 +233,9 @@ wxString MemoryView::GetColLabelValue(int col)
             break;
         case MemoryInstruction:
             ret = _("Instruction");
+            break;
+        case MemoryComment:
+            ret = _("Comment");
             break;
         default:
             ret = wxEmptyString;
