@@ -69,7 +69,7 @@ bool ComplxApp::OnInit()
     // starting due to a GTK issue.
     ///TODO see if I can remove this.
     wxMilliSleep(50);
-    complxframe = new ComplxFrame(disassemble, stack_size, call_stack_size, true_traps, interrupts, highlight, address_str, files);
+    complxframe = new ComplxFrame(wxString::Format("%s v%s", "Complx LC-3 Simulator", Version::FULLVERSION_STRING), disassemble, stack_size, call_stack_size, true_traps, interrupts, highlight, address_str, files);
     wxIcon icon(icon32_xpm);
     complxframe->SetIcon(icon);
     complxframe->Show();

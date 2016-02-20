@@ -29,7 +29,7 @@ class wxThreadEvent;
 class ComplxFrame : public ComplxFrameDecl
 {
     public:
-        ComplxFrame(long disassemble, long stack_size, long call_stack_size, long true_traps, long interrupts, long highlight, wxString address_str,
+        ComplxFrame(const wxString& title, long disassemble, long stack_size, long call_stack_size, long true_traps, long interrupts, long highlight, wxString address_str,
                     wxArrayString files);
         ~ComplxFrame();
 
@@ -132,6 +132,7 @@ class ComplxFrame : public ComplxFrameDecl
 
         long stack_size;
         long call_stack_size;
+        wxString base_title;
 
         void UpdateRegister(wxTextCtrl* text, int value, int index);
         void OnInit(bool randomize_registers = true, bool randomize_memory = false, short fill_value = 0);

@@ -66,8 +66,8 @@ void PrintError(int error);
   *
   * Constructor
   */
-ComplxFrame::ComplxFrame(long disassemble, long stack_size, long call_stack_size, long true_traps, long interrupts, long highlight,
-                         wxString address_str, wxArrayString files) : ComplxFrameDecl(NULL), console(NULL), memoryView(NULL)
+ComplxFrame::ComplxFrame(const wxString& title, long disassemble, long stack_size, long call_stack_size, long true_traps, long interrupts, long highlight,
+                         wxString address_str, wxArrayString files) : ComplxFrameDecl(NULL, wxID_ANY, title), console(NULL), memoryView(NULL), base_title(title)
 {
     InitImages();
 
@@ -344,7 +344,7 @@ void ComplxFrame::DoLoadFile(const wxFileName& filename)
 
     //if (DoAssemble(filename)) return;
     currentFile = filename;
-    SetTitle(wxString::Format("Complx - %s", filename.GetFullPath()));
+    SetTitle(wxString::Format("%s - %s", base_title, filename.GetFullPath()));
     merge:
 
     std::map<std::string, unsigned short>::const_iterator i;
