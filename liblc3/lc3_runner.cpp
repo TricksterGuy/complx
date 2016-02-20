@@ -90,6 +90,7 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     // Clear Breakpoints and all that jazz
     state.breakpoints.clear();
     state.blackboxes.clear();
+    state.comments.clear();
     state.reg_watchpoints.clear();
     state.mem_watchpoints.clear();
     state.subroutines.clear();
