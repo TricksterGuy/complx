@@ -1,6 +1,7 @@
 #include <string>
 #include <sstream>
 #include <bitset>
+#include <queue>
 #include <wx/msgdlg.h>
 #include "MemoryView.hpp"
 #include "BreakpointDialog.hpp"
@@ -314,8 +315,14 @@ void MemoryView::ExpandRanges()
         for (unsigned int i = 0; i <= 65535; i++)
             temp_set.insert(i);
     }
-    for (const auto& range : ranges)
+
+    std::priority_queue<ViewRange, std::vector<ViewRange>, ViewRangeElementCompare>
+        queue(ranges.begin(), ranges.end(), ViewRangeElementCompare(), std::vector<ViewRange>());
+
+    while (!queue.empty())
     {
+        const auto& range = queue.top();
+
         if (range.action == ViewAction::HIDE)
         {
             for (unsigned short current = range.start; current <= range.end; current++)
@@ -326,6 +333,7 @@ void MemoryView::ExpandRanges()
             for (unsigned short current = range.start; current <= range.end; current++)
                 temp_set.insert(current);
         }
+        queue.pop();
     }
 
     int id = 0;

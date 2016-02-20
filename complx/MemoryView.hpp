@@ -18,6 +18,13 @@ enum class ViewAction {
 struct ViewRange {
     ViewRange(unsigned short _start, unsigned short _end, ViewAction _action = ViewAction::SHOW) :
        start(_start), end(_end), action(_action) {}
+    bool operator<(const ViewRange rhs) const
+    {
+        if (start != rhs.start)
+            return start < rhs.start;
+        else
+            return end < rhs.end;
+    }
     unsigned short NumElements() const {return end - start + 1;}
     unsigned short start;
     unsigned short end;
@@ -28,7 +35,7 @@ struct ViewRange {
 struct ViewRangeElementCompare {
     bool operator()(const ViewRange& lhs, const ViewRange& rhs)
     {
-        return lhs.NumElements() > rhs.NumElements();
+        return lhs.NumElements() < rhs.NumElements();
     }
 };
 
@@ -79,7 +86,7 @@ class MemoryView : public wxGridTableBase
         bool unsigned_mode;
         bool flipped_mode;
         void ExpandRanges();
-        std::set<ViewRange, ViewRangeElementCompare> ranges;
+        std::set<ViewRange> ranges;
         // Expanded version of ranges.
         std::vector<ViewTableEntry> viewTable;
         std::map<unsigned short, int> viewTable_rev;
