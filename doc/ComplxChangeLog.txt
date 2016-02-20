@@ -1,3 +1,13 @@
+20 February 2016
+   released version 4.13.0 of complx-tools
+     Change log:
+       - New: Comment column shows comments from your code
+       - Fixed: Disassemble level appeared incorrect
+       - Fixed: Address filtering was omitting some ranges
+       - Fixed: Most memory view right click commands were not working as intended with filtering
+       - Fixed: Comments from previous program was not erased when a new program was loaded
+       - Fixed: Columns in memory view are sized better
+
 15 February 2016
    released version 4.12.1 of complx-tools
      Change log:
