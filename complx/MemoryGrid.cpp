@@ -105,7 +105,7 @@ void MemoryGrid::InitGridSizes()
     w -= instrSize;
     w -= labelSize;
     w -= 10;
-    /// TODO Apparently this can go below zero and cause and assertion failed
+    /// TODO Apparently this can go below zero and cause an assertion failed
     if (w < 0) w = 200;
 
     SetColSize(MemoryInfo, 22);
