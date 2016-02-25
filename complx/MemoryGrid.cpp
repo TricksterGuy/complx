@@ -98,14 +98,15 @@ void MemoryGrid::InitGridSizes()
     // Hi I am a function call that takes 2+ seconds
     //AutoSizeColumn(MemoryBinary);
 
-
-    //printf("%d\n", GetColSize(MemoryBinary));
     w -= binSize;//GetColSize(MemoryBinary);
     w -= addrSize;
     w -= hexSize;
     w -= decimalSize;
     w -= instrSize;
     w -= labelSize;
+    w -= 10;
+    /// TODO Apparently this can go below zero and cause and assertion failed
+    if (w < 0) w = 200;
 
     SetColSize(MemoryInfo, 22);
     SetColSize(MemoryAddress, addrSize);
@@ -114,7 +115,7 @@ void MemoryGrid::InitGridSizes()
     SetColSize(MemoryBinary, binSize);
     SetColSize(MemoryLabel, labelSize);
     SetColSize(MemoryInstruction, instrSize);
-    SetColSize(MemoryComment, w - 10);
+    SetColSize(MemoryComment, w);
 
     wxGridCellAttr* info = new wxGridCellAttr; info->SetReadOnly(); info->SetTextColour(*wxBLACK);
     /// TODO abstract out Memory View address->row translation into an object and pass it in here
