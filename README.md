@@ -45,6 +45,11 @@ complx is a suite of educational tools for learning lc3 assembly. It includes bo
   * Plugins can add new device registers, traps, send interrupts, and add a new instruction
 
 # Installation from Source
+You can run one of the install scripts depending on your platform, which does everything listed below.
+* Ubuntu 14.04 and above sudo ./install.sh
+* Ubuntu 13.10 and below sudo ./install_script_13_10.sh
+* Fedora ./install_script_fedora23.sh
+
   From the root directory of where you have the source code.
   1. Ensure you have a C++ compiler (sudo apt-get install build-essential)
   2. Ensure you have CMake installed (sudo apt-get install cmake)
@@ -54,10 +59,7 @@ complx is a suite of educational tools for learning lc3 assembly. It includes bo
   6. Build the program (make)
   7. Install the program (sudo make install)
   8. Run ldconfig (sudo ldconfig)
-Alternatively you can run one of the install scripts depending on your platform.
-* Ubuntu 14.04 and above sudo ./install.sh
-* Ubuntu 13.10 and below sudo ./install_script_13_10.sh
-* Fedora ./install_script_fedora23.sh
+
 
 # Installation from Packages via apt-get (for ubuntu versions trusty and beyond)
 Execute these commands
