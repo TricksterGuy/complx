@@ -44,21 +44,23 @@ complx is a suite of educational tools for learning lc3 assembly. It includes bo
     5. Plugin that adds a new trap that performs division and modulus
   * Plugins can add new device registers, traps, send interrupts, and add a new instruction
 
-# Installation from Source
-You can run one of the install scripts depending on your platform, which does everything listed below.
+# Installation from Source via scripts
+You can run one of the install scripts depending on your platform, which does everything listed in the below section.
 * Ubuntu 14.04 and above sudo ./install.sh
 * Ubuntu 13.10 and below sudo ./install_script_13_10.sh
 * Fedora ./install_script_fedora23.sh
 
-  From the root directory of where you have the source code.
-  1. Ensure you have a C++ compiler (sudo apt-get install build-essential)
-  2. Ensure you have CMake installed (sudo apt-get install cmake)
-  3. Install dependency wxWidgets 3.0 (sudo apt-get install libwxgtk3.0-dev)
-  4. Create a build directory (mkdir build && cd build)
-  5. Generate a Makefile via cmake (cmake ..)
-  6. Build the program (make)
-  7. Install the program (sudo make install)
-  8. Run ldconfig (sudo ldconfig)
+
+# Installation from Source manually
+From the root directory of where you have the source code.
+ 1. Ensure you have a C++ compiler (sudo apt-get install build-essential)
+ 2. Ensure you have CMake installed (sudo apt-get install cmake)
+ 3. Install dependency wxWidgets 3.0 (sudo apt-get install libwxgtk3.0-dev)
+ 4. Create a build directory (mkdir build && cd build)
+ 5. Generate a Makefile via cmake (cmake ..)
+ 6. Build the program (make)
+ 7. Install the program (sudo make install)
+ 8. Run ldconfig (sudo ldconfig)
 
 
 # Installation from Packages via apt-get (for ubuntu versions trusty and beyond)
