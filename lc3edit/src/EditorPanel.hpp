@@ -2,7 +2,7 @@
 #define EDITORPANEL_HPP
 
 #include <wx/panel.h>
-#include "LC3EditFrameDecl.h"
+#include "EditorPanelDecl.hpp"
 
 class EditorPanel : public EditorPanelDecl
 {

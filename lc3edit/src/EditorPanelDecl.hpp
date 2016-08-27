@@ -5,8 +5,8 @@
 // PLEASE DO "NOT" EDIT THIS FILE!
 ///////////////////////////////////////////////////////////////////////////
 
-#ifndef __LC3EDITFRAMEDECL_H__
-#define __LC3EDITFRAMEDECL_H__
+#ifndef __EDITORFRAMEDECL_H__
+#define __EDITORFRAMEDECL_H__
 
 #include <wx/artprov.h>
 #include <wx/xrc/xmlres.h>
@@ -16,43 +16,14 @@
 #include <wx/font.h>
 #include <wx/colour.h>
 #include <wx/settings.h>
-#include <wx/wxFlatNotebook/wxFlatNotebook.h>
 #ifdef __VISUALC__
 #include <wx/link_additions.h>
 #endif //__VISUALC__
 #include <wx/sizer.h>
 #include <wx/statusbr.h>
 #include <wx/frame.h>
-#include <wx/wxscintilla.h>
 #include <wx/panel.h>
-
-///////////////////////////////////////////////////////////////////////////
-
-
-///////////////////////////////////////////////////////////////////////////////
-/// Class LC3EditFrameDecl
-///////////////////////////////////////////////////////////////////////////////
-class LC3EditFrameDecl : public wxFrame
-{
-	private:
-
-	protected:
-		wxMenuBar* m_menubar1;
-		wxMenu* file;
-		wxMenu* edit;
-		wxMenu* view;
-		wxMenu* run;
-		wxMenu* help;
-		wxFlatNotebook* fileNotebook;
-		wxStatusBar* statusBar;
-
-	public:
-
-		LC3EditFrameDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("LC3 EDIT"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 640,480 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
-
-		~LC3EditFrameDecl();
-
-};
+#include <wx/wxscintilla.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class EditorPanelDecl
@@ -71,4 +42,4 @@ class EditorPanelDecl : public wxPanel
 
 };
 
-#endif //__LC3EDITFRAMEDECL_H__
+#endif //__EDITORFRAMEDECL_H__

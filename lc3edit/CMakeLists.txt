@@ -153,6 +153,7 @@ set(SRC_LC3EDIT
     src/LC3EditFrame.cpp
     src/LC3EditFrameDecl.cpp
     src/EditorPanel.cpp
+    src/EditorPanelDecl.cpp    
     src/resources.cpp
 )
 
