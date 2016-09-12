@@ -149,11 +149,13 @@ set(SRC_wxScintilla
 )
 
 set(SRC_LC3EDIT
+    src/AsmFileDocument.cpp
     src/LC3EditApp.cpp
     src/LC3EditFrame.cpp
     src/LC3EditFrameDecl.cpp
     src/EditorPanel.cpp
-    src/EditorPanelDecl.cpp    
+    src/EditorPanelDecl.cpp
+    src/EditorView.cpp
     src/resources.cpp
 )
 

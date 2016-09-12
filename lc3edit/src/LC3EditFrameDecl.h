@@ -20,6 +20,11 @@
 #include <wx/sizer.h>
 #include <wx/panel.h>
 #include <wx/statusbr.h>
+#include <wx/bitmap.h>
+#include <wx/image.h>
+#include <wx/docview.h>
+#include <wx/docmdi.h>
+#include <wx/icon.h>
 #include <wx/menu.h>
 #include <wx/frame.h>
 
@@ -29,13 +34,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 /// Class LC3EditFrameDecl
 ///////////////////////////////////////////////////////////////////////////////
-class LC3EditFrameDecl : public wxFrame 
+class LC3EditFrameDecl : public wxDocMDIParentFrame
 {
 	private:
-	
+
 	protected:
 		wxPanel* m_panel1;
-		wxFlatNotebook* fileNotebook; 
+		wxFlatNotebook* fileNotebook;
 		wxStatusBar* statusBar;
 		wxMenuBar* m_menubar1;
 		wxMenu* file;
@@ -43,13 +48,13 @@ class LC3EditFrameDecl : public wxFrame
 		wxMenu* view;
 		wxMenu* run;
 		wxMenu* help;
-	
+
 	public:
-		
-		LC3EditFrameDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("LC3-Edit"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 640,480 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
-		
+
+		LC3EditFrameDecl( wxDocManager* manager, wxFrame* parent, wxWindowID id = wxID_ANY, const wxString& title = _("LC3-Edit"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 640,480 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+
 		~LC3EditFrameDecl();
-	
+
 };
 
 #endif //__LC3EDITFRAMEDECL_H__

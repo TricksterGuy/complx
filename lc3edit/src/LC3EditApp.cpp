@@ -10,6 +10,8 @@
 #include "LC3EditApp.hpp"
 #include "LC3EditFrame.hpp"
 #include "version.h"
+#include "AsmFileDocument.hpp"
+#include "EditorPanel.hpp"
 
 #include <wx/wxprec.h>
 #include <wx/cmdline.h>
@@ -37,10 +39,18 @@ bool LC3EditApp::OnInit()
     if (!wxApp::OnInit()) return false;
 
     srand(time(NULL));
-    lc3editframe = new LC3EditFrame(files);
+    manager = new wxDocManager();
+    templ = new wxDocTemplate(manager, "asm files", "*.asm", wxEmptyString, "asm", "asmdoc", "asmview", wxCLASSINFO(AsmFileDocument), wxCLASSINFO(EditorPanel));
+    frame = new LC3EditFrame(manager, files);
+
     //wxIcon icon(icon32_xpm);
     //lc3editframe->SetIcon(icon);
-    lc3editframe->Show();
+
+    SetTopWindow(frame);
+    frame->Centre();
+    frame->Show();
+
+    //frame->UpdateStatusBar();
 
     return true;
 }

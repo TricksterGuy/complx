@@ -21,11 +21,12 @@
 class LC3EditFrame : public LC3EditFrameDecl
 {
     public:
-        LC3EditFrame(const wxArrayString& files);
+        LC3EditFrame(wxDocManager* manager, const wxArrayString& files);
         ~LC3EditFrame();
         void DoLoadFile(const wxString& file);
     private:
         wxToolBar* toolbar;
+        wxDocManager* manager;
         void SetupToolbar();
 		void OnNew(wxCommandEvent& event) {event.Skip();}
 		void OnOpen(wxCommandEvent& event) {event.Skip();}

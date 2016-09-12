@@ -11,6 +11,7 @@
 #define LC3EDITAPP_HPP
 
 #include <wx/app.h>
+#include <wx/docview.h>
 
 class LC3EditFrame;
 
@@ -21,9 +22,11 @@ class LC3EditApp : public wxApp
         virtual void OnInitCmdLine(wxCmdLineParser& parser);
         virtual bool OnCmdLineParsed(wxCmdLineParser& parser);
         int OnRun();
-
+        LC3EditFrame* GetFrame() const {return frame;}
+    private:
+        LC3EditFrame* frame;
+        wxDocManager* manager;
+        wxDocTemplate* templ;
 };
-
-extern LC3EditFrame* lc3editframe;
 
 #endif
