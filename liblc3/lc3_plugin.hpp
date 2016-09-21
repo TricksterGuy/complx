@@ -48,7 +48,7 @@ class Plugin
           */
         virtual void OnTick(lc3_state& state) {};
         /** Called at the end of the instruction execution cycle exactly after an instruction is executed
-          * This is not called whent he user back steps.
+          * This is not called when the user back steps.
           */
         virtual void OnTock(lc3_state& state) {};
         /** Called when a memory address is read from.
