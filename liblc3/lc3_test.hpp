@@ -121,8 +121,10 @@ typedef struct lc3_test_suite
     std::vector<lc3_test> tests;
 } lc3_test_suite;
 
+typedef std::map<std::string, unsigned int> subroutine_params_table;
+
 void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, int seed = -1);
-void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed = -1);
+void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed = -1, const subroutine_params_table& subr_params = subroutine_params_table());
 void lc3_write_test_report(std::stringstream& oss, lc3_test_suite& suite, const std::string& filename);
 void lc3_write_test_report(std::stringstream& oss, lc3_test& test, int& minipass_count, int& total_minitests);
 std::string lc3_test_input_string(lc3_test_input& test);

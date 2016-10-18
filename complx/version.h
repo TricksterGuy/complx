@@ -5,6 +5,6 @@ namespace Version {
 	static const long MAJOR = 4;
 	static const long MINOR = 13;
 
-	static const char FULLVERSION_STRING[] = "4.13.1";
+	static const char FULLVERSION_STRING[] = "4.13.2";
 }
 #endif

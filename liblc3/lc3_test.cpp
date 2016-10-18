@@ -4,6 +4,7 @@
 #include "lc3_expressions.hpp"
 #include "lc3_runner.hpp"
 #include "lc3_plugin.hpp"
+#include "lc3_symbol.hpp"
 #include <sstream>
 
 #define ANSWER_FOUND "answer found on stack"
@@ -72,9 +73,20 @@ void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, int 
     bool passed = true;
     unsigned int total_points = 0;
     unsigned int points = 0;
+    std::map<std::string, unsigned int> subr_params;
+    for (const auto& test_case : suite.tests)
+    {
+        for (const auto& atom : test_case.input)
+        {
+            if (atom.type == TEST_SUBROUTINE)
+            {
+                subr_params[atom.subroutine.name] = atom.subroutine.params.size();
+            }
+        }
+    }
     for (unsigned int i = 0; i < suite.tests.size(); i++)
     {
-        lc3_run_test_case(suite.tests[i], filename, seed);
+        lc3_run_test_case(suite.tests[i], filename, seed, subr_params);
         passed = passed && suite.tests[i].passed;
         points += suite.tests[i].points;
         total_points += suite.tests[i].max_points;
@@ -84,7 +96,7 @@ void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, int 
     suite.max_points = total_points;
 }
 
-void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
+void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed, const subroutine_params_table& subr_params)
 {
     lc3_state state;
 
@@ -113,6 +125,27 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
         throw e.what();
     }
 
+    // Merge inferred subroutine data (just in case)
+    // This fixes the issue in which a subroutine is being tested, but it makes calls to other subroutines who takes a
+    // different number of parameters than the subroutine under test.
+    // If the file uses subroutine annotations then just use those over whats inferred.
+    for (const auto& subr_param : subr_params)
+    {
+        const auto& name = subr_param.first;
+        const auto& num_params = subr_param.second;
+
+        int address = 0;
+        if (lc3_calculate(state, name, address) == -1)
+            throw "<in test-subr> invalid subroutine name given " + name;
+        if (state.subroutines.find((unsigned short)address) == state.subroutines.end())
+        {
+            lc3_subroutine_info info;
+            info.name = name;
+            info.address = (unsigned short) address;
+            info.num_params = num_params;
+            state.subroutines[(unsigned short)address] = info;
+        }
+    }
     std::stringstream* newinput = new std::stringstream();
 
     // Set up test environment
@@ -421,7 +454,14 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
             unsigned short actual_r6 = (unsigned short) r6;
             if (state.call_stack.size() >= 1)
             {
-                unsigned short start = state.call_stack[0].r6 + subr.params.size();
+                unsigned short subr_location = state.call_stack[0].address;
+                if (state.subroutines.find(subr_location) == state.subroutines.end())
+                {
+                    extra << "      [WARNING] Could not determine number of parameters for subroutine " <<
+                        lc3_sym_rev_lookup(state, subr_location) << " at address " <<
+                        std::hex << "0x" << subr_location << "\n";
+                }
+                unsigned short start = state.call_stack[0].r6 + state.subroutines[subr_location].params.size();
                 // Screams...
                 if (start >= actual_r6)
                     extra << "      [WARNING] Could not get students stack frame.\n"

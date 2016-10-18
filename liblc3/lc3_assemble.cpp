@@ -41,7 +41,7 @@ struct debug_statement
 
 unsigned short lc3_assemble_one(lc3_state& state, LC3AssembleContext& context);
 
-void process_debug_info(lc3_state& state, const debug_statement& statement);
+void process_debug_info(lc3_state& state, const debug_statement& statement, bool enable_debug_statements);
 void process_plugin_info(lc3_state& state, const LC3AssembleContext& context);
 void parse_params(const std::string& line, std::map<std::string, std::string>& params);
 
@@ -451,7 +451,7 @@ void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>&
         {
             process_plugin_info(state, context);
         }
-        else if (context.options.process_debug_comments && comment.size() > 2 && comment[1] == '@')
+        else if (comment.size() > 2 && comment[1] == '@')
         {
             debugging.push_back(debug_statement(comment.substr(2), context.lineno, context.address));
         }
@@ -834,7 +834,7 @@ void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>&
     for (unsigned int i = 0; i < debugging.size(); i++)
     {
         debug_statement statement = debugging[i];
-        process_debug_info(state, statement);
+        process_debug_info(state, statement, context.options.process_debug_comments);
     }
 
 
@@ -920,7 +920,7 @@ bool lc3_add_watch(const std::string& symbol, const std::string& condition, cons
   *
   * Process debug statements adding appropriate debugging things as necessary
   */
-void process_debug_info(lc3_state& state, const debug_statement& statement)
+void process_debug_info(lc3_state& state, const debug_statement& statement, bool enable_debug_statements)
 {
     // break[point] address=address name=label condition=1 times=-1
     // break[point] address name condition times
@@ -954,7 +954,7 @@ void process_debug_info(lc3_state& state, const debug_statement& statement)
     // watch[point] target name condition times
     // blackbox address=address name=label condition=1
     // subroutine address=address name=label num_params=0
-    if (type == std::string("break"))
+    if (type == std::string("break") && enable_debug_statements)
     {
         if (debug_params.empty())
         {
@@ -1016,7 +1016,7 @@ void process_debug_info(lc3_state& state, const debug_statement& statement)
             lc3_add_break(state, address, name, condition, times);
         }
     }
-    else if (type == std::string("watch"))
+    else if (type == std::string("watch") && enable_debug_statements)
     {
         if (debug_params.empty())
         {
@@ -1173,7 +1173,7 @@ void process_debug_info(lc3_state& state, const debug_statement& statement)
             }
         }
     }
-    else if (type == std::string("black"))
+    else if (type == std::string("black") && enable_debug_statements)
     {
         if (debug_params.empty())
         {
