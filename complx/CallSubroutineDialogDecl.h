@@ -55,7 +55,7 @@ class CallSubroutineDialogDecl : public wxDialog
 	
 	public:
 		
-		CallSubroutineDialogDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Simulate Subroutine Call"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 513,334 ), long style = wxDEFAULT_DIALOG_STYLE ); 
+		CallSubroutineDialogDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Simulate Subroutine Call"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 513,350 ), long style = wxDEFAULT_DIALOG_STYLE ); 
 		~CallSubroutineDialogDecl();
 	
 };
