@@ -15,8 +15,6 @@ if(ENABLE_TESTS)
 enable_testing()
 endif(ENABLE_TESTS)
 
-
-
 # Require C++11 build
 if(NOT CMAKE_CXX_FLAGS MATCHES "-std=(c|gnu)\\+\\+11")
     message(STATUS "This project requires C++11. Adding -std=c++11 to CXXFLAGS.")
@@ -224,6 +222,6 @@ if(ENABLE_COMP)
     add_subdirectory(comp)
 endif(ENABLE_COMP)
 
-if(ENABLE_TESTS) 
+if(ENABLE_TESTS)
     add_subdirectory(tests)
 endif(ENABLE_TESTS)

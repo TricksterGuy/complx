@@ -40,7 +40,7 @@ bool LC3EditApp::OnInit()
 
     srand(time(NULL));
     manager = new wxDocManager();
-    templ = new wxDocTemplate(manager, "asm files", "*.asm", wxEmptyString, "asm", "asmdoc", "asmview", wxCLASSINFO(AsmFileDocument), wxCLASSINFO(EditorPanel));
+    templ = new wxDocTemplate(manager, "asm files", "*.asm", wxEmptyString, "asm", "asmdoc", "asmview", CLASSINFO(AsmFileDocument), CLASSINFO(EditorPanel));
     frame = new LC3EditFrame(manager, files);
 
     //wxIcon icon(icon32_xpm);
