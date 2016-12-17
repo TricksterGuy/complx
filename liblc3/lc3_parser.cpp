@@ -302,17 +302,12 @@ int get_imm(const std::string& value, int bits, bool is_num, bool is_signed, con
     std::string effValue = value;
     int base;
     bool negate;
-    bool twosc_conversion = false;
 
     get_number(effValue, base, negate);
 
     char* errstr;
     errno = 0;
     long d = strtol(effValue.c_str(), &errstr, base);
-    // TODO Refactor
-    if (base != 10 && is_signed) twosc_conversion = (d >> (bits - 1)) & 1;
-
-    if (twosc_conversion) d -= (1 << bits);
     if (negate) d *= -1;
     // Failed for some reason they could have done 0xCAFEG or something
     if (*errstr)

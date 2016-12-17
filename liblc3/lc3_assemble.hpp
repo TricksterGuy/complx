@@ -64,6 +64,7 @@ class LC3AssembleException
             line(line_str), params(1, param), id(errorid), lineno(linenum) {}
         ~LC3AssembleException() throw() {}
         std::string what() const throw();
+        int get_id() const {return id;}
     private:
         std::string line;
         std::vector<std::string> params;
