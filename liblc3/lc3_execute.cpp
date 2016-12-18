@@ -11,7 +11,7 @@ const char* WARNING_MESSAGES[LC3_WARNINGS] =
     "Unsupported Trap x%02x. Assuming Halt",
     "Unsupported Instruction x%04x. Halting",
     "RTI executed in user mode. Halting.",
-    "Trying to write character x%04x",
+    "Trying to write invalid character x%04x",
     "PUTS called with invalid address x%04x",
     "Trying to write to the display when its not ready",
     "Trying to read from the keyboard when its not ready",
@@ -410,7 +410,7 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
                 state.regs[0] = state.reader(state, *state.input);
                 break;
             case TRAP_OUT:
-                state.writer(state, *state.output, state.regs[0]);
+                lc3_write_char(state, *state.output, state.regs[0]);
                 state.output->flush();
                 break;
             case TRAP_PUTS:
@@ -422,7 +422,7 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
                 {
                     while (state.mem[r0] != 0x0000)
                     {
-                        state.writer(state, *state.output, state.mem[r0] & 0xFF);
+                        lc3_write_char(state,*state.output, state.mem[r0]);
                         r0++;
                     }
                     state.output->flush();
@@ -435,6 +435,7 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
                 changes.value = state.regs[0];
                 lc3_write_str(state, state.writer, *state.output, "Input character: ");
                 state.regs[0] = state.reader(state, *state.input);
+                // Don't call lc3_write_char since it will spit out a warning on non printable character
                 state.writer(state, *state.output, state.regs[0]);
                 state.output->flush();
                 break;
@@ -447,11 +448,11 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
                 {
                     unsigned short chunk = state.mem[r0];
                     if ((chunk & 0xFF) != 0)
-                        state.writer(state, *state.output, chunk & 0xFF);
+                        lc3_write_char(state, *state.output, chunk & 0xFF);
                     else
                         break;
                     if ((chunk & 0xFF00) != 0)
-                        state.writer(state, *state.output, (chunk >> 8) & 0xFF);
+                        lc3_write_char(state, *state.output, (chunk >> 8) & 0xFF);
                     else
                         break;
                     r0++;
@@ -603,7 +604,7 @@ void lc3_mem_write(lc3_state& state, unsigned short addr, short value, bool priv
                 if (state.mem[DEV_DSR])
                 {
                     state.mem[DEV_DSR] = 0;
-                    state.writer(state, *state.output, value);
+                    lc3_write_char(state, *state.output, value);
                     state.output->flush();
                 }
                 else

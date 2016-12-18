@@ -646,10 +646,22 @@ int lc3_peek_char(lc3_state& state, std::istream& file)
 
 /** lc3_write_char
   *
-  * Writes a character to the output
+  * Checks and then prints a character
   * @return -1 on failure 0 on success
   */
 int lc3_write_char(lc3_state& state, std::ostream& file, int chr)
+{
+    if (chr > 255 || !(isgraph(chr) || isspace(chr)))
+        lc3_warning(state, LC3_INVALID_CHARACTER_WRITE, chr, 0);
+    return state.writer(state, file, chr);
+}
+
+/** lc3_do_write_char
+  *
+  * Writes a character to the output
+  * @return -1 on failure 0 on success
+  */
+int lc3_do_write_char(lc3_state& state, std::ostream& file, int chr)
 {
     if (!file.good()) return -1;
     file.put((char) chr);

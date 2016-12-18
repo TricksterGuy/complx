@@ -63,7 +63,7 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     state.reader = lc3_read_char;
     state.peek = lc3_peek_char;
     state.output = &std::cout;
-    state.writer = lc3_write_char;
+    state.writer = lc3_do_write_char;
     state.warning = &std::cout;
 
     // Clear memory

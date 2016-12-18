@@ -475,10 +475,10 @@ typedef struct lc3_state
 } lc3_state;
 
 /*
-=======================
-Disassembling Functions
-=======================
-*/
+ * =======================
+ * Disassembling Functions
+ * =======================
+ */
 /** Disassemble the data passed in no label information a straight disassemble */
 std::string lc3_basic_disassemble(lc3_state& state, unsigned short data);
 /** Disassemble the data passed in with label information */
@@ -487,22 +487,30 @@ std::string lc3_disassemble(lc3_state& state, unsigned short data);
 std::string lc3_smart_disassemble(lc3_state& state, unsigned short data);
 
 /*
-======================
-Loading Data Functions
-======================
-*/
+ * ======================
+ * Loading Data Functions
+ * ======================
+ */
 /** Loads the given file into the machine */
 int lc3_load(lc3_state& state, std::istream& file, int (*reader)(std::istream&));
 /** Reader for .obj files */
 int lc3_reader_obj(std::istream& file);
 /** Reader for .hex files */
 int lc3_reader_hex(std::istream& file);
+/*
+ * ======================
+ * I/O Functions
+ * ======================
+ */
+
 /** Reads in a character from the input stream passed in */
 int lc3_read_char(lc3_state& state, std::istream& file);
 /** Gets (Peek) next character from the input stream passed in */
 int lc3_peek_char(lc3_state& state, std::istream& file);
-/** Writes in a character to the output stream passed in */
+/** Checks and warns if a non printable character is printed then print it */
 int lc3_write_char(lc3_state& state, std::ostream& file, int);
+/** Writes a character to the output stream passed in */
+int lc3_do_write_char(lc3_state& state, std::ostream& file, int);
 /** Writes a string to the output stream passed in */
 int lc3_write_str(lc3_state& state, int (*writer)(lc3_state& state, std::ostream& file, int), std::ostream& file, const std::string& str);
 /** Enables true traps loads the OS code into the lc3 */
