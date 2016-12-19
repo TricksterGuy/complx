@@ -207,6 +207,7 @@ void LC3Console::Update()
         oss.seekp(0);
         oss.str("");
     }
+    Raise();
 }
 
 /** Clear
