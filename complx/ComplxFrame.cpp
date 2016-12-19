@@ -1127,7 +1127,7 @@ void ComplxFrame::OnFillMemoryWith(wxCommandEvent& event)
 
     wxString fill_value_str = wxGetTextFromUser(_("Please enter value to fill memory with"),
                                                 _("Fill Memory With"),
-                                                _("0"),
+                                                _(""),
                                                 this);
 	if (fill_value_str.IsEmpty()) return;
 
@@ -1136,9 +1136,9 @@ void ComplxFrame::OnFillMemoryWith(wxCommandEvent& event)
     int data;
     int error = lc3_calculate(state, strdata, data);
     if (error) PrintError(error);
-    if (data < -32768 || data > 32767)
+    if (data < -32768 || data > 65535)
     {
-        wxMessageBox(wxString::Format("ERROR value must be a 16 bit 2's complement number got %d", data), _("Error"));
+        wxMessageBox(wxString::Format("ERROR value must be a 16 bit number got %d", data), _("Error"));
         return;
     }
 
