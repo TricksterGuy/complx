@@ -49,6 +49,8 @@ const char* DISASSEMBLE_LOOKUP[16][3] = {
     {"TRAP x%02X"         , ""                   , ""                },
 };
 
+const char* TRAP_CASES[6] = {"GETC", "OUT", "PUTS", "IN", "PUTSP", "HALT"};
+
 //nul(NOP), N, Z, NZ, P, NP, ZP, nul(NZP)
 const char* BR_CASES[8] = {"", "<", "=", "<=", ">", "!=", ">=", ""};
 
@@ -307,7 +309,17 @@ std::string lc3_disassemble(lc3_state& state, unsigned short data)
                 sprintf(buf, DISASSEMBLE_LOOKUP[opcode][0], instr.jmp.base_r);
             break;
         case TRAP_INSTR:
-            sprintf(buf, DISASSEMBLE_LOOKUP[opcode][0], instr.trap.vector);
+            data = instr.trap.vector;
+            if (data >= TRAP_GETC && data <= TRAP_HALT)
+                sprintf(buf, "%s", TRAP_CASES[data - TRAP_GETC]);
+            else
+            {
+                // Plugin check time!
+                if (state.trapPlugins.find(data) != state.trapPlugins.end())
+                    return state.trapPlugins[data]->GetTrapName();
+                else
+                    sprintf(buf, DISASSEMBLE_LOOKUP[opcode][0], instr.trap.vector);
+            }
             break;
         case RTI_INSTR:
             sprintf(buf, "%s", DISASSEMBLE_LOOKUP[opcode][0]);
