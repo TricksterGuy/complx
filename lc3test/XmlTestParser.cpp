@@ -561,6 +561,34 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
                     subr.answer = grandchild->GetNodeContent();
                 else if (grandchild->GetName() == "locals")
                     tokenize(grandchild->GetNodeContent().ToStdString(), subr.locals, ",");
+                else if (grandchild->GetName() == "calls")
+                {
+                    wxXmlNode* ggchild = grandchild->GetChildren();
+                    while(ggchild)
+                    {
+                        if (ggchild->GetName() == "call")
+                        {
+                            wxXmlNode* gggchild = grandchild->GetChildren();
+                            lc3_subr_output_subr_call call;
+                            while (gggchild)
+                            {
+                                if (gggchild->GetName() == "name")
+                                    call.name = gggchild->GetNodeContent();
+                                else if (gggchild->GetName() == "params")
+                                    tokenize(gggchild->GetNodeContent().ToStdString(), call.params, ",");
+                                else
+                                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", ggchild->GetName(), gggchild->GetName()), gggchild);
+                                gggchild = getNextNode(gggchild);
+                            }
+                            subr.calls.push_back(call);
+                        }
+                        else
+                        {
+                            throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), ggchild->GetName()), grandchild);
+                        }
+                        ggchild = getNextNode(ggchild);
+                    }
+                }
                 else if (grandchild->GetName() == "points")
                 {
                     wxXmlNode* ggchild = grandchild->GetChildren();
@@ -578,6 +606,10 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
                             subr.points_r5 = wxAtoi(ggchild->GetNodeContent());
                         else if (ggchild->GetName() == "locals")
                             subr.points_locals = wxAtoi(ggchild->GetNodeContent());
+                        else if (ggchild->GetName() == "calls")
+                            subr.points_calls = wxAtoi(ggchild->GetNodeContent());
+                        else if (ggchild->GetName() == "read-answer")
+                            subr.points_read_answer = wxAtoi(ggchild->GetNodeContent());
                         else
                             throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), ggchild->GetName()), ggchild);
                         ggchild = getNextNode(ggchild);

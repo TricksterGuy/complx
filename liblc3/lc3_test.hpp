@@ -30,6 +30,12 @@ typedef struct lc3_subr_input
     std::vector<std::string> params;
 } lc3_subr_input;
 
+typedef struct lc3_subr_output_subr_call
+{
+    std::string name;
+    std::vector<std::string> params;
+} lc3_subr_output_subr_call;
+
 typedef struct lc3_subr_output
 {
     lc3_subr_output() : points_answer(0), points_params(0), points_r6(0),  points_r7(0), points_r5(0), points_locals(0),
@@ -40,12 +46,15 @@ typedef struct lc3_subr_output
     std::string r7; // Same as input not present in its xml tag.
     std::string r5; // Same as input not present in its xml tag.
     std::vector<std::string> locals;
+    std::vector<lc3_subr_output_subr_call> calls;
     unsigned int points_answer;
     unsigned int points_params;
     unsigned int points_r6;
     unsigned int points_r7;
     unsigned int points_r5;
     unsigned int points_locals;
+    unsigned int points_calls;
+    unsigned int points_read_answer;
     unsigned int deductions_edist;
 } lc3_subr_output;
 
