@@ -361,6 +361,13 @@ typedef struct lc3_subroutine_call
     bool is_trap;
 } lc3_subroutine_call;
 
+typedef struct lc3_subroutine_call_info
+{
+    unsigned short address;
+    unsigned short r6;
+    std::vector<unsigned short> params;
+} lc3_subroutine_call_info;
+
 typedef struct lc3_memory_stats
 {
     lc3_memory_stats() : reads(0), writes(0) {}
@@ -437,7 +444,7 @@ typedef struct lc3_state
     // Plugin interrupt information
     std::map<unsigned char, Plugin*> interruptPlugin;
 
-    // Maximum stack size just here for people who like to infinite loop/recurse and don't want their computers to explode.
+    // Maximum undo stack size just here for people who like to infinite loop/recurse and don't want their computers to explode.
     unsigned int max_stack_size;
     /* I did not use a stack since I can't remove from front if max stack size != 0
        So treat this as a "stack" */
@@ -447,6 +454,8 @@ typedef struct lc3_state
     unsigned int max_call_stack_size;
     // Subroutine debugging info (again see note above)
     std::deque<lc3_subroutine_call> call_stack;
+    // First layer of calls for lc3 calling convention checker (In case of multi recursion)
+    std::vector<lc3_subroutine_call_info> first_level_calls;
 
     // Interrupt support push things here to cause interrupt
     std::list<lc3_interrupt_req> interrupts;
@@ -470,7 +479,7 @@ typedef struct lc3_state
     unsigned long total_writes;
 
     // test_only mode
-    // The only effect is that it does not pop subroutine calls from stack (max_call_stack_size is ignored)
+    // The only effect is that it records the first level subroutine calls.
     bool in_lc3test;
 } lc3_state;
 

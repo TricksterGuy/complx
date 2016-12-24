@@ -6,6 +6,7 @@
 #include "lc3_plugin.hpp"
 #include "lc3_symbol.hpp"
 #include <sstream>
+#include <set>
 
 #define ANSWER_FOUND "answer found on stack"
 #define R6_FOUND "r6 points to r6-1 (answer location)"
@@ -68,25 +69,26 @@ int edit_distance(const std::vector<short>& s, const std::vector<short>& t)
     return v1[t.size()];
 }
 
+struct lc3_subroutine_call_info_cmp
+{
+    bool operator()(const lc3_subroutine_call_info& a, const lc3_subroutine_call_info& b)
+    {
+        if (a.address != b.address)
+            return a.address < b.address;
+        else
+            return a.params < b.params;
+    }
+};
+
 void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, int seed)
 {
     bool passed = true;
     unsigned int total_points = 0;
     unsigned int points = 0;
-    std::map<std::string, unsigned int> subr_params;
-    for (const auto& test_case : suite.tests)
-    {
-        for (const auto& atom : test_case.input)
-        {
-            if (atom.type == TEST_SUBROUTINE)
-            {
-                subr_params[atom.subroutine.name] = atom.subroutine.params.size();
-            }
-        }
-    }
+
     for (unsigned int i = 0; i < suite.tests.size(); i++)
     {
-        lc3_run_test_case(suite.tests[i], filename, seed, subr_params);
+        lc3_run_test_case(suite.tests[i], filename, seed);
         passed = passed && suite.tests[i].passed;
         points += suite.tests[i].points;
         total_points += suite.tests[i].max_points;
@@ -96,7 +98,7 @@ void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, int 
     suite.max_points = total_points;
 }
 
-void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed, const subroutine_params_table& subr_params)
+void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
 {
     lc3_state state;
 
@@ -125,27 +127,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed, co
         throw e.what();
     }
 
-    // Merge inferred subroutine data (just in case)
-    // This fixes the issue in which a subroutine is being tested, but it makes calls to other subroutines who takes a
-    // different number of parameters than the subroutine under test.
-    // If the file uses subroutine annotations then just use those over whats inferred.
-    for (const auto& subr_param : subr_params)
-    {
-        const auto& name = subr_param.first;
-        const auto& num_params = subr_param.second;
 
-        int address = 0;
-        if (lc3_calculate(state, name, address) == -1)
-            throw "<in test-subr> invalid subroutine name given " + name;
-        if (state.subroutines.find((unsigned short)address) == state.subroutines.end())
-        {
-            lc3_subroutine_info info;
-            info.name = name;
-            info.address = (unsigned short) address;
-            info.num_params = num_params;
-            state.subroutines[(unsigned short)address] = info;
-        }
-    }
     std::stringstream* newinput = new std::stringstream();
 
     // Set up test environment
@@ -245,6 +227,20 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed, co
                 if (lc3_calculate(state, subr.params[j], value_calc))
                     throw "<in test-subr> param expression " + subr.params[j] + " was malformed.";
                 state.mem[(unsigned short)state.regs[6] + j] = (short) value_calc;
+            }
+
+            // This fixes the issue in which a subroutine is being tested, but it makes calls to other subroutines who takes a
+            // different number of parameters than the subroutine under test.
+            // If the file uses subroutine annotations then overwrite it.
+            for (const auto& info : subr.subroutines)
+            {
+                int address = 0;
+                if (lc3_calculate(state, info.name, address) == -1)
+                    throw "<in test-subr> invalid subroutine name given " + info.name;
+
+                lc3_subroutine_info test_info = info;
+                test_info.address = (unsigned short) address;
+                state.subroutines[(unsigned short)address] = test_info;
             }
         }
     }
@@ -452,16 +448,17 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed, co
 
             // Code to get the students stack frame
             unsigned short actual_r6 = (unsigned short) r6;
-            if (state.call_stack.size() >= 1)
+            if (state.first_level_calls.size() >= 1)
             {
-                unsigned short subr_location = state.call_stack[0].address;
+                const auto& call_info = state.first_level_calls[0];
+                unsigned short subr_location = call_info.address;
                 if (state.subroutines.find(subr_location) == state.subroutines.end())
                 {
                     extra << "      [WARNING] Could not determine number of parameters for subroutine " <<
                         lc3_sym_rev_lookup(state, subr_location) << " at address " <<
                         std::hex << "0x" << subr_location << "\n";
                 }
-                unsigned short start = state.call_stack[0].r6 + state.subroutines[subr_location].params.size();
+                unsigned short start = call_info.r6 + call_info.params.size();
                 // Screams...
                 if (start >= actual_r6)
                     extra << "      [WARNING] Could not get students stack frame.\n"
@@ -469,7 +466,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed, co
                 else
                     actual_stack.assign(state.mem + start, state.mem + actual_r6);
             }
-            else if (state.call_stack.size() == 0)
+            else if (state.first_level_calls.empty())
             {
                 int num_params = subr.params.size();
                 // Get at least the parameters student could probably not save anything...
@@ -511,49 +508,49 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed, co
             {
                 actual_stack_map[(short)answer] -= 1;
                 points += subr.points_answer;
-                extra << CHECK << ANSWER_FOUND << " +" << subr.points_answer << "\n";
+                extra << CHECK << ANSWER_FOUND << " +" << subr.points_answer << ".\n";
             }
             else
             {
                 ed_forgiveness++;
-                extra << MISS << ANSWER_FOUND << " -" << subr.points_answer << "\n";
+                extra << MISS << ANSWER_FOUND << " -" << subr.points_answer << ".\n";
             }
 
             if (state.regs[6] == (short)(actual_r6 - subr.params.size() - 1))
             {
                 points += subr.points_r6;
-                extra << CHECK << R6_FOUND << " +" << subr.points_r6 << "\n";
+                extra << CHECK << R6_FOUND << " +" << subr.points_r6 << ".\n";
             }
             else
             {
-                extra << MISS << R6_FOUND << " -" << subr.points_r6 << "\n";
+                extra << MISS << R6_FOUND << " -" << subr.points_r6 << ".\n";
             }
 
             if (actual_stack_map[(short)r7] > 0 && state.regs[7] == (short)(r7+1))
             {
                 actual_stack_map[(short)r7] -= 1;
                 points += subr.points_r7;
-                extra << CHECK << R7_FOUND << " +" << subr.points_r7 << "\n";
+                extra << CHECK << R7_FOUND << " +" << subr.points_r7 << ".\n";
             }
             else
             {
                 // Don't count if just r7 was clobbered
                 if (actual_stack_map[(short)r7] <= 0)
                     ed_forgiveness++;
-                extra << MISS << R7_FOUND << " -" << subr.points_r7 << "\n";
+                extra << MISS << R7_FOUND << " -" << subr.points_r7 << ".\n";
             }
 
             if (actual_stack_map[(short)r5] > 0 && state.regs[5] == (short)r5)
             {
                 actual_stack_map[(short)r5] -= 1;
                 points += subr.points_r5;
-                extra << CHECK << R5_FOUND << " +" << subr.points_r5 << "\n";
+                extra << CHECK << R5_FOUND << " +" << subr.points_r5 << ".\n";
             }
             else
             {
                 if (actual_stack_map[(short)r5] <= 0)
                     ed_forgiveness++;
-                extra << MISS << R5_FOUND << " -" << subr.points_r5 << "\n";
+                extra << MISS << R5_FOUND << " -" << subr.points_r5 << ".\n";
             }
 
             for (unsigned int j = 0; j < params.size(); j++)
@@ -562,12 +559,12 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed, co
                 {
                     actual_stack_map[params[j]] -= 1;
                     points += subr.points_params;
-                    extra << CHECK << params[j] << " " << PARAM_FOUND << " +" << subr.points_params << "\n";
+                    extra << CHECK << params[j] << " " << PARAM_FOUND << " +" << subr.points_params << ".\n";
                 }
                 else
                 {
                     ed_forgiveness++;
-                    extra << MISS << params[j] << " " << PARAM_FOUND << " -" << subr.points_params << "\n";
+                    extra << MISS << params[j] << " " << PARAM_FOUND << " -" << subr.points_params << ".\n";
                 }
             }
 
@@ -579,12 +576,102 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed, co
                     actual_stack_map[locals[j]] -= 1;
                     points += subr.points_locals;
                     all_locals_wrong = false;
-                    extra << CHECK << locals[j] << " " << LOCAL_FOUND << " +" << subr.points_locals << "\n";
+                    extra << CHECK << locals[j] << " " << LOCAL_FOUND << " +" << subr.points_locals << ".\n";
                 }
                 else
                 {
                     ed_forgiveness++;
-                    extra << MISS << locals[j] << " " << LOCAL_FOUND << " -" << subr.points_locals << "\n";
+                    extra << MISS << locals[j] << " " << LOCAL_FOUND << " -" << subr.points_locals << ".\n";
+                }
+            }
+
+            // Subroutine calls check.
+            std::set<lc3_subroutine_call_info, lc3_subroutine_call_info_cmp> actual_calls(state.first_level_calls.begin(), state.first_level_calls.end());
+            std::set<lc3_subroutine_call_info, lc3_subroutine_call_info_cmp> expected_calls;
+            for (const auto& expected_call : subr.calls)
+            {
+                lc3_subroutine_call_info info;
+                int addr = lc3_sym_lookup(state, expected_call.name);
+                if (addr == -1)
+                    throw "Invalid subroutine name given in <call> " + expected_call.name;
+                for (unsigned int i = 0; i < expected_call.params.size(); i++)
+                {
+                    int param;
+                    if (lc3_calculate(state, expected_call.params[i], param) == -1)
+                        throw "<in test-subr/call> param expression " + expected_call.params[i] + " was malformed";
+                    info.params.push_back(param);
+                }
+                info.address = addr;
+                info.r6 = 0;
+                expected_calls.insert(info);
+            }
+
+            for (const auto& call : expected_calls)
+            {
+                std::stringstream call_name;
+                call_name << lc3_sym_rev_lookup(state, call.address) << "(";
+                if (state.subroutines.find(call.address) == state.subroutines.end())
+                    call_name << "?";
+                for (unsigned int i = 0; i < call.params.size(); i++)
+                {
+
+                    call_name << std::hex << "0x" << call.params[i];
+                    if (i != call.params.size() - 1)
+                        call_name << ",";
+                }
+                call_name << ")";
+
+                if (actual_calls.find(call) != actual_calls.end())
+                {
+                    extra << CHECK << "Call " << call_name.str() << " made correctly.\n";
+                    points += subr.points_calls;
+                }
+                else
+                {
+                    extra << MISS << "Call " << call_name.str() << " was not made.\n";
+                }
+            }
+            for (const auto& call : actual_calls)
+            {
+                std::stringstream call_name;
+
+                std::string name = lc3_sym_rev_lookup(state, call.address);
+                if (name.empty())
+                    call_name << "0x" << std::hex << call.address << "(";
+                else
+                    call_name << name << "(";
+                if (state.subroutines.find(call.address) == state.subroutines.end())
+                    call_name << "?";
+                for (unsigned int i = 0; i < call.params.size(); i++)
+                {
+
+                    call_name << std::hex << "0x" << call.params[i];
+                    if (i != call.params.size() - 1)
+                        call_name << ",";
+                }
+                call_name << ")";
+
+                if (expected_calls.find(call) == expected_calls.end())
+                {
+                    extra << MISS << "Unexpected Call " << call_name.str() << " made.\n";
+                }
+            }
+
+            // Read answer check sigh...
+            if (subr.points_read_answer > 0)
+            {
+                for (const auto& call : actual_calls)
+                {
+                    if (expected_calls.find(call) != expected_calls.end() && !call.params.empty())
+                    {
+                        if (state.memory_ops[call.r6 - 1].reads > 0)
+                        {
+                            extra << CHECK << "Read answer from stack.\n";
+                            points += subr.points_read_answer;
+                        }
+                        else
+                            extra << MISS << "Did not read answer from stack.\n";
+                    }
                 }
             }
 
@@ -597,7 +684,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed, co
                     // Truncate stack to last num_params + 3 elements the stuff we care about (don't do expected since ed forgiveness handles it).
                     actual_stack.erase(actual_stack.begin(), actual_stack.begin() + (actual_stack.size() - subr.params.size() - 3));
                 if (!subr.locals.empty())
-                    extra << "      All locals were not found, so locals aren't included in structure check\n";
+                    extra << "      All locals were not found, so locals aren't included in structure check.\n";
             }
             else
             {
@@ -609,10 +696,11 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed, co
             points -= (ed_grade - ed_forgiveness) * subr.deductions_edist;
             int mistakes = ed_grade - ed_forgiveness;
 
+
             if (mistakes == 0)
                 extra << "      Found no structural mistakes in the stack.  No changes needed.\n";
             else
-                extra << "      Found " << mistakes << " structural mistakes in stack -" << subr.deductions_edist * mistakes << "\n";
+                extra << "      Found " << mistakes << " structural mistakes in stack -" << subr.deductions_edist * mistakes << ".\n";
 
             output.passed = (ed_grade == 0) && (ed_forgiveness == 0);
             output.extra_output += extra.str();

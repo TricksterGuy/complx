@@ -568,7 +568,7 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
                     {
                         if (ggchild->GetName() == "call")
                         {
-                            wxXmlNode* gggchild = grandchild->GetChildren();
+                            wxXmlNode* gggchild = ggchild->GetChildren();
                             lc3_subr_output_subr_call call;
                             while (gggchild)
                             {
@@ -577,14 +577,14 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
                                 else if (gggchild->GetName() == "params")
                                     tokenize(gggchild->GetNodeContent().ToStdString(), call.params, ",");
                                 else
-                                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", ggchild->GetName(), gggchild->GetName()), gggchild);
+                                    throw XmlTestParserException(wxString::Format("1Unknown tag found in %s %s", ggchild->GetName(), gggchild->GetName()), gggchild);
                                 gggchild = getNextNode(gggchild);
                             }
                             subr.calls.push_back(call);
                         }
                         else
                         {
-                            throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), ggchild->GetName()), grandchild);
+                            throw XmlTestParserException(wxString::Format("2Unknown tag found in %s %s", child->GetName(), ggchild->GetName()), grandchild);
                         }
                         ggchild = getNextNode(ggchild);
                     }
@@ -642,10 +642,19 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
             subr.r5 = subr_input->subroutine.r5;
             subr.stack = subr_input->subroutine.stack;
 
+            for (const auto& call : subr.calls)
+            {
+                lc3_subroutine_info info;
+                info.name = call.name;
+                info.num_params = call.params.size();
+                subr_input->subroutine.subroutines.push_back(info);
+            }
+
             // Post processing part II calculate total points
             output.points = subr.points_locals * subr.locals.size() +
                             subr.points_params * subr.params.size() +
-                            subr.points_answer + subr.points_r5 + subr.points_r7 + subr.points_r6;
+                            subr.points_answer + subr.points_r5 + subr.points_r7 + subr.points_r6 +
+                            subr.points_calls * subr.calls.size() + subr.points_read_answer;
         }
         else if (child->GetName() != "comment")
             return false;

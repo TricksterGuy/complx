@@ -179,16 +179,35 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
             else
                 state.pc = state.regs[instruction.subr.jsrr.base_r];
 
-            // If not within an interrupt
+            // If not within an interrupt, then don't want to store subroutines within an interrupt.
             if (state.privilege)
             {
                 changes.changes = LC3_SUBROUTINE_BEGIN;
                 changes.subroutine.address = state.pc;
                 changes.subroutine.r6 = state.regs[0x6];
 
-                state.call_stack.push_back(changes.subroutine);
-                if (state.max_call_stack_size != 0 && state.max_call_stack_size < state.call_stack.size() && !state.in_lc3test)
-                    state.call_stack.pop_front();
+                //printf("enter: %x %d\n", state.pc, state.call_stack.size());
+                if (state.call_stack.empty() && state.in_lc3test)
+                {
+                    unsigned int num_params = 0;
+                    lc3_subroutine_call_info call_info;
+                    call_info.address = state.pc;
+                    call_info.r6 = state.regs[0x6];
+                    if (state.subroutines.find(state.pc) != state.subroutines.end())
+                        num_params = state.subroutines[state.pc].num_params;
+                    else
+                        fprintf(stderr, "Subroutine at x%04x number params not given, test results may be incorrect!\n", state.pc);
+                    for (unsigned int i = 0; i < num_params; i++)
+                        call_info.params.push_back(state.mem[call_info.r6 + i]);
+
+                    state.first_level_calls.push_back(call_info);
+                }
+                if (state.max_call_stack_size != 0)
+                {
+                    state.call_stack.push_back(changes.subroutine);
+                    if (state.max_call_stack_size < state.call_stack.size())
+                        state.call_stack.pop_front();
+                }
                 //printf("enter: %s\n", subroutine.name.c_str());
             }
             break;
@@ -306,7 +325,7 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
             if (state.privilege && instruction.jmp.base_r == 0x7)
             {
                 changes.changes = LC3_SUBROUTINE_END;
-                if (!state.call_stack.empty() && !state.in_lc3test)
+                if (!state.call_stack.empty())
                 {
                     changes.subroutine = state.call_stack.back();
                     state.call_stack.pop_back();
@@ -393,9 +412,12 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
             changes.subroutine.address = state.pc;
             changes.subroutine.r6 = state.regs[0x6];
             changes.subroutine.is_trap = true;
-            state.call_stack.push_back(changes.subroutine);
-            if (state.max_call_stack_size != 0 && state.max_call_stack_size < state.call_stack.size())
-                state.call_stack.pop_front();
+            if (state.max_call_stack_size != 0)
+            {
+                state.call_stack.push_back(changes.subroutine);
+                if (state.max_call_stack_size < state.call_stack.size())
+                    state.call_stack.pop_front();
+            }
         }
     }
     else

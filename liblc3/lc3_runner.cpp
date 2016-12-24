@@ -201,28 +201,32 @@ void lc3_step(lc3_state& state)
     // Increment executions
     state.executions++;
 
-    // If the change is INTERRUPT END
-    if (change.changes == LC3_INTERRUPT_END)
+    if (state.max_stack_size != 0)
     {
-        // After you've scrubbed all of the floors in hyrule (remove all instructions that have been added except the LC3_INTERRUPT change.
-        lc3_state_change* hmm = &state.undo_stack.back();
-        while (hmm->changes != LC3_INTERRUPT_BEGIN)
+        // If the change is INTERRUPT END
+        if (change.changes == LC3_INTERRUPT_END)
         {
-            state.undo_stack.pop_back();
-            hmm = &state.undo_stack.back();
+            // After you've scrubbed all of the floors in hyrule (remove all instructions that have been added except the LC3_INTERRUPT change.
+            lc3_state_change* hmm = &state.undo_stack.back();
+            while (hmm->changes != LC3_INTERRUPT_BEGIN)
+            {
+                state.undo_stack.pop_back();
+                hmm = &state.undo_stack.back();
+            }
+            // Please sire have mercy (Change LC3_INTERRUPT_BEGIN to LC3_INTERRUPT to signal a completed interrupt)
+            lc3_state_change& lib = state.undo_stack.back();
+            lib.changes = LC3_INTERRUPT;
         }
-        // Please sire have mercy (Change LC3_INTERRUPT_BEGIN to LC3_INTERRUPT to signal a completed interrupt)
-        lc3_state_change& lib = state.undo_stack.back();
-        lib.changes = LC3_INTERRUPT;
+        else
+        {
+            // Push Old into state
+            state.undo_stack.push_back(change);
+        }
+        // Never pop if you are in privileged mode.
+
+        if (state.privilege && state.max_stack_size < state.undo_stack.size())
+            state.undo_stack.pop_front();
     }
-    else
-    {
-        // Push Old into state
-        state.undo_stack.push_back(change);
-    }
-    // Never pop if you are in priveleged mode.
-    if (state.privilege && state.max_stack_size != 0 && state.max_stack_size < state.undo_stack.size())
-        state.undo_stack.pop_front();
 
     // Tock all plugins
     lc3_tock_plugins(state);
@@ -246,10 +250,15 @@ void lc3_step(lc3_state& state)
     }
 
     // Interrupt?
-    lc3_interrupt(state);
-    // Check for interrupt
-    const lc3_state_change& interrupt = state.undo_stack.back();
-    if (interrupt.changes != LC3_INTERRUPT_BEGIN) return;
+    if (!lc3_interrupt(state)) return;
+
+    lc3_state_change interrupt;
+    interrupt.changes = LC3_INTERRUPT_BEGIN;
+    interrupt.warnings = state.warnings;
+    interrupt.executions = state.executions;
+    if (state.max_stack_size != 0)
+        state.undo_stack.push_back(interrupt);
+
     // Another breakpoint test
     lc3_break_test(state, &interrupt);
 }
@@ -316,9 +325,12 @@ void lc3_back(lc3_state& state)
         }
         else if (changes.changes == LC3_SUBROUTINE_END)
         {
-            state.call_stack.push_back(changes.subroutine);
-            if (state.max_call_stack_size != 0 && state.max_call_stack_size < state.call_stack.size())
-                state.call_stack.pop_front();
+            if (state.max_call_stack_size != 0)
+            {
+                state.call_stack.push_back(changes.subroutine);
+                if (state.max_call_stack_size < state.call_stack.size())
+                    state.call_stack.pop_front();
+            }
         }
 
         // Decrement PC
@@ -485,10 +497,10 @@ void lc3_finish(lc3_state& state)
   *
   * Checks for and processes a single pending interrupt.
   */
-void lc3_interrupt(lc3_state& state)
+bool lc3_interrupt(lc3_state& state)
 {
     // No interrupts? return.
-    if (state.interrupts.empty()) return;
+    if (state.interrupts.empty()) return false;
 
     int my_priority = state.priority;
     int max_priority = -1, max_vector = -1;
@@ -513,7 +525,7 @@ void lc3_interrupt(lc3_state& state)
         }
     }
 
-    if (max_priority == -1) return;
+    if (max_priority == -1) return false;
 
     // Interrupt acknowledged.
     state.interrupts.erase(max_pos);
@@ -543,12 +555,7 @@ void lc3_interrupt(lc3_state& state)
         state.interrupt_vector_stack.push_back(state.interrupt_vector);
     state.interrupt_vector = max_vector;
 
-    lc3_state_change changes;
-    changes.changes = LC3_INTERRUPT_BEGIN;
-    changes.warnings = state.warnings;
-    changes.executions = state.executions;
-    // Push this thing back in there as a flag.
-    state.undo_stack.push_back(changes);
+    return true;
 }
 
 /** lc3_keyboard_interrupt

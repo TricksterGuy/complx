@@ -329,7 +329,8 @@ int get_imm(const std::string& value, int bits, bool is_num, bool is_signed, con
         THROW(LC3AssembleException(context.line, params, is_num ? NUMBER_OVERFLOW : OFFSET_OVERFLOW, context.lineno));
     }
 
-    d = check_value(d, bits, is_num, is_signed, context);
+    if (bits != 16)
+        d = check_value(d, bits, is_num, is_signed, context);
 
     return d;
 }

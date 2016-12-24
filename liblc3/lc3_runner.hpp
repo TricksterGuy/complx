@@ -30,8 +30,8 @@ void lc3_next_line(lc3_state& state);
 void lc3_prev_line(lc3_state& state);
 /** Finishes the current subroutine */
 void lc3_finish(lc3_state& state);
-/** Checks and processes interrupt */
-void lc3_interrupt(lc3_state& state);
+/** Checks and processes interrupt.  Returns true if an interrupt occurred */
+bool lc3_interrupt(lc3_state& state);
 /** Signals a keyboard interrupt */
 void lc3_keyboard_interrupt(lc3_state& state);
 /** Singals a general interrupt will stack */
