@@ -14,8 +14,8 @@ before_install:
 
 script:
   - mkdir build && cd build
-  - cmake ..
+  - cmake -DENABLE_TESTS=ON ..
   - make
-  - make install
-  - ldconfig
+  - sudo make install
+  - sudo ldconfig
   - ctest -VV
