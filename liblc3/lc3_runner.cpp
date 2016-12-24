@@ -51,11 +51,11 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     state.interrupt_enabled = 0;
 
     // Clear subroutine info
-    state.max_call_stack_size = 0;
+    state.max_call_stack_size = -1;
     state.call_stack.clear();
 
     // Set Stack Flags
-    state.max_stack_size = 0;
+    state.max_stack_size = -1;
     state.undo_stack.clear();
 
     // Set I/O Stuff

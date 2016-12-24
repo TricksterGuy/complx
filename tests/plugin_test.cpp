@@ -153,6 +153,6 @@ BOOST_FIXTURE_TEST_CASE(TestTrapPluginDisassemble, LC3Test)
     lc3_assemble(state, file, ranges, options);
     BOOST_REQUIRE_EQUAL(state.mem[0x3002], short(0xF080));
     BOOST_CHECK_EQUAL(lc3_basic_disassemble(state, state.mem[0x3002]), "TRAP x80");
-    BOOST_CHECK_EQUAL(lc3_disassemble(state, state.mem[0x3002]), "TRAP x80");
+    BOOST_CHECK_EQUAL(lc3_disassemble(state, state.mem[0x3002]), "UDIV");
     BOOST_CHECK_EQUAL(lc3_smart_disassemble(state, state.mem[0x3002]), "UDIV");
 }
