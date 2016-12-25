@@ -1,5 +1,6 @@
 #complx
 ======
+[![Travis CI Build Status](https://travis-ci.org/TricksterGuy/complx.svg?branch=master)](https://travis-ci.org/TricksterGuy/complx)
 
 Complx the LC-3 Simulator used in CS2110 at Georgia Tech currently maintained and authored by Brandon (bwhitehead0308 [AT] gmail [DOT] com)
 
