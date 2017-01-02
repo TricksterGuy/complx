@@ -3,11 +3,6 @@ option(ENABLE_COLORLCD "Enable the Color LCD Plugin" ON)
 option(ENABLE_PINGER "Enable the Pinger Plugin" ON)
 include_directories(${complx-tools_SOURCE_DIR}/liblc3)
 
-set(wxWidgets_USE_LIBS stc xrc xml html adv gl net core base)
-find_package(wxWidgets REQUIRED)
-include(${wxWidgets_USE_FILE})
-set(CMAKE_SKIP_RPATH TRUE)
-
 if(ENABLE_BWLCD)
 
 set(SRC_BWLCD
