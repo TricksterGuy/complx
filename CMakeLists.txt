@@ -50,7 +50,7 @@ add_definitions(-DPREFIX=${CMAKE_INSTALL_PREFIX})
 add_definitions(-DSO_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
 if(ENABLE_COMPLX OR ENABLE_LC3TEST)
-set(wxWidgets_USE_LIBS stc xrc xml html adv gl net core base)
+set(wxWidgets_USE_LIBS stc xrc xml html adv net core base)
 find_package(wxWidgets REQUIRED)
 set(CMAKE_SKIP_RPATH TRUE)
 include(${wxWidgets_USE_FILE})
