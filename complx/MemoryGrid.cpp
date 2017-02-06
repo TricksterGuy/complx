@@ -85,6 +85,7 @@ void MemoryGrid::InitGridSizes()
 {
     int w, h;
     GetClientSize(&w, &h);
+    int cz = w;
     w -= 24;
 
     wxClientDC dc(this);
@@ -105,8 +106,10 @@ void MemoryGrid::InitGridSizes()
     w -= instrSize;
     w -= labelSize;
     w -= 10;
+
     /// TODO Apparently this can go below zero and cause an assertion failed
     if (w < 0) w = 200;
+    printf("sizes total: %d addr: %d hex: %d decimal: %d binary: %d label: %d instr: %d comment: %d", cz, addrSize, hexSize, decimalSize, binSize, labelSize, instrSize, w);
 
     SetColSize(MemoryInfo, 22);
     SetColSize(MemoryAddress, addrSize);
