@@ -660,6 +660,13 @@ void lc3_mem_write(lc3_state& state, unsigned short addr, short value, bool priv
   */
 void lc3_warning(lc3_state& state, unsigned int warn_id, short arg1, short arg2)
 {
+	if (state.warn_limits.find(warn_id) != state.warn_limits.end() && state.warn_limits[warn_id] <= state.warn_stats[warn_id])
+	{
+		state.warn_stats[warn_id] += 1;
+		state.warnings++;
+		return;
+	}
+
     char warning[128];
     std::string msg;
 
@@ -667,6 +674,12 @@ void lc3_warning(lc3_state& state, unsigned int warn_id, short arg1, short arg2)
     msg = warning;
 
     lc3_warning(state, msg);
+	state.warn_stats[warn_id] += 1;
+	if (state.warn_limits.find(warn_id) != state.warn_limits.end() && state.warn_limits[warn_id] <= state.warn_stats[warn_id])
+	{
+		lc3_warning(state, "Limit for previous warning has been reached will no longer output messages of this type");
+		return;
+	}
 }
 
 /** lc3_warning

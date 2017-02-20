@@ -457,6 +457,10 @@ typedef struct lc3_state
     // First layer of calls for lc3 calling convention checker (In case of multi recursion)
     std::vector<lc3_subroutine_call_info> first_level_calls;
 
+	// Warn limit map
+	std::map<int, unsigned int> warn_stats;
+	std::map<int, unsigned int> warn_limits;
+
     // Interrupt support push things here to cause interrupt
     std::list<lc3_interrupt_req> interrupts;
     std::list<interrupt_test_func> interrupt_test; // Functions to be called at the end of each step.
