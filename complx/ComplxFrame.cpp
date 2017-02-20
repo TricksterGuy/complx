@@ -66,36 +66,35 @@ void PrintError(int error);
   *
   * Constructor
   */
-ComplxFrame::ComplxFrame(const wxString& title, long disassemble, long stack_size, long call_stack_size, long true_traps, long interrupts, long highlight,
-                         wxString address_str, wxArrayString files) : ComplxFrameDecl(NULL, wxID_ANY, title), console(NULL), memoryView(NULL), base_title(title)
+ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) : ComplxFrameDecl(NULL, wxID_ANY, opts.title), console(NULL), memoryView(NULL), base_title(opts.title)
 {
     InitImages();
 
-    menuStateTrueTraps->Check(true_traps == 1);
-    menuStateInterrupts->Check(interrupts == 1);
-    menuViewInstructionHighlighting->Check(highlight != 0);
-    menuViewBasic->Check(disassemble == 0);
-    menuViewNormal->Check(disassemble == 1);
-    menuViewHighLevel->Check(disassemble == 2);
+    menuStateTrueTraps->Check(opts.true_traps);
+    menuStateInterrupts->Check(opts.interrupts);
+    menuViewInstructionHighlighting->Check(opts.highlight);
+    menuViewBasic->Check(opts.disassemble == 0);
+    menuViewNormal->Check(opts.disassemble == 1);
+    menuViewHighLevel->Check(opts.disassemble == 2);
 
-    this->stack_size = stack_size;
-    this->call_stack_size = call_stack_size;
+    this->stack_size = opts.stack_size;
+    this->call_stack_size = opts.call_stack_size;
     OnInit();
 
-    if (!address_str.IsEmpty())
+    if (!opts.pc.IsEmpty())
     {
         int addr;
-        lc3_calculate(state, address_str.ToStdString(), addr);
+        lc3_calculate(state, opts.pc.ToStdString(), addr);
         state.pc = addr;
     }
 
-    if (files.size() > 0) DoLoadFile(wxFileName(files[0]));
+    if (!opts.file.IsEmpty()) DoLoadFile(wxFileName(opts.file));
 
     memoryView = new MemoryView();
     memory->SetView(memoryView);
-    memory->SetDisassembleLevel(disassemble > 2 ? 2 : disassemble);
+    memory->SetDisassembleLevel(opts.disassemble);
     memory->SetUnsignedMode(false);
-    memory->SetHighlight(highlight > 1 ? 1 : highlight);
+    memory->SetHighlight(opts.highlight);
 
     int widths[3] = {-7, -3, -3};
     int styles[3] = {wxSB_NORMAL, wxSB_NORMAL, wxSB_NORMAL};

@@ -29,8 +29,19 @@ class wxThreadEvent;
 class ComplxFrame : public ComplxFrameDecl
 {
     public:
-        ComplxFrame(const wxString& title, long disassemble, long stack_size, long call_stack_size, long true_traps, long interrupts, long highlight, wxString address_str,
-                    wxArrayString files);
+		struct Options
+		{
+			wxString title;
+			int disassemble;
+			unsigned int stack_size;
+			unsigned int call_stack_size;
+			bool true_traps;
+			bool interrupts;
+			bool highlight;
+			wxString pc;
+			wxString file;
+		};
+        ComplxFrame(const Options& opts);
         ~ComplxFrame();
 
         // File menu event handlers
