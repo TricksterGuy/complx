@@ -5,6 +5,7 @@
 #include "lc3_runner.hpp"
 #include "lc3_plugin.hpp"
 #include "lc3_symbol.hpp"
+#include <ctime>
 #include <sstream>
 #include <set>
 
@@ -103,7 +104,10 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
     lc3_state state;
 
     // Preliminary stuff
-    if (seed != -1) srand(seed);
+    if (seed != -1) 
+		srand(seed);
+	else
+		srand(time(NULL));
     lc3_init(state, test.randomize, test.randomize);
     if (test.true_traps) lc3_set_true_traps(state, 1);
     if (test.interrupt_enabled) state.interrupt_enabled = 1;
