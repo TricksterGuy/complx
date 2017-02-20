@@ -82,14 +82,32 @@ bool ComplxApp::OnInit()
 	if (!files.empty())
 		opts.file = files[0];
 
+    std::string last_ver = config->Read("/firstrun", "").ToStdString();
+	bool firstrun = false;
+	opts.exact_column_sizing = true;
+
+	if (last_ver.empty())
+	{
+		firstrun = true;
+	}
+	else if (last_ver != Version::FULLVERSION_STRING)
+	{
+        config->Write("/firstrun", Version::FULLVERSION_STRING);
+        config->Flush();
+	}
+	else
+	{
+		// Operation that takes 2 seconds don't want to do it if it is not the first run.
+		opts.exact_column_sizing = false;
+	}
+
     complxframe = new ComplxFrame(opts);
     wxIcon icon(icon32_xpm);
     complxframe->SetIcon(icon);
     complxframe->Show();
 
-    std::string last_ver = config->Read("/firstrun", "").ToStdString();
     // use our config object...
-    if (last_ver.empty()) {
+    if (firstrun) {
         wxCommandEvent event;
         complxframe->OnFirstTime(event);
         config->Write("/firstrun", Version::FULLVERSION_STRING);

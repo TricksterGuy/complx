@@ -91,7 +91,7 @@ ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) : ComplxFrameDecl(NUL
     if (!opts.file.IsEmpty()) DoLoadFile(wxFileName(opts.file));
 
     memoryView = new MemoryView();
-    memory->SetView(memoryView);
+    memory->SetView(memoryView, opts.exact_column_sizing);
     memory->SetDisassembleLevel(opts.disassemble);
     memory->SetUnsignedMode(false);
     memory->SetHighlight(opts.highlight);

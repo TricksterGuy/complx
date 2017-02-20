@@ -69,19 +69,19 @@ wxGrid(parent, id, pos, size, style), timer(this, MemoryToolTipTimer), tipWindow
   *
   * Sets the backend Table the grid is using
   */
-void MemoryGrid::SetView(MemoryView* view)
+void MemoryGrid::SetView(MemoryView* view, bool exact_column_sizes)
 {
     // DO NOT SET TO TRUE.
     // See TODOs in MemoryViewContainer.cpp
     SetTable(view, false, wxGridSelectRows);
-    InitGridSizes();
+    InitGridSizes(exact_column_sizes);
 }
 
 /** InitGridSizes
   *
   * Initializes the Grid Sizes
   */
-void MemoryGrid::InitGridSizes()
+void MemoryGrid::InitGridSizes(bool exact_column_sizing)
 {
     int w, h;
     GetClientSize(&w, &h);
@@ -96,10 +96,18 @@ void MemoryGrid::InitGridSizes()
     int decimalSize = std::max(dc.GetTextExtent("-32768 ").GetWidth(), GetColSize(MemoryDecimal));
     int instrSize = dc.GetTextExtent("ABC 12345678901234567890 ").GetWidth();
     int labelSize = dc.GetTextExtent("1234567890 ").GetWidth();
-    // Hi I am a function call that takes 2+ seconds
-    //AutoSizeColumn(MemoryBinary);
+	
+	if (exact_column_sizing)
+	{
+    	// Hi I am a function call that takes 2+ seconds
+	    AutoSizeColumn(MemoryBinary);
+		w -= GetColSize(MemoryBinary);
+	}
+	else
+	{
+    	w -= binSize;
+	}
 
-    w -= binSize;//GetColSize(MemoryBinary);
     w -= addrSize;
     w -= hexSize;
     w -= decimalSize;

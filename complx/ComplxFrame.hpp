@@ -4,6 +4,7 @@
 #define STRINGIFY_TOKEN(S) #S
 
 #include <lc3_all.hpp>
+#include <vector>
 #include <wx/grid.h>
 #include <wx/textctrl.h>
 #include <wx/event.h>
@@ -40,6 +41,8 @@ class ComplxFrame : public ComplxFrameDecl
 			bool highlight;
 			wxString pc;
 			wxString file;
+			std::vector<int> column_sizes;
+			bool exact_column_sizing;
 		};
         ComplxFrame(const Options& opts);
         ~ComplxFrame();
