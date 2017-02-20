@@ -79,10 +79,16 @@ bool ComplxApp::OnInit()
 	opts.interrupts = interrupts != 0;
 	opts.highlight = highlight != 0;
 	opts.pc = address_str;
+	opts.width = 800;
+	opts.height = 600;
 	if (!files.empty())
 		opts.file = files[0];
 
     std::string last_ver = config->Read("/firstrun", "").ToStdString();
+	std::string column_size_str = config->Read("/columnsizes", "").ToStdString();
+	std::string width_str = config->Read("/appwidth", "800").ToStdString();
+	std::string height_str = config->Read("/appheight", "600").ToStdString();
+
 	bool firstrun = false;
 	opts.exact_column_sizing = true;
 
@@ -99,6 +105,17 @@ bool ComplxApp::OnInit()
 	{
 		// Operation that takes 2 seconds don't want to do it if it is not the first run.
 		opts.exact_column_sizing = false;
+		std::vector<std::string> columns;
+		tokenize(column_size_str, columns, ",");
+		if (columns.size() == MemorySize)
+		{
+			for (const auto& str : columns)
+				opts.column_sizes.push_back(wxAtoi(str));
+		}
+		if (!width_str.empty())
+			opts.width = wxAtoi(width_str);
+		if (!height_str.empty())
+			opts.height = wxAtoi(height_str);
 	}
 
     complxframe = new ComplxFrame(opts);

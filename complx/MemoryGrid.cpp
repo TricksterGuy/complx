@@ -69,23 +69,22 @@ wxGrid(parent, id, pos, size, style), timer(this, MemoryToolTipTimer), tipWindow
   *
   * Sets the backend Table the grid is using
   */
-void MemoryGrid::SetView(MemoryView* view, bool exact_column_sizes)
+void MemoryGrid::SetView(MemoryView* view, bool exact_column_sizes, const std::vector<int>& column_sizes)
 {
     // DO NOT SET TO TRUE.
     // See TODOs in MemoryViewContainer.cpp
     SetTable(view, false, wxGridSelectRows);
-    InitGridSizes(exact_column_sizes);
+    InitGridSizes(exact_column_sizes, column_sizes);
 }
 
 /** InitGridSizes
   *
   * Initializes the Grid Sizes
   */
-void MemoryGrid::InitGridSizes(bool exact_column_sizing)
+void MemoryGrid::InitGridSizes(bool exact_column_sizing, const std::vector<int>& column_sizes)
 {
     int w, h;
     GetClientSize(&w, &h);
-    int cz = w;
     w -= 24;
 
     wxClientDC dc(this);
@@ -117,16 +116,29 @@ void MemoryGrid::InitGridSizes(bool exact_column_sizing)
 
     /// TODO Apparently this can go below zero and cause an assertion failed
     if (w < 0) w = 200;
-    printf("sizes total: %d addr: %d hex: %d decimal: %d binary: %d label: %d instr: %d comment: %d", cz, addrSize, hexSize, decimalSize, binSize, labelSize, instrSize, w);
 
-    SetColSize(MemoryInfo, 22);
-    SetColSize(MemoryAddress, addrSize);
-    SetColSize(MemoryHexadecimal, hexSize);
-    SetColSize(MemoryDecimal, decimalSize);
-    SetColSize(MemoryBinary, binSize);
-    SetColSize(MemoryLabel, labelSize);
-    SetColSize(MemoryInstruction, instrSize);
-    SetColSize(MemoryComment, w);
+	if (column_sizes.empty())
+	{
+		SetColSize(MemoryInfo, 22);
+		SetColSize(MemoryAddress, addrSize);
+		SetColSize(MemoryHexadecimal, hexSize);
+		SetColSize(MemoryDecimal, decimalSize);
+		SetColSize(MemoryBinary, binSize);
+		SetColSize(MemoryLabel, labelSize);
+		SetColSize(MemoryInstruction, instrSize);
+		SetColSize(MemoryComment, w);
+	}
+	else
+	{
+		SetColSize(MemoryInfo, column_sizes[0]);
+		SetColSize(MemoryAddress, column_sizes[1]);
+		SetColSize(MemoryHexadecimal, column_sizes[2]);
+		SetColSize(MemoryDecimal, column_sizes[3]);
+		SetColSize(MemoryBinary, column_sizes[4]);
+		SetColSize(MemoryLabel, column_sizes[5]);
+		SetColSize(MemoryInstruction, column_sizes[6]);
+		SetColSize(MemoryComment, column_sizes[7]);
+	}
 
     wxGridCellAttr* info = new wxGridCellAttr; info->SetReadOnly(); info->SetTextColour(*wxBLACK);
     /// TODO abstract out Memory View address->row translation into an object and pass it in here

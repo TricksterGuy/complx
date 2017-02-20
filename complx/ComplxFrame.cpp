@@ -66,7 +66,7 @@ void PrintError(int error);
   *
   * Constructor
   */
-ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) : ComplxFrameDecl(NULL, wxID_ANY, opts.title), console(NULL), memoryView(NULL), base_title(opts.title)
+ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) : ComplxFrameDecl(NULL, wxID_ANY, opts.title, wxDefaultPosition, wxSize(opts.width, opts.height)), console(NULL), memoryView(NULL), base_title(opts.title)
 {
     InitImages();
 
@@ -91,7 +91,7 @@ ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) : ComplxFrameDecl(NUL
     if (!opts.file.IsEmpty()) DoLoadFile(wxFileName(opts.file));
 
     memoryView = new MemoryView();
-    memory->SetView(memoryView, opts.exact_column_sizing);
+    memory->SetView(memoryView, opts.exact_column_sizing, opts.column_sizes);
     memory->SetDisassembleLevel(opts.disassemble);
     memory->SetUnsignedMode(false);
     memory->SetHighlight(opts.highlight);
@@ -117,6 +117,23 @@ ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) : ComplxFrameDecl(NUL
   */
 ComplxFrame::~ComplxFrame()
 {
+	auto* config = wxConfigBase::Get();
+
+	int width, height;
+	GetSize(&width, &height);
+
+	config->Write("/appwidth", wxString::Format("%d", width)); 
+	config->Write("/appheight", wxString::Format("%d", height));
+	
+	const auto& column_sizes = memory->GetColSizes();
+	std::stringstream oss;
+	for (unsigned int i = 0; i < MemorySize; i++)
+	{
+		oss << column_sizes.GetSize(i) << ",";
+	}
+	wxString sizes = oss.str();
+	config->Write("/columnsizes", sizes);
+
     complxframe = NULL;
     Disconnect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_COMPLETED, wxThreadEventHandler(ComplxFrame::OnRunComplete));
     Disconnect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_UPDATE, wxThreadEventHandler(ComplxFrame::OnRunUpdate));

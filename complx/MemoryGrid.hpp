@@ -25,7 +25,7 @@ class MemoryGrid : public wxGrid
 	public:
 		MemoryGrid(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, long style);
 		~MemoryGrid();
-        void InitGridSizes(bool exact_column_sizing = false);
+        void InitGridSizes(bool exact_column_sizing = false, const std::vector<int>& column_sizes = std::vector<int>());
         void SelectLocation(unsigned short location);
         void OnContextMenu(wxGridEvent& event);
         void OnBreakpoint(wxCommandEvent& event);
@@ -34,7 +34,7 @@ class MemoryGrid : public wxGrid
         void OnBlackbox(wxCommandEvent& event);
         void OnAdvancedpoint(wxCommandEvent& event);
         void OnPCHere(wxCommandEvent& event);
-        void SetView(MemoryView* view, bool exact_column_sizes = false);
+        void SetView(MemoryView* view, bool exact_column_sizes = false, const std::vector<int>& column_sizes = std::vector<int>());
         bool AcceptsFocusFromKeyboard() const;
 
         void SetDisassembleLevel(int level);

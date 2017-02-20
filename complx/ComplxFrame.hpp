@@ -41,6 +41,8 @@ class ComplxFrame : public ComplxFrameDecl
 			bool highlight;
 			wxString pc;
 			wxString file;
+			int width;
+			int height;
 			std::vector<int> column_sizes;
 			bool exact_column_sizing;
 		};
