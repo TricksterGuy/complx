@@ -594,7 +594,9 @@ void ComplxFrame::OnRunAgain(wxCommandEvent& event)
     }
 
     SetupExecution(RUNMODE_RUNFOR, runforRunTime);
+	SetFocus();
 }
+
 
 /** OnStep
   *

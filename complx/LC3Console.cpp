@@ -196,7 +196,7 @@ void LC3Console::OnReadChar()
 
 /** Update
   *
-  * Called when the console needs to update the text.
+  * Called when the console needs to update the text or periodically when running.
   */
 void LC3Console::Update()
 {
@@ -206,8 +206,9 @@ void LC3Console::Update()
         (*output) << oss.str();
         oss.seekp(0);
         oss.str("");
+		if (!IsShown())
+			Raise();
     }
-    Raise();
 }
 
 /** Clear

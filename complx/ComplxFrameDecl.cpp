@@ -137,7 +137,7 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuStateControl->Append( menuStateControlRunFor );
 	
 	wxMenuItem* menuStateControlRunAgain;
-	menuStateControlRunAgain = new wxMenuItem( menuStateControl, ID_RUN_AGAIN, wxString( _("Run Again...") ) + wxT('\t') + wxT("Ctrl+Space"), _("Runs the default number of instructions (see RunFor)"), wxITEM_NORMAL );
+	menuStateControlRunAgain = new wxMenuItem( menuStateControl, ID_RUN_AGAIN, wxString( _("Run Again...") ) + wxT('\t') + wxT("Ctrl+A"), _("Runs the default number of instructions (see RunFor)"), wxITEM_NORMAL );
 	menuStateControl->Append( menuStateControlRunAgain );
 	
 	wxMenuItem* menuStateControlRewind;
@@ -162,10 +162,10 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuStateFillMemoryWith = new wxMenuItem( menuState, ID_FILL_MEMORY_WITH, wxString( _("Fill Memory With...") ) , _("Fills memory with a specified value"), wxITEM_NORMAL );
 	menuState->Append( menuStateFillMemoryWith );
 	
-	menuStateTrueTraps = new wxMenuItem( menuState, ID_TRUE_TRAPS, wxString( _("True Traps") ) + wxT('\t') + wxT("Ctrl+T"), _("Enables True Traps"), wxITEM_CHECK );
+	menuStateTrueTraps = new wxMenuItem( menuState, ID_TRUE_TRAPS, wxString( _("True Traps") ), _("Enables True Traps"), wxITEM_CHECK );
 	menuState->Append( menuStateTrueTraps );
 	
-	menuStateInterrupts = new wxMenuItem( menuState, ID_INTERRUPTS, wxString( _("Interrupts") ) + wxT('\t') + wxT("Ctrl+I"), _("Enables Interrupts"), wxITEM_CHECK );
+	menuStateInterrupts = new wxMenuItem( menuState, ID_INTERRUPTS, wxString( _("Interrupts") ), _("Enables Interrupts"), wxITEM_CHECK );
 	menuState->Append( menuStateInterrupts );
 	
 	menuState->AppendSeparator();
@@ -229,7 +229,7 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuTest->Append( menuTestRunTests );
 	
 	wxMenuItem* menuTestRerunTests;
-	menuTestRerunTests = new wxMenuItem( menuTest, ID_RERUN_TESTS, wxString( _("&Rerun Tests") ) + wxT('\t') + wxT("Ctrl+Alt+T"), _("Rerun tests from an xml file."), wxITEM_NORMAL );
+	menuTestRerunTests = new wxMenuItem( menuTest, ID_RERUN_TESTS, wxString( _("&Rerun Tests") ) + wxT('\t') + wxT("Ctrl+T"), _("Rerun tests from an xml file."), wxITEM_NORMAL );
 	menuTest->Append( menuTestRerunTests );
 	
 	menu->Append( menuTest, _("Test") ); 
