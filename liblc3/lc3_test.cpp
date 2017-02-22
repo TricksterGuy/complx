@@ -211,7 +211,8 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
             int r7;
             int r6;
             int r5;
-            if (lc3_calculate(state, subr.name, pc) == -1)
+            pc = lc3_sym_lookup(state, subr.name);
+            if (pc == -1)
                 throw "<in test-subr> invalid subroutine name given " + subr.name;
             if (lc3_calculate(state, subr.stack, r6) == -1)
                 throw "<in test-subr> stack expression was malformed " + subr.stack;

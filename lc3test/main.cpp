@@ -34,8 +34,7 @@ int main(int argc, char** argv)
     // Typical
     if (argc < 3)
     {
-        printf("Usage: lc3test testfile.xml asmfile.asm -disable_plugins -random_seed=int -runs=int\n");
-        printf("by default -disable_plugins is false\n");
+        printf("Usage: lc3test testfile.xml asmfile.asm -random_seed=int -runs=int\n");
         return EXIT_FAILURE;
     }
 
@@ -43,15 +42,20 @@ int main(int argc, char** argv)
     std::string xmlfile = argv[1];
     std::string asmfile = argv[2];
     int random_seed = -1;
-	unsigned int runs = 1;
+    unsigned int runs = 1;
 
     for (int i = 3; i < argc; i++)
     {
         const std::string& arg = argv[i];
-        if (arg.compare("-random_seed"))
+        if (arg.find("-random_seed=") != std::string::npos)
             random_seed = atoi(arg.substr(arg.find("=") + 1).c_str());
-		if (arg.compare("-runs"))
+	else if (arg.find("-runs=") != std::string::npos)
             runs = (unsigned int) atoi(arg.substr(arg.find("=") + 1).c_str());
+	else
+        {
+            printf("Invalid param %s passed in!", arg.c_str());
+            return EXIT_FAILURE;
+        }
     }
 
     try
