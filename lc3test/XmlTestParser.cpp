@@ -654,7 +654,8 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
             output.points = subr.points_locals * subr.locals.size() +
                             subr.points_params * subr.params.size() +
                             subr.points_answer + subr.points_r5 + subr.points_r7 + subr.points_r6 +
-                            subr.points_calls * subr.calls.size() + subr.points_read_answer;
+                            subr.points_calls * subr.calls.size() +
+                            subr.points_read_answer * subr.calls.size();
         }
         else if (child->GetName() != "comment")
             return false;
