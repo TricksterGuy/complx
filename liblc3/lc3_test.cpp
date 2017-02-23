@@ -225,7 +225,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
             state.regs[6] = (unsigned short)(r6 - subr.params.size());
             state.regs[7] = (unsigned short) r7;
             state.regs[5] = (unsigned short) r5;
-            state.mem[state.regs[7]] = 0xF025;
+            state.mem[(unsigned short)state.regs[7]] = 0xF025;
 
             for (unsigned int j = 0; j < subr.params.size(); j++)
             {
@@ -663,22 +663,42 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
             }
 
             // Read answer check sigh...
+            bool all_answers_read = true;
             if (subr.points_read_answer > 0)
             {
                 for (const auto& call : actual_calls)
                 {
+                    std::stringstream call_name;
+
+                    std::string name = lc3_sym_rev_lookup(state, call.address);
+                    if (name.empty())
+                        call_name << "0x" << std::hex << call.address << "(";
+                    else
+                        call_name << name << "(";
+                    if (state.subroutines.find(call.address) == state.subroutines.end())
+                        call_name << "?";
+                    for (unsigned int i = 0; i < call.params.size(); i++)
+                    {
+
+                        call_name << std::hex << "0x" << call.params[i];
+                        if (i != call.params.size() - 1)
+                            call_name << ",";
+                    }
+                    call_name << ")";
                     if (expected_calls.find(call) != expected_calls.end() && !call.params.empty())
                     {
                         if (state.memory_ops[call.r6 - 1].reads > 0)
-                        {
-                            extra << CHECK << "Read answer from stack.\n";
-                            points += subr.points_read_answer;
-                        }
+                            extra << CHECK << "Read answer from call " << call_name.str() << ".\n";
                         else
-                            extra << MISS << "Did not read answer from stack.\n";
+                        {
+                            extra << MISS << "Did not read answer from call " << call_name.str() << ".\n";
+                            all_answers_read = false;
+                        }
                     }
                 }
             }
+            if (all_answers_read)
+                points += subr.points_read_answer;
 
             // If all local variables are wrong then it can be argued that they was saving registers
             // And forgot to save locals...
