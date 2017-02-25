@@ -166,7 +166,7 @@ bool ComplxApp::OnCmdLineParsed(wxCmdLineParser& parser)
   */
 void ComplxApp::OnInitCmdLine(wxCmdLineParser& parser)
 {
-    parser.SetLogo(wxString::Format(_("Complx Version %ld.%ld"), Version::MAJOR, Version::MINOR));
+    parser.SetLogo(wxString::Format(_("Complx Version %s"), Version::FULLVERSION_STRING));
     parser.SetDesc(cmd_descriptions);
     parser.SetSwitchChars (_("-"));
 }
