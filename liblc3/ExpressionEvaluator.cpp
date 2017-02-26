@@ -1,5 +1,4 @@
 
-
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
@@ -426,14 +425,14 @@ int SymbolTableLookup(string symbol, bool hasref, int ref, int& error)
 
     switch (value.type)
     {
-        case EVAL_VALUE:
-            return value.eval.value;
-            break;
-        case EVAL_FUNCTION:
-            return value.eval.func(hasref, ref);
-            break;
-        default:
-            error = eval_evalerr;
+    case EVAL_VALUE:
+        return value.eval.value;
+        break;
+    case EVAL_FUNCTION:
+        return value.eval.func(hasref, ref);
+        break;
+    default:
+        error = eval_evalerr;
     }
 
     return -1;

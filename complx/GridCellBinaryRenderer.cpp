@@ -123,51 +123,51 @@ void GridCellBinaryRenderer::InstructionColor(wxGrid &grid, wxGridCellAttr &attr
 
     switch (opcode)
     {
-        case BR_INSTR:
-            colors.assign(instrColorings[BR_TYPE], instrColorings[BR_TYPE] + 4);
-            break;
-        case ADD_INSTR:
-        case AND_INSTR:
-            if (instr >> 5 & 0x1)
-                colors.assign(instrColorings[ARITH_IMM_TYPE], instrColorings[ARITH_IMM_TYPE] + 4);
-            else
-                colors.assign(instrColorings[ARITH_REG_TYPE], instrColorings[ARITH_REG_TYPE] + 4);
-            break;
-        case NOT_INSTR:
-            colors.assign(instrColorings[NOT_TYPE], instrColorings[NOT_TYPE] + 4);
-            break;
-        case LD_INSTR:
-        case ST_INSTR:
-        case LDI_INSTR:
-        case STI_INSTR:
-        case LEA_INSTR:
-            colors.assign(instrColorings[PCOFFSET_TYPE], instrColorings[PCOFFSET_TYPE] + 4);
-            break;
-        case JSR_INSTR:
-            if ((instr >> 11) & 1)
-                colors.assign(instrColorings[JSR_TYPE], instrColorings[JSR_TYPE] + 4);
-            else
-                colors.assign(instrColorings[JUMP_REG_TYPE], instrColorings[JUMP_REG_TYPE] + 4);
-            break;
-        case LDR_INSTR:
-        case STR_INSTR:
-            colors.assign(instrColorings[BASE_OFFSET_TYPE], instrColorings[BASE_OFFSET_TYPE] + 4);
-            break;
-        case JMP_INSTR:
+    case BR_INSTR:
+        colors.assign(instrColorings[BR_TYPE], instrColorings[BR_TYPE] + 4);
+        break;
+    case ADD_INSTR:
+    case AND_INSTR:
+        if (instr >> 5 & 0x1)
+            colors.assign(instrColorings[ARITH_IMM_TYPE], instrColorings[ARITH_IMM_TYPE] + 4);
+        else
+            colors.assign(instrColorings[ARITH_REG_TYPE], instrColorings[ARITH_REG_TYPE] + 4);
+        break;
+    case NOT_INSTR:
+        colors.assign(instrColorings[NOT_TYPE], instrColorings[NOT_TYPE] + 4);
+        break;
+    case LD_INSTR:
+    case ST_INSTR:
+    case LDI_INSTR:
+    case STI_INSTR:
+    case LEA_INSTR:
+        colors.assign(instrColorings[PCOFFSET_TYPE], instrColorings[PCOFFSET_TYPE] + 4);
+        break;
+    case JSR_INSTR:
+        if ((instr >> 11) & 1)
+            colors.assign(instrColorings[JSR_TYPE], instrColorings[JSR_TYPE] + 4);
+        else
             colors.assign(instrColorings[JUMP_REG_TYPE], instrColorings[JUMP_REG_TYPE] + 4);
-            break;
-        case TRAP_INSTR:
-            colors.assign(instrColorings[TRAP_TYPE], instrColorings[TRAP_TYPE] + 4);
-            break;
-        case ERROR_INSTR:
-            if (state.instructionPlugin)
-                colors = state.instructionPlugin->GetInstructionColoring(instr);
-            else
-                colors.assign(instrColorings[NULL_TYPE], instrColorings[NULL_TYPE] + 4);
-            break;
-        default:
+        break;
+    case LDR_INSTR:
+    case STR_INSTR:
+        colors.assign(instrColorings[BASE_OFFSET_TYPE], instrColorings[BASE_OFFSET_TYPE] + 4);
+        break;
+    case JMP_INSTR:
+        colors.assign(instrColorings[JUMP_REG_TYPE], instrColorings[JUMP_REG_TYPE] + 4);
+        break;
+    case TRAP_INSTR:
+        colors.assign(instrColorings[TRAP_TYPE], instrColorings[TRAP_TYPE] + 4);
+        break;
+    case ERROR_INSTR:
+        if (state.instructionPlugin)
+            colors = state.instructionPlugin->GetInstructionColoring(instr);
+        else
             colors.assign(instrColorings[NULL_TYPE], instrColorings[NULL_TYPE] + 4);
-            break;
+        break;
+    default:
+        colors.assign(instrColorings[NULL_TYPE], instrColorings[NULL_TYPE] + 4);
+        break;
     }
 
     int colored = 0;

@@ -17,24 +17,33 @@ enum class LogLevel
 
 class AbstractLogger
 {
-    public:
-        AbstractLogger(std::ostream* target = &std::cerr) : out(target), log_level(LogLevel::INFO), log_time(true) {}
-        virtual ~AbstractLogger() {}
-        virtual void Log(LogLevel level, const char* format, va_list ap);
-        virtual void DoLog(LogLevel level, const char* format, va_list ap) {}
-        void SetLogTarget(std::ostream* stream) {out = stream;}
-        void SetLogLevel(LogLevel level) {log_level = level;}
-        void SetLogTime(bool logging_time) {log_time = logging_time;}
-    protected:
-        std::ostream* out;
-        LogLevel log_level;
-        bool log_time;
+public:
+    AbstractLogger(std::ostream* target = &std::cerr) : out(target), log_level(LogLevel::INFO), log_time(true) {}
+    virtual ~AbstractLogger() {}
+    virtual void Log(LogLevel level, const char* format, va_list ap);
+    virtual void DoLog(LogLevel level, const char* format, va_list ap) {}
+    void SetLogTarget(std::ostream* stream)
+    {
+        out = stream;
+    }
+    void SetLogLevel(LogLevel level)
+    {
+        log_level = level;
+    }
+    void SetLogTime(bool logging_time)
+    {
+        log_time = logging_time;
+    }
+protected:
+    std::ostream* out;
+    LogLevel log_level;
+    bool log_time;
 };
 
 class Logger : public AbstractLogger
 {
-    public:
-        virtual void DoLog(LogLevel level, const char* format, va_list ap);
+public:
+    virtual void DoLog(LogLevel level, const char* format, va_list ap);
 };
 
 extern std::unique_ptr<AbstractLogger> logger;
@@ -97,12 +106,12 @@ static inline void VerboseLog(const char* format, ...)
 /** Object that only exists to print out start and end of event call in a function */
 class EventLog
 {
-    public:
-        EventLog(const char* function);
-        ~EventLog();
-    private:
-        const char* func;
-        std::chrono::time_point<std::chrono::system_clock> startTime;
+public:
+    EventLog(const char* function);
+    ~EventLog();
+private:
+    const char* func;
+    std::chrono::time_point<std::chrono::system_clock> startTime;
 };
 
 #endif

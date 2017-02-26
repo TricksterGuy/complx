@@ -27,27 +27,27 @@
 ///////////////////////////////////////////////////////////////////////////////
 /// Class AddressDialogDecl
 ///////////////////////////////////////////////////////////////////////////////
-class AddressDialogDecl : public wxDialog 
+class AddressDialogDecl : public wxDialog
 {
-	private:
-	
-	protected:
-		wxStaticText* m_staticText11;
-		wxTextCtrl* address_text;
-		wxStaticText* m_staticText12;
-		wxTextCtrl* value_text;
-		
-		wxButton* okButton;
-		
-		wxButton* cancelButton;
-	
-	public:
-		wxString address; 
-		wxString value; 
-		
-		AddressDialogDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Address"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 182,115 ), long style = wxDEFAULT_DIALOG_STYLE );
-		~AddressDialogDecl();
-	
+private:
+
+protected:
+    wxStaticText* m_staticText11;
+    wxTextCtrl* address_text;
+    wxStaticText* m_staticText12;
+    wxTextCtrl* value_text;
+
+    wxButton* okButton;
+
+    wxButton* cancelButton;
+
+public:
+    wxString address;
+    wxString value;
+
+    AddressDialogDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Address"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 182,115 ), long style = wxDEFAULT_DIALOG_STYLE );
+    ~AddressDialogDecl();
+
 };
 
 #endif //__AddressDialogDecl__

@@ -7,9 +7,9 @@
 
 class BreakpointDialog : public BreakpointDialogDecl
 {
-	public:
-		BreakpointDialog(wxWindow* parent, lc3_breakpoint_info info, bool addr_change = true);
-		lc3_breakpoint_info GetInfo(int& error);
+public:
+    BreakpointDialog(wxWindow* parent, lc3_breakpoint_info info, bool addr_change = true);
+    lc3_breakpoint_info GetInfo(int& error);
 };
 
 

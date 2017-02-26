@@ -77,46 +77,46 @@ wxString MemoryView::GetValue(int item, int column)
 
     switch(column)
     {
-        case MemoryAddress:
-            ret = wxString::Format(_("%04X:"), addr);
-            break;
-        case MemoryHexadecimal:
-            ret = wxString::Format(_("x%04X"), (unsigned short)data);
-            break;
-        case MemoryDecimal:
-            if (unsigned_mode)
-                ret = wxString::Format(_("%d"), (unsigned short)data);
-            else
-                ret = wxString::Format(_("%d"), (short)data);
-            break;
-        case MemoryLabel:
-            ret = wxString::FromUTF8(lc3_sym_rev_lookup(state, addr).c_str());
-            break;
-        case MemoryInstruction:
-            // Change the pc temporarily...
-            state.pc = (unsigned short) (addr + 1);
-            if (disassemble_level == 0)
-                instruction = lc3_basic_disassemble(state, data);
-            else if (disassemble_level == 1)
-                instruction = lc3_disassemble(state, data);
-            else
-                instruction = lc3_smart_disassemble(state, data);
-            ret = wxString::FromUTF8(instruction.c_str());
-            state.pc = pc;
-            break;
-        case MemoryBinary:
-            string << b;
-            ret = wxString::FromUTF8(string.str().c_str());
-            break;
-        case MemoryComment:
-            if (state.comments.find(addr) != state.comments.end())
-            {
-                ret = wxString::FromUTF8(state.comments[addr].c_str());
-                ret.Replace(_("\n"), _(" "), true);
-            }
-            break;
-        default:
-            ret = wxEmptyString;
+    case MemoryAddress:
+        ret = wxString::Format(_("%04X:"), addr);
+        break;
+    case MemoryHexadecimal:
+        ret = wxString::Format(_("x%04X"), (unsigned short)data);
+        break;
+    case MemoryDecimal:
+        if (unsigned_mode)
+            ret = wxString::Format(_("%d"), (unsigned short)data);
+        else
+            ret = wxString::Format(_("%d"), (short)data);
+        break;
+    case MemoryLabel:
+        ret = wxString::FromUTF8(lc3_sym_rev_lookup(state, addr).c_str());
+        break;
+    case MemoryInstruction:
+        // Change the pc temporarily...
+        state.pc = (unsigned short) (addr + 1);
+        if (disassemble_level == 0)
+            instruction = lc3_basic_disassemble(state, data);
+        else if (disassemble_level == 1)
+            instruction = lc3_disassemble(state, data);
+        else
+            instruction = lc3_smart_disassemble(state, data);
+        ret = wxString::FromUTF8(instruction.c_str());
+        state.pc = pc;
+        break;
+    case MemoryBinary:
+        string << b;
+        ret = wxString::FromUTF8(string.str().c_str());
+        break;
+    case MemoryComment:
+        if (state.comments.find(addr) != state.comments.end())
+        {
+            ret = wxString::FromUTF8(state.comments[addr].c_str());
+            ret.Replace(_("\n"), _(" "), true);
+        }
+        break;
+    default:
+        ret = wxEmptyString;
     }
     return ret;
 }
@@ -136,72 +136,72 @@ void MemoryView::SetValue(int item, int col, const wxString &value)
 
     switch(col)
     {
-        case MemoryHexadecimal:
-            if (value.StartsWith(_("x")) || value.StartsWith(_("X")))
-                effvalue = _("0") + value;
-            else if (!(value.StartsWith(_("0x")) && value.StartsWith(_("0X"))))
-                effvalue = _("0x") + value;
+    case MemoryHexadecimal:
+        if (value.StartsWith(_("x")) || value.StartsWith(_("X")))
+            effvalue = _("0") + value;
+        else if (!(value.StartsWith(_("0x")) && value.StartsWith(_("0X"))))
+            effvalue = _("0x") + value;
 
+        strdata = effvalue.ToStdString();
+
+        data = (int)strtol(strdata.c_str(), &errstr, 16);
+        if (*errstr) return;
+
+        lc3_mem_write(state, addr, (short)data, true);
+        break;
+    case MemoryDecimal:
+        if (value.StartsWith(_("#")))
+            effvalue = value.Mid(1);
+
+        strdata = effvalue.ToStdString();
+        data = (int)strtol(strdata.c_str(), &errstr, 10);
+        if (*errstr) return;
+
+        lc3_mem_write(state, addr, (short)data, true);
+        break;
+    case MemoryLabel:
+        strdata = lc3_sym_rev_lookup(state, addr);
+        newsym = value.ToStdString();
+        if (!strdata.empty()) lc3_sym_delete(state, strdata);
+        data = lc3_sym_lookup(state, newsym);
+        if (data == -1)
+            lc3_sym_add(state, newsym, addr);
+        else
+            wxMessageBox(wxString::Format("ERROR! The symbol %s already exists at address 0x%04x",
+                                          newsym, data), _("ERROR"));
+        break;
+    case MemoryBinary:
+        if (value.StartsWith(_("0b")))
+            effvalue = value.Mid(2);
+
+        strdata = effvalue.ToStdString();
+        data = (int)strtol(strdata.c_str(), &errstr, 2);
+        if (*errstr) return;
+
+        lc3_mem_write(state, addr, (short)data, true);
+        break;
+    case MemoryInstruction:
+        try
+        {
             strdata = effvalue.ToStdString();
-
-            data = (int)strtol(strdata.c_str(), &errstr, 16);
-            if (*errstr) return;
-
-            lc3_mem_write(state, addr, (short)data, true);
-            break;
-        case MemoryDecimal:
-            if (value.StartsWith(_("#")))
-                effvalue = value.Mid(1);
-
-            strdata = effvalue.ToStdString();
-            data = (int)strtol(strdata.c_str(), &errstr, 10);
-            if (*errstr) return;
-
-            lc3_mem_write(state, addr, (short)data, true);
-            break;
-        case MemoryLabel:
-            strdata = lc3_sym_rev_lookup(state, addr);
-            newsym = value.ToStdString();
-            if (!strdata.empty()) lc3_sym_delete(state, strdata);
-            data = lc3_sym_lookup(state, newsym);
-            if (data == -1)
-                lc3_sym_add(state, newsym, addr);
+            if (!strdata.empty())
+                lc3_mem_write(state, addr, (short)lc3_assemble_one(state, addr, strdata), true);
             else
-                wxMessageBox(wxString::Format("ERROR! The symbol %s already exists at address 0x%04x",
-                                              newsym, data), _("ERROR"));
-            break;
-        case MemoryBinary:
-            if (value.StartsWith(_("0b")))
-                effvalue = value.Mid(2);
-
-            strdata = effvalue.ToStdString();
-            data = (int)strtol(strdata.c_str(), &errstr, 2);
-            if (*errstr) return;
-
-            lc3_mem_write(state, addr, (short)data, true);
-            break;
-        case MemoryInstruction:
-            try
-            {
-                strdata = effvalue.ToStdString();
-                if (!strdata.empty())
-                    lc3_mem_write(state, addr, (short)lc3_assemble_one(state, addr, strdata), true);
-                else
-                    lc3_mem_write(state, addr, 0, true);
-            }
-            catch (LC3AssembleException e)
-            {
-                effvalue = e.what();
-                wxMessageBox(wxString::Format("ERROR! %s", effvalue), _("Assemble Error"));
-            }
-            catch (std::vector<LC3AssembleException> e)
-            {
-                effvalue = e[0].what();
-                wxMessageBox(wxString::Format("ERROR! %s", effvalue), _("Assemble Error"));
-            }
-            break;
-        default:
-            break;
+                lc3_mem_write(state, addr, 0, true);
+        }
+        catch (LC3AssembleException e)
+        {
+            effvalue = e.what();
+            wxMessageBox(wxString::Format("ERROR! %s", effvalue), _("Assemble Error"));
+        }
+        catch (std::vector<LC3AssembleException> e)
+        {
+            effvalue = e[0].what();
+            wxMessageBox(wxString::Format("ERROR! %s", effvalue), _("Assemble Error"));
+        }
+        break;
+    default:
+        break;
     }
 }
 
@@ -214,33 +214,33 @@ wxString MemoryView::GetColLabelValue(int col)
     wxString ret;
     switch(col)
     {
-        case MemoryInfo:
-            ret = wxEmptyString;
-            break;
-        case MemoryAddress:
-            ret = _("Addr");
-            break;
-        case MemoryHexadecimal:
-            ret = _("Hex");
-            break;
-        case MemoryDecimal:
-            ret = _("Decimal");
-            break;
-        case MemoryBinary:
-            ret = _("Binary");
-            break;
-        case MemoryLabel:
-            ret = _("Label");
-            break;
-        case MemoryInstruction:
-            ret = _("Instruction");
-            break;
-        case MemoryComment:
-            ret = _("Comment");
-            break;
-        default:
-            ret = wxEmptyString;
-            break;
+    case MemoryInfo:
+        ret = wxEmptyString;
+        break;
+    case MemoryAddress:
+        ret = _("Addr");
+        break;
+    case MemoryHexadecimal:
+        ret = _("Hex");
+        break;
+    case MemoryDecimal:
+        ret = _("Decimal");
+        break;
+    case MemoryBinary:
+        ret = _("Binary");
+        break;
+    case MemoryLabel:
+        ret = _("Label");
+        break;
+    case MemoryInstruction:
+        ret = _("Instruction");
+        break;
+    case MemoryComment:
+        ret = _("Comment");
+        break;
+    default:
+        ret = wxEmptyString;
+        break;
     }
     return ret;
 }
@@ -317,7 +317,7 @@ void MemoryView::ExpandRanges()
     }
 
     std::priority_queue<ViewRange, std::vector<ViewRange>, ViewRangeElementCompare>
-        queue(ranges.begin(), ranges.end(), ViewRangeElementCompare(), std::vector<ViewRange>());
+    queue(ranges.begin(), ranges.end(), ViewRangeElementCompare(), std::vector<ViewRange>());
 
     while (!queue.empty())
     {

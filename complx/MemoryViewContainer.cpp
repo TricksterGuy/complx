@@ -84,10 +84,10 @@ void OnHideAddressesCustom(MemoryGrid* memory, MemoryView* memoryView)
 {
     ///TODO come up with a better dialog for this.
     std::string rangesStr = wxGetTextFromUser(
-        "Enter a list of ranges in the format start-end,start2-end2,start3-end3\n"
-        "Ending address for range is inclusive\n"
-        "Example x3000-x3010,xE000-xF000",
-        "Custom Hide Addresses").ToStdString();
+                                "Enter a list of ranges in the format start-end,start2-end2,start3-end3\n"
+                                "Ending address for range is inclusive\n"
+                                "Example x3000-x3010,xE000-xF000",
+                                "Custom Hide Addresses").ToStdString();
     if (rangesStr.empty()) return;
     std::vector<std::string> parsed_ranges;
     tokenize(rangesStr, parsed_ranges, ",");
@@ -103,7 +103,7 @@ void OnHideAddressesCustom(MemoryGrid* memory, MemoryView* memoryView)
             return;
         }
         if (lc3_calculate(state, start_end[0], start) ||
-            lc3_calculate(state, start_end[1], end))
+                lc3_calculate(state, start_end[1], end))
         {
             wxMessageBox(wxString::Format("%s does not contain valid addresses or malformed", parsed_range), "Error");
             return;

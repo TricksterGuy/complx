@@ -30,20 +30,20 @@
 ///////////////////////////////////////////////////////////////////////////////
 class RunForDialogDecl : public wxDialog
 {
-	private:
+private:
 
-	protected:
-		wxStaticText* m_staticText12;
-		wxStaticText* m_staticText3;
-		wxSpinCtrl* value_text;
-		wxButton* okButton;
-		wxButton* cancelButton;
-        int value;
+protected:
+    wxStaticText* m_staticText12;
+    wxStaticText* m_staticText3;
+    wxSpinCtrl* value_text;
+    wxButton* okButton;
+    wxButton* cancelButton;
+    int value;
 
-	public:
+public:
 
-		RunForDialogDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Run For"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 288,144 ), long style = wxDEFAULT_DIALOG_STYLE );
-		~RunForDialogDecl();
+    RunForDialogDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Run For"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 288,144 ), long style = wxDEFAULT_DIALOG_STYLE );
+    ~RunForDialogDecl();
 
 };
 

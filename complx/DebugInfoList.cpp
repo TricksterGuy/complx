@@ -11,7 +11,7 @@ void PrintError(int error);
   * Constructor
   */
 DebugInfoList::DebugInfoList(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, long style, const wxValidator &validator, const wxString &name)
-: wxListCtrl(parent, id, pos, size, style, validator, name)
+    : wxListCtrl(parent, id, pos, size, style, validator, name)
 {
     breakpoints.clear();
     reg_watchpoints.clear();
@@ -102,27 +102,27 @@ wxString DebugInfoList::OnGetBreakpointText(long item, long column) const
 
     switch(column)
     {
-        case DebugInfoName:
-            ret = wxString::FromUTF8(info.label.c_str());
-            break;
-        case DebugInfoAddress:
-            ret = sym.empty() ? wxString::Format(_("0x%04X"), info.addr) : wxString::FromUTF8(sym.c_str());
-            break;
-        case DebugInfoEnabled:
-            ret = info.enabled ? _("YES") : _("NO");
-            break;
-        case DebugInfoCondition:
-            ret = wxString::FromUTF8(info.condition.c_str());
-            break;
-        case DebugInfoTimes:
-            ret = wxString::Format(_("%d"), info.max_hits);
-            break;
-        case DebugInfoHits:
-            ret = wxString::Format(_("%d"), info.hit_count);
-            break;
-        default:
-            ret = wxEmptyString;
-            break;
+    case DebugInfoName:
+        ret = wxString::FromUTF8(info.label.c_str());
+        break;
+    case DebugInfoAddress:
+        ret = sym.empty() ? wxString::Format(_("0x%04X"), info.addr) : wxString::FromUTF8(sym.c_str());
+        break;
+    case DebugInfoEnabled:
+        ret = info.enabled ? _("YES") : _("NO");
+        break;
+    case DebugInfoCondition:
+        ret = wxString::FromUTF8(info.condition.c_str());
+        break;
+    case DebugInfoTimes:
+        ret = wxString::Format(_("%d"), info.max_hits);
+        break;
+    case DebugInfoHits:
+        ret = wxString::Format(_("%d"), info.hit_count);
+        break;
+    default:
+        ret = wxEmptyString;
+        break;
     }
 
     return ret;
@@ -141,30 +141,30 @@ wxString DebugInfoList::OnGetWatchpointText(long item, long column) const
 
     switch(column)
     {
-       case DebugInfoName:
-            ret = wxString::FromUTF8(info.label.c_str());
-            break;
-        case DebugInfoAddress:
-            if (is_reg)
-                ret = wxString::Format(_("R%d"), info.data);
-            else
-                ret = sym.empty() ? wxString::Format(_("MEM[0x%04X]"), info.data) : wxString::FromUTF8(sym.c_str());
-            break;
-        case DebugInfoEnabled:
-            ret = info.enabled ? _("YES") : _("NO");
-            break;
-        case DebugInfoCondition:
-            ret = wxString::FromUTF8(info.condition.c_str());
-            break;
-        case DebugInfoTimes:
-            ret = wxString::Format(_("%d"), info.max_hits);
-            break;
-        case DebugInfoHits:
-            ret = wxString::Format(_("%d"), info.hit_count);
-            break;
-        default:
-            ret = wxEmptyString;
-            break;
+    case DebugInfoName:
+        ret = wxString::FromUTF8(info.label.c_str());
+        break;
+    case DebugInfoAddress:
+        if (is_reg)
+            ret = wxString::Format(_("R%d"), info.data);
+        else
+            ret = sym.empty() ? wxString::Format(_("MEM[0x%04X]"), info.data) : wxString::FromUTF8(sym.c_str());
+        break;
+    case DebugInfoEnabled:
+        ret = info.enabled ? _("YES") : _("NO");
+        break;
+    case DebugInfoCondition:
+        ret = wxString::FromUTF8(info.condition.c_str());
+        break;
+    case DebugInfoTimes:
+        ret = wxString::Format(_("%d"), info.max_hits);
+        break;
+    case DebugInfoHits:
+        ret = wxString::Format(_("%d"), info.hit_count);
+        break;
+    default:
+        ret = wxEmptyString;
+        break;
     }
 
     return ret;

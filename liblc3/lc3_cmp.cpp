@@ -22,7 +22,8 @@ bool lc3_is_string_notcontains_ic(const void* a, const void* b);
 bool lc3_is_array_equal(const void* a, const void* b);
 bool lc3_is_array_notequal(const void* a, const void* b);
 
-lc3_cmp lc3_comparators[CMP_SIZE] = {
+lc3_cmp lc3_comparators[CMP_SIZE] =
+{
     lc3_is_equal,
     lc3_is_less,
     lc3_is_greater,

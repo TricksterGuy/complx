@@ -7,14 +7,14 @@
 
 class PingerPlugin : public Plugin
 {
-    public:
-        PingerPlugin(unsigned short ping_interval, unsigned int prio, unsigned short vec) :
-            Plugin(PINGER_MAJOR_VERSION, PINGER_MINOR_VERSION, LC3_OTHER, "Pinger plugin", true, vec), interval(ping_interval), priority(prio), ticks(0) {}
-        virtual void OnTick(lc3_state& state);
-	private:
-		unsigned int interval;
-		unsigned int priority;
-		unsigned int ticks;
+public:
+    PingerPlugin(unsigned short ping_interval, unsigned int prio, unsigned short vec) :
+        Plugin(PINGER_MAJOR_VERSION, PINGER_MINOR_VERSION, LC3_OTHER, "Pinger plugin", true, vec), interval(ping_interval), priority(prio), ticks(0) {}
+    virtual void OnTick(lc3_state& state);
+private:
+    unsigned int interval;
+    unsigned int priority;
+    unsigned int ticks;
 };
 
 extern "C" Plugin* create_plugin(const std::map<std::string, std::string>& params);

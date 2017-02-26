@@ -120,64 +120,64 @@ bool lc3_install_plugin(lc3_state& state, const std::string& filename, const Plu
 
     switch (plugin->GetPluginType())
     {
-        case LC3_INSTRUCTION:
-            // There can be only one!
-            if (state.instructionPlugin != NULL)
-            {
-                fprintf(stderr, "There can only be one Instruction Plugin %s not loaded!\n", filename.c_str());
-                return false;
-            }
-            state.instructionPlugin = dynamic_cast<InstructionPlugin*>(plugin);
-            // We should have a non NULL value.
-            if (state.instructionPlugin == NULL)
-            {
-                fprintf(stderr, "%s is not an Instruction Plugin!\n", filename.c_str());
-                return false;
-            }
-            break;
-        case LC3_DEVICE:
-            drplugin = dynamic_cast<DeviceRegisterPlugin*>(plugin);
-            if (drplugin == NULL)
-            {
-                fprintf(stderr, "%s is not an Device Register Plugin!\n", filename.c_str());
-                return false;
-            }
-            // Fail if not in correct area of memory < 0xFE00
-            if (drplugin->GetAddress() < 0xFE00U)
-            {
-                fprintf(stderr, "%s: Device Register Plugins can only be mapped to addresses above xFE00!\n", filename.c_str());
-                return false;
-            }
-            // Fail if something already mapped to this address.
-            if (state.devicePlugins.find(drplugin->GetAddress()) != state.devicePlugins.end())
-            {
-                fprintf(stderr, "%s: A Device Register Plugin is already mapped to address %04x!\n", filename.c_str(), drplugin->GetAddress());
-                return false;
-            }
-            state.devicePlugins[drplugin->GetAddress()] = drplugin;
-            break;
-        case LC3_TRAP:
-            tfplugin = dynamic_cast<TrapFunctionPlugin*>(plugin);
-            if (tfplugin == NULL)
-            {
-                fprintf(stderr, "%s is not an Trap Function Plugin!\n", filename.c_str());
-                return false;
-            }
-            // Fail if something already mapped to this address.
-            if (state.trapPlugins.find(tfplugin->GetTrapVector()) != state.trapPlugins.end())
-            {
-                fprintf(stderr, "%s: A Trap Function Plugin is already mapped to address %02x!\n", filename.c_str(), tfplugin->GetTrapVector());
-                return false;
-            }
-            state.trapPlugins[tfplugin->GetTrapVector()] = tfplugin;
-            break;
-        case LC3_OTHER:
-            state.plugins.push_back(plugin);
-            break;
-        default:
-            fprintf(stderr, "%s: Unknown Plugin Type!\n", filename.c_str());
-            // Unknown type I don't support.
+    case LC3_INSTRUCTION:
+        // There can be only one!
+        if (state.instructionPlugin != NULL)
+        {
+            fprintf(stderr, "There can only be one Instruction Plugin %s not loaded!\n", filename.c_str());
             return false;
+        }
+        state.instructionPlugin = dynamic_cast<InstructionPlugin*>(plugin);
+        // We should have a non NULL value.
+        if (state.instructionPlugin == NULL)
+        {
+            fprintf(stderr, "%s is not an Instruction Plugin!\n", filename.c_str());
+            return false;
+        }
+        break;
+    case LC3_DEVICE:
+        drplugin = dynamic_cast<DeviceRegisterPlugin*>(plugin);
+        if (drplugin == NULL)
+        {
+            fprintf(stderr, "%s is not an Device Register Plugin!\n", filename.c_str());
+            return false;
+        }
+        // Fail if not in correct area of memory < 0xFE00
+        if (drplugin->GetAddress() < 0xFE00U)
+        {
+            fprintf(stderr, "%s: Device Register Plugins can only be mapped to addresses above xFE00!\n", filename.c_str());
+            return false;
+        }
+        // Fail if something already mapped to this address.
+        if (state.devicePlugins.find(drplugin->GetAddress()) != state.devicePlugins.end())
+        {
+            fprintf(stderr, "%s: A Device Register Plugin is already mapped to address %04x!\n", filename.c_str(), drplugin->GetAddress());
+            return false;
+        }
+        state.devicePlugins[drplugin->GetAddress()] = drplugin;
+        break;
+    case LC3_TRAP:
+        tfplugin = dynamic_cast<TrapFunctionPlugin*>(plugin);
+        if (tfplugin == NULL)
+        {
+            fprintf(stderr, "%s is not an Trap Function Plugin!\n", filename.c_str());
+            return false;
+        }
+        // Fail if something already mapped to this address.
+        if (state.trapPlugins.find(tfplugin->GetTrapVector()) != state.trapPlugins.end())
+        {
+            fprintf(stderr, "%s: A Trap Function Plugin is already mapped to address %02x!\n", filename.c_str(), tfplugin->GetTrapVector());
+            return false;
+        }
+        state.trapPlugins[tfplugin->GetTrapVector()] = tfplugin;
+        break;
+    case LC3_OTHER:
+        state.plugins.push_back(plugin);
+        break;
+    default:
+        fprintf(stderr, "%s: Unknown Plugin Type!\n", filename.c_str());
+        // Unknown type I don't support.
+        return false;
     }
 
     // Register
@@ -202,20 +202,20 @@ bool lc3_uninstall_plugin(lc3_state& state, const std::string& filename)
 
     switch(infos.plugin->GetPluginType())
     {
-        case LC3_INSTRUCTION:
-            state.instructionPlugin = NULL;
-            break;
-        case LC3_TRAP:
-            state.trapPlugins.erase(dynamic_cast<TrapFunctionPlugin*>(infos.plugin)->GetTrapVector());
-            break;
-        case LC3_DEVICE:
-            state.devicePlugins.erase(dynamic_cast<DeviceRegisterPlugin*>(infos.plugin)->GetAddress());
-            break;
-        case LC3_OTHER:
-            state.plugins.erase(std::find(state.plugins.begin(), state.plugins.end(), infos.plugin));
-            break;
-        default:
-            return false;
+    case LC3_INSTRUCTION:
+        state.instructionPlugin = NULL;
+        break;
+    case LC3_TRAP:
+        state.trapPlugins.erase(dynamic_cast<TrapFunctionPlugin*>(infos.plugin)->GetTrapVector());
+        break;
+    case LC3_DEVICE:
+        state.devicePlugins.erase(dynamic_cast<DeviceRegisterPlugin*>(infos.plugin)->GetAddress());
+        break;
+    case LC3_OTHER:
+        state.plugins.erase(std::find(state.plugins.begin(), state.plugins.end(), infos.plugin));
+        break;
+    default:
+        return false;
     }
 
     if (infos.plugin->IsInterruptCapable())

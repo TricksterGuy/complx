@@ -10,7 +10,7 @@ int main(int argc, char** argv)
     // Typical
     if (argc < 2)
     {
-        usage:
+usage:
         printf("Usage: as2obj file.asm [-all_errors] [-disable_plugins] [outfile] \n");
         abort();
     }

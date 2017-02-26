@@ -16,11 +16,11 @@ class ComplxFrame;
 
 class ComplxApp : public wxApp
 {
-    public:
-        virtual bool OnInit();
-        virtual int OnExit();
-        virtual void OnInitCmdLine(wxCmdLineParser& parser);
-        virtual bool OnCmdLineParsed(wxCmdLineParser& parser);
+public:
+    virtual bool OnInit();
+    virtual int OnExit();
+    virtual void OnInitCmdLine(wxCmdLineParser& parser);
+    virtual bool OnCmdLineParsed(wxCmdLineParser& parser);
 };
 
 extern ComplxFrame* complxframe;

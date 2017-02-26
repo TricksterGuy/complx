@@ -28,27 +28,33 @@
 ///////////////////////////////////////////////////////////////////////////////
 /// Class CallStackDialogDecl
 ///////////////////////////////////////////////////////////////////////////////
-class CallStackDialogDecl : public wxDialog 
+class CallStackDialogDecl : public wxDialog
 {
-	private:
-	
-	protected:
-		wxListBox* callList;
-		wxButton* rewindButton;
-		wxButton* viewStackButton;
-		wxButton* closeButton;
-		
-		// Virtual event handlers, overide them in your derived class
-		virtual void OnRewindToCall( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnViewStackFrame( wxCommandEvent& event ) { event.Skip(); }
-		
-	
-	public:
-		wxArrayInt frame; 
-		
-		CallStackDialogDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Call Stack"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 431,365 ), long style = wxDEFAULT_DIALOG_STYLE ); 
-		~CallStackDialogDecl();
-	
+private:
+
+protected:
+    wxListBox* callList;
+    wxButton* rewindButton;
+    wxButton* viewStackButton;
+    wxButton* closeButton;
+
+    // Virtual event handlers, overide them in your derived class
+    virtual void OnRewindToCall( wxCommandEvent& event )
+    {
+        event.Skip();
+    }
+    virtual void OnViewStackFrame( wxCommandEvent& event )
+    {
+        event.Skip();
+    }
+
+
+public:
+    wxArrayInt frame;
+
+    CallStackDialogDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Call Stack"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 431,365 ), long style = wxDEFAULT_DIALOG_STYLE );
+    ~CallStackDialogDecl();
+
 };
 
 #endif //__CALLSTACKDIALOGDECL_H__

@@ -57,20 +57,23 @@ enum LC3AssembleExceptionTypes
 
 class LC3AssembleException
 {
-    public:
-        LC3AssembleException(const std::string& line_str, const std::vector<std::string>& args, int errorid = UNKNOWN_ERROR, int linenum = -1) throw() :
-            line(line_str), params(args), id(errorid), lineno(linenum) {}
-        LC3AssembleException(const std::string& line_str, const std::string& param, int errorid = UNKNOWN_ERROR, int linenum = -1) throw() :
-            line(line_str), params(1, param), id(errorid), lineno(linenum) {}
-        ~LC3AssembleException() throw() {}
-        std::string what() const throw();
-        int get_id() const {return id;}
-    private:
-        std::string line;
-        std::vector<std::string> params;
-        int id;
-        int lineno;
-        mutable char what_str[1024];
+public:
+    LC3AssembleException(const std::string& line_str, const std::vector<std::string>& args, int errorid = UNKNOWN_ERROR, int linenum = -1) throw() :
+        line(line_str), params(args), id(errorid), lineno(linenum) {}
+    LC3AssembleException(const std::string& line_str, const std::string& param, int errorid = UNKNOWN_ERROR, int linenum = -1) throw() :
+        line(line_str), params(1, param), id(errorid), lineno(linenum) {}
+    ~LC3AssembleException() throw() {}
+    std::string what() const throw();
+    int get_id() const
+    {
+        return id;
+    }
+private:
+    std::string line;
+    std::vector<std::string> params;
+    int id;
+    int lineno;
+    mutable char what_str[1024];
 };
 
 struct LC3AssembleOptions

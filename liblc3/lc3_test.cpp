@@ -104,10 +104,10 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
     lc3_state state;
 
     // Preliminary stuff
-    if (seed != -1) 
-		srand(seed);
-	else
-		srand(time(NULL));
+    if (seed != -1)
+        srand(seed);
+    else
+        srand(time(NULL));
     lc3_init(state, test.randomize, test.randomize);
     if (test.true_traps) lc3_set_true_traps(state, 1);
     if (test.interrupt_enabled) state.interrupt_enabled = 1;
@@ -144,7 +144,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
 
         ///TODO flip the condition here so that if new types are added you don't have to check for it here...
         if (input.type != TEST_IO && input.type != TEST_REGISTER && input.type != TEST_PC && input.type != TEST_SUBROUTINE &&
-            lc3_calculate(state, input.address, address_calc) == -1)
+                lc3_calculate(state, input.address, address_calc) == -1)
             throw "An address expression " + input.address + " was not formed correctly.";
         else if (input.type == TEST_REGISTER)
         {
@@ -162,46 +162,46 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
 
         switch (input.type)
         {
-            case TEST_VALUE:
-                if (lc3_calculate(state, input.value, value_calc))
-                    throw "<in test-value> A value expression " + input.value + " was malformed.";
-                state.mem[effective_address] = (short) value_calc;
-                break;
-            case TEST_REGISTER:
-                if (lc3_calculate(state, input.registerval, value_calc))
-                    throw "<in test-register> A value expression " + input.registerval + " was malformed.";
-                state.regs[effective_address] = (short) value_calc;
-                break;
-            case TEST_PC:
-                if (lc3_calculate(state, input.pcval, value_calc))
-                    throw "<in test-pc> A value expression " + input.pcval + " was malformed.";
-                state.pc = (unsigned short) value_calc;
-                break;
-            case TEST_POINTER:
-                if (lc3_calculate(state, input.pointer, value_calc))
-                    throw "<in test-pointer> An expression was " + input.pointer + " malformed.";
-                state.mem[(unsigned short) state.mem[effective_address]] = (short) value_calc;
-                break;
-            case TEST_STRING:
-                for (unsigned int j = 0; j < input.text.size(); j++)
-                    state.mem[state.mem[effective_address] + j] = input.text[j];
-                state.mem[(unsigned short) (state.mem[effective_address] + input.text.size())] = 0;
-                break;
-            case TEST_ARRAY:
-                for (unsigned int j = 0; j < input.array.size(); j++)
-                {
-                    if (lc3_calculate(state, input.array[j], value_calc))
-                        throw "<in test-array> An expression was " + input.array[j] + " malformed.";
-                    state.mem[(unsigned short) (state.mem[effective_address] + j)] = (short) value_calc;
-                }
-                break;
-            case TEST_IO:
-                newinput->str(input.io);
-                break;
-            case TEST_SUBROUTINE:
-                break;
-            default:
-                throw "Unknown test type";
+        case TEST_VALUE:
+            if (lc3_calculate(state, input.value, value_calc))
+                throw "<in test-value> A value expression " + input.value + " was malformed.";
+            state.mem[effective_address] = (short) value_calc;
+            break;
+        case TEST_REGISTER:
+            if (lc3_calculate(state, input.registerval, value_calc))
+                throw "<in test-register> A value expression " + input.registerval + " was malformed.";
+            state.regs[effective_address] = (short) value_calc;
+            break;
+        case TEST_PC:
+            if (lc3_calculate(state, input.pcval, value_calc))
+                throw "<in test-pc> A value expression " + input.pcval + " was malformed.";
+            state.pc = (unsigned short) value_calc;
+            break;
+        case TEST_POINTER:
+            if (lc3_calculate(state, input.pointer, value_calc))
+                throw "<in test-pointer> An expression was " + input.pointer + " malformed.";
+            state.mem[(unsigned short) state.mem[effective_address]] = (short) value_calc;
+            break;
+        case TEST_STRING:
+            for (unsigned int j = 0; j < input.text.size(); j++)
+                state.mem[state.mem[effective_address] + j] = input.text[j];
+            state.mem[(unsigned short) (state.mem[effective_address] + input.text.size())] = 0;
+            break;
+        case TEST_ARRAY:
+            for (unsigned int j = 0; j < input.array.size(); j++)
+            {
+                if (lc3_calculate(state, input.array[j], value_calc))
+                    throw "<in test-array> An expression was " + input.array[j] + " malformed.";
+                state.mem[(unsigned short) (state.mem[effective_address] + j)] = (short) value_calc;
+            }
+            break;
+        case TEST_IO:
+            newinput->str(input.io);
+            break;
+        case TEST_SUBROUTINE:
+            break;
+        default:
+            throw "Unknown test type";
         }
 
         if (input.type == TEST_SUBROUTINE)
@@ -264,11 +264,11 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
         while (i < test.max_executions && !state.halted)
         {
             //printf("%04x: %s (%x)\n", state.pc, lc3_disassemble(state, state.mem[state.pc]).c_str(), (unsigned short)state.mem[state.pc]);
-                /*printf("R0 %6d|x%04x\tR1 %6d|x%04x\tR2 %6d|x%04x\tR3 %6d|x%04x\nR4 %6d|x%04x\tR5 %6d|x%04x\tR6 %6d|x%04x\tR7 %6d|x%04x\nCC: %s\tPC: %04x\n\n",
-                       state.regs[0], (unsigned short)state.regs[0], state.regs[1], (unsigned short)state.regs[1], state.regs[2], (unsigned short)state.regs[2],
-                       state.regs[3], (unsigned short)state.regs[3], state.regs[4], (unsigned short)state.regs[4], state.regs[5], (unsigned short)state.regs[5],
-                       state.regs[6], (unsigned short)state.regs[6], state.regs[7], (unsigned short)state.regs[7], (state.n ? "N" : (state.z ? "Z" : "P")),
-                       (unsigned short) state.pc);*/
+            /*printf("R0 %6d|x%04x\tR1 %6d|x%04x\tR2 %6d|x%04x\tR3 %6d|x%04x\nR4 %6d|x%04x\tR5 %6d|x%04x\tR6 %6d|x%04x\tR7 %6d|x%04x\nCC: %s\tPC: %04x\n\n",
+                   state.regs[0], (unsigned short)state.regs[0], state.regs[1], (unsigned short)state.regs[1], state.regs[2], (unsigned short)state.regs[2],
+                   state.regs[3], (unsigned short)state.regs[3], state.regs[4], (unsigned short)state.regs[4], state.regs[5], (unsigned short)state.regs[5],
+                   state.regs[6], (unsigned short)state.regs[6], state.regs[7], (unsigned short)state.regs[7], (state.n ? "N" : (state.z ? "Z" : "P")),
+                   (unsigned short) state.pc);*/
             // Step one instruction
             lc3_step(state);
             // Increment instruction count
@@ -317,88 +317,88 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
         output.earned = 0;
         switch (output.type)
         {
-            case TEST_VALUE:
-                if (lc3_calculate(state, output.value, value_calc))
-                    throw "<in test-value> An expression " + output.value + " was malformed.";
+        case TEST_VALUE:
+            if (lc3_calculate(state, output.value, value_calc))
+                throw "<in test-value> An expression " + output.value + " was malformed.";
 
-                short_cmp = (short) value_calc;
-                output.passed = lc3_test_check(output, &state.mem[effective_address], &short_cmp);
+            short_cmp = (short) value_calc;
+            output.passed = lc3_test_check(output, &state.mem[effective_address], &short_cmp);
 
-                actual << state.mem[effective_address];
-                expected << short_cmp;
-                break;
-            case TEST_REGISTER:
-                if (lc3_calculate(state, output.registerval, value_calc))
-                    throw "<in test-register> An expression " + output.registerval + " was malformed.";
+            actual << state.mem[effective_address];
+            expected << short_cmp;
+            break;
+        case TEST_REGISTER:
+            if (lc3_calculate(state, output.registerval, value_calc))
+                throw "<in test-register> An expression " + output.registerval + " was malformed.";
 
-                short_cmp = (short) value_calc;
-                output.passed = lc3_test_check(output, &state.regs[effective_address], &short_cmp);
+            short_cmp = (short) value_calc;
+            output.passed = lc3_test_check(output, &state.regs[effective_address], &short_cmp);
 
-                actual << state.regs[effective_address];
-                expected << short_cmp;
-                break;
-            case TEST_PC:
-                if (lc3_calculate(state, output.pcval, value_calc))
-                    throw "<in test-pc> An expression " + output.pcval + " was malformed.";
+            actual << state.regs[effective_address];
+            expected << short_cmp;
+            break;
+        case TEST_PC:
+            if (lc3_calculate(state, output.pcval, value_calc))
+                throw "<in test-pc> An expression " + output.pcval + " was malformed.";
 
-                short_cmp = (short) value_calc;
-                output.passed = lc3_test_check(output, &state.pc, &short_cmp);
+            short_cmp = (short) value_calc;
+            output.passed = lc3_test_check(output, &state.pc, &short_cmp);
 
-                actual << state.pc;
-                expected << short_cmp;
+            actual << state.pc;
+            expected << short_cmp;
 
-                break;
-            case TEST_POINTER:
-                if (lc3_calculate(state, output.pointer, value_calc))
-                    throw "<in test-pointer> An expression " + output.pointer + " was malformed.";
+            break;
+        case TEST_POINTER:
+            if (lc3_calculate(state, output.pointer, value_calc))
+                throw "<in test-pointer> An expression " + output.pointer + " was malformed.";
 
-                short_cmp = (short) value_calc;
-                output.passed = lc3_test_check(output, &state.mem[(unsigned short)state.mem[effective_address]], &short_cmp);
+            short_cmp = (short) value_calc;
+            output.passed = lc3_test_check(output, &state.mem[(unsigned short)state.mem[effective_address]], &short_cmp);
 
-                actual << state.mem[(unsigned short)state.mem[effective_address]];
-                expected << short_cmp;
+            actual << state.mem[(unsigned short)state.mem[effective_address]];
+            expected << short_cmp;
 
-                break;
-            case TEST_STRING:
-                value_calc = (unsigned short)state.mem[effective_address];
+            break;
+        case TEST_STRING:
+            value_calc = (unsigned short)state.mem[effective_address];
+            short_cmp = state.mem[(unsigned short)value_calc];
+
+            while(short_cmp > 0 && short_cmp <= 255)
+            {
+                actual.put((char) short_cmp);
+                value_calc++;
                 short_cmp = state.mem[(unsigned short)value_calc];
+            }
 
-                while(short_cmp > 0 && short_cmp <= 255)
-                {
-                    actual.put((char) short_cmp);
-                    value_calc++;
-                    short_cmp = state.mem[(unsigned short)value_calc];
-                }
+            str = actual.str();
+            output.passed = lc3_test_check(output, &str, &output.text);
+            expected << output.text;
+            break;
+        case TEST_ARRAY:
+            for (unsigned int j = 0; j < output.array.size(); j++)
+            {
+                if (lc3_calculate(state, output.array[j], value_calc))
+                    throw "<in test-array> An expression " + output.array[j] + " was malformed.";
 
-                str = actual.str();
-                output.passed = lc3_test_check(output, &str, &output.text);
-                expected << output.text;
-                break;
-            case TEST_ARRAY:
-                for (unsigned int j = 0; j < output.array.size(); j++)
-                {
-                    if (lc3_calculate(state, output.array[j], value_calc))
-                        throw "<in test-array> An expression " + output.array[j] + " was malformed.";
+                arrayexpected.push_back(state.mem[(unsigned short)(state.mem[effective_address] + j)]);
+                arrayactual.push_back((short)value_calc);
 
-                    arrayexpected.push_back(state.mem[(unsigned short)(state.mem[effective_address] + j)]);
-                    arrayactual.push_back((short)value_calc);
+                actual << state.mem[(unsigned short)(state.mem[effective_address] + j)] << " ";
+                expected << (short)value_calc << " ";
+            }
 
-                    actual << state.mem[(unsigned short)(state.mem[effective_address] + j)] << " ";
-                    expected << (short)value_calc << " ";
-                }
-
-                output.passed = lc3_test_check(output, &arrayactual, &arrayexpected);
-                break;
-            case TEST_IO:
-                str = newoutput->str();
-                output.passed = lc3_test_check(output, &str, &output.io);
-                actual << str;
-                expected << output.io;
-                break;
-            case TEST_SUBROUTINE:
-                break;
-            default:
-                throw "Unknown test type";
+            output.passed = lc3_test_check(output, &arrayactual, &arrayexpected);
+            break;
+        case TEST_IO:
+            str = newoutput->str();
+            output.passed = lc3_test_check(output, &str, &output.io);
+            actual << str;
+            expected << output.io;
+            break;
+        case TEST_SUBROUTINE:
+            break;
+        default:
+            throw "Unknown test type";
         }
 
         if (output.type != TEST_SUBROUTINE)
@@ -460,14 +460,14 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
                 if (state.subroutines.find(subr_location) == state.subroutines.end())
                 {
                     extra << "      [WARNING] Could not determine number of parameters for subroutine " <<
-                        lc3_sym_rev_lookup(state, subr_location) << " at address " <<
-                        std::hex << "0x" << subr_location << "\n";
+                          lc3_sym_rev_lookup(state, subr_location) << " at address " <<
+                          std::hex << "0x" << subr_location << "\n";
                 }
                 unsigned short start = call_info.r6 + call_info.params.size();
                 // Screams...
                 if (start >= actual_r6)
                     extra << "      [WARNING] Could not get students stack frame.\n"
-                             "      Is the student managing the stack correctly?\n";
+                          "      Is the student managing the stack correctly?\n";
                 else
                     actual_stack.assign(state.mem + start, state.mem + actual_r6);
             }
@@ -489,15 +489,15 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
             for (unsigned int j = 0; j < expected_stack.size(); j++)
                 expected << std::hex << "0x" << expected_stack[j] << " ";
             expected << " r5: " << std::hex << "0x" << (short)r5 <<
-                        " r6: " << std::hex << "0x" << (actual_r6 - subr.params.size() - 1) <<
-                        " r7: " << std::hex << "0x" << (short)(r7 + 1);
+                     " r6: " << std::hex << "0x" << (actual_r6 - subr.params.size() - 1) <<
+                     " r7: " << std::hex << "0x" << (short)(r7 + 1);
 
 
             for (unsigned int j = 0; j < actual_stack.size(); j++)
                 actual << std::hex << "0x" << actual_stack[j] << " ";
             actual << " r5: " << std::hex << "0x" << state.regs[5] <<
-                      " r6: " << std::hex << "0x" << state.regs[6] <<
-                      " r7: " << std::hex << "0x" << state.regs[7];
+                   " r6: " << std::hex << "0x" << state.regs[6] <<
+                   " r7: " << std::hex << "0x" << state.regs[7];
 
             // now that I have all information available time for some checks.
             std::map<short, int> actual_stack_map;
@@ -754,42 +754,42 @@ std::string get_comp_op(int type)
 {
     switch(type)
     {
-        case CMP_EQUAL:
-            return "==";
-        case CMP_LESS:
-            return "<";
-        case CMP_GREATER:
-            return ">";
-        case CMP_LESSEQUAL:
-            return "<=";
-        case CMP_GREATEREQUAL:
-            return ">=";
-        case CMP_NOTEQUAL:
-            return "!=";
+    case CMP_EQUAL:
+        return "==";
+    case CMP_LESS:
+        return "<";
+    case CMP_GREATER:
+        return ">";
+    case CMP_LESSEQUAL:
+        return "<=";
+    case CMP_GREATEREQUAL:
+        return ">=";
+    case CMP_NOTEQUAL:
+        return "!=";
 
-        case CMP_STRING_EQUAL:
-            return "==";
-        case CMP_STRING_NOTEQUAL:
-            return "!=";
-        case CMP_STRING_EQUALIC:
-            return "== (ic)";
-        case CMP_STRING_NOTEQUALIC:
-            return "!= (ic)";
-        case CMP_STRING_CONTAINS:
-            return "c";
-        case CMP_STRING_NOTCONTAINS:
-            return "!c";
-        case CMP_STRING_CONTAINSIC:
-            return "c (ic)";
-        case CMP_STRING_NOTCONTAINSIC:
-            return "!c (ic)";
+    case CMP_STRING_EQUAL:
+        return "==";
+    case CMP_STRING_NOTEQUAL:
+        return "!=";
+    case CMP_STRING_EQUALIC:
+        return "== (ic)";
+    case CMP_STRING_NOTEQUALIC:
+        return "!= (ic)";
+    case CMP_STRING_CONTAINS:
+        return "c";
+    case CMP_STRING_NOTCONTAINS:
+        return "!c";
+    case CMP_STRING_CONTAINSIC:
+        return "c (ic)";
+    case CMP_STRING_NOTCONTAINSIC:
+        return "!c (ic)";
 
-        case CMP_ARRAY_EQUAL:
-            return "==";
-        case CMP_ARRAY_NOTEQUAL:
-            return "!=";
-        default:
-            return "==";
+    case CMP_ARRAY_EQUAL:
+        return "==";
+    case CMP_ARRAY_NOTEQUAL:
+        return "!=";
+    default:
+        return "==";
     }
 }
 
@@ -822,12 +822,12 @@ void lc3_write_test_report(std::stringstream& oss, lc3_test& test, int& minipass
     if (test.max_points)
     {
         oss << (test.passed ? "Passed" : "Failed") << " Test case - " << test.name << " " <<
-                test.points << " / " << test.max_points << " " << (test.has_halted ? "" : "(Did not finish!)") << "\n";
+            test.points << " / " << test.max_points << " " << (test.has_halted ? "" : "(Did not finish!)") << "\n";
     }
     else
     {
         oss << (test.passed ? "Passed" : "Failed") << " Test case - " << test.name << " " <<
-               (test.has_halted ? "" : "(Did not finish!)") << "\n";
+            (test.has_halted ? "" : "(Did not finish!)") << "\n";
     }
 
     if (test.passed) pass_count++;
@@ -841,12 +841,12 @@ void lc3_write_test_report(std::stringstream& oss, lc3_test& test, int& minipass
         if (output.points)
         {
             oss << (j + 1) << " (" << (output.passed ? 'P' : 'F') << " " << output.earned << " / " << output.points <<
-                   ") " << type << "\n  expected (right): " << output.expected << "\n    actual  (left): " << output.actual << "\n";
+                ") " << type << "\n  expected (right): " << output.expected << "\n    actual  (left): " << output.actual << "\n";
         }
         else
         {
             oss << (j + 1) << " (" << (output.passed ? 'P' : 'F') << ") " << type << "\n  expected (right): " << output.expected <<
-                   "\n    actual  (left): " << output.actual << "\n";
+                "\n    actual  (left): " << output.actual << "\n";
         }
 
         if (!output.extra_output.empty())
@@ -873,55 +873,55 @@ std::string lc3_test_input_string(lc3_test_input& test)
 
     switch(test.type)
     {
-        case TEST_VALUE:
-            oss << "MEM[";
-            oss << test.address;
-            oss << "] = ";
-            oss << test.value;
-            break;
-        case TEST_REGISTER:
-            oss << test.address;
-            oss << " = ";
-            oss << test.registerval;
-            break;
-        case TEST_PC:
-            oss << "PC = ";
-            oss << test.pcval;
-            break;
-        case TEST_POINTER:
-            oss << "MEM[MEM[";
-            oss << test.address;
-            oss << "]] = ";
-            oss << test.pointer;
-            break;
-        case TEST_ARRAY:
-            oss << "Array at MEM[";
-            oss << test.address;
-            oss << "] = ";
-            for (unsigned int i = 0; i < test.array.size() - 1; i++)
-            {
-                oss << test.array[i];
-                oss << ", ";
-            }
-            oss << test.array[test.array.size() - 1];
-            break;
-        case TEST_STRING:
-            oss << "String at MEM[";
-            oss << test.address;
-            oss << "] = ";
-            oss << test.text;
-            break;
-        case TEST_IO:
-            oss << "Input: ";
-            oss << test.io;
-            break;
-        case TEST_SUBROUTINE:
-            oss << "Call ";
-            oss << test.subroutine.name;
-            oss << "(";
-            oss << join(test.subroutine.params, ",");
-            oss << ")";
-            break;
+    case TEST_VALUE:
+        oss << "MEM[";
+        oss << test.address;
+        oss << "] = ";
+        oss << test.value;
+        break;
+    case TEST_REGISTER:
+        oss << test.address;
+        oss << " = ";
+        oss << test.registerval;
+        break;
+    case TEST_PC:
+        oss << "PC = ";
+        oss << test.pcval;
+        break;
+    case TEST_POINTER:
+        oss << "MEM[MEM[";
+        oss << test.address;
+        oss << "]] = ";
+        oss << test.pointer;
+        break;
+    case TEST_ARRAY:
+        oss << "Array at MEM[";
+        oss << test.address;
+        oss << "] = ";
+        for (unsigned int i = 0; i < test.array.size() - 1; i++)
+        {
+            oss << test.array[i];
+            oss << ", ";
+        }
+        oss << test.array[test.array.size() - 1];
+        break;
+    case TEST_STRING:
+        oss << "String at MEM[";
+        oss << test.address;
+        oss << "] = ";
+        oss << test.text;
+        break;
+    case TEST_IO:
+        oss << "Input: ";
+        oss << test.io;
+        break;
+    case TEST_SUBROUTINE:
+        oss << "Call ";
+        oss << test.subroutine.name;
+        oss << "(";
+        oss << join(test.subroutine.params, ",");
+        oss << ")";
+        break;
     }
 
     return oss.str();
@@ -933,52 +933,52 @@ std::string lc3_test_output_string(lc3_test_output& test)
 
     switch(test.type)
     {
-        case TEST_VALUE:
-            oss << "MEM[";
-            oss << test.address;
-            oss << "] " << get_comp_op(test.cmp_type) << " ";
-            oss << test.value;
-            break;
-        case TEST_REGISTER:
-            oss << test.address;
-            oss << " " << get_comp_op(test.cmp_type) << " ";
-            oss << test.registerval;
-            break;
-        case TEST_PC:
-            oss << "PC " << get_comp_op(test.cmp_type) << " ";
-            oss << test.pcval;
-            break;
-        case TEST_POINTER:
-            oss << "MEM[MEM[";
-            oss << test.address;
-            oss << "]] " << get_comp_op(test.cmp_type) << " ";
-            oss << test.pointer;
-            break;
-        case TEST_ARRAY:
-            oss << "Array at MEM[";
-            oss << test.address;
-            oss << "] " << get_comp_op(test.cmp_type) << " [";
-            for (unsigned int i = 0; i < test.array.size() - 1; i++)
-            {
-                oss << test.array[i];
-                oss << ", ";
-            }
-            oss << test.array[test.array.size() - 1];
-            oss << "]";
-            break;
-        case TEST_STRING:
-            oss << "String at MEM[";
-            oss << test.address;
-            oss << "] " << get_comp_op(test.cmp_type) << " \"";
-            oss << test.text << "\"";
-            break;
-        case TEST_IO:
-            oss << "Output " << get_comp_op(test.cmp_type) << " ";
-            oss << test.io;
-            break;
-        case TEST_SUBROUTINE:
-            oss << "Answer " << test.subroutine.answer << " calling convention followed";
-            break;
+    case TEST_VALUE:
+        oss << "MEM[";
+        oss << test.address;
+        oss << "] " << get_comp_op(test.cmp_type) << " ";
+        oss << test.value;
+        break;
+    case TEST_REGISTER:
+        oss << test.address;
+        oss << " " << get_comp_op(test.cmp_type) << " ";
+        oss << test.registerval;
+        break;
+    case TEST_PC:
+        oss << "PC " << get_comp_op(test.cmp_type) << " ";
+        oss << test.pcval;
+        break;
+    case TEST_POINTER:
+        oss << "MEM[MEM[";
+        oss << test.address;
+        oss << "]] " << get_comp_op(test.cmp_type) << " ";
+        oss << test.pointer;
+        break;
+    case TEST_ARRAY:
+        oss << "Array at MEM[";
+        oss << test.address;
+        oss << "] " << get_comp_op(test.cmp_type) << " [";
+        for (unsigned int i = 0; i < test.array.size() - 1; i++)
+        {
+            oss << test.array[i];
+            oss << ", ";
+        }
+        oss << test.array[test.array.size() - 1];
+        oss << "]";
+        break;
+    case TEST_STRING:
+        oss << "String at MEM[";
+        oss << test.address;
+        oss << "] " << get_comp_op(test.cmp_type) << " \"";
+        oss << test.text << "\"";
+        break;
+    case TEST_IO:
+        oss << "Output " << get_comp_op(test.cmp_type) << " ";
+        oss << test.io;
+        break;
+    case TEST_SUBROUTINE:
+        oss << "Answer " << test.subroutine.answer << " calling convention followed";
+        break;
     }
 
     return oss.str();

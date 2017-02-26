@@ -9,15 +9,18 @@
 
 class CallSubroutineDialog : public CallSubroutineDialogDecl
 {
-    public:
-        CallSubroutineDialog(wxWindow* parent = NULL)  : CallSubroutineDialogDecl(parent) {SetupSubroutines();}
-        const std::string GetSubroutine() const;
-        const std::string GetStack() const;
-        const std::vector<std::string> GetParams() const;
-        bool IsRandomRegisters() const;
-        bool IsRandomMemory() const;
-    private:
-        void SetupSubroutines();
+public:
+    CallSubroutineDialog(wxWindow* parent = NULL)  : CallSubroutineDialogDecl(parent)
+    {
+        SetupSubroutines();
+    }
+    const std::string GetSubroutine() const;
+    const std::string GetStack() const;
+    const std::vector<std::string> GetParams() const;
+    bool IsRandomRegisters() const;
+    bool IsRandomMemory() const;
+private:
+    void SetupSubroutines();
 };
 
 #endif

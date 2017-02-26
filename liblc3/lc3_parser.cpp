@@ -80,63 +80,83 @@ std::string process_str(std::string str, const LC3AssembleContext& context)
             char buf[4];
             switch(str[i])
             {
-                case '\'': out << '\''; break;
-                case '"': out << '"'; break;
-                case '\\': out << '\\'; break;
-                case 'a': out << '\a'; break;
-                case 'b': out << '\b'; break;
-                case 'f': out << '\f'; break;
-                case 'n': out << '\n'; break;
-                case 'r': out << '\r'; break;
-                case 't': out << '\t'; break;
-                case 'v': out << '\v'; break;
-                case 'x':
-                    i++;
-                    if (i < str.size() && isxdigit(str[i]))
-                    {
-                        memset(buf, 0, 4);
-                        buf[0] = str[i];
-
-                        if (i + 1 < str.size() && isxdigit(str[i + 1]))
-                        {
-                            i++;
-                            buf[1] = str[i];
-                        }
-                        num = strtol(buf, NULL, 16);
-                    }
-                    else
-                    {
-                        THROW(LC3AssembleException("", str, MALFORMED_STRING, context.lineno));
-                    }
-                    out << num;
-                    break;
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
+            case '\'':
+                out << '\'';
+                break;
+            case '"':
+                out << '"';
+                break;
+            case '\\':
+                out << '\\';
+                break;
+            case 'a':
+                out << '\a';
+                break;
+            case 'b':
+                out << '\b';
+                break;
+            case 'f':
+                out << '\f';
+                break;
+            case 'n':
+                out << '\n';
+                break;
+            case 'r':
+                out << '\r';
+                break;
+            case 't':
+                out << '\t';
+                break;
+            case 'v':
+                out << '\v';
+                break;
+            case 'x':
+                i++;
+                if (i < str.size() && isxdigit(str[i]))
+                {
                     memset(buf, 0, 4);
                     buf[0] = str[i];
 
-                    if (i + 1 < str.size() && str[i + 1] >= '0' && str[i + 1] <= '7')
+                    if (i + 1 < str.size() && isxdigit(str[i + 1]))
                     {
                         i++;
                         buf[1] = str[i];
-                        if (i + 1 < str.size() && str[i + 1] >= '0' && str[i + 1] <= '7')
-                        {
-                            i++;
-                            buf[2] = str[i];
-                        }
                     }
-                    num = strtol(buf, NULL, 8);
-                    out << num;
-                    break;
-                default:
+                    num = strtol(buf, NULL, 16);
+                }
+                else
+                {
                     THROW(LC3AssembleException("", str, MALFORMED_STRING, context.lineno));
-                    break;
+                }
+                out << num;
+                break;
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+                memset(buf, 0, 4);
+                buf[0] = str[i];
+
+                if (i + 1 < str.size() && str[i + 1] >= '0' && str[i + 1] <= '7')
+                {
+                    i++;
+                    buf[1] = str[i];
+                    if (i + 1 < str.size() && str[i + 1] >= '0' && str[i + 1] <= '7')
+                    {
+                        i++;
+                        buf[2] = str[i];
+                    }
+                }
+                num = strtol(buf, NULL, 8);
+                out << num;
+                break;
+            default:
+                THROW(LC3AssembleException("", str, MALFORMED_STRING, context.lineno));
+                break;
             }
         }
         else
@@ -145,7 +165,7 @@ std::string process_str(std::string str, const LC3AssembleContext& context)
         }
     }
 
-    endstringprocessing:
+endstringprocessing:
 
     return out.str();
 }

@@ -66,8 +66,8 @@ void destroy_plugin(Plugin* ptr = NULL)
   *
   * @todo: document this function
   */
- BWLCDPlugin::BWLCDPlugin(unsigned short _width, unsigned short _height, unsigned short _initaddr,
-                          unsigned short _startaddr, unsigned int _offcolor, unsigned int _oncolor) :
+BWLCDPlugin::BWLCDPlugin(unsigned short _width, unsigned short _height, unsigned short _initaddr,
+                         unsigned short _startaddr, unsigned int _offcolor, unsigned int _oncolor) :
     Plugin(BWLCD_MAJOR_VERSION, BWLCD_MINOR_VERSION, LC3_OTHER, "Black & White LCD Display"), width(_width),
     height(_height), initaddr(_initaddr), startaddr(_startaddr), offcolor(_offcolor), oncolor(_oncolor), lcd(NULL),
     lcd_initializing(false)
@@ -80,7 +80,7 @@ void destroy_plugin(Plugin* ptr = NULL)
   *
   * @todo: document this function
   */
- BWLCDPlugin::~BWLCDPlugin()
+BWLCDPlugin::~BWLCDPlugin()
 {
     if (lcd)
         delete lcd;
@@ -164,8 +164,8 @@ void BWLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, short 
   *
   * @todo: document this function
   */
- BWLCD::BWLCD(wxWindow* top, int _width, int _height, unsigned short _startaddr, unsigned int _off, unsigned int _on) :
- BWLCDGUI(top), state(NULL), width(_width), height(_height), startaddr(_startaddr), off(_off), on(_on)
+BWLCD::BWLCD(wxWindow* top, int _width, int _height, unsigned short _startaddr, unsigned int _off, unsigned int _on) :
+    BWLCDGUI(top), state(NULL), width(_width), height(_height), startaddr(_startaddr), off(_off), on(_on)
 {
     //Centre();
     int x, y;

@@ -27,33 +27,33 @@ class DebugInfoList;
 ///////////////////////////////////////////////////////////////////////////////
 /// Class DebugInfoDialogDecl
 ///////////////////////////////////////////////////////////////////////////////
-class DebugInfoDialogDecl : public wxDialog 
+class DebugInfoDialogDecl : public wxDialog
 {
-	private:
-	
-	protected:
-		DebugInfoList* debugpoints;
-		wxButton* addBButton;
-		wxButton* addWButton;
-		wxButton* editButton;
-		wxButton* removeButton;
-		
-		
-		wxButton* okButton;
-		wxButton* cancelButton;
-		
-		// Virtual event handlers, overide them in your derived class
-		virtual void OnBreakpoint( wxCommandEvent& event ) = 0;
-		virtual void OnWatchpoint( wxCommandEvent& event ) = 0;
-		virtual void OnEdit( wxCommandEvent& event ) = 0;
-		virtual void OnRemove( wxCommandEvent& event ) = 0;
-		
-	
-	public:
-		
-		DebugInfoDialogDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Breakpoints and Watchpoints"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 480,320 ), long style = wxDEFAULT_DIALOG_STYLE );
-		~DebugInfoDialogDecl();
-	
+private:
+
+protected:
+    DebugInfoList* debugpoints;
+    wxButton* addBButton;
+    wxButton* addWButton;
+    wxButton* editButton;
+    wxButton* removeButton;
+
+
+    wxButton* okButton;
+    wxButton* cancelButton;
+
+    // Virtual event handlers, overide them in your derived class
+    virtual void OnBreakpoint( wxCommandEvent& event ) = 0;
+    virtual void OnWatchpoint( wxCommandEvent& event ) = 0;
+    virtual void OnEdit( wxCommandEvent& event ) = 0;
+    virtual void OnRemove( wxCommandEvent& event ) = 0;
+
+
+public:
+
+    DebugInfoDialogDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Breakpoints and Watchpoints"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 480,320 ), long style = wxDEFAULT_DIALOG_STYLE );
+    ~DebugInfoDialogDecl();
+
 };
 
 #endif //__DebugInfoDialogDecl__

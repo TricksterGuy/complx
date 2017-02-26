@@ -41,13 +41,13 @@ void MemoryViewFrame::OnUpdateHideAddresses(wxCommandEvent& event)
 {
     int mode;
     if (menuViewHideAddressesShowAll->IsChecked())
-      mode = SHOW_ALL;
+        mode = SHOW_ALL;
     else if (menuViewHideAddressesShowOnlyCodeData->IsChecked())
-      mode = SHOW_MODIFIED;
+        mode = SHOW_MODIFIED;
     else if ((menuViewHideAddressesShowNonZero->IsChecked()))
-      mode = SHOW_NONZERO;
+        mode = SHOW_NONZERO;
     else
-      mode = SHOW_ALL;
+        mode = SHOW_ALL;
     ::OnUpdateHideAddresses(memory, memoryView, mode);
 }
 

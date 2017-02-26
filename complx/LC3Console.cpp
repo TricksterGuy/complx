@@ -206,8 +206,8 @@ void LC3Console::Update()
         (*output) << oss.str();
         oss.seekp(0);
         oss.str("");
-		if (!IsShown())
-			Raise();
+        if (!IsShown())
+            Raise();
     }
 }
 

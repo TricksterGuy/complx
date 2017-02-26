@@ -8,14 +8,14 @@
 
 class MultiplyPlugin : public InstructionPlugin
 {
-	public:
-		MultiplyPlugin() : InstructionPlugin(MULTIPLY_MAJOR_VERSION, MULTIPLY_MINOR_VERSION, "Multiplication Plugin") {}
-        virtual std::string GetOpcode() const;
-        virtual unsigned short DoAssembleOne(lc3_state& state, LC3AssembleContext& context);
-        virtual void OnDecode(lc3_state& state, unsigned short data, lc3_instr& instr);
-        virtual void OnExecute(lc3_state& state, lc3_instr& instruction, lc3_state_change& changes);
-        virtual std::string OnDisassemble(lc3_state& state, lc3_instr& instr, unsigned int level);
-        virtual std::vector<RLEColorEntry> GetInstructionColoring(unsigned short instr) const;
+public:
+    MultiplyPlugin() : InstructionPlugin(MULTIPLY_MAJOR_VERSION, MULTIPLY_MINOR_VERSION, "Multiplication Plugin") {}
+    virtual std::string GetOpcode() const;
+    virtual unsigned short DoAssembleOne(lc3_state& state, LC3AssembleContext& context);
+    virtual void OnDecode(lc3_state& state, unsigned short data, lc3_instr& instr);
+    virtual void OnExecute(lc3_state& state, lc3_instr& instruction, lc3_state_change& changes);
+    virtual std::string OnDisassemble(lc3_state& state, lc3_instr& instr, unsigned int level);
+    virtual std::vector<RLEColorEntry> GetInstructionColoring(unsigned short instr) const;
 };
 
 

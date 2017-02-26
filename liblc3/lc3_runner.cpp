@@ -54,11 +54,11 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     state.max_call_stack_size = -1;
     state.call_stack.clear();
 
-	state.warn_stats.clear();
-	state.warn_limits.clear();
-	state.warn_limits[LC3_INVALID_CHARACTER_WRITE] = 100;
-	state.warn_limits[LC3_RESERVED_MEM_WRITE] = 100;
-	state.warn_limits[LC3_RESERVED_MEM_READ] = 100;
+    state.warn_stats.clear();
+    state.warn_limits.clear();
+    state.warn_limits[LC3_INVALID_CHARACTER_WRITE] = 100;
+    state.warn_limits[LC3_RESERVED_MEM_WRITE] = 100;
+    state.warn_limits[LC3_RESERVED_MEM_READ] = 100;
 
 
     // Set Stack Flags
@@ -422,7 +422,8 @@ void lc3_next_line(lc3_state& state)
         if (state.interrupt_enabled && state.undo_stack.back().changes == LC3_INTERRUPT_BEGIN)
             depth++;
 
-    } while (depth != 0 && !state.halted);
+    }
+    while (depth != 0 && !state.halted);
 }
 
 /** lc3_prev_line
@@ -463,7 +464,8 @@ void lc3_prev_line(lc3_state& state)
         if (instr.data.opcode == JSR_INSTR || (instr.data.opcode == TRAP_INSTR && state.true_traps))
             depth--;
         // Don't have to handle interrupts here...
-    } while (depth != 0 && !state.halted && !state.undo_stack.empty());
+    }
+    while (depth != 0 && !state.halted && !state.undo_stack.empty());
 }
 
 /** lc3_finish
@@ -497,7 +499,8 @@ void lc3_finish(lc3_state& state)
         // If we got interrupted
         if (state.interrupt_enabled && state.undo_stack.back().changes == LC3_INTERRUPT_BEGIN)
             depth++;
-    } while (depth != 0 && !state.halted);
+    }
+    while (depth != 0 && !state.halted);
 }
 
 /** lc3_interrupt

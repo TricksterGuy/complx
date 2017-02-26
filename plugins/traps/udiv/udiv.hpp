@@ -8,10 +8,13 @@
 
 class UdivPlugin : public TrapFunctionPlugin
 {
-    public:
-        UdivPlugin(unsigned char vector) : TrapFunctionPlugin(UDIV_MAJOR_VERSION, UDIV_MINOR_VERSION, "Division and Modulus Trap", vector) {}
-        std::string GetTrapName() const {return "UDIV";}
-        void OnExecute(lc3_state& state, lc3_state_change& changes);
+public:
+    UdivPlugin(unsigned char vector) : TrapFunctionPlugin(UDIV_MAJOR_VERSION, UDIV_MINOR_VERSION, "Division and Modulus Trap", vector) {}
+    std::string GetTrapName() const
+    {
+        return "UDIV";
+    }
+    void OnExecute(lc3_state& state, lc3_state_change& changes);
 };
 
 extern "C" Plugin* create_plugin(const std::map<std::string, std::string>& params);

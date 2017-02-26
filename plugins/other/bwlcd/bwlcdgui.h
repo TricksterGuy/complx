@@ -25,22 +25,25 @@
 ///////////////////////////////////////////////////////////////////////////////
 /// Class BWLCDGUI
 ///////////////////////////////////////////////////////////////////////////////
-class BWLCDGUI : public wxDialog 
+class BWLCDGUI : public wxDialog
 {
-	private:
-	
-	protected:
-		wxPanel* displayPanel;
-		
-		// Virtual event handlers, overide them in your derived class
-		virtual void OnPaint( wxPaintEvent& event ) { event.Skip(); }
-		
-	
-	public:
-		
-		BWLCDGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("BWDisplay"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION|wxDIALOG_NO_PARENT|wxRESIZE_BORDER );
-		~BWLCDGUI();
-	
+private:
+
+protected:
+    wxPanel* displayPanel;
+
+    // Virtual event handlers, overide them in your derived class
+    virtual void OnPaint( wxPaintEvent& event )
+    {
+        event.Skip();
+    }
+
+
+public:
+
+    BWLCDGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("BWDisplay"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION|wxDIALOG_NO_PARENT|wxRESIZE_BORDER );
+    ~BWLCDGUI();
+
 };
 
 #endif //__BWLCDGUI__

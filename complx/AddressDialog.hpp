@@ -6,10 +6,10 @@
 
 class AddressDialog : public AddressDialogDecl
 {
-	public:
-		AddressDialog(wxWindow* parent, unsigned short addr, bool change_addr = true);
-		int GetAddress(int& error) const;
-		int GetValue(int& error) const;
+public:
+    AddressDialog(wxWindow* parent, unsigned short addr, bool change_addr = true);
+    int GetAddress(int& error) const;
+    int GetValue(int& error) const;
 };
 
 

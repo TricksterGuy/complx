@@ -24,14 +24,14 @@ enum
 
 class LC3RunThread : public wxThread
 {
-	public:
-        LC3RunThread(ComplxFrame* complx, int mode = RUNMODE_RUN, int run_for = 1) : frame(complx), run_mode(mode), runtime(run_for) {}
-        virtual ~LC3RunThread();
-		virtual void* Entry();
-	private:
-        ComplxFrame* frame;
-        int run_mode;
-        int runtime;
+public:
+    LC3RunThread(ComplxFrame* complx, int mode = RUNMODE_RUN, int run_for = 1) : frame(complx), run_mode(mode), runtime(run_for) {}
+    virtual ~LC3RunThread();
+    virtual void* Entry();
+private:
+    ComplxFrame* frame;
+    int run_mode;
+    int runtime;
 
 };
 

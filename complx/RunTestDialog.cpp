@@ -11,22 +11,22 @@ extern wxFileName currentFile;
 TestTreeItem::TestTreeItem(void* _data) : data(_data) {}
 
 RunTestDialog::RunTestDialog(wxWindow* parent, const std::string& _filename, lc3_test_suite& _test) :
- RunTestDialogDecl(parent), suite(_test), filename(_filename)
+    RunTestDialogDecl(parent), suite(_test), filename(_filename)
 {
     tspanel = new TestSuiteInfoPanel(right, suite);
-	testInfoSizer->Add(tspanel, 1, wxEXPAND|wxALL, 4);
+    testInfoSizer->Add(tspanel, 1, wxEXPAND|wxALL, 4);
     tcpanel = new TestCaseInfoPanel(right);
-	testInfoSizer->Add(tcpanel, 1, wxEXPAND|wxALL, 4);
+    testInfoSizer->Add(tcpanel, 1, wxEXPAND|wxALL, 4);
     cipanel = new CheckInfoPanel(right);
-	testInfoSizer->Add(cipanel, 1, wxEXPAND|wxALL, 4);
+    testInfoSizer->Add(cipanel, 1, wxEXPAND|wxALL, 4);
     UpdateTests();
     tspanel->Show();
     infoSplitter->Layout();
-	testInfoSizer->Fit(tspanel);
-	infoSplitter->SetSashPosition(infoSplitter->GetSashPosition() + 1);
+    testInfoSizer->Fit(tspanel);
+    infoSplitter->SetSashPosition(infoSplitter->GetSashPosition() + 1);
 
-	wxCommandEvent dummy;
-	OnRunTests(dummy);
+    wxCommandEvent dummy;
+    OnRunTests(dummy);
 }
 
 void RunTestDialog::OnSelectTestItem(wxTreeEvent& event)
@@ -66,7 +66,7 @@ void RunTestDialog::OnSelectTestItem(wxTreeEvent& event)
     testInfoSizer->Fit(interest);
     testInfoSizer->Layout();
 
-	//testInfoSizer->Fit( testInfoScroller );
+    //testInfoSizer->Fit( testInfoScroller );
 }
 
 void RunTestDialog::OnRunTest(wxCommandEvent& event)
@@ -261,7 +261,7 @@ void TestSuiteInfoPanel::Update()
   *
   * @todo: document this function
   */
- TestCaseInfoPanel::TestCaseInfoPanel(wxWindow* parent) : TestCaseInfoPanelDecl(parent), testcase(NULL)
+TestCaseInfoPanel::TestCaseInfoPanel(wxWindow* parent) : TestCaseInfoPanelDecl(parent), testcase(NULL)
 {
     Hide();
 }
@@ -354,7 +354,7 @@ void TestCaseInfoPanel::OnWarnings(wxCommandEvent& event)
   *
   * @todo: document this function
   */
- CheckInfoPanel::CheckInfoPanel(wxWindow* parent) : CheckInfoPanelDecl(parent), output(NULL)
+CheckInfoPanel::CheckInfoPanel(wxWindow* parent) : CheckInfoPanelDecl(parent), output(NULL)
 {
     Hide();
 }

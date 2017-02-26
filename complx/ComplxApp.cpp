@@ -21,22 +21,38 @@
 
 static const wxCmdLineEntryDesc cmd_descriptions[] =
 {
-    { wxCMD_LINE_SWITCH, "h", "help", "Displays help on command line parameters",
-        wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP },
-    { wxCMD_LINE_OPTION, "d", "disassemble", "Sets up the disassemble level 0 = basic 1: normal (default) 2: smart",
-        wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL},
-    { wxCMD_LINE_OPTION, "s", "stack_size", "Sets the undo stack size default 65536 instructions",
-        wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL},
-    { wxCMD_LINE_OPTION, "c", "call_stack_size", "Sets the call stack size default 10000 JSR/Trap calls",
-        wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL},
-    { wxCMD_LINE_OPTION, "a", "address", "Sets PC's starting address default 0x3000",
-        wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL},
-    { wxCMD_LINE_OPTION, "t", "true_traps", "Enables true traps 0 = no (default) 1 = yes",
-        wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL},
-    { wxCMD_LINE_OPTION, "ie", "interrupts_enable", "Enables interrupts 0 = no (default) 1 = yes",
-        wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL},
-    { wxCMD_LINE_OPTION, "i", "highlight", "Enable instruction highlight 0 = no 1 = yes (default)",
-        wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL},
+    {
+        wxCMD_LINE_SWITCH, "h", "help", "Displays help on command line parameters",
+        wxCMD_LINE_VAL_NONE, wxCMD_LINE_OPTION_HELP
+    },
+    {
+        wxCMD_LINE_OPTION, "d", "disassemble", "Sets up the disassemble level 0 = basic 1: normal (default) 2: smart",
+        wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL
+    },
+    {
+        wxCMD_LINE_OPTION, "s", "stack_size", "Sets the undo stack size default 65536 instructions",
+        wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL
+    },
+    {
+        wxCMD_LINE_OPTION, "c", "call_stack_size", "Sets the call stack size default 10000 JSR/Trap calls",
+        wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL
+    },
+    {
+        wxCMD_LINE_OPTION, "a", "address", "Sets PC's starting address default 0x3000",
+        wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL
+    },
+    {
+        wxCMD_LINE_OPTION, "t", "true_traps", "Enables true traps 0 = no (default) 1 = yes",
+        wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL
+    },
+    {
+        wxCMD_LINE_OPTION, "ie", "interrupts_enable", "Enables interrupts 0 = no (default) 1 = yes",
+        wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL
+    },
+    {
+        wxCMD_LINE_OPTION, "i", "highlight", "Enable instruction highlight 0 = no 1 = yes (default)",
+        wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL
+    },
     { wxCMD_LINE_PARAM,  NULL, NULL, "input file", wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL},
     { wxCMD_LINE_NONE }
 };
@@ -50,10 +66,10 @@ wxString address_str = wxEmptyString;
 wxArrayString files;
 ComplxFrame* complxframe;
 
- /** OnInit
-  *
-  * Initializes the program
-  */
+/** OnInit
+ *
+ * Initializes the program
+ */
 bool ComplxApp::OnInit()
 {
     if (!wxApp::OnInit()) return false;
@@ -70,53 +86,53 @@ bool ComplxApp::OnInit()
     ///TODO see if I can remove this.
     wxMilliSleep(50);
 
-	ComplxFrame::Options opts;
-	opts.title = wxString::Format("%s v%s", "Complx LC-3 Simulator", Version::FULLVERSION_STRING);
-	opts.disassemble = disassemble > 2 ? 2 : disassemble;
-	opts.stack_size = stack_size;
-	opts.call_stack_size = call_stack_size;
-	opts.true_traps = true_traps != 0;
-	opts.interrupts = interrupts != 0;
-	opts.highlight = highlight != 0;
-	opts.pc = address_str;
-	opts.width = 800;
-	opts.height = 600;
-	if (!files.empty())
-		opts.file = files[0];
+    ComplxFrame::Options opts;
+    opts.title = wxString::Format("%s v%s", "Complx LC-3 Simulator", Version::FULLVERSION_STRING);
+    opts.disassemble = disassemble > 2 ? 2 : disassemble;
+    opts.stack_size = stack_size;
+    opts.call_stack_size = call_stack_size;
+    opts.true_traps = true_traps != 0;
+    opts.interrupts = interrupts != 0;
+    opts.highlight = highlight != 0;
+    opts.pc = address_str;
+    opts.width = 800;
+    opts.height = 600;
+    if (!files.empty())
+        opts.file = files[0];
 
     std::string last_ver = config->Read("/firstrun", "").ToStdString();
-	std::string column_size_str = config->Read("/columnsizes", "").ToStdString();
-	std::string width_str = config->Read("/appwidth", "800").ToStdString();
-	std::string height_str = config->Read("/appheight", "600").ToStdString();
+    std::string column_size_str = config->Read("/columnsizes", "").ToStdString();
+    std::string width_str = config->Read("/appwidth", "800").ToStdString();
+    std::string height_str = config->Read("/appheight", "600").ToStdString();
 
-	bool firstrun = false;
-	opts.exact_column_sizing = true;
+    bool firstrun = false;
+    opts.exact_column_sizing = true;
 
-	if (last_ver.empty())
-	{
-		firstrun = true;
-	}
-	else if (last_ver != Version::FULLVERSION_STRING)
-	{
+    if (last_ver.empty())
+    {
+        firstrun = true;
+    }
+    else if (last_ver != Version::FULLVERSION_STRING)
+    {
         config->Write("/firstrun", Version::FULLVERSION_STRING);
         config->Flush();
-	}
-	else
-	{
-		// Operation that takes 2 seconds don't want to do it if it is not the first run.
-		opts.exact_column_sizing = false;
-		std::vector<std::string> columns;
-		tokenize(column_size_str, columns, ",");
-		if (columns.size() == MemorySize)
-		{
-			for (const auto& str : columns)
-				opts.column_sizes.push_back(wxAtoi(str));
-		}
-		if (!width_str.empty())
-			opts.width = wxAtoi(width_str);
-		if (!height_str.empty())
-			opts.height = wxAtoi(height_str);
-	}
+    }
+    else
+    {
+        // Operation that takes 2 seconds don't want to do it if it is not the first run.
+        opts.exact_column_sizing = false;
+        std::vector<std::string> columns;
+        tokenize(column_size_str, columns, ",");
+        if (columns.size() == MemorySize)
+        {
+            for (const auto& str : columns)
+                opts.column_sizes.push_back(wxAtoi(str));
+        }
+        if (!width_str.empty())
+            opts.width = wxAtoi(width_str);
+        if (!height_str.empty())
+            opts.height = wxAtoi(height_str);
+    }
 
     complxframe = new ComplxFrame(opts);
     wxIcon icon(icon32_xpm);
@@ -124,7 +140,8 @@ bool ComplxApp::OnInit()
     complxframe->Show();
 
     // use our config object...
-    if (firstrun) {
+    if (firstrun)
+    {
         wxCommandEvent event;
         complxframe->OnFirstTime(event);
         config->Write("/firstrun", Version::FULLVERSION_STRING);

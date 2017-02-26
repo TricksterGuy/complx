@@ -9,11 +9,11 @@
 ///TODO complete this plugin
 class SecondTimerPlugin : public DeviceRegisterPlugin
 {
-    public:
-        SecondTimerPlugin(unsigned short vector);
-        virtual short OnRead(lc3_state& state);
-        virtual void OnWrite(lc3_state& state, short value);
-        unsigned int lastreadtime;
+public:
+    SecondTimerPlugin(unsigned short vector);
+    virtual short OnRead(lc3_state& state);
+    virtual void OnWrite(lc3_state& state, short value);
+    unsigned int lastreadtime;
 };
 
 extern "C" Plugin* create_plugin(const std::map<std::string, std::string>& params);

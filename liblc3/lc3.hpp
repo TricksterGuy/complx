@@ -457,9 +457,9 @@ typedef struct lc3_state
     // First layer of calls for lc3 calling convention checker (In case of multi recursion)
     std::vector<lc3_subroutine_call_info> first_level_calls;
 
-	// Warn limit map
-	std::map<int, unsigned int> warn_stats;
-	std::map<int, unsigned int> warn_limits;
+    // Warn limit map
+    std::map<int, unsigned int> warn_stats;
+    std::map<int, unsigned int> warn_limits;
 
     // Interrupt support push things here to cause interrupt
     std::list<lc3_interrupt_req> interrupts;
@@ -529,7 +529,10 @@ int lc3_write_str(lc3_state& state, int (*writer)(lc3_state& state, std::ostream
 /** Enables true traps loads the OS code into the lc3 */
 void lc3_set_true_traps(lc3_state& state, int value);
 /** Generate a random number LC-3 */
-inline unsigned short lc3_random(void) {return rand() & 0xFFFF;}
+inline unsigned short lc3_random(void)
+{
+    return rand() & 0xFFFF;
+}
 /** Randomize LC-3 Memory */
 void lc3_randomize(lc3_state& state);
 

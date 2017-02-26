@@ -6,9 +6,9 @@
 
 enum ViewMode
 {
-  SHOW_ALL,
-  SHOW_MODIFIED,
-  SHOW_NONZERO,
+    SHOW_ALL,
+    SHOW_MODIFIED,
+    SHOW_NONZERO,
 };
 
 void OnGoto(MemoryGrid* memory);

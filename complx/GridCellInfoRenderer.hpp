@@ -21,13 +21,13 @@ extern wxImageList* infoImages;
 
 class GridCellInfoRenderer : public wxGridCellStringRenderer
 {
-	public:
-		GridCellInfoRenderer(MemoryView* mview) : view(mview) {}
-		void Draw(wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRect &rect, int row, int col, bool isSelected);
-    private:
-        /// Necessary for determining what address we are at.
-        /// Not owned by this class
-        MemoryView* view;
+public:
+    GridCellInfoRenderer(MemoryView* mview) : view(mview) {}
+    void Draw(wxGrid &grid, wxGridCellAttr &attr, wxDC &dc, const wxRect &rect, int row, int col, bool isSelected);
+private:
+    /// Necessary for determining what address we are at.
+    /// Not owned by this class
+    MemoryView* view;
 };
 
 #endif

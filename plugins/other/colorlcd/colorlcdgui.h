@@ -25,22 +25,25 @@
 ///////////////////////////////////////////////////////////////////////////////
 /// Class COLORLCDGUI
 ///////////////////////////////////////////////////////////////////////////////
-class COLORLCDGUI : public wxDialog 
+class COLORLCDGUI : public wxDialog
 {
-	private:
-	
-	protected:
-		wxPanel* displayPanel;
-		
-		// Virtual event handlers, overide them in your derived class
-		virtual void OnPaint( wxPaintEvent& event ) { event.Skip(); }
-		
-	
-	public:
-		
-		COLORLCDGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Display"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION|wxDIALOG_NO_PARENT|wxRESIZE_BORDER );
-		~COLORLCDGUI();
-	
+private:
+
+protected:
+    wxPanel* displayPanel;
+
+    // Virtual event handlers, overide them in your derived class
+    virtual void OnPaint( wxPaintEvent& event )
+    {
+        event.Skip();
+    }
+
+
+public:
+
+    COLORLCDGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Display"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION|wxDIALOG_NO_PARENT|wxRESIZE_BORDER );
+    ~COLORLCDGUI();
+
 };
 
 #endif //__COLORLCDGUI__

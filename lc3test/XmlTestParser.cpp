@@ -27,65 +27,85 @@ wxString process_str(const wxString& wxStr, int& error)
             char buf[4];
             switch(str[i])
             {
-                case '\'': out << '\''; break;
-                case '"': out << '"'; break;
-                case '\\': out << '\\'; break;
-                case 'a': out << '\a'; break;
-                case 'b': out << '\b'; break;
-                case 'f': out << '\f'; break;
-                case 'n': out << '\n'; break;
-                case 'r': out << '\r'; break;
-                case 't': out << '\t'; break;
-                case 'v': out << '\v'; break;
-                case 'x':
-                    i++;
-                    if (i < str.size() && isxdigit(str[i]))
-                    {
-                        memset(buf, 0, 4);
-                        buf[0] = str[i];
-
-                        if (i + 1 < str.size() && isxdigit(str[i + 1]))
-                        {
-                            i++;
-                            buf[1] = str[i];
-                        }
-                        num = strtol(buf, NULL, 16);
-                    }
-                    else
-                    {
-                        error = 1;
-                        goto endstringprocessing;
-                    }
-                    out << num;
-                    break;
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
+            case '\'':
+                out << '\'';
+                break;
+            case '"':
+                out << '"';
+                break;
+            case '\\':
+                out << '\\';
+                break;
+            case 'a':
+                out << '\a';
+                break;
+            case 'b':
+                out << '\b';
+                break;
+            case 'f':
+                out << '\f';
+                break;
+            case 'n':
+                out << '\n';
+                break;
+            case 'r':
+                out << '\r';
+                break;
+            case 't':
+                out << '\t';
+                break;
+            case 'v':
+                out << '\v';
+                break;
+            case 'x':
+                i++;
+                if (i < str.size() && isxdigit(str[i]))
+                {
                     memset(buf, 0, 4);
                     buf[0] = str[i];
 
-                    if (i + 1 < str.size() && str[i + 1] >= '0' && str[i + 1] <= '7')
+                    if (i + 1 < str.size() && isxdigit(str[i + 1]))
                     {
                         i++;
                         buf[1] = str[i];
-                        if (i + 1 < str.size() && str[i + 1] >= '0' && str[i + 1] <= '7')
-                        {
-                            i++;
-                            buf[2] = str[i];
-                        }
                     }
-                    num = strtol(buf, NULL, 8);
-                    out << num;
-                    break;
-                default:
+                    num = strtol(buf, NULL, 16);
+                }
+                else
+                {
                     error = 1;
                     goto endstringprocessing;
-                    break;
+                }
+                out << num;
+                break;
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+                memset(buf, 0, 4);
+                buf[0] = str[i];
+
+                if (i + 1 < str.size() && str[i + 1] >= '0' && str[i + 1] <= '7')
+                {
+                    i++;
+                    buf[1] = str[i];
+                    if (i + 1 < str.size() && str[i + 1] >= '0' && str[i + 1] <= '7')
+                    {
+                        i++;
+                        buf[2] = str[i];
+                    }
+                }
+                num = strtol(buf, NULL, 8);
+                out << num;
+                break;
+            default:
+                error = 1;
+                goto endstringprocessing;
+                break;
             }
         }
         else
@@ -94,7 +114,7 @@ wxString process_str(const wxString& wxStr, int& error)
         }
     }
 
-    endstringprocessing:
+endstringprocessing:
 
     return error ? "" : out.str();
 }
@@ -123,26 +143,26 @@ int GetCompareType(int type, const wxString& mode, const wxXmlNode* node)
     // Get Real type
     switch(type)
     {
-            case TEST_VALUE:
-                break;
-            case TEST_REGISTER:
-                break;
-            case TEST_PC:
-                break;
-            case TEST_POINTER:
-                break;
-            case TEST_STRING:
-                real_type = 1;
-                break;
-            case TEST_ARRAY:
-                real_type = 2;
-                break;
-            case TEST_IO:
-                real_type = 1;
-                break;
-            case TEST_SUBROUTINE:
-                real_type = 3;
-                break;
+    case TEST_VALUE:
+        break;
+    case TEST_REGISTER:
+        break;
+    case TEST_PC:
+        break;
+    case TEST_POINTER:
+        break;
+    case TEST_STRING:
+        real_type = 1;
+        break;
+    case TEST_ARRAY:
+        real_type = 2;
+        break;
+    case TEST_IO:
+        real_type = 1;
+        break;
+    case TEST_SUBROUTINE:
+        real_type = 3;
+        break;
     }
 
     // If test-subr then just set to equal.

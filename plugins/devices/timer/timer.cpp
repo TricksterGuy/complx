@@ -63,6 +63,6 @@ void TimerPlugin::OnTick(lc3_state& state)
         //struct tm* newtime = localtime(&now);
         //int hour = newtime->tm_hour;
         //int minute = newtime->tm_min;
-	// TODO FINISH THIS
+        // TODO FINISH THIS
     }
 }

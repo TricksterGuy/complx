@@ -23,20 +23,20 @@ struct XmlTestParserException
 
 class XmlTestParser
 {
-	public:
-        static XmlTestParser& Instance()
-        {
-            static XmlTestParser singleton;
-            return singleton;
-        }
-		bool LoadTestSuite(lc3_test_suite& suite, const std::string filename);
-	private:
-        XmlTestParser() {};                                     // Private constructor
-        XmlTestParser(const XmlTestParser&);                    // Prevent copy-construction
-        XmlTestParser& operator=(const XmlTestParser&);         // Prevent assignment
-        bool LoadTest(lc3_test_suite& suite, wxXmlNode* root);
-        bool LoadTestInput(lc3_test& suite, wxXmlNode* root);
-        bool LoadTestOutput(lc3_test& suite, wxXmlNode* root);
+public:
+    static XmlTestParser& Instance()
+    {
+        static XmlTestParser singleton;
+        return singleton;
+    }
+    bool LoadTestSuite(lc3_test_suite& suite, const std::string filename);
+private:
+    XmlTestParser() {};                                     // Private constructor
+    XmlTestParser(const XmlTestParser&);                    // Prevent copy-construction
+    XmlTestParser& operator=(const XmlTestParser&);         // Prevent assignment
+    bool LoadTest(lc3_test_suite& suite, wxXmlNode* root);
+    bool LoadTestInput(lc3_test& suite, wxXmlNode* root);
+    bool LoadTestOutput(lc3_test& suite, wxXmlNode* root);
 };
 
 inline XmlTestParser& XmlTestParser()

@@ -11,15 +11,15 @@
 
 class CallStackDialog : public CallStackDialogDecl
 {
-    public:
-        CallStackDialog(wxWindow* parent = NULL);
-        int GetFrame() const;
-        int GetRewindId() const;
-        int GetViewStackId() const;
-    private:
-        void OnRewindToCall(wxCommandEvent& event);
-        void OnViewStackFrame(wxCommandEvent& event);
-        void SetupList();
+public:
+    CallStackDialog(wxWindow* parent = NULL);
+    int GetFrame() const;
+    int GetRewindId() const;
+    int GetViewStackId() const;
+private:
+    void OnRewindToCall(wxCommandEvent& event);
+    void OnViewStackFrame(wxCommandEvent& event);
+    void SetupList();
 };
 
 #endif

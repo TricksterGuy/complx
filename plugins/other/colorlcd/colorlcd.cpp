@@ -61,7 +61,7 @@ void destroy_plugin(Plugin* ptr = NULL)
   *
   * @todo: document this function
   */
- ColorLCDPlugin::ColorLCDPlugin(unsigned short _width, unsigned short _height, unsigned short _initaddr, unsigned short _startaddr) :
+ColorLCDPlugin::ColorLCDPlugin(unsigned short _width, unsigned short _height, unsigned short _initaddr, unsigned short _startaddr) :
     Plugin(COLORLCD_MAJOR_VERSION, COLORLCD_MINOR_VERSION, LC3_OTHER, "Black & White LCD Display"), width(_width),
     height(_height), initaddr(_initaddr), startaddr(_startaddr), lcd(NULL),
     lcd_initializing(false)
@@ -74,7 +74,7 @@ void destroy_plugin(Plugin* ptr = NULL)
   *
   * @todo: document this function
   */
- ColorLCDPlugin::~ColorLCDPlugin()
+ColorLCDPlugin::~ColorLCDPlugin()
 {
     if (lcd)
         delete lcd;
@@ -157,8 +157,8 @@ void ColorLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, sho
   *
   * @todo: document this function
   */
- ColorLCD::ColorLCD(wxWindow* top, int _width, int _height, unsigned short _startaddr) :
- COLORLCDGUI(top), state(NULL), width(_width), height(_height), startaddr(_startaddr)
+ColorLCD::ColorLCD(wxWindow* top, int _width, int _height, unsigned short _startaddr) :
+    COLORLCDGUI(top), state(NULL), width(_width), height(_height), startaddr(_startaddr)
 {
     //Centre();
     int x, y;

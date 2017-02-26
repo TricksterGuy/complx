@@ -56,164 +56,164 @@ std::string LC3AssembleException::what() const throw()
     {
         switch(id)
         {
-            case SYNTAX_ERROR:
-                snprintf(what_str, 1023, "Syntax Error on line %d: %s", lineno, line.c_str());
-                break;
-            case ORIG_MATCHUP:
-                snprintf(what_str, 1023, "No matching .end found on line %d for %s", lineno, line.c_str());
-                break;
-            case ORIG_OVERLAP:
-                snprintf(what_str, 1023, "Code sections %s and %s overlap", params[0].c_str(), params[1].c_str());
-                break;
-            case STRAY_END:
-                snprintf(what_str, 1023, "No matching .orig found for .end on line %d", lineno);
-                break;
-            case STRAY_DATA:
-                snprintf(what_str, 1023, "Stray data found on line %d: %s", lineno, line.c_str());
-                break;
-            case UNDEFINED_SYMBOL:
-                snprintf(what_str, 1023, "Undefined symbol %s found on line %d", params[0].c_str(), lineno);
-                break;
-            case DUPLICATE_SYMBOL:
-                snprintf(what_str, 1023, "Duplicate symbol %s found on line %d", params[0].c_str(), lineno);
-                break;
-            case MULTIPLE_SYMBOL:
-                snprintf(what_str, 1023, "Multiple symbol %s and %s found for address 0x%s on line %d", params[0].c_str(), params[1].c_str(), params[2].c_str(), lineno);
-                break;
-            case INVALID_SYMBOL:
-                snprintf(what_str, 1023, "Invalid symbol %s found on line %d", params[0].c_str(), lineno);
-                break;
-            case INVALID_REGISTER:
-                snprintf(what_str, 1023, "Invalid register %s found on line %d", params[0].c_str(), lineno);
-                break;
-            case INVALID_INSTRUCTION:
-                snprintf(what_str, 1023, "Invalid instruction %s found on line %d", params[0].c_str(), lineno);
-                break;
-            case INVALID_DIRECTIVE:
-                snprintf(what_str, 1023, "Invalid assembler directive %s found on line %d", params[0].c_str(), lineno);
-                break;
-            case INVALID_FLAGS:
-                snprintf(what_str, 1023, "Invalid condition code flags %s found on line %d", params[0].c_str(), lineno);
-                break;
-            case INVALID_CHARACTER:
-                snprintf(what_str, 1023, "Invalid character constant found on line %d: %s", lineno, params[0].c_str());
-                break;
-            case INVALID_NUMBER:
-                snprintf(what_str, 1023, "Found signed number expecting unsigned number on line %d: %s", lineno, params[0].c_str());
-                break;
-            case NUMBER_OVERFLOW:
-                snprintf(what_str, 1023, "%s is too big for an immediate value expected %s bits got %s bits found on line %d", params[0].c_str(), params[1].c_str(), params[2].c_str(), lineno);
-                break;
-            case OFFSET_OVERFLOW:
-                snprintf(what_str, 1023, "%s is too far away for an offset expected %s bits got %s bits found on line %d", params[0].c_str(), params[1].c_str(), params[2].c_str(), lineno);
-                break;
-            case MEMORY_OVERFLOW:
-                snprintf(what_str, 1023, "Can't add by %s found on line %d", params[0].c_str(), lineno);
-                break;
-            case SCAN_OVERFLOW:
-                snprintf(what_str, 1023, "I'm at the end of memory (xFFFF) and I refuse to wrap around! found on line %d", lineno);
-                break;
-            case FILE_ERROR:
-                snprintf(what_str, 1023, "Could not open %s for reading\nAre you sure the file is in your current working directory?\n", params[0].c_str());
-                break;
-            case UNTERMINATED_STRING:
-                snprintf(what_str, 1023, "Unterminated string on line %d: %s", lineno, params[0].c_str());
-                break;
-            case MALFORMED_STRING:
-                snprintf(what_str, 1023, "Malformed string on line %d: %s", lineno, params[0].c_str());
-                break;
-            case EXTRA_INPUT:
-                snprintf(what_str, 1023, "Extra input found at end of line %d: %s", lineno, line.c_str());
-                break;
-            case PLUGIN_FAILED_TO_LOAD:
-                snprintf(what_str, 1023, "Plugin %s failed to load at line %d", params[0].c_str(), lineno);
-                break;
-            case UNKNOWN_ERROR:
-            default:
-                snprintf(what_str, 1023, "Unknown error found on line %d: %s", lineno, line.c_str());
-                break;
+        case SYNTAX_ERROR:
+            snprintf(what_str, 1023, "Syntax Error on line %d: %s", lineno, line.c_str());
+            break;
+        case ORIG_MATCHUP:
+            snprintf(what_str, 1023, "No matching .end found on line %d for %s", lineno, line.c_str());
+            break;
+        case ORIG_OVERLAP:
+            snprintf(what_str, 1023, "Code sections %s and %s overlap", params[0].c_str(), params[1].c_str());
+            break;
+        case STRAY_END:
+            snprintf(what_str, 1023, "No matching .orig found for .end on line %d", lineno);
+            break;
+        case STRAY_DATA:
+            snprintf(what_str, 1023, "Stray data found on line %d: %s", lineno, line.c_str());
+            break;
+        case UNDEFINED_SYMBOL:
+            snprintf(what_str, 1023, "Undefined symbol %s found on line %d", params[0].c_str(), lineno);
+            break;
+        case DUPLICATE_SYMBOL:
+            snprintf(what_str, 1023, "Duplicate symbol %s found on line %d", params[0].c_str(), lineno);
+            break;
+        case MULTIPLE_SYMBOL:
+            snprintf(what_str, 1023, "Multiple symbol %s and %s found for address 0x%s on line %d", params[0].c_str(), params[1].c_str(), params[2].c_str(), lineno);
+            break;
+        case INVALID_SYMBOL:
+            snprintf(what_str, 1023, "Invalid symbol %s found on line %d", params[0].c_str(), lineno);
+            break;
+        case INVALID_REGISTER:
+            snprintf(what_str, 1023, "Invalid register %s found on line %d", params[0].c_str(), lineno);
+            break;
+        case INVALID_INSTRUCTION:
+            snprintf(what_str, 1023, "Invalid instruction %s found on line %d", params[0].c_str(), lineno);
+            break;
+        case INVALID_DIRECTIVE:
+            snprintf(what_str, 1023, "Invalid assembler directive %s found on line %d", params[0].c_str(), lineno);
+            break;
+        case INVALID_FLAGS:
+            snprintf(what_str, 1023, "Invalid condition code flags %s found on line %d", params[0].c_str(), lineno);
+            break;
+        case INVALID_CHARACTER:
+            snprintf(what_str, 1023, "Invalid character constant found on line %d: %s", lineno, params[0].c_str());
+            break;
+        case INVALID_NUMBER:
+            snprintf(what_str, 1023, "Found signed number expecting unsigned number on line %d: %s", lineno, params[0].c_str());
+            break;
+        case NUMBER_OVERFLOW:
+            snprintf(what_str, 1023, "%s is too big for an immediate value expected %s bits got %s bits found on line %d", params[0].c_str(), params[1].c_str(), params[2].c_str(), lineno);
+            break;
+        case OFFSET_OVERFLOW:
+            snprintf(what_str, 1023, "%s is too far away for an offset expected %s bits got %s bits found on line %d", params[0].c_str(), params[1].c_str(), params[2].c_str(), lineno);
+            break;
+        case MEMORY_OVERFLOW:
+            snprintf(what_str, 1023, "Can't add by %s found on line %d", params[0].c_str(), lineno);
+            break;
+        case SCAN_OVERFLOW:
+            snprintf(what_str, 1023, "I'm at the end of memory (xFFFF) and I refuse to wrap around! found on line %d", lineno);
+            break;
+        case FILE_ERROR:
+            snprintf(what_str, 1023, "Could not open %s for reading\nAre you sure the file is in your current working directory?\n", params[0].c_str());
+            break;
+        case UNTERMINATED_STRING:
+            snprintf(what_str, 1023, "Unterminated string on line %d: %s", lineno, params[0].c_str());
+            break;
+        case MALFORMED_STRING:
+            snprintf(what_str, 1023, "Malformed string on line %d: %s", lineno, params[0].c_str());
+            break;
+        case EXTRA_INPUT:
+            snprintf(what_str, 1023, "Extra input found at end of line %d: %s", lineno, line.c_str());
+            break;
+        case PLUGIN_FAILED_TO_LOAD:
+            snprintf(what_str, 1023, "Plugin %s failed to load at line %d", params[0].c_str(), lineno);
+            break;
+        case UNKNOWN_ERROR:
+        default:
+            snprintf(what_str, 1023, "Unknown error found on line %d: %s", lineno, line.c_str());
+            break;
         }
     }
     else
     {
         switch(id)
         {
-            case SYNTAX_ERROR:
-                snprintf(what_str, 1023, "Syntax Error %s", line.c_str());
-                break;
-            case ORIG_MATCHUP:
-                snprintf(what_str, 1023, "No matching .end found for %s", line.c_str());
-                break;
-            case ORIG_OVERLAP:
-                snprintf(what_str, 1023, "Code sections %s and %s overlap", params[0].c_str(), params[1].c_str());
-                break;
-            case STRAY_END:
-                snprintf(what_str, 1023, "No matching .orig found for .end");
-                break;
-            case STRAY_DATA:
-                snprintf(what_str, 1023, "Stray data %s", line.c_str());
-                break;
-            case UNDEFINED_SYMBOL:
-                snprintf(what_str, 1023, "Undefined symbol %s", params[0].c_str());
-                break;
-            case DUPLICATE_SYMBOL:
-                snprintf(what_str, 1023, "Duplicate symbol %s", params[0].c_str());
-                break;
-            case MULTIPLE_SYMBOL:
-                snprintf(what_str, 1023, "Multiple symbol %s and %s found for address 0x%s", params[0].c_str(), params[1].c_str(), params[2].c_str());
-                break;
-            case INVALID_DIRECTIVE:
-                snprintf(what_str, 1023, "Invalid assembler directive %s", params[0].c_str());
-                break;
-            case INVALID_SYMBOL:
-                snprintf(what_str, 1023, "Invalid symbol %s", params[0].c_str());
-                break;
-            case INVALID_REGISTER:
-                snprintf(what_str, 1023, "Invalid register %s", params[0].c_str());
-                break;
-            case INVALID_INSTRUCTION:
-                snprintf(what_str, 1023, "Invalid instruction %s", params[0].c_str());
-                break;
-            case INVALID_FLAGS:
-                snprintf(what_str, 1023, "Invalid condition code flags %s", params[0].c_str());
-                break;
-            case INVALID_CHARACTER:
-                snprintf(what_str, 1023, "Invalid character constant %s", params[0].c_str());
-                break;
-            case INVALID_NUMBER:
-                snprintf(what_str, 1023, "Found signed number expecting unsigned number %s", params[0].c_str());
-                break;
-            case NUMBER_OVERFLOW:
-                snprintf(what_str, 1023, "%s is too big for an immediate value expected %s bits got %s bits", params[0].c_str(), params[1].c_str(), params[2].c_str());
-                break;
-            case OFFSET_OVERFLOW:
-                snprintf(what_str, 1023, "%s is too far away for an offset expected %s bits got %s bits", params[0].c_str(), params[1].c_str(), params[2].c_str());
-                break;
-            case MEMORY_OVERFLOW:
-                snprintf(what_str, 1023, "Can't add by %s", params[0].c_str());
-                break;
-            case SCAN_OVERFLOW:
-                snprintf(what_str, 1023, "I'm at the end of memory (xFFFF) and I refuse to wrap around! found on line %d", lineno);
-                break;
-            case FILE_ERROR:
-                snprintf(what_str, 1023, "Could not open %s for reading\nAre you sure the file is in your current working directory?", params[0].c_str());
-                break;
-            case UNTERMINATED_STRING:
-                snprintf(what_str, 1023, "Unterminated string %s", params[0].c_str());
-                break;
-            case MALFORMED_STRING:
-                snprintf(what_str, 1023, "Malformed string %s on line %d", params[0].c_str(), lineno);
-                break;
-            case EXTRA_INPUT:
-                snprintf(what_str, 1023, "%s Extra input found at end of line %d", line.c_str(), lineno);
-                break;
-            case PLUGIN_FAILED_TO_LOAD:
-                snprintf(what_str, 1023, "Plugin %s failed to load", params[0].c_str());
-                break;
-            case UNKNOWN_ERROR:
-            default:
-                snprintf(what_str, 1023, "Unknown error: %s", line.c_str());
-                break;
+        case SYNTAX_ERROR:
+            snprintf(what_str, 1023, "Syntax Error %s", line.c_str());
+            break;
+        case ORIG_MATCHUP:
+            snprintf(what_str, 1023, "No matching .end found for %s", line.c_str());
+            break;
+        case ORIG_OVERLAP:
+            snprintf(what_str, 1023, "Code sections %s and %s overlap", params[0].c_str(), params[1].c_str());
+            break;
+        case STRAY_END:
+            snprintf(what_str, 1023, "No matching .orig found for .end");
+            break;
+        case STRAY_DATA:
+            snprintf(what_str, 1023, "Stray data %s", line.c_str());
+            break;
+        case UNDEFINED_SYMBOL:
+            snprintf(what_str, 1023, "Undefined symbol %s", params[0].c_str());
+            break;
+        case DUPLICATE_SYMBOL:
+            snprintf(what_str, 1023, "Duplicate symbol %s", params[0].c_str());
+            break;
+        case MULTIPLE_SYMBOL:
+            snprintf(what_str, 1023, "Multiple symbol %s and %s found for address 0x%s", params[0].c_str(), params[1].c_str(), params[2].c_str());
+            break;
+        case INVALID_DIRECTIVE:
+            snprintf(what_str, 1023, "Invalid assembler directive %s", params[0].c_str());
+            break;
+        case INVALID_SYMBOL:
+            snprintf(what_str, 1023, "Invalid symbol %s", params[0].c_str());
+            break;
+        case INVALID_REGISTER:
+            snprintf(what_str, 1023, "Invalid register %s", params[0].c_str());
+            break;
+        case INVALID_INSTRUCTION:
+            snprintf(what_str, 1023, "Invalid instruction %s", params[0].c_str());
+            break;
+        case INVALID_FLAGS:
+            snprintf(what_str, 1023, "Invalid condition code flags %s", params[0].c_str());
+            break;
+        case INVALID_CHARACTER:
+            snprintf(what_str, 1023, "Invalid character constant %s", params[0].c_str());
+            break;
+        case INVALID_NUMBER:
+            snprintf(what_str, 1023, "Found signed number expecting unsigned number %s", params[0].c_str());
+            break;
+        case NUMBER_OVERFLOW:
+            snprintf(what_str, 1023, "%s is too big for an immediate value expected %s bits got %s bits", params[0].c_str(), params[1].c_str(), params[2].c_str());
+            break;
+        case OFFSET_OVERFLOW:
+            snprintf(what_str, 1023, "%s is too far away for an offset expected %s bits got %s bits", params[0].c_str(), params[1].c_str(), params[2].c_str());
+            break;
+        case MEMORY_OVERFLOW:
+            snprintf(what_str, 1023, "Can't add by %s", params[0].c_str());
+            break;
+        case SCAN_OVERFLOW:
+            snprintf(what_str, 1023, "I'm at the end of memory (xFFFF) and I refuse to wrap around! found on line %d", lineno);
+            break;
+        case FILE_ERROR:
+            snprintf(what_str, 1023, "Could not open %s for reading\nAre you sure the file is in your current working directory?", params[0].c_str());
+            break;
+        case UNTERMINATED_STRING:
+            snprintf(what_str, 1023, "Unterminated string %s", params[0].c_str());
+            break;
+        case MALFORMED_STRING:
+            snprintf(what_str, 1023, "Malformed string %s on line %d", params[0].c_str(), lineno);
+            break;
+        case EXTRA_INPUT:
+            snprintf(what_str, 1023, "%s Extra input found at end of line %d", line.c_str(), lineno);
+            break;
+        case PLUGIN_FAILED_TO_LOAD:
+            snprintf(what_str, 1023, "Plugin %s failed to load", params[0].c_str());
+            break;
+        case UNKNOWN_ERROR:
+        default:
+            snprintf(what_str, 1023, "Unknown error: %s", line.c_str());
+            break;
         }
     }
     ret = what_str;
@@ -266,46 +266,46 @@ unsigned short lc3_assemble_one(lc3_state& state, LC3AssembleContext& context)
 
     switch(opcode_id)
     {
-        case ADD_INSTR:
-        case AND_INSTR:
-            params = 3;
-            break;
-        case NOT_INSTR:
-            params = 2;
-            break;
-        case BR_INSTR:
-            params = 1;
-            break;
-        case JMP_INSTR:
-            params = specialop ? 0 : 1;
-            break;
-        case JSR_INSTR:
-            params = 1;
-            break;
-        case RTI_INSTR:
-            params = 0;
-            break;
-        case LEA_INSTR:
-        case LD_INSTR:
-        case LDI_INSTR:
-        case ST_INSTR:
-        case STI_INSTR:
-            params = 2;
-            break;
-        case LDR_INSTR:
-        case STR_INSTR:
-            params = 3;
-            break;
-        case TRAP_INSTR:
-            // Special op contains trap number if trapname.
-            params = specialop ? 0 : 1;
-            break;
-        case ERROR_INSTR:
-            // Let the plugin handle it
-            params = tokens.size();
-            break;
-        default: /* Just in case */
-            break;
+    case ADD_INSTR:
+    case AND_INSTR:
+        params = 3;
+        break;
+    case NOT_INSTR:
+        params = 2;
+        break;
+    case BR_INSTR:
+        params = 1;
+        break;
+    case JMP_INSTR:
+        params = specialop ? 0 : 1;
+        break;
+    case JSR_INSTR:
+        params = 1;
+        break;
+    case RTI_INSTR:
+        params = 0;
+        break;
+    case LEA_INSTR:
+    case LD_INSTR:
+    case LDI_INSTR:
+    case ST_INSTR:
+    case STI_INSTR:
+        params = 2;
+        break;
+    case LDR_INSTR:
+    case STR_INSTR:
+        params = 3;
+        break;
+    case TRAP_INSTR:
+        // Special op contains trap number if trapname.
+        params = specialop ? 0 : 1;
+        break;
+    case ERROR_INSTR:
+        // Let the plugin handle it
+        params = tokens.size();
+        break;
+    default: /* Just in case */
+        break;
     }
 
     if (tokens.size() < params)
@@ -319,76 +319,76 @@ unsigned short lc3_assemble_one(lc3_state& state, LC3AssembleContext& context)
 
     switch(opcode_id)
     {
-        case ADD_INSTR:
-        case AND_INSTR:
-            dr = get_register(tokens[0], context);
-            sr1 = get_register(tokens[1], context);
-            sr2_imm = get_register_imm5(tokens[2], is_reg, context);
-            instruction |= (dr << 9) | (sr1 << 6) | (!is_reg << 5) | sr2_imm;
-            break;
-        case NOT_INSTR:
-            dr = get_register(tokens[0], context);
-            sr1 = get_register(tokens[1], context);
-            instruction |= (dr << 9) | (sr1 << 6) | 0x3F;
-            break;
-        case BR_INSTR:
-            get_cc_flags(opcode, n, z, p, context);
-            dr = get_offset(tokens[0], 9, context);
-            instruction |= (n << 11) | (z << 10) | (p << 9) | dr;
-            break;
-        case JMP_INSTR:
-            // Special op contains 1 if RET
-            dr = specialop ? 7 : get_register(tokens[0], context);
-            instruction |= dr << 6;
-            break;
-        case JSR_INSTR:
-            instruction |= (specialop << 11);
-            // special op contains a 1 if JSR
-            if (specialop)
-            {
-                dr = get_offset(tokens[0], 11, context);
-                instruction |= dr;
-            }
-            else
-            {
-                dr = get_register(tokens[0], context);
-                instruction |= dr << 6;
-            }
-            break;
-        case RTI_INSTR:
-            break;
-        case LEA_INSTR:
-        case LD_INSTR:
-        case LDI_INSTR:
-        case ST_INSTR:
-        case STI_INSTR:
-            dr = get_register(tokens[0], context);
-            sr1 = get_offset(tokens[1], 9, context);
-            instruction |= (dr << 9) | sr1;
-            break;
-        case LDR_INSTR:
-        case STR_INSTR:
-            dr = get_register(tokens[0], context);
-            sr1 = get_register(tokens[1], context);
-            sr2_imm = get_imm(tokens[2], 6, true, true, context);
-            instruction |= (dr << 9) | (sr1 << 6) | sr2_imm;
-            break;
-        case TRAP_INSTR:
-            // Special op contains trap number if trapname.
-            // get_imm with false because its unsigned
-            dr = specialop ? specialop : get_imm(tokens[0], 8, true, false, context);
+    case ADD_INSTR:
+    case AND_INSTR:
+        dr = get_register(tokens[0], context);
+        sr1 = get_register(tokens[1], context);
+        sr2_imm = get_register_imm5(tokens[2], is_reg, context);
+        instruction |= (dr << 9) | (sr1 << 6) | (!is_reg << 5) | sr2_imm;
+        break;
+    case NOT_INSTR:
+        dr = get_register(tokens[0], context);
+        sr1 = get_register(tokens[1], context);
+        instruction |= (dr << 9) | (sr1 << 6) | 0x3F;
+        break;
+    case BR_INSTR:
+        get_cc_flags(opcode, n, z, p, context);
+        dr = get_offset(tokens[0], 9, context);
+        instruction |= (n << 11) | (z << 10) | (p << 9) | dr;
+        break;
+    case JMP_INSTR:
+        // Special op contains 1 if RET
+        dr = specialop ? 7 : get_register(tokens[0], context);
+        instruction |= dr << 6;
+        break;
+    case JSR_INSTR:
+        instruction |= (specialop << 11);
+        // special op contains a 1 if JSR
+        if (specialop)
+        {
+            dr = get_offset(tokens[0], 11, context);
             instruction |= dr;
-            break;
-        case ERROR_INSTR:
-            // If there is an instruction defined to replace this then call the plugin's one.
-            if (state.instructionPlugin)
-                instruction = state.instructionPlugin->DoAssembleOne(state, context);
-            else
-                THROWANDDO(LC3AssembleException(line, opcode, INVALID_INSTRUCTION, context.lineno), return 0);
-            break;
-        default: /* Just in case */
+        }
+        else
+        {
+            dr = get_register(tokens[0], context);
+            instruction |= dr << 6;
+        }
+        break;
+    case RTI_INSTR:
+        break;
+    case LEA_INSTR:
+    case LD_INSTR:
+    case LDI_INSTR:
+    case ST_INSTR:
+    case STI_INSTR:
+        dr = get_register(tokens[0], context);
+        sr1 = get_offset(tokens[1], 9, context);
+        instruction |= (dr << 9) | sr1;
+        break;
+    case LDR_INSTR:
+    case STR_INSTR:
+        dr = get_register(tokens[0], context);
+        sr1 = get_register(tokens[1], context);
+        sr2_imm = get_imm(tokens[2], 6, true, true, context);
+        instruction |= (dr << 9) | (sr1 << 6) | sr2_imm;
+        break;
+    case TRAP_INSTR:
+        // Special op contains trap number if trapname.
+        // get_imm with false because its unsigned
+        dr = specialop ? specialop : get_imm(tokens[0], 8, true, false, context);
+        instruction |= dr;
+        break;
+    case ERROR_INSTR:
+        // If there is an instruction defined to replace this then call the plugin's one.
+        if (state.instructionPlugin)
+            instruction = state.instructionPlugin->DoAssembleOne(state, context);
+        else
             THROWANDDO(LC3AssembleException(line, opcode, INVALID_INSTRUCTION, context.lineno), return 0);
-            break;
+        break;
+    default: /* Just in case */
+        THROWANDDO(LC3AssembleException(line, opcode, INVALID_INSTRUCTION, context.lineno), return 0);
+        break;
     }
 
     return instruction;
@@ -487,7 +487,7 @@ void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>&
             symbol = tokens[0];
 
             //if (symbol[symbol.size() - 1] == ':')
-                //symbol = symbol.substr(0, symbol.size() - 1);
+            //symbol = symbol.substr(0, symbol.size() - 1);
             if (symbol.size() >= 20)
             {
                 THROWANDDO(LC3AssembleException(context.line, symbol, INVALID_SYMBOL, context.lineno), goto symbolcheckdone);
@@ -513,7 +513,7 @@ void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>&
                 }
             }
 
-            symbolcheckdone:
+symbolcheckdone:
             // Ugly cases like A.fill will be treated as a symbol.
             if (validate_failed)
                 continue;
@@ -996,21 +996,21 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
 
             switch (pieces.size())
             {
-                case 4:
-                    times = atoi(pieces[3].c_str());
-                case 3:
-                    condition = pieces[2];
-                case 2:
-                    name = pieces[1];
-                case 1:
-                    address = get_sym_imm(pieces[0], 16, dummy, true);
-                    break;
-                case 0:
-                    if (statement.address == 0) return;
-                    address = statement.address;
-                    break;
-                default: // shouldn't happen
-                    return;
+            case 4:
+                times = atoi(pieces[3].c_str());
+            case 3:
+                condition = pieces[2];
+            case 2:
+                name = pieces[1];
+            case 1:
+                address = get_sym_imm(pieces[0], 16, dummy, true);
+                break;
+            case 0:
+                if (statement.address == 0) return;
+                address = statement.address;
+                break;
+            default: // shouldn't happen
+                return;
             }
 
             lc3_add_break(state, address, name, condition, times);
@@ -1041,7 +1041,7 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
                 is_reg = false;
             }
             else if (params["target"].size() == 2 && ((params["target"][0] == 'R' || params["target"][0] == 'r') &&
-                                                       params["target"][1] >= '0' && params["target"][1] <= '7'))
+                     params["target"][1] >= '0' && params["target"][1] <= '7'))
             {
                 is_reg = true;
                 data = params["target"][1] - '0';
@@ -1068,33 +1068,33 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
 
             switch (pieces.size())
             {
-                case 4:
-                    times = atoi(pieces[3].c_str());
-                case 3:
-                    name = pieces[1];
-                case 2:
-                    condition = pieces[2];
-                case 1:
-                    if (pieces[0].size() == 2 && ((pieces[0][0] == 'R' || pieces[0][0] == 'r') &&
-                        pieces[0][1] >= '0' && pieces[0][1] <= '7'))
-                    {
-                        data = pieces[0][1] - '0';
-                        is_reg = true;
-                    }
-                    else
-                    {
-                        data = get_sym_imm(pieces[0], 16, dummy, true);
-                        is_reg = false;
-                    }
-                    break;
-                case 0:
-                    if (statement.address == 0) return;
-                    data = statement.address;
+            case 4:
+                times = atoi(pieces[3].c_str());
+            case 3:
+                name = pieces[1];
+            case 2:
+                condition = pieces[2];
+            case 1:
+                if (pieces[0].size() == 2 && ((pieces[0][0] == 'R' || pieces[0][0] == 'r') &&
+                                              pieces[0][1] >= '0' && pieces[0][1] <= '7'))
+                {
+                    data = pieces[0][1] - '0';
+                    is_reg = true;
+                }
+                else
+                {
+                    data = get_sym_imm(pieces[0], 16, dummy, true);
                     is_reg = false;
-                    condition = "1";
-                    break;
-                default: // shouldn't happen
-                    return;
+                }
+                break;
+            case 0:
+                if (statement.address == 0) return;
+                data = statement.address;
+                is_reg = false;
+                condition = "1";
+                break;
+            default: // shouldn't happen
+                return;
             }
 
             lc3_add_watch(state, is_reg, data, condition, name, times);
@@ -1147,19 +1147,19 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
 
             switch (pieces.size())
             {
-                case 3:
-                    params_str = pieces[2];
-                case 2:
-                    name = pieces[1];
-                case 1:
-                    address = get_sym_imm(pieces[0], 16, dummy, true);
-                    break;
-                case 0:
-                    if (statement.address == 0) return;
-                    address = statement.address;
-                    break;
-                default: // shouldn't happen
-                    return;
+            case 3:
+                params_str = pieces[2];
+            case 2:
+                name = pieces[1];
+            case 1:
+                address = get_sym_imm(pieces[0], 16, dummy, true);
+                break;
+            case 0:
+                if (statement.address == 0) return;
+                address = statement.address;
+                break;
+            default: // shouldn't happen
+                return;
             }
 
             if (params_str.empty())
@@ -1213,19 +1213,19 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
 
             switch (pieces.size())
             {
-                case 3:
-                    condition = pieces[2];
-                case 2:
-                    name = pieces[1];
-                case 1:
-                    address = get_sym_imm(pieces[0], 16, dummy, true);
-                    break;
-                case 0:
-                    if (statement.address == 0) return;
-                    address = statement.address;
-                    break;
-                default: // shouldn't happen
-                    return;
+            case 3:
+                condition = pieces[2];
+            case 2:
+                name = pieces[1];
+            case 1:
+                address = get_sym_imm(pieces[0], 16, dummy, true);
+                break;
+            case 0:
+                if (statement.address == 0) return;
+                address = statement.address;
+                break;
+            default: // shouldn't happen
+                return;
             }
 
             lc3_add_blackbox(state, address, name, condition);

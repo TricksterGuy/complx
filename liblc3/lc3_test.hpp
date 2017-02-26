@@ -40,7 +40,7 @@ typedef struct lc3_subr_output_subr_call
 typedef struct lc3_subr_output
 {
     lc3_subr_output() : points_answer(0), points_params(0), points_r6(0),  points_r7(0), points_r5(0), points_locals(0),
-    points_calls(0), points_read_answer(0), deductions_edist(0) {}
+        points_calls(0), points_read_answer(0), deductions_edist(0) {}
     std::string answer;
     std::vector<std::string> params; // Same as input not present in its xml tag.
     std::string stack; // Same as input not present in its xml tag.
@@ -102,8 +102,8 @@ typedef struct lc3_test_output
 typedef struct lc3_test
 {
     lc3_test() : points(0), max_points(0), passed(false), true_traps(false), interrupt_enabled(false),
-                 disable_plugins(false), randomize(false), has_max_executions(false), has_halted(false),
-                 executions(0), max_executions(0), warnings(0) {}
+        disable_plugins(false), randomize(false), has_max_executions(false), has_halted(false),
+        executions(0), max_executions(0), warnings(0) {}
     std::string name;
     std::string warning;
     std::vector<lc3_test_input> input;

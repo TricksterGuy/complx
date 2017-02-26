@@ -6,9 +6,9 @@
 
 class RunForDialog : public RunForDialogDecl
 {
-	public:
-		RunForDialog(wxWindow* parent, int value);
-		int GetValue() const;
+public:
+    RunForDialog(wxWindow* parent, int value);
+    int GetValue() const;
 };
 
 

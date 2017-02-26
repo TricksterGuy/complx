@@ -11,26 +11,26 @@
 
 BWLCDGUI::BWLCDGUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
 {
-	this->SetSizeHints( wxSize( -1,-1 ), wxDefaultSize );
-	
-	wxBoxSizer* bSizer1;
-	bSizer1 = new wxBoxSizer( wxVERTICAL );
-	
-	displayPanel = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	displayPanel->SetMinSize( wxSize( 120,120 ) );
-	
-	bSizer1->Add( displayPanel, 1, wxEXPAND | wxALL, 0 );
-	
-	this->SetSizer( bSizer1 );
-	this->Layout();
-	bSizer1->Fit( this );
-	
-	// Connect Events
-	displayPanel->Connect( wxEVT_PAINT, wxPaintEventHandler( BWLCDGUI::OnPaint ), NULL, this );
+    this->SetSizeHints( wxSize( -1,-1 ), wxDefaultSize );
+
+    wxBoxSizer* bSizer1;
+    bSizer1 = new wxBoxSizer( wxVERTICAL );
+
+    displayPanel = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    displayPanel->SetMinSize( wxSize( 120,120 ) );
+
+    bSizer1->Add( displayPanel, 1, wxEXPAND | wxALL, 0 );
+
+    this->SetSizer( bSizer1 );
+    this->Layout();
+    bSizer1->Fit( this );
+
+    // Connect Events
+    displayPanel->Connect( wxEVT_PAINT, wxPaintEventHandler( BWLCDGUI::OnPaint ), NULL, this );
 }
 
 BWLCDGUI::~BWLCDGUI()
 {
-	// Disconnect Events
-	displayPanel->Disconnect( wxEVT_PAINT, wxPaintEventHandler( BWLCDGUI::OnPaint ), NULL, this );
+    // Disconnect Events
+    displayPanel->Disconnect( wxEVT_PAINT, wxPaintEventHandler( BWLCDGUI::OnPaint ), NULL, this );
 }

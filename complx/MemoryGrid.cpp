@@ -22,7 +22,7 @@ void PrintError(int error);
   * Constructor
   */
 MemoryGrid::MemoryGrid(wxWindow *parent, wxWindowID id, const wxPoint &pos, const wxSize &size, long style) :
-wxGrid(parent, id, pos, size, style), timer(this, MemoryToolTipTimer), tipWindow(NULL)
+    wxGrid(parent, id, pos, size, style), timer(this, MemoryToolTipTimer), tipWindow(NULL)
 {
     last_address = 0x3000;
     highlight = true;
@@ -50,7 +50,7 @@ wxGrid(parent, id, pos, size, style), timer(this, MemoryToolTipTimer), tipWindow
   *
   * Destructor
   */
- MemoryGrid::~MemoryGrid()
+MemoryGrid::~MemoryGrid()
 {
     Disconnect(MemoryMenuBreakpoint, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryGrid::OnBreakpoint));
     Disconnect(MemoryMenuTemppoint, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryGrid::OnTemppoint));
@@ -95,17 +95,17 @@ void MemoryGrid::InitGridSizes(bool exact_column_sizing, const std::vector<int>&
     int decimalSize = std::max(dc.GetTextExtent("-32768 ").GetWidth(), GetColSize(MemoryDecimal));
     int instrSize = dc.GetTextExtent("ABC 12345678901234567890 ").GetWidth();
     int labelSize = dc.GetTextExtent("1234567890 ").GetWidth();
-	
-	if (exact_column_sizing)
-	{
-    	// Hi I am a function call that takes 2+ seconds
-	    AutoSizeColumn(MemoryBinary);
-		w -= GetColSize(MemoryBinary);
-	}
-	else
-	{
-    	w -= binSize;
-	}
+
+    if (exact_column_sizing)
+    {
+        // Hi I am a function call that takes 2+ seconds
+        AutoSizeColumn(MemoryBinary);
+        w -= GetColSize(MemoryBinary);
+    }
+    else
+    {
+        w -= binSize;
+    }
 
     w -= addrSize;
     w -= hexSize;
@@ -117,42 +117,53 @@ void MemoryGrid::InitGridSizes(bool exact_column_sizing, const std::vector<int>&
     /// TODO Apparently this can go below zero and cause an assertion failed
     if (w < 0) w = 200;
 
-	if (column_sizes.empty())
-	{
-		SetColSize(MemoryInfo, 22);
-		SetColSize(MemoryAddress, addrSize);
-		SetColSize(MemoryHexadecimal, hexSize);
-		SetColSize(MemoryDecimal, decimalSize);
-		SetColSize(MemoryBinary, binSize);
-		SetColSize(MemoryLabel, labelSize);
-		SetColSize(MemoryInstruction, instrSize);
-		SetColSize(MemoryComment, w);
-	}
-	else
-	{
-		SetColSize(MemoryInfo, column_sizes[0]);
-		SetColSize(MemoryAddress, column_sizes[1]);
-		SetColSize(MemoryHexadecimal, column_sizes[2]);
-		SetColSize(MemoryDecimal, column_sizes[3]);
-		SetColSize(MemoryBinary, column_sizes[4]);
-		SetColSize(MemoryLabel, column_sizes[5]);
-		SetColSize(MemoryInstruction, column_sizes[6]);
-		SetColSize(MemoryComment, column_sizes[7]);
-	}
+    if (column_sizes.empty())
+    {
+        SetColSize(MemoryInfo, 22);
+        SetColSize(MemoryAddress, addrSize);
+        SetColSize(MemoryHexadecimal, hexSize);
+        SetColSize(MemoryDecimal, decimalSize);
+        SetColSize(MemoryBinary, binSize);
+        SetColSize(MemoryLabel, labelSize);
+        SetColSize(MemoryInstruction, instrSize);
+        SetColSize(MemoryComment, w);
+    }
+    else
+    {
+        SetColSize(MemoryInfo, column_sizes[0]);
+        SetColSize(MemoryAddress, column_sizes[1]);
+        SetColSize(MemoryHexadecimal, column_sizes[2]);
+        SetColSize(MemoryDecimal, column_sizes[3]);
+        SetColSize(MemoryBinary, column_sizes[4]);
+        SetColSize(MemoryLabel, column_sizes[5]);
+        SetColSize(MemoryInstruction, column_sizes[6]);
+        SetColSize(MemoryComment, column_sizes[7]);
+    }
 
-    wxGridCellAttr* info = new wxGridCellAttr; info->SetReadOnly(); info->SetTextColour(*wxBLACK);
+    wxGridCellAttr* info = new wxGridCellAttr;
+    info->SetReadOnly();
+    info->SetTextColour(*wxBLACK);
     /// TODO abstract out Memory View address->row translation into an object and pass it in here
     info->SetRenderer(new GridCellInfoRenderer(dynamic_cast<MemoryView*>(GetTable())));
-    wxGridCellAttr* addr = new wxGridCellAttr; addr->SetReadOnly(); addr->SetTextColour(*wxBLACK);
-    wxGridCellAttr* instr = new wxGridCellAttr; instr->SetTextColour(*wxBLACK);
-    wxGridCellAttr* hex = new wxGridCellAttr; hex->SetTextColour(*wxBLUE);
-    wxGridCellAttr* decimal = new wxGridCellAttr; decimal->SetTextColour(*wxRED);
-    wxGridCellAttr* binary = new wxGridCellAttr; binary->SetTextColour(*wxWHITE); binary->SetBackgroundColour(wxTransparentColor);
+    wxGridCellAttr* addr = new wxGridCellAttr;
+    addr->SetReadOnly();
+    addr->SetTextColour(*wxBLACK);
+    wxGridCellAttr* instr = new wxGridCellAttr;
+    instr->SetTextColour(*wxBLACK);
+    wxGridCellAttr* hex = new wxGridCellAttr;
+    hex->SetTextColour(*wxBLUE);
+    wxGridCellAttr* decimal = new wxGridCellAttr;
+    decimal->SetTextColour(*wxRED);
+    wxGridCellAttr* binary = new wxGridCellAttr;
+    binary->SetTextColour(*wxWHITE);
+    binary->SetBackgroundColour(wxTransparentColor);
     // Passing the view here is not needed because we call GetTableValueAsLong which takes care of view<=>address translation
     binary->SetRenderer(new GridCellBinaryRenderer());
     //binary->SetFont(wxFont( 10, 70, 90, wxFONTWEIGHT_BOLD, false, wxT("Courier New")));
-    wxGridCellAttr* label = new wxGridCellAttr; label->SetTextColour(wxColour(64, 64, 64));
-    wxGridCellAttr* comment = new wxGridCellAttr; comment->SetTextColour(wxColour(128, 128, 255));
+    wxGridCellAttr* label = new wxGridCellAttr;
+    label->SetTextColour(wxColour(64, 64, 64));
+    wxGridCellAttr* comment = new wxGridCellAttr;
+    comment->SetTextColour(wxColour(128, 128, 255));
 
     SetColAttr(MemoryInfo, info);
     SetColAttr(MemoryAddress, addr);
@@ -366,11 +377,11 @@ void MemoryGrid::OnMotion(wxMouseEvent& event)
     {
         timer.Stop();
         event.Skip();
-		if (tipWindow != NULL)
-		{
-			delete tipWindow;
-			tipWindow = NULL;
-		}
+        if (tipWindow != NULL)
+        {
+            delete tipWindow;
+            tipWindow = NULL;
+        }
         return;
     }
 
@@ -412,7 +423,9 @@ void MemoryGrid::OnShowToolTip(wxTimerEvent& event)
   */
 void MemoryGrid::SetHighlight(bool highlight)
 {
-    wxGridCellAttr* binary = new wxGridCellAttr; binary->SetTextColour(*wxWHITE); binary->SetBackgroundColour(wxTransparentColor);
+    wxGridCellAttr* binary = new wxGridCellAttr;
+    binary->SetTextColour(*wxWHITE);
+    binary->SetBackgroundColour(wxTransparentColor);
     if (highlight) binary->SetRenderer(new GridCellBinaryRenderer());
     SetColAttr(MemoryBinary, binary);
 }

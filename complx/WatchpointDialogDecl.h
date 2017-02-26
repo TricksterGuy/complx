@@ -30,38 +30,38 @@
 ///////////////////////////////////////////////////////////////////////////////
 /// Class WatchpointDialogDecl
 ///////////////////////////////////////////////////////////////////////////////
-class WatchpointDialogDecl : public wxDialog 
+class WatchpointDialogDecl : public wxDialog
 {
-	private:
-	
-	protected:
-		wxStaticText* m_staticText2;
-		wxTextCtrl* name_text;
-		wxStaticText* m_staticText1;
-		wxTextCtrl* target_text;
-		wxStaticText* m_staticText3;
-		wxTextCtrl* condition_text;
-		wxStaticText* m_staticText4;
-		wxSpinCtrl* times_spin;
-		wxStaticText* m_staticText5;
-		wxSpinCtrl* hits_spin;
-		wxCheckBox* enable_check;
-		
-		
-		wxButton* okButton;
-		wxButton* cancelButton;
-	
-	public:
-		wxString name; 
-		wxString target; 
-		wxString condition; 
-		int times; 
-		int hits; 
-		bool enabled; 
-		
-		WatchpointDialogDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Advanced Watchpoint"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 228,296 ), long style = wxDEFAULT_DIALOG_STYLE );
-		~WatchpointDialogDecl();
-	
+private:
+
+protected:
+    wxStaticText* m_staticText2;
+    wxTextCtrl* name_text;
+    wxStaticText* m_staticText1;
+    wxTextCtrl* target_text;
+    wxStaticText* m_staticText3;
+    wxTextCtrl* condition_text;
+    wxStaticText* m_staticText4;
+    wxSpinCtrl* times_spin;
+    wxStaticText* m_staticText5;
+    wxSpinCtrl* hits_spin;
+    wxCheckBox* enable_check;
+
+
+    wxButton* okButton;
+    wxButton* cancelButton;
+
+public:
+    wxString name;
+    wxString target;
+    wxString condition;
+    int times;
+    int hits;
+    bool enabled;
+
+    WatchpointDialogDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Advanced Watchpoint"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 228,296 ), long style = wxDEFAULT_DIALOG_STYLE );
+    ~WatchpointDialogDecl();
+
 };
 
 #endif //__WatchpointDialogDecl__

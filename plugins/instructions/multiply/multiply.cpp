@@ -101,7 +101,7 @@ void MultiplyPlugin::OnExecute(lc3_state& state, lc3_instr& instruction, lc3_sta
     else
     {
         state.regs[changes.location] = state.regs[instruction.arith.reg.sr1] *
-                                        state.regs[instruction.arith.reg.sr2];
+                                       state.regs[instruction.arith.reg.sr2];
     }
     // Update NZP
     lc3_setcc(state, state.regs[changes.location]);
@@ -184,7 +184,8 @@ std::string MultiplyPlugin::OnDisassemble(lc3_state& state, lc3_instr& instr, un
     return buf;
 }
 
-const RLEColorEntry mulColorings[2][4] = {
+const RLEColorEntry mulColorings[2][4] =
+{
     {{96, 0, 0, 3}, {0, 0, 80, 3}, {0, 0, 0, 1}, {0, 0, 80, 5}}, // IMM Version
     {{96, 0, 0, 3}, {0, 0, 80, 3}, {0, 0, 0, 3}, {0, 0, 80, 3}}, // REG Version
 };

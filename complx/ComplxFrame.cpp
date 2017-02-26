@@ -117,22 +117,22 @@ ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) : ComplxFrameDecl(NUL
   */
 ComplxFrame::~ComplxFrame()
 {
-	auto* config = wxConfigBase::Get();
+    auto* config = wxConfigBase::Get();
 
-	int width, height;
-	GetSize(&width, &height);
+    int width, height;
+    GetSize(&width, &height);
 
-	config->Write("/appwidth", wxString::Format("%d", width)); 
-	config->Write("/appheight", wxString::Format("%d", height));
-	
-	const auto& column_sizes = memory->GetColSizes();
-	std::stringstream oss;
-	for (unsigned int i = 0; i < MemorySize; i++)
-	{
-		oss << column_sizes.GetSize(i) << ",";
-	}
-	wxString sizes = oss.str();
-	config->Write("/columnsizes", sizes);
+    config->Write("/appwidth", wxString::Format("%d", width));
+    config->Write("/appheight", wxString::Format("%d", height));
+
+    const auto& column_sizes = memory->GetColSizes();
+    std::stringstream oss;
+    for (unsigned int i = 0; i < MemorySize; i++)
+    {
+        oss << column_sizes.GetSize(i) << ",";
+    }
+    wxString sizes = oss.str();
+    config->Write("/columnsizes", sizes);
 
     complxframe = NULL;
     Disconnect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_COMPLETED, wxThreadEventHandler(ComplxFrame::OnRunComplete));
@@ -361,7 +361,7 @@ void ComplxFrame::DoLoadFile(const wxFileName& filename)
     //if (DoAssemble(filename)) return;
     currentFile = filename;
     SetTitle(wxString::Format("%s - %s", base_title, filename.GetFullPath()));
-    merge:
+merge:
 
     std::map<std::string, unsigned short>::const_iterator i;
     std::map<unsigned short, std::string>::const_iterator j;
@@ -594,7 +594,7 @@ void ComplxFrame::OnRunAgain(wxCommandEvent& event)
     }
 
     SetupExecution(RUNMODE_RUNFOR, runforRunTime);
-	SetFocus();
+    SetFocus();
 }
 
 
@@ -801,21 +801,21 @@ void ComplxFrame::UpdateRegister(wxTextCtrl* text, int value, int index)
 
     switch(strategy)
     {
-        case BASE_2:
-            string << b;
-            text->SetValue(wxString::FromUTF8(string.str().c_str()));
-            break;
-        case BASE_10:
-            text->SetValue(wxString::Format(_("%d"), (short)value));
-            break;
-        case BASE_16:
-            text->SetValue(wxString::Format(_("0x%04X"), (unsigned short)value));
-            break;
-        case BASE_CC:
-            text->SetValue(wxString::Format(_("%s"), value < 0 ? _("n") : (value == 0 ? _("z") : _("p"))));
-            break;
-        default:
-            break;
+    case BASE_2:
+        string << b;
+        text->SetValue(wxString::FromUTF8(string.str().c_str()));
+        break;
+    case BASE_10:
+        text->SetValue(wxString::Format(_("%d"), (short)value));
+        break;
+    case BASE_16:
+        text->SetValue(wxString::Format(_("0x%04X"), (unsigned short)value));
+        break;
+    case BASE_CC:
+        text->SetValue(wxString::Format(_("%s"), value < 0 ? _("n") : (value == 0 ? _("z") : _("p"))));
+        break;
+    default:
+        break;
     }
 }
 
@@ -970,15 +970,15 @@ void ComplxFrame::OnInterrupts(wxCommandEvent& event)
 void ComplxFrame::OnUndoStack(wxCommandEvent& event)
 {
     wxString str = wxGetTextFromUser(
-        wxString::Format(_("Enter new undo stack size\n\
+                       wxString::Format(_("Enter new undo stack size\n\
                            It is currently %d instructions\n\
                            Enter -1 for infinite."), state.max_stack_size),
-		_("Undo Stack size"),
-		wxString::Format(_("%d"), state.max_stack_size),
-		this
-	);
+                       _("Undo Stack size"),
+                       wxString::Format(_("%d"), state.max_stack_size),
+                       this
+                   );
 
-	if (str.IsEmpty()) return;
+    if (str.IsEmpty()) return;
 
     std::string strdata = str.ToStdString();
     int data;
@@ -1101,7 +1101,7 @@ void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
     state.regs[6] = state.mem[(unsigned short)stack_location] - params.size();
     state.pc = (unsigned short) subroutine_location;
     for (unsigned int i = 0; i < params.size(); i++)
-      state.mem[(unsigned short)state.regs[6] + i] = params[i];
+        state.mem[(unsigned short)state.regs[6] + i] = params[i];
     state.regs[7] = halt_statement;
 
     UpdateRegisters();
@@ -1144,10 +1144,10 @@ void ComplxFrame::OnFillMemoryWith(wxCommandEvent& event)
 {
 
     wxString fill_value_str = wxGetTextFromUser(_("Please enter value to fill memory with"),
-                                                _("Fill Memory With"),
-                                                _(""),
-                                                this);
-	if (fill_value_str.IsEmpty()) return;
+                              _("Fill Memory With"),
+                              _(""),
+                              this);
+    if (fill_value_str.IsEmpty()) return;
 
     std::string strdata = fill_value_str.ToStdString();
 
@@ -1183,13 +1183,13 @@ void ComplxFrame::OnUpdateHideAddresses(wxCommandEvent& event)
 {
     int mode;
     if (menuViewHideAddressesShowAll->IsChecked())
-      mode = SHOW_ALL;
+        mode = SHOW_ALL;
     else if (menuViewHideAddressesShowOnlyCodeData->IsChecked())
-      mode = SHOW_MODIFIED;
+        mode = SHOW_MODIFIED;
     else if ((menuViewHideAddressesShowNonZero->IsChecked()))
-      mode = SHOW_NONZERO;
+        mode = SHOW_NONZERO;
     else
-      mode = 0;
+        mode = 0;
     ::OnUpdateHideAddresses(memory, memoryView, mode);
 }
 
@@ -1416,7 +1416,7 @@ void ComplxFrame::OnFirstTime(wxCommandEvent& event)
                                   "Thing 3: Report any bugs to TAs or me directly (bwhitehead0308@gmail.com).\n\n"
                                   "  Or you may file an issue at https://github.com/TricksterGuy/complx/issues",
                                   Version::FULLVERSION_STRING),
-                                  "Hi from Brandon", wxICON_INFORMATION | wxOK);
+                 "Hi from Brandon", wxICON_INFORMATION | wxOK);
 }
 
 void ComplxFrame::OnTips(wxCommandEvent& event)
@@ -1518,24 +1518,24 @@ void PrintError(int error)
 
     switch(error)
     {
-        case 1:
-            msg = _("ERROR! Error evaluating expression: Unbalanced parethesis");
-            break;
-        case 2:
-            msg = _("ERROR! Error evaluating expression: Invalid Operator");
-            break;
-        case 3:
-            msg = _("ERROR! Error evaluating expression: Invalid operand");
-            break;
-        case 4:
-            msg = _("ERROR! Error evaluating expression: Malformed reference");
-            break;
-        case 5:
-            msg = _("ERROR! Error evaluating expression: Undefined symbol");
-            break;
-        default:
-            msg = _("ERROR! Error evaluating expression.");
-            break;
+    case 1:
+        msg = _("ERROR! Error evaluating expression: Unbalanced parethesis");
+        break;
+    case 2:
+        msg = _("ERROR! Error evaluating expression: Invalid Operator");
+        break;
+    case 3:
+        msg = _("ERROR! Error evaluating expression: Invalid operand");
+        break;
+    case 4:
+        msg = _("ERROR! Error evaluating expression: Malformed reference");
+        break;
+    case 5:
+        msg = _("ERROR! Error evaluating expression: Undefined symbol");
+        break;
+    default:
+        msg = _("ERROR! Error evaluating expression.");
+        break;
     }
 
     wxMessageBox(msg, _("Error"));

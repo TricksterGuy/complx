@@ -28,18 +28,18 @@ inline const char* GetLogAbbrev(LogLevel level)
 {
     switch(level)
     {
-        case LogLevel::FATAL:
-            return "F";
-        case LogLevel::DEBUG:
-            return "D";
-        case LogLevel::WARNING:
-            return "W";
-        case LogLevel::INFO:
-            return "I";
-        case LogLevel::VERBOSE:
-            return "V";
-        default:
-            return "?";
+    case LogLevel::FATAL:
+        return "F";
+    case LogLevel::DEBUG:
+        return "D";
+    case LogLevel::WARNING:
+        return "W";
+    case LogLevel::INFO:
+        return "I";
+    case LogLevel::VERBOSE:
+        return "V";
+    default:
+        return "?";
     }
 }
 
@@ -48,18 +48,18 @@ inline const char* GetLogColor(LogLevel level)
 #ifndef WINDOWS
     switch(level)
     {
-        case LogLevel::FATAL:
-            return "\033[1;31m";
-        case LogLevel::DEBUG:
-            return "\033[1;33m";
-        case LogLevel::WARNING:
-            return "\033[1;33m";
-        case LogLevel::INFO:
-            return "";
-        case LogLevel::VERBOSE:
-            return "\033[2;34m";
-        default:
-            return "";
+    case LogLevel::FATAL:
+        return "\033[1;31m";
+    case LogLevel::DEBUG:
+        return "\033[1;33m";
+    case LogLevel::WARNING:
+        return "\033[1;33m";
+    case LogLevel::INFO:
+        return "";
+    case LogLevel::VERBOSE:
+        return "\033[2;34m";
+    default:
+        return "";
     }
 #else
     return "";
