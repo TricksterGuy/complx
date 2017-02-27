@@ -237,6 +237,11 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
             // This fixes the issue in which a subroutine is being tested, but it makes calls to other subroutines who takes a
             // different number of parameters than the subroutine under test.
             // If the file uses subroutine annotations then overwrite it.
+            lc3_subroutine_info self_info;
+            self_info.address = state.pc;
+            self_info.name = subr.name;
+            self_info.num_params = subr.params.size();
+            state.subroutines[state.pc] = self_info;
             for (const auto& info : subr.subroutines)
             {
                 int address = 0;
