@@ -360,6 +360,8 @@ void ComplxFrame::DoLoadFile(const wxFileName& filename)
 
     //if (DoAssemble(filename)) return;
     currentFile = filename;
+    currentTestFile.Clear();
+
     SetTitle(wxString::Format("%s - %s", base_title, filename.GetFullPath()));
 merge:
 
