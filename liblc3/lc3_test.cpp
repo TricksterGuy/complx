@@ -787,9 +787,9 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
             if (all_locals_wrong)
             {
                 // Bro do you even calling convention
-                if (actual_stack.size() > subr.params.size() + 3)
-                    // Truncate stack to last num_params + 3 elements the stuff we care about (don't do expected since ed forgiveness handles it).
-                    actual_stack.erase(actual_stack.begin(), actual_stack.begin() + (actual_stack.size() - subr.params.size() - 3));
+                if (actual_stack.size() > 3)
+                    // Truncate stack to last num_params + 3 (ra,rv,ofp) elements the stuff we care about (don't do expected since ed forgiveness handles it).
+                    actual_stack.erase(actual_stack.begin(), actual_stack.begin() + (actual_stack.size() - 3));
                 if (!subr.locals.empty())
                     extra << "      All locals were not found, so locals aren't included in structure check.\n";
             }
