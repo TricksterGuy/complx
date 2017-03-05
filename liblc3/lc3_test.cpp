@@ -72,7 +72,7 @@ int edit_distance(const std::vector<short>& s, const std::vector<short>& t)
 
 struct lc3_subroutine_call_info_cmp
 {
-    bool operator()(const lc3_subroutine_call_info& a, const lc3_subroutine_call_info& b)
+    bool operator() (const lc3_subroutine_call_info& a, const lc3_subroutine_call_info& b) const
     {
         if (a.address != b.address)
             return a.address < b.address;
