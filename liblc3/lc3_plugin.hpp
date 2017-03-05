@@ -17,7 +17,7 @@ enum PluginTypes
 
 /** Define version of lc3 any plugins that are not of the same version will be rejected. */
 #define LC3_MAJOR_VERSION 1
-#define LC3_MINOR_VERSION 3
+#define LC3_MINOR_VERSION 4
 
 /** Main class for complx's plugin system.
   *
@@ -95,6 +95,11 @@ public:
     {
         return intvector;
     };
+    /** Able to run in lc3test */
+    virtual bool AvailableInLC3Test() const
+    {
+        return true;
+    }
 
 private:
     Plugin& operator=(const Plugin& other);

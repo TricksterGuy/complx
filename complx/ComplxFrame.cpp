@@ -504,7 +504,15 @@ void ComplxFrame::OnBaseChange(wxMouseEvent& event)
     else if (mode == BASE_10)
         mode = BASE_16;
     else if (mode == BASE_16)
-        mode = BASE_2;
+    {
+        //TODO register display as a character.
+        //if (value > 0 && value <= 255)
+        //    mode = BASE_CHAR;
+        //else
+            mode = BASE_2;
+    }
+    //else if (mode == BASE_CHAR)
+    //    mode = BASE_2;
     register_display[index] = mode;
 
     UpdateRegister(text, value, index);
@@ -812,6 +820,12 @@ void ComplxFrame::UpdateRegister(wxTextCtrl* text, int value, int index)
         break;
     case BASE_16:
         text->SetValue(wxString::Format(_("0x%04X"), (unsigned short)value));
+        break;
+    case BASE_CHAR:
+        if (value > 0 && value <= 255)
+            text->SetValue(wxString::Format(_("'%c'"), value));
+        else
+            text->SetValue(wxString::Format(_("%d"), (short)value));
         break;
     case BASE_CC:
         text->SetValue(wxString::Format(_("%s"), value < 0 ? _("n") : (value == 0 ? _("z") : _("p"))));

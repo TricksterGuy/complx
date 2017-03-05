@@ -93,6 +93,12 @@ bool lc3_install_plugin(lc3_state& state, const std::string& filename, const Plu
         return false;
     }
 
+    if (state.in_lc3test && !plugin->AvailableInLC3Test())
+    {
+        // Do not register, silently return true
+        return true;
+    }
+
     PluginInfo infos;
     infos.filename = filename;
     infos.plugin = plugin;

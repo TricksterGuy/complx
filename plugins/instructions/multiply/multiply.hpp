@@ -4,7 +4,7 @@
 #include <lc3_all.hpp>
 
 #define MULTIPLY_MAJOR_VERSION 1
-#define MULTIPLY_MINOR_VERSION 3
+#define MULTIPLY_MINOR_VERSION 4
 
 class MultiplyPlugin : public InstructionPlugin
 {
