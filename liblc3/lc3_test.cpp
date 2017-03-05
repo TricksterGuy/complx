@@ -731,7 +731,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
                 }
             }
             if (mistakes_made > max_mistakes)
-                extra << "      Threshold of points lost via unexpected calls was met.\n";
+                extra << MISS << "Threshold of points lost via unexpected calls was met.\n";
 
             // Read answer check sigh...
             if (subr.points_read_answer > 0 && !subr.calls.empty())
