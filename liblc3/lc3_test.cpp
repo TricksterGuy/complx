@@ -809,6 +809,12 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
             else
                 extra << "      Found " << mistakes << " structural mistakes in stack -" << subr.deductions_edist * mistakes << " points.\n";
 
+            if (points < 0)
+            {
+                extra << "      Points earned on test negative! Setting earned points for test to zero.\n";
+                points = 0;
+            }
+
             output.passed = (ed_grade == 0) && (ed_forgiveness == 0);
             output.extra_output += extra.str();
             output.earned = points;
