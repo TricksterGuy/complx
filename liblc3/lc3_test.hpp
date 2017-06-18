@@ -35,6 +35,7 @@ typedef struct lc3_subr_output_subr_call
 {
     std::string name;
     std::vector<std::string> params;
+    bool required;
 } lc3_subr_output_subr_call;
 
 typedef struct lc3_subr_output

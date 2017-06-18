@@ -4,7 +4,7 @@
 #include <lc3_all.hpp>
 
 #define UDIV_MAJOR_VERSION 1
-#define UDIV_MINOR_VERSION 3
+#define UDIV_MINOR_VERSION 4
 
 class UdivPlugin : public TrapFunctionPlugin
 {

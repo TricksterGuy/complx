@@ -54,8 +54,7 @@ Execute these commands
 # Installation from Source via scripts
 You can run one of the install scripts depending on your platform, which does everything listed in the below section.
 * Ubuntu 14.04 and above sudo ./install.sh
-* Ubuntu 13.10 and below sudo ./install_script_13_10.sh
-* Fedora ./install_script_fedora23.sh
+* Fedora 23 ./install_script_fedora23.sh
 
 
 # Installation from Source manually

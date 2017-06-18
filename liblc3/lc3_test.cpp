@@ -13,7 +13,7 @@
 #define R6_FOUND "r6 points to r6-1 (answer location)"
 #define R7_FOUND "r7 found on stack and r7 not clobbered"
 #define R5_FOUND "r5 found on stack and r5 not clobbered"
-#define PARAM_FOUND "param found on stack"
+#define PARAM_FOUND "param found and unmodified on stack"
 #define LOCAL_FOUND "local found on stack"
 #define CHECK "      [+] "
 #define MISS "      [-] "
@@ -72,7 +72,7 @@ int edit_distance(const std::vector<short>& s, const std::vector<short>& t)
 
 struct lc3_subroutine_call_info_cmp
 {
-    bool operator()(const lc3_subroutine_call_info& a, const lc3_subroutine_call_info& b)
+    bool operator()(const lc3_subroutine_call_info& a, const lc3_subroutine_call_info& b) const
     {
         if (a.address != b.address)
             return a.address < b.address;
@@ -421,7 +421,8 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
             std::vector<short> actual_stack;
 
             std::vector<short> locals;
-            std::vector<short> params;
+            std::vector<short> expected_params;
+            std::vector<short> actual_params;
             for (int j = (int)subr.locals.size() - 1; j >= 0; j--)
             {
                 if (lc3_calculate(state, subr.locals[j], value_calc))
@@ -452,12 +453,30 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
             {
                 if (lc3_calculate(state, subr.params[j], value_calc))
                     throw "<in test-subr> A param expression " + subr.params[j] + " was malformed.";
-                expected_stack.push_back((short)value_calc);
-                params.push_back((short) value_calc);
+                //expected_stack.push_back((short)value_calc);
+                expected_params.push_back((short) value_calc);
             }
+
+            // Defense against weird issues where the grader gives them full credit for the answer being correct
+            bool strict_answer_check = false;
+            std::map<unsigned short, int> expected_stack_map;
+            for (const auto& item : expected_stack)
+                expected_stack_map[item] += 1;
+
+            // Disallowing r5 and r7 copies on stack.
+            if (expected_stack_map[(unsigned short)r5] > 1 || expected_stack_map[(unsigned short)r7] > 1)
+            {
+                extra << "      [WARNING] Expected stack frame has duplicate elements, grade may not be accurate, if mistakes are found. " <<
+                         "Please modify the r5 and r7 inputs in the xml file so that no duplicates appear among r5, r7, and locals on the expected stack.\n";
+            }
+
+            strict_answer_check = expected_stack_map[(unsigned short) answer] > 1;
 
             // Code to get the students stack frame
             unsigned short actual_r6 = (unsigned short) r6;
+            actual_params.assign(state.mem + (actual_r6 - subr.params.size()), state.mem + actual_r6);
+            actual_r6 -= subr.params.size();
+
             if (state.first_level_calls.size() >= 1)
             {
                 const auto& call_info = state.first_level_calls[0];
@@ -478,11 +497,10 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
             }
             else if (state.first_level_calls.empty())
             {
-                int num_params = subr.params.size();
                 // Get at least the parameters student could probably not save anything...
-                actual_stack.assign(state.mem + (actual_r6 - num_params), state.mem + actual_r6);
+                //actual_stack.assign(state.mem + (actual_r6 - num_params), state.mem + actual_r6);
                 // Get additional addresses modified
-                unsigned short start = actual_r6 - num_params - 1;
+                unsigned short start = actual_r6 - 1;
                 while (state.memory_ops.find(start) != state.memory_ops.end())
                 {
                     if (!state.memory_ops[start].writes) break;
@@ -491,15 +509,32 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
                 }
             }
 
-            for (unsigned int j = 0; j < expected_stack.size(); j++)
-                expected << std::hex << "0x" << expected_stack[j] << " ";
+            for (const auto& item : expected_stack)
+                expected << std::hex << "0x" << item << " ";
+            expected << "params: ";
+            for (unsigned int j = 0; j < expected_params.size(); j++)
+            {
+                const auto& item = expected_params[j];
+                expected << std::hex << "0x" << item;
+                if (j != expected_params.size() - 1)
+                    expected << ",";
+            }
+
             expected << " r5: " << std::hex << "0x" << (short)r5 <<
-                     " r6: " << std::hex << "0x" << (actual_r6 - subr.params.size() - 1) <<
+                     " r6: " << std::hex << "0x" << (actual_r6 - 1) <<
                      " r7: " << std::hex << "0x" << (short)(r7 + 1);
 
 
-            for (unsigned int j = 0; j < actual_stack.size(); j++)
-                actual << std::hex << "0x" << actual_stack[j] << " ";
+            for (const auto& item : actual_stack)
+                actual << std::hex << "0x" << item << " ";
+            actual << "params: ";
+            for (unsigned int j = 0; j < actual_params.size(); j++)
+            {
+                const auto& item = actual_params[j];
+                actual << std::hex << "0x" << item;
+                if (j != actual_params.size() - 1)
+                    actual << ",";
+            }
             actual << " r5: " << std::hex << "0x" << state.regs[5] <<
                    " r6: " << std::hex << "0x" << state.regs[6] <<
                    " r7: " << std::hex << "0x" << state.regs[7];
@@ -513,91 +548,98 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
             // If they get something wrong then it will also be wrong in edit distance
             // so cut some slack if you get a value wrong.
             int ed_forgiveness = 0;
+            // Invalid in case their stack is empty.
+            int actual_answer = 0x10000;
+            if (!actual_stack.empty())
+                actual_answer = (short)actual_stack[actual_stack.size() - 1];
 
-            if (actual_stack_map[(short)answer] > 0)
+            if ((!strict_answer_check && actual_stack_map[(short)answer] > 0) || (strict_answer_check && actual_answer == (short)answer))
             {
                 actual_stack_map[(short)answer] -= 1;
                 points += subr.points_answer;
-                extra << CHECK << ANSWER_FOUND << " +" << subr.points_answer << ".\n";
+                extra << CHECK << ANSWER_FOUND << " +" << subr.points_answer << " points.\n";
             }
             else
             {
                 ed_forgiveness++;
-                extra << MISS << ANSWER_FOUND << " -" << subr.points_answer << ".\n";
+                if (strict_answer_check && actual_stack_map[(short)answer] > 0)
+                    extra << "      [NOTE] The answer must strictly be located in the return value slot for credit for this test case.\n";
+                extra << MISS << ANSWER_FOUND << " -" << subr.points_answer << " points.\n";
             }
 
-            if (state.regs[6] == (short)(actual_r6 - subr.params.size() - 1))
+            if (state.regs[6] == (short)(actual_r6 - 1))
             {
                 points += subr.points_r6;
-                extra << CHECK << R6_FOUND << " +" << subr.points_r6 << ".\n";
+                extra << CHECK << R6_FOUND << " +" << subr.points_r6 << " points.\n";
             }
             else
             {
-                extra << MISS << R6_FOUND << " -" << subr.points_r6 << ".\n";
+                extra << MISS << R6_FOUND << " -" << subr.points_r6 << " points.\n";
             }
 
+            // R7+1 due to HALT statement being a trap.
             if (actual_stack_map[(short)r7] > 0 && state.regs[7] == (short)(r7+1))
             {
                 actual_stack_map[(short)r7] -= 1;
                 points += subr.points_r7;
-                extra << CHECK << R7_FOUND << " +" << subr.points_r7 << ".\n";
+                extra << CHECK << R7_FOUND << " +" << subr.points_r7 << " points.\n";
             }
             else
             {
                 // Don't count if just r7 was clobbered
                 if (actual_stack_map[(short)r7] <= 0)
                     ed_forgiveness++;
-                extra << MISS << R7_FOUND << " -" << subr.points_r7 << ".\n";
+                extra << MISS << R7_FOUND << " -" << subr.points_r7 << " points.\n";
             }
 
             if (actual_stack_map[(short)r5] > 0 && state.regs[5] == (short)r5)
             {
                 actual_stack_map[(short)r5] -= 1;
                 points += subr.points_r5;
-                extra << CHECK << R5_FOUND << " +" << subr.points_r5 << ".\n";
+                extra << CHECK << R5_FOUND << " +" << subr.points_r5 << " points.\n";
             }
             else
             {
                 if (actual_stack_map[(short)r5] <= 0)
                     ed_forgiveness++;
-                extra << MISS << R5_FOUND << " -" << subr.points_r5 << ".\n";
+                extra << MISS << R5_FOUND << " -" << subr.points_r5 << " points.\n";
             }
 
-            for (unsigned int j = 0; j < params.size(); j++)
+            for (unsigned int j = 0; j < subr.params.size(); j++)
             {
-                if (actual_stack_map[params[j]] > 0)
+                const auto& param = expected_params[j];
+                if (expected_params[j] == actual_params[j])
                 {
-                    actual_stack_map[params[j]] -= 1;
                     points += subr.points_params;
-                    extra << CHECK << params[j] << " " << PARAM_FOUND << " +" << subr.points_params << ".\n";
+                    extra << CHECK << param << " " << PARAM_FOUND << " +" << subr.points_params << " points.\n";
                 }
                 else
                 {
-                    ed_forgiveness++;
-                    extra << MISS << params[j] << " " << PARAM_FOUND << " -" << subr.points_params << ".\n";
+                    extra << MISS << param << " " << PARAM_FOUND << " -" << subr.points_params << " points.\n";
                 }
             }
 
             bool all_locals_wrong = true;
-            for (unsigned int j = 0; j < locals.size(); j++)
+            for (const auto& local : locals)
             {
-                if (actual_stack_map[locals[j]] > 0)
+                if (actual_stack_map[local] > 0)
                 {
-                    actual_stack_map[locals[j]] -= 1;
+                    actual_stack_map[local] -= 1;
                     points += subr.points_locals;
                     all_locals_wrong = false;
-                    extra << CHECK << locals[j] << " " << LOCAL_FOUND << " +" << subr.points_locals << ".\n";
+                    extra << CHECK << local << " " << LOCAL_FOUND << " +" << subr.points_locals << " points.\n";
                 }
                 else
                 {
                     ed_forgiveness++;
-                    extra << MISS << locals[j] << " " << LOCAL_FOUND << " -" << subr.points_locals << ".\n";
+                    extra << MISS << local << " " << LOCAL_FOUND << " -" << subr.points_locals << " points.\n";
                 }
             }
 
             // Subroutine calls check.
             std::set<lc3_subroutine_call_info, lc3_subroutine_call_info_cmp> actual_calls(state.first_level_calls.begin(), state.first_level_calls.end());
             std::set<lc3_subroutine_call_info, lc3_subroutine_call_info_cmp> expected_calls;
+            std::map<lc3_subroutine_call_info, lc3_subr_output_subr_call, lc3_subroutine_call_info_cmp> expected_to_output_calls_map;
             for (const auto& expected_call : subr.calls)
             {
                 lc3_subroutine_call_info info;
@@ -614,6 +656,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
                 info.address = addr;
                 info.r6 = 0;
                 expected_calls.insert(info);
+                expected_to_output_calls_map[info] = expected_call;
             }
 
             for (const auto& call : expected_calls)
@@ -631,16 +674,34 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
                 }
                 call_name << ")";
 
-                if (actual_calls.find(call) != actual_calls.end())
+                if (expected_to_output_calls_map[call].required)
                 {
-                    extra << CHECK << "Call " << call_name.str() << " made correctly.\n";
-                    points += subr.points_calls;
+                    if (actual_calls.find(call) != actual_calls.end())
+                    {
+                        extra << CHECK << "Required Call " << call_name.str() << " made correctly +" << subr.points_calls << " points.\n";
+                        points += subr.points_calls;
+                    }
+                    else
+                    {
+                        extra << MISS << "Required Call " << call_name.str() << " was not made -" << subr.points_calls << " points.\n";
+                    }
                 }
                 else
                 {
-                    extra << MISS << "Call " << call_name.str() << " was not made.\n";
+                    if (actual_calls.find(call) != actual_calls.end())
+                    {
+                        extra << CHECK << "Optional Call " << call_name.str() << " made correctly +0 points.\n";
+                    }
                 }
             }
+
+            // At most can lose (subr.calls.size() + 1) * deductions-per-mistake here.
+            int max_mistakes = 0;
+            int mistakes_made = 0;
+            for (const auto& call : subr.calls)
+                if (call.required)
+                    max_mistakes++;
+
             for (const auto& call : actual_calls)
             {
                 std::stringstream call_name;
@@ -663,14 +724,19 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
 
                 if (expected_calls.find(call) == expected_calls.end())
                 {
-                    extra << MISS << "Unexpected Call " << call_name.str() << " made.\n";
+                    extra << MISS << "Unexpected Call " << call_name.str() << " made -" << ((max_mistakes >= mistakes_made) ? subr.deductions_edist : 0) << " points.\n";
+                    if (max_mistakes >= mistakes_made)
+                        points -= subr.deductions_edist;
+                    mistakes_made++;
                 }
             }
+            if (mistakes_made > max_mistakes)
+                extra << MISS << "Threshold of points lost via unexpected calls was met.\n";
 
             // Read answer check sigh...
-            bool all_answers_read = true;
-            if (subr.points_read_answer > 0)
+            if (subr.points_read_answer > 0 && !subr.calls.empty())
             {
+                bool all_answers_read = true;
                 for (const auto& call : actual_calls)
                 {
                     std::stringstream call_name;
@@ -701,18 +767,29 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
                         }
                     }
                 }
+                if (all_answers_read)
+                {
+                    points += subr.points_read_answer;
+                    if (!actual_calls.empty())
+                        extra << CHECK << "Answers from all subroutines were pulled from the stack +" << subr.points_read_answer << " points.\n";
+                    else
+                        extra << CHECK << "No subroutine calls! No penalty for not pulling answers +" << subr.points_read_answer << " points.\n";
+                }
+                else
+                {
+                    extra << MISS << "Not all answers were pulled from the stack -" << subr.points_read_answer << " points.\n";
+                }
             }
-            if (all_answers_read)
-                points += subr.points_read_answer;
+
 
             // If all local variables are wrong then it can be argued that they was saving registers
             // And forgot to save locals...
             if (all_locals_wrong)
             {
                 // Bro do you even calling convention
-                if (actual_stack.size() > subr.params.size() + 3)
-                    // Truncate stack to last num_params + 3 elements the stuff we care about (don't do expected since ed forgiveness handles it).
-                    actual_stack.erase(actual_stack.begin(), actual_stack.begin() + (actual_stack.size() - subr.params.size() - 3));
+                if (actual_stack.size() > 3)
+                    // Truncate stack to last num_params + 3 (ra,rv,ofp) elements the stuff we care about (don't do expected since ed forgiveness handles it).
+                    actual_stack.erase(actual_stack.begin(), actual_stack.begin() + (actual_stack.size() - 3));
                 if (!subr.locals.empty())
                     extra << "      All locals were not found, so locals aren't included in structure check.\n";
             }
@@ -730,7 +807,13 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
             if (mistakes == 0)
                 extra << "      Found no structural mistakes in the stack.  No changes needed.\n";
             else
-                extra << "      Found " << mistakes << " structural mistakes in stack -" << subr.deductions_edist * mistakes << ".\n";
+                extra << "      Found " << mistakes << " structural mistakes in stack -" << subr.deductions_edist * mistakes << " points.\n";
+
+            if (points < 0)
+            {
+                extra << "      Points earned on test negative! Setting earned points for test to zero.\n";
+                points = 0;
+            }
 
             output.passed = (ed_grade == 0) && (ed_forgiveness == 0);
             output.extra_output += extra.str();
@@ -846,12 +929,12 @@ void lc3_write_test_report(std::stringstream& oss, lc3_test& test, int& minipass
         if (output.points)
         {
             oss << (j + 1) << " (" << (output.passed ? 'P' : 'F') << " " << output.earned << " / " << output.points <<
-                ") " << type << "\n  expected (right): " << output.expected << "\n    actual  (left): " << output.actual << "\n";
+                ") " << type << "\n  expected: " << output.expected << "\n    actual: " << output.actual << "\n";
         }
         else
         {
-            oss << (j + 1) << " (" << (output.passed ? 'P' : 'F') << ") " << type << "\n  expected (right): " << output.expected <<
-                "\n    actual  (left): " << output.actual << "\n";
+            oss << (j + 1) << " (" << (output.passed ? 'P' : 'F') << ") " << type << "\n  expected: " << output.expected <<
+                "\n    actual : " << output.actual << "\n";
         }
 
         if (!output.extra_output.empty())

@@ -21,6 +21,7 @@ enum
     BASE_2,
     BASE_10,
     BASE_16,
+    BASE_CHAR,
     NUM_BASES,
     BASE_CC,
 };

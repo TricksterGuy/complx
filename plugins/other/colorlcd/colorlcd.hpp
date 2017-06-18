@@ -6,7 +6,7 @@
 #include "colorlcdgui.h"
 
 #define COLORLCD_MAJOR_VERSION 1
-#define COLORLCD_MINOR_VERSION 3
+#define COLORLCD_MINOR_VERSION 4
 
 wxDECLARE_EVENT(wxEVT_COMMAND_CREATE_DISPLAY, wxThreadEvent);
 wxDECLARE_EVENT(wxEVT_COMMAND_DESTROY_DISPLAY, wxThreadEvent);
@@ -34,6 +34,7 @@ public:
     void InitDisplay(wxThreadEvent& event);
     void UpdateDisplay(wxThreadEvent& event);
     void DestroyDisplay(wxThreadEvent& event);
+    virtual bool AvailableInLC3Test() const {return false;}
 private:
     unsigned short width;
     unsigned short height;

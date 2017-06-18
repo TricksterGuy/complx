@@ -588,8 +588,10 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
                     {
                         if (ggchild->GetName() == "call")
                         {
+                            wxString required = ggchild->GetAttribute("required", "1");
                             wxXmlNode* gggchild = ggchild->GetChildren();
                             lc3_subr_output_subr_call call;
+                            call.required = wxAtoi(required) != 0;
                             while (gggchild)
                             {
                                 if (gggchild->GetName() == "name")
@@ -597,7 +599,7 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
                                 else if (gggchild->GetName() == "params")
                                     tokenize(gggchild->GetNodeContent().ToStdString(), call.params, ",");
                                 else
-                                    throw XmlTestParserException(wxString::Format("1Unknown tag found in %s %s", ggchild->GetName(), gggchild->GetName()), gggchild);
+                                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", ggchild->GetName(), gggchild->GetName()), gggchild);
                                 gggchild = getNextNode(gggchild);
                             }
                             subr.calls.push_back(call);
@@ -674,7 +676,10 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
             output.points = subr.points_locals * subr.locals.size() +
                             subr.points_params * subr.params.size() +
                             subr.points_answer + subr.points_r5 + subr.points_r7 + subr.points_r6 +
-                            subr.points_calls * subr.calls.size() + subr.points_read_answer;
+                            subr.points_read_answer;
+            for (const auto& call : subr.calls)
+                if (call.required)
+                    output.points += subr.points_calls;
         }
         else if (child->GetName() != "comment")
             return false;

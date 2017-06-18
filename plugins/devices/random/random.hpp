@@ -5,7 +5,7 @@
 #include <random>
 
 #define RANDOM_MAJOR_VERSION 1
-#define RANDOM_MINOR_VERSION 3
+#define RANDOM_MINOR_VERSION 4
 
 class RandomPlugin : public DeviceRegisterPlugin
 {
