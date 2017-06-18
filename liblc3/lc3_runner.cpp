@@ -59,6 +59,7 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     state.warn_limits[LC3_INVALID_CHARACTER_WRITE] = 100;
     state.warn_limits[LC3_RESERVED_MEM_WRITE] = 100;
     state.warn_limits[LC3_RESERVED_MEM_READ] = 100;
+    state.warn_limits[LC3_PUTSP_UNEXPECTED_NUL] = 100;
 
 
     // Set Stack Flags

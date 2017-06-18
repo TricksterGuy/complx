@@ -16,6 +16,8 @@ const char* WARNING_MESSAGES[LC3_WARNINGS] =
     "Trying to write to the display when its not ready",
     "Trying to read from the keyboard when its not ready",
     "Turning off machine via the MCR register",
+    "PUTSP called with invalid address x%04x",
+    "PUTSP found an unexpected NUL byte at address x%04x",
 };
 
 /** lc3_decode
@@ -422,6 +424,7 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
     }
     else
     {
+        bool putsp_should_stop = false;
         switch(trap.vector)
         {
         case TRAP_GETC:
@@ -466,20 +469,30 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
             // Or at least every implementation I've seen writes it
             // so that it ends when a NUL is encountered and not a
             // memory address with 0x0000 in it. Meh...
-            while (state.mem[r0] != 0x0000)
+            if ((r0 < 0x3000U || r0 >= 0xFE00U) && !kernel_mode)
             {
-                unsigned short chunk = state.mem[r0];
-                if ((chunk & 0xFF) != 0)
-                    lc3_write_char(state, *state.output, chunk & 0xFF);
-                else
-                    break;
-                if ((chunk & 0xFF00) != 0)
-                    lc3_write_char(state, *state.output, (chunk >> 8) & 0xFF);
-                else
-                    break;
-                r0++;
+                lc3_warning(state, LC3_PUTSP_INVALID_MEMORY, r0, 0);
             }
-            state.output->flush();
+            else
+            {
+                while (state.mem[r0] != 0x0000)
+                {
+                    if (putsp_should_stop)
+                        lc3_warning(state, LC3_PUTSP_UNEXPECTED_NUL, r0, 0);
+                    unsigned short chunk = state.mem[r0];
+                    if ((chunk & 0xFF) != 0)
+                        lc3_write_char(state, *state.output, chunk & 0xFF);
+                    else
+                        lc3_warning(state, LC3_PUTSP_UNEXPECTED_NUL, r0, 0);
+                    if ((chunk & 0xFF00) != 0)
+                        lc3_write_char(state, *state.output, (chunk >> 8) & 0xFF);
+                    else
+                        putsp_should_stop = true;
+                    r0++;
+                }
+                state.output->flush();
+            }
+
             break;
         case TRAP_HALT:
             state.halted = 1;
