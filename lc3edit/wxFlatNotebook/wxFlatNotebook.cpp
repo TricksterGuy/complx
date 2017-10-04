@@ -1245,7 +1245,7 @@ void wxPageContainer::DoDeletePage(size_t page)
 	}
 
 	// same thing with the active page
-	if (m_iActivePage > (int)page || (int)page >= m_pagesInfoVec.Count())
+	if (m_iActivePage > (int)page || page >= m_pagesInfoVec.Count())
 	{
 		newActivePageIndex = m_iActivePage-1;
 	}
