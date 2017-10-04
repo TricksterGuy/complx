@@ -403,7 +403,11 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, wxXmlNode* root)
                 if (grandchild->GetName() == "address")
                     input.address = grandchild->GetNodeContent();
                 else if (grandchild->GetName() == "value")
+                {
                     tokenize(grandchild->GetNodeContent().ToStdString(), input.array, ",");
+                    if (input.array.empty())
+                        throw XmlTestParserException(wxString::Format("%s must be given at least one element", child->GetName()), grandchild);
+                }
                 else
                     throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), grandchild->GetName()), grandchild);
                 grandchild = getNextNode(grandchild);
@@ -552,7 +556,11 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
                 if (grandchild->GetName() == "address")
                     output.address = grandchild->GetNodeContent();
                 else if (grandchild->GetName() == "value")
+                {
                     tokenize(grandchild->GetNodeContent().ToStdString(), output.array, ",");
+                    if (output.array.empty())
+                        throw XmlTestParserException(wxString::Format("%s must be given at least one element", child->GetName()), grandchild);
+                }
                 else
                     throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), grandchild->GetName()), grandchild);
                 grandchild = getNextNode(grandchild);
