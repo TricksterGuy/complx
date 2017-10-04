@@ -23,7 +23,7 @@ std::string join(const std::vector<std::string>& vec, const std::string& join)
     if (vec.empty()) return "";
 
     std::stringstream oss;
-    for (unsigned int i = 0; i < vec.size() - 1; i++)
+    for (int i = 0; i < (int)vec.size() - 1; i++)
         oss << vec[i] << join;
     oss << vec[vec.size() - 1];
     return oss.str();
@@ -986,7 +986,8 @@ std::string lc3_test_input_string(lc3_test_input& test)
         oss << "Array at MEM[";
         oss << test.address;
         oss << "] = ";
-        for (unsigned int i = 0; i < test.array.size() - 1; i++)
+
+        for (int i = 0; i < (int)test.array.size() - 1; i++)
         {
             oss << test.array[i];
             oss << ", ";
@@ -1046,7 +1047,7 @@ std::string lc3_test_output_string(lc3_test_output& test)
         oss << "Array at MEM[";
         oss << test.address;
         oss << "] " << get_comp_op(test.cmp_type) << " [";
-        for (unsigned int i = 0; i < test.array.size() - 1; i++)
+        for (int i = 0; i < (int)test.array.size() - 1; i++)
         {
             oss << test.array[i];
             oss << ", ";
