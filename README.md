@@ -51,6 +51,9 @@ Execute these commands
 * sudo apt-get update
 * sudo apt-get install complx-tools
 
+# Installation from the AUR (Arch Linux and it's forks.)
+Get the package from the [AUR](https://aur.archlinux.org/packages/complx-git/)
+
 # Installation from Source via scripts
 You can run one of the install scripts depending on your platform, which does everything listed in the below section.
 * Ubuntu 14.04 and above sudo ./install.sh
