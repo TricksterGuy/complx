@@ -819,7 +819,7 @@ void ComplxFrame::UpdateRegister(wxTextCtrl* text, int value, int index)
         text->SetValue(wxString::Format(_("%d"), (short)value));
         break;
     case BASE_16:
-        text->SetValue(wxString::Format(_("0x%04X"), (unsigned short)value));
+        text->SetValue(wxString::Format(_("x%04X"), (unsigned short)value));
         break;
     case BASE_CHAR:
         if (value > 0 && value <= 255)
