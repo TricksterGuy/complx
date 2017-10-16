@@ -704,7 +704,7 @@ void lc3_warning(lc3_state& state, const std::string& msg)
     char warning[256];
     std::string message;
 
-    sprintf(warning, "Warning at 0x%04x: %s", state.pc-1, msg.c_str());
+    sprintf(warning, "Warning at x%04x: %s", state.pc-1, msg.c_str());
     message = warning;
     (*state.warning) << message << std::endl;
 
