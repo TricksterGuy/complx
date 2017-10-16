@@ -106,7 +106,7 @@ wxString DebugInfoList::OnGetBreakpointText(long item, long column) const
         ret = wxString::FromUTF8(info.label.c_str());
         break;
     case DebugInfoAddress:
-        ret = sym.empty() ? wxString::Format(_("0x%04X"), info.addr) : wxString::FromUTF8(sym.c_str());
+        ret = sym.empty() ? wxString::Format(_("x%04X"), info.addr) : wxString::FromUTF8(sym.c_str());
         break;
     case DebugInfoEnabled:
         ret = info.enabled ? _("YES") : _("NO");
@@ -148,7 +148,7 @@ wxString DebugInfoList::OnGetWatchpointText(long item, long column) const
         if (is_reg)
             ret = wxString::Format(_("R%d"), info.data);
         else
-            ret = sym.empty() ? wxString::Format(_("MEM[0x%04X]"), info.data) : wxString::FromUTF8(sym.c_str());
+            ret = sym.empty() ? wxString::Format(_("MEM[x%04X]"), info.data) : wxString::FromUTF8(sym.c_str());
         break;
     case DebugInfoEnabled:
         ret = info.enabled ? _("YES") : _("NO");

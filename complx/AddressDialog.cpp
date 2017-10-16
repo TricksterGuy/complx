@@ -11,7 +11,7 @@ extern lc3_state state;
 AddressDialog::AddressDialog(wxWindow* parent, unsigned short addr, bool change_addr) : AddressDialogDecl(parent)
 {
     std::string sym = lc3_sym_rev_lookup(state, addr);
-    address = sym.empty() ? wxString::Format(_("0x%04X"), addr) : wxString::FromUTF8(sym.c_str());
+    address = sym.empty() ? wxString::Format(_("x%04X"), addr) : wxString::FromUTF8(sym.c_str());
 
     value = wxString::Format(_("%d"), state.mem[addr]);
 

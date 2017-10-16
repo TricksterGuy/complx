@@ -485,7 +485,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
                 {
                     extra << "      [WARNING] Could not determine number of parameters for subroutine " <<
                           lc3_sym_rev_lookup(state, subr_location) << " at address " <<
-                          std::hex << "0x" << subr_location << "\n";
+                          std::hex << "x" << subr_location << "\n";
                 }
                 unsigned short start = call_info.r6 + call_info.params.size();
                 // Screams...
@@ -510,34 +510,34 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
             }
 
             for (const auto& item : expected_stack)
-                expected << std::hex << "0x" << item << " ";
+                expected << std::hex << "x" << item << " ";
             expected << "params: ";
             for (unsigned int j = 0; j < expected_params.size(); j++)
             {
                 const auto& item = expected_params[j];
-                expected << std::hex << "0x" << item;
+                expected << std::hex << "x" << item;
                 if (j != expected_params.size() - 1)
                     expected << ",";
             }
 
-            expected << " r5: " << std::hex << "0x" << (short)r5 <<
-                     " r6: " << std::hex << "0x" << (actual_r6 - 1) <<
-                     " r7: " << std::hex << "0x" << (short)(r7 + 1);
+            expected << " r5: " << std::hex << "x" << (short)r5 <<
+                     " r6: " << std::hex << "x" << (actual_r6 - 1) <<
+                     " r7: " << std::hex << "x" << (short)(r7 + 1);
 
 
             for (const auto& item : actual_stack)
-                actual << std::hex << "0x" << item << " ";
+                actual << std::hex << "x" << item << " ";
             actual << "params: ";
             for (unsigned int j = 0; j < actual_params.size(); j++)
             {
                 const auto& item = actual_params[j];
-                actual << std::hex << "0x" << item;
+                actual << std::hex << "x" << item;
                 if (j != actual_params.size() - 1)
                     actual << ",";
             }
-            actual << " r5: " << std::hex << "0x" << state.regs[5] <<
-                   " r6: " << std::hex << "0x" << state.regs[6] <<
-                   " r7: " << std::hex << "0x" << state.regs[7];
+            actual << " r5: " << std::hex << "x" << state.regs[5] <<
+                   " r6: " << std::hex << "x" << state.regs[6] <<
+                   " r7: " << std::hex << "x" << state.regs[7];
 
             // now that I have all information available time for some checks.
             std::map<short, int> actual_stack_map;
@@ -668,7 +668,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
                 for (unsigned int i = 0; i < call.params.size(); i++)
                 {
 
-                    call_name << std::hex << "0x" << call.params[i];
+                    call_name << std::hex << "x" << call.params[i];
                     if (i != call.params.size() - 1)
                         call_name << ",";
                 }
@@ -708,7 +708,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
 
                 std::string name = lc3_sym_rev_lookup(state, call.address);
                 if (name.empty())
-                    call_name << "0x" << std::hex << call.address << "(";
+                    call_name << "x" << std::hex << call.address << "(";
                 else
                     call_name << name << "(";
                 if (state.subroutines.find(call.address) == state.subroutines.end())
@@ -716,7 +716,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
                 for (unsigned int i = 0; i < call.params.size(); i++)
                 {
 
-                    call_name << std::hex << "0x" << call.params[i];
+                    call_name << std::hex << "x" << call.params[i];
                     if (i != call.params.size() - 1)
                         call_name << ",";
                 }
@@ -743,7 +743,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
 
                     std::string name = lc3_sym_rev_lookup(state, call.address);
                     if (name.empty())
-                        call_name << "0x" << std::hex << call.address << "(";
+                        call_name << "x" << std::hex << call.address << "(";
                     else
                         call_name << name << "(";
                     if (state.subroutines.find(call.address) == state.subroutines.end())
@@ -751,7 +751,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
                     for (unsigned int i = 0; i < call.params.size(); i++)
                     {
 
-                        call_name << std::hex << "0x" << call.params[i];
+                        call_name << std::hex << "x" << call.params[i];
                         if (i != call.params.size() - 1)
                             call_name << ",";
                     }

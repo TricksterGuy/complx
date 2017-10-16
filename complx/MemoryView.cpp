@@ -167,7 +167,7 @@ void MemoryView::SetValue(int item, int col, const wxString &value)
         if (data == -1)
             lc3_sym_add(state, newsym, addr);
         else
-            wxMessageBox(wxString::Format("ERROR! The symbol %s already exists at address 0x%04x",
+            wxMessageBox(wxString::Format("ERROR! The symbol %s already exists at address x%04x",
                                           newsym, data), _("ERROR"));
         break;
     case MemoryBinary:

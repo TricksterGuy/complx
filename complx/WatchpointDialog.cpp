@@ -19,7 +19,7 @@ WatchpointDialog::WatchpointDialog(wxWindow* parent, lc3_watchpoint_info info, b
     else
     {
         std::string sym = lc3_sym_rev_lookup(state, info.data);
-        target = sym.empty() ? wxString::Format(_("MEM[0x%04X]"), info.data) : wxString::FromUTF8(sym.c_str());
+        target = sym.empty() ? wxString::Format(_("MEM[x%04X]"), info.data) : wxString::FromUTF8(sym.c_str());
     }
 
     times = info.max_hits;

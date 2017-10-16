@@ -13,7 +13,7 @@ BreakpointDialog::BreakpointDialog(wxWindow* parent, lc3_breakpoint_info info, b
     condition = wxString::FromUTF8(info.condition.c_str());
 
     std::string sym = lc3_sym_rev_lookup(state, info.addr);
-    address = sym.empty() ? wxString::Format(_("0x%04X"), info.addr) : wxString::FromUTF8(sym.c_str());
+    address = sym.empty() ? wxString::Format(_("x%04X"), info.addr) : wxString::FromUTF8(sym.c_str());
 
     times = info.max_hits;
     enabled = info.enabled;
