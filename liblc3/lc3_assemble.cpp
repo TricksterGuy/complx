@@ -3,6 +3,7 @@
 #include "lc3_symbol.hpp"
 #include "lc3_runner.hpp"
 #include "lc3_debug.hpp"
+#include "lc3_parser.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -496,6 +497,11 @@ void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>&
             {
                 THROWANDDO(LC3AssembleException(context.line, symbol, INVALID_SYMBOL, context.lineno), goto symbolcheckdone);
             }
+            if (is_hex(symbol))
+            {
+                THROWANDDO(LC3AssembleException(context.line, symbol, INVALID_SYMBOL, context.lineno), goto symbolcheckdone);
+            }
+
 
             // Validate symbol should only have alphanumeric
             // And should start with an alpha character

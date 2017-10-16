@@ -645,3 +645,16 @@ void tokenize(const std::string& str, std::vector<std::string>& tokens, const st
         pos = str.find_first_of(delimiters, lastPos);
     }
 }
+
+bool is_hex(const std::string& str)
+{
+    if (str.size() < 2 || str[0] != 'x')
+        return false;
+
+    for (unsigned int i = 1; i < str.size(); i++)
+    {
+        if (!isxdigit(str[i]))
+            return false;
+    }
+    return true;
+}

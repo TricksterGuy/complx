@@ -26,6 +26,11 @@ bool is_number_overflow(const LC3AssembleException& ex)
     return ex.get_id() == NUMBER_OVERFLOW;
 }
 
+bool is_invalid_symbol(const LC3AssembleException& ex)
+{
+    return ex.get_id() == INVALID_SYMBOL;
+}
+
 BOOST_FIXTURE_TEST_CASE(AddImmediateTest, LC3AssembleTest)
 {
     BOOST_CHECK_EQUAL(lc3_assemble_one(state, 0x3000, "ADD R0, R0, 0"), 0x1020);
@@ -102,4 +107,46 @@ BOOST_FIXTURE_TEST_CASE(FillTest, LC3AssembleTest)
     );
     BOOST_CHECK_EXCEPTION(lc3_assemble(state, bad_file, ranges, options), LC3AssembleException, is_number_overflow);
 
+}
+
+BOOST_FIXTURE_TEST_CASE(InvalidSymbolTest, LC3AssembleTest)
+{
+    std::istringstream long_sym(
+        ".orig x3000\n"
+        "IAMAVERYLONGSYMBOLGUIZE .fill 0\n"
+        ".end"
+    );
+    std::vector<code_range> ranges;
+    LC3AssembleOptions options;
+    options.multiple_errors = false;
+
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, long_sym, ranges, options), LC3AssembleException, is_invalid_symbol);
+
+    std::istringstream register_sym(
+        ".orig x3000\n"
+        "R0 .fill 0\n"
+        ".end"
+    );
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, register_sym, ranges, options), LC3AssembleException, is_invalid_symbol);
+
+    std::istringstream hexa_sym(
+        ".orig x3000\n"
+        "x8 .fill 0\n"
+        ".end"
+    );
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, hexa_sym, ranges, options), LC3AssembleException, is_invalid_symbol);
+
+    std::istringstream num_sym(
+        ".orig x3000\n"
+        "8HIYA .fill 0\n"
+        ".end"
+    );
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, num_sym, ranges, options), LC3AssembleException, is_invalid_symbol);
+
+    std::istringstream invalid_sym(
+        ".orig x3000\n"
+        "DOLLADOLLA$$$ .fill 0\n"
+        ".end"
+    );
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, invalid_sym, ranges, options), LC3AssembleException, is_invalid_symbol);
 }

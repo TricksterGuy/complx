@@ -75,5 +75,7 @@ short check_value(long, int, bool, bool, const LC3AssembleContext&);
 void tokenize(const std::string& str, std::vector<std::string>& tokens, const std::string& delimiters = " ");
 /* Checks if token is a register or immediate value */
 bool is_register_or_imm(const std::string& token);
+/* Checks if token is a hexadecimal literal */
+bool is_hex(const std::string& token);
 
 #endif
