@@ -286,6 +286,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
 
     // Fill in the output values
     test.has_halted = state.halted;
+    test.has_halted_normally = (state.mem[state.pc] == 0xF025 || (state.true_traps && (state.mem[0xFFFE] >> 15 & 1) == 0));
     test.executions = state.executions;
     test.warnings = state.warnings;
     test.warning = newwarning->str();
@@ -907,16 +908,14 @@ void lc3_write_test_report(std::stringstream& oss, lc3_test_suite& suite, const 
 void lc3_write_test_report(std::stringstream& oss, lc3_test& test, int& minipass_count, int& total_minitests)
 {
     int pass_count = 0;
+    oss << (test.passed ? "Passed" : "Failed") << " Test case - " << test.name;
     if (test.max_points)
-    {
-        oss << (test.passed ? "Passed" : "Failed") << " Test case - " << test.name << " " <<
-            test.points << " / " << test.max_points << " " << (test.has_halted ? "" : "(Did not finish!)") << "\n";
-    }
-    else
-    {
-        oss << (test.passed ? "Passed" : "Failed") << " Test case - " << test.name << " " <<
-            (test.has_halted ? "" : "(Did not finish!)") << "\n";
-    }
+        oss << " " << test.points << " / " << test.max_points;
+    if (!test.has_halted)
+        oss << " (Did not finish!)";
+    else if (!test.has_halted_normally)
+        oss << " (Terminated abnormally!)";
+    oss << "\n";
 
     if (test.passed) pass_count++;
     oss << "----------------------\n";

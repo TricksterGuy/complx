@@ -103,7 +103,7 @@ typedef struct lc3_test_output
 typedef struct lc3_test
 {
     lc3_test() : points(0), max_points(0), passed(false), true_traps(false), interrupt_enabled(false),
-        disable_plugins(false), randomize(false), has_max_executions(false), has_halted(false),
+        disable_plugins(false), randomize(false), has_max_executions(false), has_halted(false), has_halted_normally(false),
         executions(0), max_executions(0), warnings(0) {}
     std::string name;
     std::string warning;
@@ -118,6 +118,7 @@ typedef struct lc3_test
     bool randomize;
     bool has_max_executions;
     bool has_halted;
+    bool has_halted_normally; // Halt via the instruction.
     unsigned long executions;
     unsigned long max_executions;
     unsigned long warnings;

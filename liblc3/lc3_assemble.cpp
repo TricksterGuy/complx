@@ -102,6 +102,9 @@ std::string LC3AssembleException::what() const throw()
         case INVALID_NUMBER:
             snprintf(what_str, 1023, "Found signed number expecting unsigned number on line %d: %s", lineno, params[0].c_str());
             break;
+        case INVALID_BYTES:
+            snprintf(what_str, 1023, "Invalid bytes found in code on line %d: %c(%02hhx)", lineno, params[0][0], params[0][0]);
+            break;
         case NUMBER_OVERFLOW:
             snprintf(what_str, 1023, "%s is too big for an immediate value expected %s bits got %s bits found on line %d", params[0].c_str(), params[1].c_str(), params[2].c_str(), lineno);
             break;
@@ -183,6 +186,9 @@ std::string LC3AssembleException::what() const throw()
             break;
         case INVALID_NUMBER:
             snprintf(what_str, 1023, "Found signed number expecting unsigned number %s", params[0].c_str());
+            break;
+        case INVALID_BYTES:
+            snprintf(what_str, 1023, "Invalid bytes found in code %c(%02hhx)", params[0][0], params[0][0]);
             break;
         case NUMBER_OVERFLOW:
             snprintf(what_str, 1023, "%s is too big for an immediate value expected %s bits got %s bits", params[0].c_str(), params[1].c_str(), params[2].c_str());
@@ -466,6 +472,12 @@ void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>&
         }
 
         if (line.empty()) continue;
+
+        for (const char& c : line)
+        {
+            if (static_cast<unsigned char>(c) >= 0x7F || !(isgraph(c) || isspace(c)))
+                THROWANDDO(LC3AssembleException(context.line, std::string(1, c), INVALID_BYTES, context.lineno), continue);
+        }
 
         if (in_orig && !comments.str().empty())
         {

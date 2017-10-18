@@ -44,6 +44,7 @@ enum LC3AssembleExceptionTypes
     INVALID_FLAGS,
     INVALID_CHARACTER,
     INVALID_NUMBER, // Signed number given to unsigned value.
+    INVALID_BYTES, // Non ASCII bytes found in input.
     NUMBER_OVERFLOW,
     OFFSET_OVERFLOW,
     MEMORY_OVERFLOW,
