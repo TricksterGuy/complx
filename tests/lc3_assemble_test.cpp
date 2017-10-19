@@ -136,6 +136,13 @@ BOOST_FIXTURE_TEST_CASE(InvalidSymbolTest, LC3AssembleTest)
     );
     BOOST_CHECK_EXCEPTION(lc3_assemble(state, hexa_sym, ranges, options), LC3AssembleException, is_invalid_symbol);
 
+    std::istringstream bin_sym(
+        ".orig x3000\n"
+        "b101 .fill 0\n"
+        ".end"
+    );
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, bin_sym, ranges, options), LC3AssembleException, is_invalid_symbol);
+
     std::istringstream num_sym(
         ".orig x3000\n"
         "8HIYA .fill 0\n"
@@ -149,4 +156,31 @@ BOOST_FIXTURE_TEST_CASE(InvalidSymbolTest, LC3AssembleTest)
         ".end"
     );
     BOOST_CHECK_EXCEPTION(lc3_assemble(state, invalid_sym, ranges, options), LC3AssembleException, is_invalid_symbol);
+}
+
+BOOST_FIXTURE_TEST_CASE(BinaryLiteralTest, LC3AssembleTest)
+{
+    std::istringstream file(
+        ".orig x3000\n"
+        ".fill b0\n"
+        ".fill b1\n"
+        ".fill b0111000011101111\n"
+        "ADD R0, R1, b01111\n"
+        "LEA R0, b011110000\n"
+        "JSR b01111000001\n"
+        "LDR R0, R1, b011111\n"
+        ".end"
+    );
+    std::vector<code_range> ranges;
+    LC3AssembleOptions options;
+    options.multiple_errors = false;
+    lc3_assemble(state, file, ranges, options);
+
+    BOOST_CHECK_EQUAL(state.mem[0x3000], 0);
+    BOOST_CHECK_EQUAL(state.mem[0x3001], 1);
+    BOOST_CHECK_EQUAL(state.mem[0x3002], 0x70EF);
+    BOOST_CHECK_EQUAL(state.mem[0x3003], 0x106F);
+    BOOST_CHECK_EQUAL(state.mem[0x3004], (short)0xE0F0);
+    BOOST_CHECK_EQUAL(state.mem[0x3005], 0x4BC1);
+    BOOST_CHECK_EQUAL(state.mem[0x3006], 0x605F);
 }

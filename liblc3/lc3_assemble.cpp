@@ -509,7 +509,7 @@ void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>&
             {
                 THROWANDDO(LC3AssembleException(context.line, symbol, INVALID_SYMBOL, context.lineno), goto symbolcheckdone);
             }
-            if (is_hex(symbol))
+            if (is_hex(symbol) || is_binary(symbol))
             {
                 THROWANDDO(LC3AssembleException(context.line, symbol, INVALID_SYMBOL, context.lineno), goto symbolcheckdone);
             }

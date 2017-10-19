@@ -62,7 +62,7 @@ void destroy_plugin(Plugin* ptr = NULL)
   * @todo: document this function
   */
 ColorLCDPlugin::ColorLCDPlugin(unsigned short _width, unsigned short _height, unsigned short _initaddr, unsigned short _startaddr) :
-    Plugin(COLORLCD_MAJOR_VERSION, COLORLCD_MINOR_VERSION, LC3_OTHER, "Black & White LCD Display"), width(_width),
+    Plugin(COLORLCD_MAJOR_VERSION, COLORLCD_MINOR_VERSION, LC3_OTHER, "Color LCD Display"), width(_width),
     height(_height), initaddr(_initaddr), startaddr(_startaddr), lcd(NULL),
     lcd_initializing(false)
 {

@@ -77,5 +77,7 @@ void tokenize(const std::string& str, std::vector<std::string>& tokens, const st
 bool is_register_or_imm(const std::string& token);
 /* Checks if token is a hexadecimal literal */
 bool is_hex(const std::string& token);
+/* Checks if token is a binary literal */
+bool is_binary(const std::string& token);
 
 #endif

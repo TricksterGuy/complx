@@ -388,11 +388,11 @@ void get_number(std::string& num, int& base, bool& negate)
         num = num.substr(num.find('x')+1);
         base = 16;
     }
-    /*else if ((num[0] == '0' && (num.size() > 1 && num[1] == 'b')) || num[0] == 'b')
+    else if (/*(num[0] == '0' && (num.size() > 1 && num[1] == 'b')) ||*/ num[0] == 'b')
     {
         num = num.substr(num.find('b')+1);
         base = 2;
-    }*/
+    }
     else if (num[0] == '0' && num.size() > 1)
     {
         num = num.substr(1);
@@ -654,6 +654,19 @@ bool is_hex(const std::string& str)
     for (unsigned int i = 1; i < str.size(); i++)
     {
         if (!isxdigit(str[i]))
+            return false;
+    }
+    return true;
+}
+
+bool is_binary(const std::string& str)
+{
+    if (str.size() < 2 || str[0] != 'b')
+        return false;
+
+    for (unsigned int i = 1; i < str.size(); i++)
+    {
+        if (!(str[i] == '0' || str[i] == '1'))
             return false;
     }
     return true;

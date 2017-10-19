@@ -324,7 +324,7 @@ void TestCaseInfoPanel::Update(lc3_test& testcase)
 
     // Set up other
     executions->SetLabel(wxString::Format("%lu Instructions", testcase.executions));
-    if (!testcase.has_halted) halted->Show();
+    if (!testcase.has_halted || !testcase.has_halted_normally) halted->Show();
     if (testcase.warnings > 0)
     {
         warning->Show();
