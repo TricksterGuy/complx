@@ -268,8 +268,8 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
         // Do this num times or until halted.
         while (i < test.max_executions && !state.halted)
         {
-            //printf("%04x: %s (%x)\n", state.pc, lc3_disassemble(state, state.mem[state.pc]).c_str(), (unsigned short)state.mem[state.pc]);
-            /*printf("R0 %6d|x%04x\tR1 %6d|x%04x\tR2 %6d|x%04x\tR3 %6d|x%04x\nR4 %6d|x%04x\tR5 %6d|x%04x\tR6 %6d|x%04x\tR7 %6d|x%04x\nCC: %s\tPC: %04x\n\n",
+            /*printf("%04x: %s (%x)\n", state.pc, lc3_disassemble(state, state.mem[state.pc]).c_str(), (unsigned short)state.mem[state.pc]);
+            printf("R0 %6d|x%04x\tR1 %6d|x%04x\tR2 %6d|x%04x\tR3 %6d|x%04x\nR4 %6d|x%04x\tR5 %6d|x%04x\tR6 %6d|x%04x\tR7 %6d|x%04x\nCC: %s\tPC: %04x\n\n",
                    state.regs[0], (unsigned short)state.regs[0], state.regs[1], (unsigned short)state.regs[1], state.regs[2], (unsigned short)state.regs[2],
                    state.regs[3], (unsigned short)state.regs[3], state.regs[4], (unsigned short)state.regs[4], state.regs[5], (unsigned short)state.regs[5],
                    state.regs[6], (unsigned short)state.regs[6], state.regs[7], (unsigned short)state.regs[7], (state.n ? "N" : (state.z ? "Z" : "P")),
@@ -286,7 +286,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
 
     // Fill in the output values
     test.has_halted = state.halted;
-    test.has_halted_normally = (state.mem[state.pc] == 0xF025 || (state.true_traps && (state.mem[0xFFFE] >> 15 & 1) == 0));
+    test.has_halted_normally = (static_cast<unsigned short>(state.mem[state.pc]) == 0xF025 || (state.true_traps && (state.mem[0xFFFE] >> 15 & 1) == 0));
     test.executions = state.executions;
     test.warnings = state.warnings;
     test.warning = newwarning->str();
