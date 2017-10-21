@@ -1,4 +1,4 @@
-#complx
+complx
 ======
 [![Travis CI Build Status](https://travis-ci.org/TricksterGuy/complx.svg?branch=master)](https://travis-ci.org/TricksterGuy/complx)
 
@@ -45,11 +45,11 @@ complx is a suite of educational tools for learning lc3 assembly. It includes bo
     5. Plugin that adds a new trap that performs division and modulus
   * Plugins can add new device registers, traps, send interrupts, and add a new instruction
 
-# Installation from Packages via apt-get (Recommended! for ubuntu trusty and beyond.)
+# Installation from Packages via apt (Recommended! for Ubuntu Trusty\[14.04\] and beyond.)
 Execute these commands
 * sudo add-apt-repository ppa:tricksterguy87/ppa-gt-cs2110
-* sudo apt-get update
-* sudo apt-get install complx-tools
+* sudo apt update
+* sudo apt install complx-tools
 
 # Installation from Source via scripts
 You can run one of the install scripts depending on your platform, which does everything listed in the below section.
