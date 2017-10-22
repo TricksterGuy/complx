@@ -662,7 +662,8 @@ void ComplxFrame::OnRewind(wxCommandEvent& event)
 void ComplxFrame::SetupExecution(int run_mode, int runtime)
 {
     wxCriticalSectionLocker enter(threadCS);
-    UpdatePhrase("&Stop");
+    if (run_mode != RUNMODE_STEP && run_mode != RUNMODE_BACK)
+        UpdatePhrase("&Stop");
     if (thread != NULL)
     {
         if (thread->IsPaused()) return;
