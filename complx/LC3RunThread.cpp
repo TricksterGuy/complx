@@ -33,29 +33,10 @@ void* LC3RunThread::Entry()
     switch(run_mode)
     {
     case RUNMODE_RUN:
-
-        /* while(!state.halted)
-         {
-             static int i = 0;
-             static int max = rand() % 1000 + 500;
-             lc3_step(state);
-             if (TestDestroy()) return NULL;
-             i++;
-             if (i % max == 0)
-             {
-                 wxQueueEvent(frame, new wxThreadEvent(wxEVT_COMMAND_RUNTHREAD_UPDATE));
-                 max = rand() % 1000 + 500;
-                 Sleep(rand() % 100 + 0);
-             }
-             else
-                 Yield();
-         }*/
-
         while(!state.halted)
         {
             lc3_step(state);
             if (TestDestroy()) return NULL;
-            wxQueueEvent(frame, new wxThreadEvent(wxEVT_COMMAND_RUNTHREAD_UPDATE));
             Yield();
         }
         /*break;*/
@@ -100,7 +81,6 @@ void* LC3RunThread::Entry()
                 depth++;
 
             if (TestDestroy()) return NULL;
-            wxQueueEvent(frame, new wxThreadEvent(wxEVT_COMMAND_RUNTHREAD_UPDATE));
             Yield();
         }
         while (depth != 0 && !state.halted);
@@ -124,7 +104,6 @@ void* LC3RunThread::Entry()
                     lc3_back(state);
                     last = state.undo_stack.back();
                     if (TestDestroy()) return NULL;
-                    wxQueueEvent(frame, new wxThreadEvent(wxEVT_COMMAND_RUNTHREAD_UPDATE));
                     Yield();
                 }
             }
@@ -141,7 +120,6 @@ void* LC3RunThread::Entry()
             if (instr.data.opcode == JSR_INSTR || (instr.data.opcode == TRAP_INSTR && state.true_traps))
                 depth--;
             if (TestDestroy()) return NULL;
-            wxQueueEvent(frame, new wxThreadEvent(wxEVT_COMMAND_RUNTHREAD_UPDATE));
             Yield();
             // Don't have to handle interrupts here...
         }
@@ -157,17 +135,12 @@ void* LC3RunThread::Entry()
             lc3_back(state);
 
             if (TestDestroy()) return NULL;
-            wxQueueEvent(frame, new wxThreadEvent(wxEVT_COMMAND_RUNTHREAD_UPDATE));
             Yield();
         }
         break;
     }
 
     wxQueueEvent(frame, new wxThreadEvent(wxEVT_COMMAND_RUNTHREAD_COMPLETED));
-
-    /*frame->UpdateRegisters();
-    frame->UpdateMemory();
-    frame->UpdateStatus();*/
 
     return NULL;
 }

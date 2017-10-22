@@ -43,7 +43,6 @@ wxFileName currentFile;
 wxFileName currentTestFile;
 wxCriticalSection threadCS;
 LC3RunThread* thread = NULL;
-bool changed = false;
 bool refreshednoio = false;
 
 int complx_reader(lc3_state& state, std::istream& file);
@@ -105,7 +104,6 @@ ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) : ComplxFrameDecl(NUL
     UpdateStatus();
 
     Connect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_COMPLETED, wxThreadEventHandler(ComplxFrame::OnRunComplete));
-    Connect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_UPDATE, wxThreadEventHandler(ComplxFrame::OnRunUpdate));
     Connect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_IO, wxThreadEventHandler(ComplxFrame::OnIo));
     Connect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_NOIO, wxThreadEventHandler(ComplxFrame::OnNoIo));
     Connect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_OUTPUT, wxThreadEventHandler(ComplxFrame::OnOutput));
@@ -136,7 +134,6 @@ ComplxFrame::~ComplxFrame()
 
     complxframe = NULL;
     Disconnect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_COMPLETED, wxThreadEventHandler(ComplxFrame::OnRunComplete));
-    Disconnect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_UPDATE, wxThreadEventHandler(ComplxFrame::OnRunUpdate));
     Disconnect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_IO, wxThreadEventHandler(ComplxFrame::OnIo));
     Disconnect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_NOIO, wxThreadEventHandler(ComplxFrame::OnNoIo));
     Disconnect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_OUTPUT, wxThreadEventHandler(ComplxFrame::OnOutput));
@@ -665,7 +662,7 @@ void ComplxFrame::OnRewind(wxCommandEvent& event)
 void ComplxFrame::SetupExecution(int run_mode, int runtime)
 {
     wxCriticalSectionLocker enter(threadCS);
-    changed = false;
+    UpdatePhrase("&Stop");
     if (thread != NULL)
     {
         if (thread->IsPaused()) return;
@@ -673,7 +670,6 @@ void ComplxFrame::SetupExecution(int run_mode, int runtime)
         {
             thread->Delete();
             thread = NULL;
-            changed = true;
             std::cout.flush();
             console->Update();
             UpdatePlay();
@@ -699,29 +695,11 @@ void ComplxFrame::SetupExecution(int run_mode, int runtime)
     thread->Run();
 }
 
-
-void ComplxFrame::OnRunUpdate(wxThreadEvent& event)
-{
-    static int i = 0;
-
-    i = (i + 1) % (/*1024 * */(!changed ? 3 : 9));
-
-    if (i == 0 && !changed)
-    {
-        UpdatePhrase("&Stop");
-        changed = true;
-    }
-
-    if (i == 0)
-        console->Update();
-}
-
 void ComplxFrame::OnRunComplete(wxThreadEvent& event)
 {
     std::cout.flush();
     console->Update();
-    if (changed)
-        UpdatePlay();
+    UpdatePlay();
     UpdateRegisters();
     UpdateMemory();
     UpdateStatus();
@@ -776,7 +754,7 @@ void ComplxFrame::OnGetIo()
     if (thread != NULL && thread->IsPaused())
     {
         refreshednoio = false;
-        UpdatePlay();
+        UpdatePhrase("&Stop");
         thread->Resume();
     }
 }
