@@ -3,7 +3,6 @@
 
 wxDEFINE_EVENT(wxEVT_COMMAND_CREATE_DISPLAY, wxThreadEvent);
 wxDEFINE_EVENT(wxEVT_COMMAND_DESTROY_DISPLAY, wxThreadEvent);
-wxDEFINE_EVENT(wxEVT_COMMAND_UPDATE_DISPLAY, wxThreadEvent);
 
 static Plugin* instance = NULL;
 
@@ -86,13 +85,9 @@ ColorLCDPlugin::~ColorLCDPlugin()
   */
 void ColorLCDPlugin::InitDisplay(wxThreadEvent& event)
 {
-    lcd = new ColorLCD(wxTheApp->GetTopWindow(), width, height, startaddr);
+    lcd = new ColorLCD(wxTheApp->GetTopWindow(), width, height, startaddr, event.GetPayload<lc3_state*>());
     lcd_initializing = false;
     lcd->Show();
-    lcd->Connect(wxID_ANY, wxEVT_COMMAND_UPDATE_DISPLAY, wxThreadEventHandler(ColorLCD::OnUpdate));
-    wxThreadEvent* evt = new wxThreadEvent(wxEVT_COMMAND_UPDATE_DISPLAY);
-    evt->SetPayload<lc3_state*>(event.GetPayload<lc3_state*>());
-    wxQueueEvent(lcd, evt);
 }
 
 /** @brief DestroyDisplay
@@ -141,15 +136,7 @@ void ColorLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, sho
     else if (address >= startaddr && address < startaddr + width * height && !lcd_initializing)
     {
         if (lcd == NULL)
-        {
             lc3_warning(state, "Writing to LCD while its not initialized!");
-        }
-        else
-        {
-            wxThreadEvent* evt = new wxThreadEvent(wxEVT_COMMAND_UPDATE_DISPLAY);
-            evt->SetPayload<lc3_state*>(&state);
-            wxQueueEvent(lcd, evt);
-        }
     }
 }
 
@@ -157,10 +144,13 @@ void ColorLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, sho
   *
   * @todo: document this function
   */
-ColorLCD::ColorLCD(wxWindow* top, int _width, int _height, unsigned short _startaddr) :
-    COLORLCDGUI(top), state(NULL), width(_width), height(_height), startaddr(_startaddr)
+ColorLCD::ColorLCD(wxWindow* top, int _width, int _height, unsigned short _startaddr, lc3_state* s) :
+    COLORLCDGUI(top), timer(this), state(s), width(_width), height(_height), startaddr(_startaddr)
 {
     //Centre();
+    // 60 fps.
+    timer.Start(1000.0 / 60);
+    Connect(timer.GetId(), wxEVT_TIMER, wxTimerEventHandler(ColorLCD::OnUpdate), NULL, this);
     int x, y;
     GetParent()->GetScreenPosition(&x, &y);
     Move(x - GetSize().GetX(), y);
@@ -170,10 +160,8 @@ ColorLCD::ColorLCD(wxWindow* top, int _width, int _height, unsigned short _start
   *
   * @todo: document this function
   */
-void ColorLCD::OnUpdate(wxThreadEvent& event)
+void ColorLCD::OnUpdate(wxTimerEvent& event)
 {
-    /// @todo there has to be a better way of doing this than just storing the lc3_state object!
-    state = event.GetPayload<lc3_state*>();
     Refresh();
 }
 

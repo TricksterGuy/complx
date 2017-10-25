@@ -3,7 +3,6 @@
 
 wxDEFINE_EVENT(wxEVT_COMMAND_CREATE_DISPLAY, wxThreadEvent);
 wxDEFINE_EVENT(wxEVT_COMMAND_DESTROY_DISPLAY, wxThreadEvent);
-wxDEFINE_EVENT(wxEVT_COMMAND_UPDATE_DISPLAY, wxThreadEvent);
 
 static Plugin* instance = NULL;
 
@@ -95,11 +94,6 @@ void BWLCDPlugin::InitDisplay(wxThreadEvent& event)
     lcd = new BWLCD(wxTheApp->GetTopWindow(), width, height, startaddr, offcolor, oncolor);
     lcd_initializing = false;
     lcd->Show();
-    lcd->Connect(wxID_ANY, wxEVT_COMMAND_UPDATE_DISPLAY, wxThreadEventHandler(BWLCD::OnUpdate));
-
-    wxThreadEvent* evt = new wxThreadEvent(wxEVT_COMMAND_UPDATE_DISPLAY);
-    evt->SetPayload<lc3_state*>(event.GetPayload<lc3_state*>());
-    wxQueueEvent(lcd, evt);
 }
 
 /** @brief DestroyDisplay
@@ -148,15 +142,7 @@ void BWLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, short 
     else if (address >= startaddr && address < startaddr + width * height && !lcd_initializing)
     {
         if (lcd == NULL)
-        {
             lc3_warning(state, "Writing to LCD while its not initialized!");
-        }
-        else
-        {
-            wxThreadEvent* evt = new wxThreadEvent(wxEVT_COMMAND_UPDATE_DISPLAY);
-            evt->SetPayload<lc3_state*>(&state);
-            wxQueueEvent(lcd, evt);
-        }
     }
 }
 

@@ -368,15 +368,15 @@ int MemoryView::AddressToView(unsigned short address) const
     if (viewTable_rev.find(address) == viewTable_rev.end())
     {
         auto upper = viewTable_rev.upper_bound(address);
+        if (upper == viewTable_rev.begin())
+        {
+            return upper->second;
+        }
         auto lower = upper;
         lower--;
         if (upper == viewTable_rev.end())
         {
             return lower->second;
-        }
-        if (upper == viewTable_rev.begin())
-        {
-            return upper->second;
         }
         if (abs(upper->first - address) > abs(lower->first - address))
             return lower->second;

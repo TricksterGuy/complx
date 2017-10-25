@@ -3,6 +3,7 @@
 
 #include <lc3_all.hpp>
 #include <wx/wx.h>
+#include <wx/timer.h>
 #include "colorlcdgui.h"
 
 #define COLORLCD_MAJOR_VERSION 1
@@ -10,15 +11,15 @@
 
 wxDECLARE_EVENT(wxEVT_COMMAND_CREATE_DISPLAY, wxThreadEvent);
 wxDECLARE_EVENT(wxEVT_COMMAND_DESTROY_DISPLAY, wxThreadEvent);
-wxDECLARE_EVENT(wxEVT_COMMAND_UPDATE_DISPLAY, wxThreadEvent);
 
 class ColorLCD : public COLORLCDGUI
 {
 public:
-    ColorLCD(wxWindow* top, int width, int height, unsigned short startaddr);
-    virtual void OnUpdate(wxThreadEvent& event);
+    ColorLCD(wxWindow* top, int width, int height, unsigned short startaddr, lc3_state* state);
+    virtual void OnUpdate(wxTimerEvent& event);
     void OnPaint(wxPaintEvent& event);
 private:
+    wxTimer timer;
     lc3_state* state;
     int width;
     int height;

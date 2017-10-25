@@ -23,7 +23,7 @@ LC3RunThread::~LC3RunThread()
   */
 void* LC3RunThread::Entry()
 {
-    ///TODO consider writting this without rewriting next_line/prev_line.
+    ///TODO consider writing this without rewriting next_line/prev_line.
     int depth = 0;
     lc3_instr instr;
     bool interrupt_begin = false;
@@ -36,10 +36,9 @@ void* LC3RunThread::Entry()
         while(!state.halted)
         {
             lc3_step(state);
-            if (TestDestroy()) return NULL;
+            if (TestDestroy()) break;
             Yield();
         }
-        /*break;*/
         break;
     case RUNMODE_RUNFOR:
         if (runtime > 0)
@@ -80,7 +79,7 @@ void* LC3RunThread::Entry()
             if (state.interrupt_enabled && state.undo_stack.back().changes == LC3_INTERRUPT_BEGIN)
                 depth++;
 
-            if (TestDestroy()) return NULL;
+            if (TestDestroy()) break;
             Yield();
         }
         while (depth != 0 && !state.halted);
@@ -103,7 +102,7 @@ void* LC3RunThread::Entry()
                 {
                     lc3_back(state);
                     last = state.undo_stack.back();
-                    if (TestDestroy()) return NULL;
+                    if (TestDestroy()) break;
                     Yield();
                 }
             }
@@ -119,7 +118,7 @@ void* LC3RunThread::Entry()
             // So if we get a JSR/JSRR or if we get a TRAP and true traps are enabled
             if (instr.data.opcode == JSR_INSTR || (instr.data.opcode == TRAP_INSTR && state.true_traps))
                 depth--;
-            if (TestDestroy()) return NULL;
+            if (TestDestroy()) break;
             Yield();
             // Don't have to handle interrupts here...
         }
@@ -134,7 +133,7 @@ void* LC3RunThread::Entry()
             // Backstep
             lc3_back(state);
 
-            if (TestDestroy()) return NULL;
+            if (TestDestroy()) break;
             Yield();
         }
         break;
