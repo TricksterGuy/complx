@@ -833,41 +833,6 @@
                     </object>
                 </object>
                 <object class="wxMenu" expanded="1">
-                    <property name="label">Test</property>
-                    <property name="name">menuTest</property>
-                    <property name="permission">protected</property>
-                    <object class="wxMenuItem" expanded="0">
-                        <property name="bitmap"></property>
-                        <property name="checked">0</property>
-                        <property name="enabled">1</property>
-                        <property name="help">Run tests from an xml file.</property>
-                        <property name="id">ID_RUN_TESTS</property>
-                        <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">&amp;Run Tests</property>
-                        <property name="name">menuTestRunTests</property>
-                        <property name="permission">none</property>
-                        <property name="shortcut">Ctrl+Shift+T</property>
-                        <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnRunTests</event>
-                        <event name="OnUpdateUI"></event>
-                    </object>
-                    <object class="wxMenuItem" expanded="0">
-                        <property name="bitmap"></property>
-                        <property name="checked">0</property>
-                        <property name="enabled">1</property>
-                        <property name="help">Rerun tests from an xml file.</property>
-                        <property name="id">ID_RERUN_TESTS</property>
-                        <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">&amp;Rerun Tests</property>
-                        <property name="name">menuTestRerunTests</property>
-                        <property name="permission">none</property>
-                        <property name="shortcut">Ctrl+Alt+T</property>
-                        <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnRerunTests</event>
-                        <event name="OnUpdateUI"></event>
-                    </object>
-                </object>
-                <object class="wxMenu" expanded="1">
                     <property name="label">Help</property>
                     <property name="name">menuHelp</property>
                     <property name="permission">protected</property>
