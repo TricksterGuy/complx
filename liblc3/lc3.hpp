@@ -437,7 +437,7 @@ typedef struct lc3_state
     // Plugins loaded into the state
     InstructionPlugin* instructionPlugin;
     std::map<unsigned char, TrapFunctionPlugin*> trapPlugins;
-    std::map<unsigned short, DeviceRegisterPlugin*> devicePlugins;
+    std::map<unsigned short, Plugin*> address_plugins;
     std::vector<Plugin*> plugins;
 
     // Plugin handle information

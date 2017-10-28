@@ -37,22 +37,22 @@ void destroy_plugin(Plugin* ptr = NULL)
     }
 }
 
-/** @brief OnRead
-  *
-  * @todo: document this function
-  */
-short RandomPlugin::OnRead(lc3_state& state)
+RandomPlugin::RandomPlugin(unsigned short address, unsigned int seed) :
+    Plugin(RANDOM_MAJOR_VERSION, RANDOM_MINOR_VERSION, LC3_OTHER, "Random Generator plugin"), generator(seed),
+    distribution(-32768, 32767)
+{
+    BindAddress(address);
+}
+
+
+short RandomPlugin::OnRead(lc3_state& state, unsigned short addr)
 {
     short retVal = (short) distribution(generator);
-    state.mem[GetAddress()] = retVal;
+    state.mem[addr] = retVal;
     return retVal;
 }
 
-/** @brief OnWrite
-  *
-  * @todo: document this function
-  */
-void RandomPlugin::OnWrite(lc3_state& state, short value)
+void RandomPlugin::OnWrite(lc3_state& state, unsigned short addr, short value)
 {
     generator.seed(value);
 }

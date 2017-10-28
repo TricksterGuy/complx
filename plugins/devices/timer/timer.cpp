@@ -33,27 +33,23 @@ void destroy_plugin(Plugin* ptr = NULL)
     }
 }
 
-/** @brief OnRead
-  *
-  * @todo: document this function
-  */
-short TimerPlugin::OnRead(lc3_state& state)
+TimerPlugin::TimerPlugin(unsigned short address, unsigned char int_vector) : Plugin(TIMER_MAJOR_VERSION, TIMER_MINOR_VERSION, LC3_OTHER, "Timer plugin")
 {
-    return (short) time;
+    BindInterrupt(int_vector);
 }
 
-/** @brief OnWrite
-  *
-  * @todo: document this function
-  */
-void TimerPlugin::OnWrite(lc3_state& state, short value)
+short TimerPlugin::OnRead(lc3_state& state, unsigned short address)
 {
+    /// TODO implement.
+    return Plugin::OnRead(state, address);
 }
 
-/** @brief OnTick
-  *
-  * @todo: document this function
-  */
+void TimerPlugin::OnWrite(lc3_state& state, unsigned short address, short value)
+{
+    /// TODO implement.
+    Plugin::OnWrite(state, address, value);
+}
+
 void TimerPlugin::OnTick(lc3_state& state)
 {
     time_t now = ::time(NULL);

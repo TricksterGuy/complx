@@ -6,27 +6,41 @@
 #undef major
 #undef minor
 
-Plugin::Plugin(unsigned int mymajor, unsigned int myminor, unsigned int _type, const std::string& _desc, bool _interrupt_gen, unsigned char _intvector) : major(mymajor),
-    minor(myminor), type(_type), desc(_desc), interrupt_cap(_interrupt_gen), intvector(_intvector)
+Plugin::Plugin(unsigned int mymajor, unsigned int myminor, unsigned int _type, const std::string& _desc) : major(mymajor),
+    minor(myminor), type(_type), desc(_desc)
 {
 
 }
 
-DeviceRegisterPlugin::DeviceRegisterPlugin(unsigned int _major, unsigned int _minor, const std::string& desc, unsigned short _address, bool _interrupt_gen, unsigned char _intvector) :
-    Plugin(_major, _minor, LC3_DEVICE, desc, _interrupt_gen, _intvector), address(_address)
+void Plugin::BindAddress(unsigned short address)
+{
+    addresses.insert(address);
+}
+
+void Plugin::BindNAddresses(unsigned short address, unsigned short length)
+{
+    if (address + length >= 0x10000U)
+    {
+        fprintf(stderr, "BindNAddresses address range (x%04x, x%05x) outside memory. Ignoring...\n", address, static_cast<int>(address) + length);
+        return;
+    }
+    for (unsigned short i = address; i < address + length; i++)
+        BindAddress(i);
+}
+
+void Plugin::BindInterrupt(unsigned char int_vector)
+{
+    interrupts.insert(int_vector);
+}
+
+TrapFunctionPlugin::TrapFunctionPlugin(unsigned int _major, unsigned int _minor, const std::string& desc, unsigned char _vector) :
+    Plugin(_major, _minor, LC3_TRAP, desc), vector(_vector)
 {
 
 }
 
-
-TrapFunctionPlugin::TrapFunctionPlugin(unsigned int _major, unsigned int _minor, const std::string& desc, unsigned char _vector, bool _interrupt_gen, unsigned char _intvector) :
-    Plugin(_major, _minor, LC3_TRAP, desc, _interrupt_gen, _intvector), vector(_vector)
-{
-
-}
-
-InstructionPlugin::InstructionPlugin(unsigned int major, unsigned int minor, const std::string& desc, bool _interrupt_gen, unsigned char _intvector) :
-    Plugin(major, minor, LC3_INSTRUCTION, desc, _interrupt_gen, _intvector)
+InstructionPlugin::InstructionPlugin(unsigned int major, unsigned int minor, const std::string& desc) :
+    Plugin(major, minor, LC3_INSTRUCTION, desc)
 {
 
 }
@@ -39,11 +53,7 @@ std::vector<RLEColorEntry> InstructionPlugin::GetInstructionColoring(unsigned sh
 }
 
 
-/** lc3_install_plugin
-  *
-  * Installs a plugin given by the filename
-  * @note the filename is minus the lib and .so extension.
-  */
+
 bool lc3_install_plugin(lc3_state& state, const std::string& filename, const PluginParams& params)
 {
     std::string realfilename = "lib" + filename + SO_SUFFIX;
@@ -95,14 +105,30 @@ bool lc3_install_plugin(lc3_state& state, const std::string& filename, const Plu
         return false;
     }
 
-    // If going to generate interrupts and if interrupt slot already filled reject
-    if (plugin->IsInterruptCapable() && state.interruptPlugin.find(plugin->GetInterruptVector()) != state.interruptPlugin.end())
-    {
-        fprintf(stderr, "Plugin %s interrupt vector x1%02x already used!\n", filename.c_str(), plugin->GetInterruptVector());
-        return false;
+    // Commit the addresses and interrupt vectors the plugin reserved.
+    plugin->Commit();
+
+    for (const auto& int_vector : plugin->GetBoundInterrupts()) {
+        // If interrupt slot already filled reject
+        if (state.interruptPlugin.find(int_vector) != state.interruptPlugin.end())
+        {
+            fprintf(stderr, "Plugin %s interrupt vector x1%02x already used!\n", filename.c_str(), int_vector);
+            return false;
+        }
+        state.interruptPlugin[int_vector] = plugin;
     }
 
-    DeviceRegisterPlugin* drplugin;
+    for (const auto& address : plugin->GetBoundAddresses())
+    {
+        // Fail if something already mapped to this address.
+        if (state.address_plugins.find(address) != state.address_plugins.end())
+        {
+            fprintf(stderr, "%s: A Plugin is already mapped to address x%04x!\n", filename.c_str(), address);
+            return false;
+        }
+        state.address_plugins[address] = plugin;
+    }
+
     TrapFunctionPlugin* tfplugin;
 
     switch (plugin->GetPluginType())
@@ -121,27 +147,6 @@ bool lc3_install_plugin(lc3_state& state, const std::string& filename, const Plu
             fprintf(stderr, "%s is not an Instruction Plugin!\n", filename.c_str());
             return false;
         }
-        break;
-    case LC3_DEVICE:
-        drplugin = dynamic_cast<DeviceRegisterPlugin*>(plugin);
-        if (drplugin == NULL)
-        {
-            fprintf(stderr, "%s is not an Device Register Plugin!\n", filename.c_str());
-            return false;
-        }
-        // Fail if not in correct area of memory < 0xFE00
-        if (drplugin->GetAddress() < 0xFE00U)
-        {
-            fprintf(stderr, "%s: Device Register Plugins can only be mapped to addresses above xFE00!\n", filename.c_str());
-            return false;
-        }
-        // Fail if something already mapped to this address.
-        if (state.devicePlugins.find(drplugin->GetAddress()) != state.devicePlugins.end())
-        {
-            fprintf(stderr, "%s: A Device Register Plugin is already mapped to address %04x!\n", filename.c_str(), drplugin->GetAddress());
-            return false;
-        }
-        state.devicePlugins[drplugin->GetAddress()] = drplugin;
         break;
     case LC3_TRAP:
         tfplugin = dynamic_cast<TrapFunctionPlugin*>(plugin);
@@ -169,17 +174,9 @@ bool lc3_install_plugin(lc3_state& state, const std::string& filename, const Plu
 
     // Register
     state.filePlugin[filename] = infos;
-
-    if (plugin->IsInterruptCapable())
-        state.interruptPlugin[plugin->GetInterruptVector()] = plugin;
-
     return true;
 }
 
-/** lc3_uninstall_plugin
-  *
-  * Uninstalls a plugin given by the filename
-  */
 bool lc3_uninstall_plugin(lc3_state& state, const std::string& filename)
 {
     if (state.filePlugin.find(filename) == state.filePlugin.end())
@@ -189,24 +186,24 @@ bool lc3_uninstall_plugin(lc3_state& state, const std::string& filename)
 
     switch(infos.plugin->GetPluginType())
     {
-    case LC3_INSTRUCTION:
-        state.instructionPlugin = NULL;
-        break;
-    case LC3_TRAP:
-        state.trapPlugins.erase(dynamic_cast<TrapFunctionPlugin*>(infos.plugin)->GetTrapVector());
-        break;
-    case LC3_DEVICE:
-        state.devicePlugins.erase(dynamic_cast<DeviceRegisterPlugin*>(infos.plugin)->GetAddress());
-        break;
-    case LC3_OTHER:
-        state.plugins.erase(std::find(state.plugins.begin(), state.plugins.end(), infos.plugin));
-        break;
-    default:
-        return false;
+        case LC3_INSTRUCTION:
+            state.instructionPlugin = NULL;
+            break;
+        case LC3_TRAP:
+            state.trapPlugins.erase(dynamic_cast<TrapFunctionPlugin*>(infos.plugin)->GetTrapVector());
+            break;
+        case LC3_OTHER:
+            state.plugins.erase(std::find(state.plugins.begin(), state.plugins.end(), infos.plugin));
+            break;
+        default:
+            return false;
     }
 
-    if (infos.plugin->IsInterruptCapable())
-        state.interruptPlugin.erase(infos.plugin->GetInterruptVector());
+    for (const auto& int_vector : infos.plugin->GetBoundInterrupts())
+        state.interruptPlugin.erase(int_vector);
+
+    for (const auto& address : infos.plugin->GetBoundAddresses())
+        state.address_plugins.erase(address);
 
     infos.destroy(infos.plugin);
 

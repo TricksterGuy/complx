@@ -56,33 +56,23 @@ void destroy_plugin(Plugin* ptr = NULL)
     }
 }
 
-/** @brief ColorLCDPlugin
-  *
-  * @todo: document this function
-  */
 ColorLCDPlugin::ColorLCDPlugin(unsigned short _width, unsigned short _height, unsigned short _initaddr, unsigned short _startaddr) :
     Plugin(COLORLCD_MAJOR_VERSION, COLORLCD_MINOR_VERSION, LC3_OTHER, "Color LCD Display"), width(_width),
     height(_height), initaddr(_initaddr), startaddr(_startaddr), lcd(NULL),
     lcd_initializing(false)
 {
+    BindAddress(initaddr);
+    BindNAddresses(startaddr, width * height);
     Connect(wxID_ANY, wxEVT_COMMAND_CREATE_DISPLAY, wxThreadEventHandler(ColorLCDPlugin::InitDisplay));
     Connect(wxID_ANY, wxEVT_COMMAND_DESTROY_DISPLAY, wxThreadEventHandler(ColorLCDPlugin::DestroyDisplay));
 }
 
-/** @brief ~ColorLCDPlugin
-  *
-  * @todo: document this function
-  */
 ColorLCDPlugin::~ColorLCDPlugin()
 {
     if (lcd)
         delete lcd;
 }
 
-/** @brief InitDisplay
-  *
-  * @todo: document this function
-  */
 void ColorLCDPlugin::InitDisplay(wxThreadEvent& event)
 {
     lcd = new ColorLCD(wxTheApp->GetTopWindow(), width, height, startaddr, event.GetPayload<lc3_state*>());
@@ -90,25 +80,17 @@ void ColorLCDPlugin::InitDisplay(wxThreadEvent& event)
     lcd->Show();
 }
 
-/** @brief DestroyDisplay
-  *
-  * @todo: document this function
-  */
 void ColorLCDPlugin::DestroyDisplay(wxThreadEvent& event)
 {
     delete lcd;
     lcd = NULL;
 }
 
-/** @brief OnMemoryWrite
-  *
-  * @todo: document this function
-  */
-void ColorLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, short new_value, short old_value)
+void ColorLCDPlugin::OnWrite(lc3_state& state, unsigned short address, short value)
 {
     if (address == initaddr)
     {
-        unsigned short data = new_value;
+        unsigned short data = value;
         if (data == 0x8000U && lcd == NULL)
         {
             wxThreadEvent* evt = new wxThreadEvent(wxEVT_COMMAND_CREATE_DISPLAY);
@@ -128,7 +110,7 @@ void ColorLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, sho
         {
             wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_DESTROY_DISPLAY));
         }
-        else if (static_cast<unsigned short>(old_value) == 0x8000U && data != 0x8000U && (lcd != NULL || lcd_initializing))
+        else if (static_cast<unsigned short>(state.mem[address]) == 0x8000U && data != 0x8000U && (lcd != NULL || lcd_initializing))
         {
             wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_DESTROY_DISPLAY));
         }
@@ -142,12 +124,10 @@ void ColorLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, sho
         if (lcd == NULL)
             lc3_warning(state, "Writing to LCD while its not initialized!");
     }
+
+    state.mem[address] = value;
 }
 
-/** @brief ColorLCD
-  *
-  * @todo: document this function
-  */
 ColorLCD::ColorLCD(wxWindow* top, int _width, int _height, unsigned short _startaddr, lc3_state* s) :
     COLORLCDGUI(top), timer(this), state(s), width(_width), height(_height), startaddr(_startaddr)
 {
@@ -160,10 +140,6 @@ ColorLCD::ColorLCD(wxWindow* top, int _width, int _height, unsigned short _start
     Move(x - GetSize().GetX(), y);
 }
 
-/** @brief OnUpdate
-  *
-  * @todo: document this function
-  */
 void ColorLCD::OnUpdate(wxTimerEvent& event)
 {
     Refresh();

@@ -31,7 +31,7 @@ class ColorLCDPlugin : public wxEvtHandler, public Plugin
 public:
     ColorLCDPlugin(unsigned short width, unsigned short height, unsigned short initaddr, unsigned short startaddr);
     ~ColorLCDPlugin();
-    void OnMemoryWrite(lc3_state& state, unsigned short address, short new_value, short old_value) override;
+    void OnWrite(lc3_state& state, unsigned short address, short value) override;
     void InitDisplay(wxThreadEvent& event);
     void UpdateDisplay(wxThreadEvent& event);
     void DestroyDisplay(wxThreadEvent& event);

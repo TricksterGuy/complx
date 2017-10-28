@@ -1,6 +1,9 @@
 #ifndef LC3_PLUGIN_HPP
 #define LC3_PLUGIN_HPP
 
+#include <set>
+#include <string>
+
 #include "lc3.hpp"
 #include "lc3_parser.hpp"
 #include "lc3_params.hpp"
@@ -9,7 +12,6 @@ enum PluginTypes
 {
     INVALID = 0,
     LC3_INSTRUCTION,
-    LC3_DEVICE,
     LC3_TRAP,
     LC3_OTHER,
     PLUGIN_TYPES_SIZE
@@ -22,9 +24,9 @@ enum PluginTypes
 /** Main class for complx's plugin system.
   *
   * Plugins can either be:
-  *   a new instruction (replacing opcode 0xD) => InstructionPlugin
-  *   a new device register akin to KBSR, KBDR, DDR, DSR, MCR => DeviceRegisterPlugin
-  *   a trap subroutine => TrapFunctionPlugin
+  *   a new instruction (replacing opcode 0xD) => subclass InstructionPlugin
+  *   a new device register akin to KBSR, KBDR, DDR, DSR, MCR => subclass Plugin
+  *   a trap subroutine => subclass TrapFunctionPlugin
   *   or anything else use this class directly being sure to pass in LC3_OTHER as the type
   *
   * This class gives you the power to do things whenever:
@@ -41,45 +43,64 @@ public:
       * Takes in a version, a type of plugin (required) a description string
       * And if the plugin is capable of sending interrupts and its interrupt vector if it is capable
       */
-    Plugin(unsigned int mymajor, unsigned int myminor, unsigned int _type = INVALID, const std::string& desc = "", bool _interrupt_cap = false, unsigned char _intvector = 0);
+    Plugin(unsigned int mymajor, unsigned int myminor, unsigned int _type = INVALID, const std::string& desc = "");
     virtual ~Plugin() {}
 
+    /** Gets Major Version */
+    unsigned int GetMajorVersion() const {return major;}
+    /** Gets Minor Version */
+    unsigned int GetMinorVersion() const {return minor;}
+    /** Gets plugin type */
+    unsigned int GetPluginType() const {return type;}
+    /** Gets description of this plugin */
+    const std::string& GetDescription() const {return desc;}
+    /** Is this plugin capable of sending interrupts to lc3 */
+    bool CanInterrupt() const {return !interrupts.empty();}
+    /** Get the bound addresses the plugin will intercept reads/writes from */
+    const std::set<unsigned short>& GetBoundAddresses() const {return addresses;}
+    /** Get the bound interrupt vectors the plugin will send from */
+    const std::set<unsigned char>& GetBoundInterrupts() const {return interrupts;}
+    /** Able to run in lc3test */
+    virtual bool AvailableInLC3Test() const {return true;}
+
+    /** Called when a memory address is about to be read allowing you to return any value you want dynamically.
+      * For this function to be called, you must call BindAddress/BindAddressRange in your plugin's constructor.
+      */
+    virtual short OnRead(lc3_state& state, unsigned short address) {return state.mem[address];}
+    /** Called when a memory address is about to be written to allowing you to do whatever you want with the value.
+      * For this function to be called, you must call BindAddress/BindAddressRange in your plugin's constructor.
+      */
+    virtual void OnWrite(lc3_state& state, unsigned short address, short value) {state.mem[address] = value;}
     /** Called at the beginning of the instruction execution cycle exactly before an instruction is fetched
       * This is not called when the user back steps.
       */
-    virtual void OnTick(lc3_state& state) {};
+    virtual void OnTick(lc3_state& state) {}
     /** Called at the end of the instruction execution cycle exactly after an instruction is executed
       * This is not called when the user back steps.
       */
-    virtual void OnTock(lc3_state& state) {};
-    /** Called when a memory address is read from.
-      * This allows you to do some updating of lc3 state when memory is read from
-      * Note this function will be called AFTER memory is read,
-      * If you want to dynamically perform the read then you must use DeviceRegisterPlugin#OnRead
-      * The use case for this is to subscribe for reads for an address, this is called any time a load instruction is executed.
+    virtual void OnTock(lc3_state& state) {}
+
+    /** Users should not call this directly
+      * Commits the bound addresses and interrupts
       */
-    virtual void OnMemoryRead(lc3_state& state, unsigned short address) {};
-    /** Called when a memory address is written to.
-      * This allows you to do some updating of lc3 state when memory is written to
-      * Note this function will be called AFTER memory is written,
-      * If you want to dynamically perform the write then you must use DeviceRegisterPlugin#OnWrite
-      * The use case for this is to subscribe for writes for an address, this is called any time a store instruction is executed.
+    void Commit() {locked = true;}
+
+protected:
+    /** Bind the plugin to subscribe for updates to an address.
+      * Can be called multiple times to acquire multiple addresses.
+      * This should only be called in your Plugin's constructor.
       */
-    virtual void OnMemoryWrite(lc3_state& state, unsigned short address, short new_value, short old_value) {};
-    /** Gets Major Version */
-    unsigned int GetMajorVersion() const {return major;};
-    /** Gets Minor Version */
-    unsigned int GetMinorVersion() const {return minor;};
-    /** Gets plugin type */
-    unsigned int GetPluginType() const {return type;};
-    /** Gets description of this plugin */
-    const std::string& GetDescription() const {return desc;};
-    /** Is this plugin capable of sending interrupts to lc3 */
-    bool IsInterruptCapable() const {return interrupt_cap;};
-    /** Gets the interrupt vector used by this plugin */
-    unsigned char GetInterruptVector() const {return intvector;};
-    /** Able to run in lc3test */
-    virtual bool AvailableInLC3Test() const {return true;}
+    void BindAddress(unsigned short address);
+    /** Bind the plugin to subscribe for updates for address range [address, address + length).
+      * Can be called multiple times to acquire multiple addresses.
+      * This should only be called in your Plugin's constructor.
+      */
+    void BindNAddresses(unsigned short address, unsigned short length);
+    /** Bind the plugin to use an Interrupt Vector.
+      * Can be called multiple times to acquire multiple interrupt vectors.
+      * This should only be called in your Plugin's constructor.
+      */
+    void BindInterrupt(unsigned char int_vector);
 
 private:
     Plugin& operator=(const Plugin& other);
@@ -88,36 +109,9 @@ private:
     unsigned int minor;
     unsigned int type;
     std::string desc;
-    bool interrupt_cap;
-    unsigned char intvector;
-};
-
-/** Represents a device register a special memory address that will be bound to your plugin.
-  *
-  * The behavior of this will be akin to KBSR, KBDR, DSR, DDR, and MCR.
-  * One address (> 0xFE00) will be marked as a special address any reads or write to that address will call OnRead and OnWrite respectively
-  * Allowing you to update the device register state.
-  *
-  * You must implement the functions OnRead and OnWrite doing whatever you please.
-  *
-  * Binding the device register to multiple addresses is not supported at this time, you will need to have multiple device plugins one per address.
-  * You can however subscribe to reads/writes from all addresss via OnMemoryRead/Write.
-  */
-class DeviceRegisterPlugin : public Plugin
-{
-public:
-    DeviceRegisterPlugin(unsigned int major, unsigned int minor, const std::string& desc, unsigned short address, bool _interrupt_cap = false, unsigned char _intvector = 0);
-    virtual ~DeviceRegisterPlugin() {}
-
-    /** Called when a memory address is about to be read allowing you to return any value you want dynamically. */
-    virtual short OnRead(lc3_state& state) = 0;
-    /** Called when a memory address is about to be written to allowing you to do whatever you want with the value. */
-    virtual void OnWrite(lc3_state& state, short value) = 0;
-    /** Gets thte address the device register was bound to */
-    unsigned short GetAddress() const {return address;};
-
-private:
-    unsigned short address;
+    bool locked;
+    std::set<unsigned short> addresses;
+    std::set<unsigned char> interrupts;
 };
 
 /** Represents a trap subroutine bound to a specific trap vector.
@@ -132,7 +126,7 @@ private:
 class TrapFunctionPlugin : public Plugin
 {
 public:
-    TrapFunctionPlugin(unsigned int major, unsigned int minor, const std::string& desc, unsigned char vector, bool _interrupt_cap = false, unsigned char _intvector = 0);
+    TrapFunctionPlugin(unsigned int major, unsigned int minor, const std::string& desc, unsigned char vector);
     virtual ~TrapFunctionPlugin() {}
     /** Gets special trap name so saying TrapName in assembly code automatically assembles to 0xF0<VECTOR8> */
     virtual std::string GetTrapName() const = 0;
@@ -174,7 +168,7 @@ struct RLEColorEntry
 class InstructionPlugin : public Plugin
 {
 public:
-    InstructionPlugin(unsigned int major, unsigned int minor, const std::string& desc, bool _interrupt_cap = false, unsigned char _intvector = 0);
+    InstructionPlugin(unsigned int major, unsigned int minor, const std::string& desc);
     virtual ~InstructionPlugin() {}
     /** A note to the assembler what the opcode of the new instruction is called */
     virtual std::string GetOpcode() const = 0;
@@ -209,12 +203,15 @@ struct PluginInfo
     Plugin* plugin;
 };
 
-/** Function for installing a lc3 plugin.
-  * You should not need to call this directly.
+/** lc3_install_plugin
+  *
+  * Installs a plugin given by the filename. This should not be called directly
+  * @note the filename is minus the lib and .so extension.
   */
 bool lc3_install_plugin(lc3_state& state, const std::string& filename, const PluginParams& params);
-/** Function for uninstalling an lc3 plugin.
-  * You should not need to call this directly.
+/** lc3_uninstall_plugin
+  *
+  * Uninstalls a plugin given by the filename
   */
 bool lc3_uninstall_plugin(lc3_state& state, const std::string& filename);
 

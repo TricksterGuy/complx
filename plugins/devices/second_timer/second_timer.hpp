@@ -7,7 +7,7 @@
 #define SECOND_TIMER_MINOR_VERSION 5
 
 ///TODO complete this plugin
-class SecondTimerPlugin : public DeviceRegisterPlugin
+class SecondTimerPlugin : public Plugin
 {
 public:
     SecondTimerPlugin(unsigned short vector);

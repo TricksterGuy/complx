@@ -8,12 +8,12 @@
 #define TIMER_MINOR_VERSION 5
 
 ///TODO complete this plugin
-class TimerPlugin : public DeviceRegisterPlugin
+class TimerPlugin : public Plugin
 {
 public:
-    TimerPlugin(unsigned short address, unsigned char vector) : DeviceRegisterPlugin(TIMER_MAJOR_VERSION, TIMER_MINOR_VERSION, "Timer plugin", address, true, vector) {}
-    short OnRead(lc3_state& state) override;
-    void OnWrite(lc3_state& state, short value) override;
+    TimerPlugin(unsigned short address, unsigned char vector);
+    short OnRead(lc3_state& state, unsigned short address) override;
+    void OnWrite(lc3_state& state, unsigned short address, short value) override;
     void OnTick(lc3_state& state) override;
     time_t lastreadtime;
     time_t time;

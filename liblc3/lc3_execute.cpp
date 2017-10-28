@@ -589,16 +589,18 @@ short lc3_mem_read(lc3_state& state, unsigned short addr, bool privileged)
             break;
         default:
             // Hey does a plugin handle this address
-            if (addr >= 0xFE00U && state.devicePlugins.find(addr) != state.devicePlugins.end())
-                return state.devicePlugins[addr]->OnRead(state);
+            if (addr >= 0xFE00U && state.address_plugins.find(addr) != state.address_plugins.end())
+                return state.address_plugins[addr]->OnRead(state, addr);
             else if (!kernel_mode)
-                // Warn if reading from privelged memory if you aren't in kernel mode
+                // Warn if reading from reserved memory if you aren't in kernel mode
                 lc3_warning(state, LC3_RESERVED_MEM_READ, addr, 0);
             break;
         }
     }
 
-    lc3_notify_plugins_read(state, addr);
+    // Intercept if plugin registered for address.
+    if (state.address_plugins.find(addr) != state.address_plugins.end())
+        return state.address_plugins[addr]->OnRead(state, addr);
 
     return state.mem[addr];
 }
@@ -657,15 +659,18 @@ void lc3_mem_write(lc3_state& state, unsigned short addr, short value, bool priv
             break;
         default:
             // Hey does a plugin handle this address
-            if (addr >= 0xFE00U && state.devicePlugins.find(addr) != state.devicePlugins.end())
-                state.devicePlugins[addr]->OnWrite(state, value);
+            if (addr >= 0xFE00U && state.address_plugins.find(addr) != state.address_plugins.end())
+                state.address_plugins[addr]->OnWrite(state, addr, value);
             else if (!kernel_mode)
                 lc3_warning(state, LC3_RESERVED_MEM_WRITE, value, addr);
         }
     }
-    short old = state.mem[addr];
+
+    // Intercept if plugin registered for address.
+    if (state.address_plugins.find(addr) != state.address_plugins.end())
+        return state.address_plugins[addr]->OnWrite(state, addr, value);
+
     state.mem[addr] = value;
-    lc3_notify_plugins_write(state, addr, value, old);
 }
 
 /** lc3_warning
@@ -710,40 +715,4 @@ void lc3_warning(lc3_state& state, const std::string& msg)
     (*state.warning) << message << std::endl;
 
     state.warnings++;
-}
-
-/** Notifies plugins of a read
-  *
-  *
-  */
-void lc3_notify_plugins_read(lc3_state& state, unsigned short addr)
-{
-    if (state.instructionPlugin != NULL)
-        state.instructionPlugin->OnMemoryRead(state, addr);
-    for (std::map<unsigned char, TrapFunctionPlugin*>::const_iterator i = state.trapPlugins.begin(); i != state.trapPlugins.end(); ++i)
-        if (i->second != NULL)
-            i->second->OnMemoryRead(state, addr);
-    for (std::map<unsigned short, DeviceRegisterPlugin*>::const_iterator i = state.devicePlugins.begin(); i != state.devicePlugins.end(); ++i)
-        if (i->second != NULL)
-            i->second->OnMemoryRead(state, addr);
-    for (unsigned int i = 0; i < state.plugins.size(); i++)
-        state.plugins[i]->OnMemoryRead(state, addr);
-}
-
-/** Notifies plugins of a write
-  *
-  *
-  */
-void lc3_notify_plugins_write(lc3_state& state, unsigned short addr, short new_val, short old_val)
-{
-    if (state.instructionPlugin != NULL)
-        state.instructionPlugin->OnMemoryWrite(state, addr, new_val, old_val);
-    for (std::map<unsigned char, TrapFunctionPlugin*>::const_iterator i = state.trapPlugins.begin(); i != state.trapPlugins.end(); ++i)
-        if (i->second != NULL)
-            i->second->OnMemoryWrite(state, addr, new_val, old_val);
-    for (std::map<unsigned short, DeviceRegisterPlugin*>::const_iterator i = state.devicePlugins.begin(); i != state.devicePlugins.end(); ++i)
-        if (i->second != NULL)
-            i->second->OnMemoryWrite(state, addr, new_val, old_val);
-    for (unsigned int i = 0; i < state.plugins.size(); i++)
-        state.plugins[i]->OnMemoryWrite(state, addr, new_val, old_val);
 }

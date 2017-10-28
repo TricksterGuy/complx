@@ -31,7 +31,7 @@ class BWLCDPlugin : public wxEvtHandler, public Plugin
 public:
     BWLCDPlugin(unsigned short width, unsigned short height, unsigned short initaddr, unsigned short startaddr, unsigned int offcolor = 0xa0b0a0, unsigned int oncolor = 0x606860);
     ~BWLCDPlugin();
-    void OnMemoryWrite(lc3_state& state, unsigned short address, short new_value, short old_value) override;
+    void OnWrite(lc3_state& state, unsigned short address, short value) override;
     void InitDisplay(wxThreadEvent& event);
     void UpdateDisplay(wxThreadEvent& event);
     void DestroyDisplay(wxThreadEvent& event);
