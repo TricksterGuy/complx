@@ -134,6 +134,10 @@ void BWLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, short 
         {
             wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_DESTROY_DISPLAY));
         }
+        else if (static_cast<unsigned short>(old_value) == 0x8000U && data != 0x8000U && (lcd != NULL || lcd_initializing))
+        {
+            wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_DESTROY_DISPLAY));
+        }
         else
         {
             lc3_warning(state, "Incorrect value written to BWLCD");
