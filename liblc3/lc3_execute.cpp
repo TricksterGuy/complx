@@ -599,8 +599,8 @@ short lc3_mem_read(lc3_state& state, unsigned short addr, bool privileged)
     }
 
     // Intercept if plugin registered for address.
-    if (state.address_plugins.find(addr) != state.address_plugins.end())
-        return state.address_plugins[addr]->OnRead(state, addr);
+    if (state.address_plugins.find(addr) != state.address_plugins.end() && state.address_plugins[addr])
+            return state.address_plugins[addr]->OnRead(state, addr);
 
     return state.mem[addr];
 }
@@ -667,7 +667,7 @@ void lc3_mem_write(lc3_state& state, unsigned short addr, short value, bool priv
     }
 
     // Intercept if plugin registered for address.
-    if (state.address_plugins.find(addr) != state.address_plugins.end())
+    if (state.address_plugins.find(addr) != state.address_plugins.end() && state.address_plugins[addr])
         return state.address_plugins[addr]->OnWrite(state, addr, value);
 
     state.mem[addr] = value;
