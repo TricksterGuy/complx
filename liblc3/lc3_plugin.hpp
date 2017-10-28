@@ -17,20 +17,21 @@ enum PluginTypes
 
 /** Define version of lc3 any plugins that are not of the same version will be rejected. */
 #define LC3_MAJOR_VERSION 1
-#define LC3_MINOR_VERSION 4
+#define LC3_MINOR_VERSION 5
 
 /** Main class for complx's plugin system.
   *
-  * Plugins can either be a new instruction (replacing opcode 0xD) => InstructionPlugin
-  * a new device register akin to KBSR, KBDR, DDR, DSR, MCR => DeviceRegisterPlugin
-  * a trap subroutine => TrapFunctionPlugin
-  * or anything else use this class directly being sure to pass in LC3_OTHER as the type
+  * Plugins can either be:
+  *   a new instruction (replacing opcode 0xD) => InstructionPlugin
+  *   a new device register akin to KBSR, KBDR, DDR, DSR, MCR => DeviceRegisterPlugin
+  *   a trap subroutine => TrapFunctionPlugin
+  *   or anything else use this class directly being sure to pass in LC3_OTHER as the type
   *
   * This class gives you the power to do things whenever:
-  * 1. An instruction is issued (before fetch)
-  * 2. At the end of instruction execution
-  * 3. After a memory address is read from
-  * 4. After a memory address is written to
+  *   1. An instruction is issued (before fetch)
+  *   2. At the end of instruction execution
+  *   3. After a memory address is read from
+  *   4. After a memory address is written to
   */
 class Plugin
 {
@@ -41,7 +42,7 @@ public:
       * And if the plugin is capable of sending interrupts and its interrupt vector if it is capable
       */
     Plugin(unsigned int mymajor, unsigned int myminor, unsigned int _type = INVALID, const std::string& desc = "", bool _interrupt_cap = false, unsigned char _intvector = 0);
-    virtual ~Plugin();
+    virtual ~Plugin() {}
 
     /** Called at the beginning of the instruction execution cycle exactly before an instruction is fetched
       * This is not called when the user back steps.
@@ -64,42 +65,21 @@ public:
       * If you want to dynamically perform the write then you must use DeviceRegisterPlugin#OnWrite
       * The use case for this is to subscribe for writes for an address, this is called any time a store instruction is executed.
       */
-    virtual void OnMemoryWrite(lc3_state& state, unsigned short address, short value) {};
+    virtual void OnMemoryWrite(lc3_state& state, unsigned short address, short new_value, short old_value) {};
     /** Gets Major Version */
-    unsigned int GetMajorVersion() const
-    {
-        return major;
-    };
+    unsigned int GetMajorVersion() const {return major;};
     /** Gets Minor Version */
-    unsigned int GetMinorVersion() const
-    {
-        return minor;
-    };
+    unsigned int GetMinorVersion() const {return minor;};
     /** Gets plugin type */
-    unsigned int GetPluginType() const
-    {
-        return type;
-    };
+    unsigned int GetPluginType() const {return type;};
     /** Gets description of this plugin */
-    const std::string& GetDescription() const
-    {
-        return desc;
-    };
+    const std::string& GetDescription() const {return desc;};
     /** Is this plugin capable of sending interrupts to lc3 */
-    bool IsInterruptCapable() const
-    {
-        return interrupt_cap;
-    };
+    bool IsInterruptCapable() const {return interrupt_cap;};
     /** Gets the interrupt vector used by this plugin */
-    unsigned char GetInterruptVector() const
-    {
-        return intvector;
-    };
+    unsigned char GetInterruptVector() const {return intvector;};
     /** Able to run in lc3test */
-    virtual bool AvailableInLC3Test() const
-    {
-        return true;
-    }
+    virtual bool AvailableInLC3Test() const {return true;}
 
 private:
     Plugin& operator=(const Plugin& other);
@@ -127,17 +107,14 @@ class DeviceRegisterPlugin : public Plugin
 {
 public:
     DeviceRegisterPlugin(unsigned int major, unsigned int minor, const std::string& desc, unsigned short address, bool _interrupt_cap = false, unsigned char _intvector = 0);
-    virtual ~DeviceRegisterPlugin();
+    virtual ~DeviceRegisterPlugin() {}
 
     /** Called when a memory address is about to be read allowing you to return any value you want dynamically. */
     virtual short OnRead(lc3_state& state) = 0;
     /** Called when a memory address is about to be written to allowing you to do whatever you want with the value. */
     virtual void OnWrite(lc3_state& state, short value) = 0;
     /** Gets thte address the device register was bound to */
-    unsigned short GetAddress() const
-    {
-        return address;
-    };
+    unsigned short GetAddress() const {return address;};
 
 private:
     unsigned short address;
@@ -156,14 +133,11 @@ class TrapFunctionPlugin : public Plugin
 {
 public:
     TrapFunctionPlugin(unsigned int major, unsigned int minor, const std::string& desc, unsigned char vector, bool _interrupt_cap = false, unsigned char _intvector = 0);
-    virtual ~TrapFunctionPlugin();
+    virtual ~TrapFunctionPlugin() {}
     /** Gets special trap name so saying TrapName in assembly code automatically assembles to 0xF0<VECTOR8> */
     virtual std::string GetTrapName() const = 0;
     /** Gets trap vector plugin is bound to */
-    unsigned char GetTrapVector() const
-    {
-        return vector;
-    }
+    unsigned char GetTrapVector() const {return vector;}
     /** Handles execution of the trap.  Please fill out any changes made to lc3_state to the lc3_state_change object */
     virtual void OnExecute(lc3_state& state, lc3_state_change& changes) = 0;
 private:
@@ -201,7 +175,7 @@ class InstructionPlugin : public Plugin
 {
 public:
     InstructionPlugin(unsigned int major, unsigned int minor, const std::string& desc, bool _interrupt_cap = false, unsigned char _intvector = 0);
-    virtual ~InstructionPlugin();
+    virtual ~InstructionPlugin() {}
     /** A note to the assembler what the opcode of the new instruction is called */
     virtual std::string GetOpcode() const = 0;
     /** Called when an instruction needs to be assembled, the entire part of the line containing the instruction is passed in see LC3AssembleContext */
@@ -212,7 +186,7 @@ public:
     virtual void OnExecute(lc3_state& state, lc3_instr& instruction, lc3_state_change& changes) = 0;
     /** Called when a disassembled version of the new instruction is requested */
     virtual std::string OnDisassemble(lc3_state& state, lc3_instr& instr, unsigned int level) = 0;
-    /** Optional called to get the instruction coloring for this instruction.
+    /** Optional. Called to get the instruction coloring for this instruction.
       * return an array containing several color entries
       * For example to color the instruction [opcode4 - green] [data12 red]
       * "return" {{0, 255, 0, 4}, {255, 0, 0, 12}}

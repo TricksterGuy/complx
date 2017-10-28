@@ -7,7 +7,7 @@
 #include "colorlcdgui.h"
 
 #define COLORLCD_MAJOR_VERSION 1
-#define COLORLCD_MINOR_VERSION 4
+#define COLORLCD_MINOR_VERSION 5
 
 wxDECLARE_EVENT(wxEVT_COMMAND_CREATE_DISPLAY, wxThreadEvent);
 wxDECLARE_EVENT(wxEVT_COMMAND_DESTROY_DISPLAY, wxThreadEvent);
@@ -17,7 +17,7 @@ class ColorLCD : public COLORLCDGUI
 public:
     ColorLCD(wxWindow* top, int width, int height, unsigned short startaddr, lc3_state* state);
     virtual void OnUpdate(wxTimerEvent& event);
-    void OnPaint(wxPaintEvent& event);
+    void OnPaint(wxPaintEvent& event) override;
 private:
     wxTimer timer;
     lc3_state* state;
@@ -31,11 +31,11 @@ class ColorLCDPlugin : public wxEvtHandler, public Plugin
 public:
     ColorLCDPlugin(unsigned short width, unsigned short height, unsigned short initaddr, unsigned short startaddr);
     ~ColorLCDPlugin();
-    virtual void OnMemoryWrite(lc3_state& state, unsigned short address, short value);
+    void OnMemoryWrite(lc3_state& state, unsigned short address, short new_value, short old_value) override;
     void InitDisplay(wxThreadEvent& event);
     void UpdateDisplay(wxThreadEvent& event);
     void DestroyDisplay(wxThreadEvent& event);
-    virtual bool AvailableInLC3Test() const {return false;}
+    bool AvailableInLC3Test() const override {return false;}
 private:
     unsigned short width;
     unsigned short height;

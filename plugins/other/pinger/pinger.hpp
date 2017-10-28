@@ -3,14 +3,14 @@
 
 #include <lc3_all.hpp>
 #define PINGER_MAJOR_VERSION 1
-#define PINGER_MINOR_VERSION 4
+#define PINGER_MINOR_VERSION 5
 
 class PingerPlugin : public Plugin
 {
 public:
     PingerPlugin(unsigned short ping_interval, unsigned int prio, unsigned short vec) :
         Plugin(PINGER_MAJOR_VERSION, PINGER_MINOR_VERSION, LC3_OTHER, "Pinger plugin", true, vec), interval(ping_interval), priority(prio), ticks(0) {}
-    virtual void OnTick(lc3_state& state);
+    void OnTick(lc3_state& state) override;
 private:
     unsigned int interval;
     unsigned int priority;

@@ -12,21 +12,12 @@ Plugin::Plugin(unsigned int mymajor, unsigned int myminor, unsigned int _type, c
 
 }
 
-Plugin::~Plugin()
-{
-
-}
-
 DeviceRegisterPlugin::DeviceRegisterPlugin(unsigned int _major, unsigned int _minor, const std::string& desc, unsigned short _address, bool _interrupt_gen, unsigned char _intvector) :
     Plugin(_major, _minor, LC3_DEVICE, desc, _interrupt_gen, _intvector), address(_address)
 {
 
 }
 
-DeviceRegisterPlugin::~DeviceRegisterPlugin()
-{
-
-}
 
 TrapFunctionPlugin::TrapFunctionPlugin(unsigned int _major, unsigned int _minor, const std::string& desc, unsigned char _vector, bool _interrupt_gen, unsigned char _intvector) :
     Plugin(_major, _minor, LC3_TRAP, desc, _interrupt_gen, _intvector), vector(_vector)
@@ -34,18 +25,8 @@ TrapFunctionPlugin::TrapFunctionPlugin(unsigned int _major, unsigned int _minor,
 
 }
 
-TrapFunctionPlugin::~TrapFunctionPlugin()
-{
-
-}
-
 InstructionPlugin::InstructionPlugin(unsigned int major, unsigned int minor, const std::string& desc, bool _interrupt_gen, unsigned char _intvector) :
     Plugin(major, minor, LC3_INSTRUCTION, desc, _interrupt_gen, _intvector)
-{
-
-}
-
-InstructionPlugin::~InstructionPlugin()
 {
 
 }

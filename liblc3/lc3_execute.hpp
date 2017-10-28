@@ -27,6 +27,6 @@ void lc3_warning(lc3_state& state, const std::string& warning);
 /** Notifies plugins of a read */
 void lc3_notify_plugins_read(lc3_state& state, unsigned short addr);
 /** Notifies plugins of a write */
-void lc3_notify_plugins_write(lc3_state& state, unsigned short addr, short val);
+void lc3_notify_plugins_write(lc3_state& state, unsigned short addr, short new_val, short old_val);
 
 #endif

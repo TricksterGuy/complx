@@ -104,11 +104,11 @@ void ColorLCDPlugin::DestroyDisplay(wxThreadEvent& event)
   *
   * @todo: document this function
   */
-void ColorLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, short value)
+void ColorLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, short new_value, short old_value)
 {
     if (address == initaddr)
     {
-        unsigned short data = value;
+        unsigned short data = new_value;
         if (data == 0x8000U && lcd == NULL)
         {
             wxThreadEvent* evt = new wxThreadEvent(wxEVT_COMMAND_CREATE_DISPLAY);
@@ -120,11 +120,11 @@ void ColorLCDPlugin::OnMemoryWrite(lc3_state& state, unsigned short address, sho
         {
             lc3_warning(state, "ColorLCD already initialized!");
         }
-        else if (value == 0 && lcd == NULL)
+        else if (data == 0 && lcd == NULL)
         {
             lc3_warning(state, "ColorLCD is destroyed already!");
         }
-        else if (value == 0 && (lcd != NULL || lcd_initializing))
+        else if (data == 0 && (lcd != NULL || lcd_initializing))
         {
             wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_DESTROY_DISPLAY));
         }

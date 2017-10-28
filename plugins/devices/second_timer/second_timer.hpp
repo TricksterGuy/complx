@@ -4,15 +4,15 @@
 #include <lc3_all.hpp>
 
 #define SECOND_TIMER_MAJOR_VERSION 1
-#define SECOND_TIMER_MINOR_VERSION 4
+#define SECOND_TIMER_MINOR_VERSION 5
 
 ///TODO complete this plugin
 class SecondTimerPlugin : public DeviceRegisterPlugin
 {
 public:
     SecondTimerPlugin(unsigned short vector);
-    virtual short OnRead(lc3_state& state);
-    virtual void OnWrite(lc3_state& state, short value);
+    short OnRead(lc3_state& state) override;
+    void OnWrite(lc3_state& state, short value) override;
     unsigned int lastreadtime;
 };
 

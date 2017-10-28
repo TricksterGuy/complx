@@ -663,8 +663,9 @@ void lc3_mem_write(lc3_state& state, unsigned short addr, short value, bool priv
                 lc3_warning(state, LC3_RESERVED_MEM_WRITE, value, addr);
         }
     }
+    short old = state.mem[addr];
     state.mem[addr] = value;
-    lc3_notify_plugins_write(state, addr, value);
+    lc3_notify_plugins_write(state, addr, value, old);
 }
 
 /** lc3_warning
@@ -733,16 +734,16 @@ void lc3_notify_plugins_read(lc3_state& state, unsigned short addr)
   *
   *
   */
-void lc3_notify_plugins_write(lc3_state& state, unsigned short addr, short val)
+void lc3_notify_plugins_write(lc3_state& state, unsigned short addr, short new_val, short old_val)
 {
     if (state.instructionPlugin != NULL)
-        state.instructionPlugin->OnMemoryWrite(state, addr, val);
+        state.instructionPlugin->OnMemoryWrite(state, addr, new_val, old_val);
     for (std::map<unsigned char, TrapFunctionPlugin*>::const_iterator i = state.trapPlugins.begin(); i != state.trapPlugins.end(); ++i)
         if (i->second != NULL)
-            i->second->OnMemoryWrite(state, addr, val);
+            i->second->OnMemoryWrite(state, addr, new_val, old_val);
     for (std::map<unsigned short, DeviceRegisterPlugin*>::const_iterator i = state.devicePlugins.begin(); i != state.devicePlugins.end(); ++i)
         if (i->second != NULL)
-            i->second->OnMemoryWrite(state, addr, val);
+            i->second->OnMemoryWrite(state, addr, new_val, old_val);
     for (unsigned int i = 0; i < state.plugins.size(); i++)
-        state.plugins[i]->OnMemoryWrite(state, addr, val);
+        state.plugins[i]->OnMemoryWrite(state, addr, new_val, old_val);
 }

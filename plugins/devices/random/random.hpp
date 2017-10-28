@@ -5,7 +5,7 @@
 #include <random>
 
 #define RANDOM_MAJOR_VERSION 1
-#define RANDOM_MINOR_VERSION 4
+#define RANDOM_MINOR_VERSION 5
 
 class RandomPlugin : public DeviceRegisterPlugin
 {
@@ -13,8 +13,8 @@ public:
     RandomPlugin(unsigned short address, unsigned int seed) :
         DeviceRegisterPlugin(RANDOM_MAJOR_VERSION, RANDOM_MINOR_VERSION, "Random Generator plugin", address), generator(seed),
         distribution(-32768, 32767) {}
-    virtual short OnRead(lc3_state& state);
-    virtual void OnWrite(lc3_state& state, short value);
+    short OnRead(lc3_state& state) override;
+    void OnWrite(lc3_state& state, short value) override;
 private:
     std::default_random_engine generator;
     std::uniform_int_distribution<int> distribution;

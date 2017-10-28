@@ -306,8 +306,9 @@ void lc3_back(lc3_state& state)
         }
         else if (changes.changes == LC3_MEMORY_CHANGE)
         {
+            short old = state.mem[changes.location];
             state.mem[changes.location] = changes.value;
-            lc3_notify_plugins_write(state, changes.location, changes.value);
+            lc3_notify_plugins_write(state, changes.location, changes.value, old);
         }
         else if (changes.changes == LC3_MULTI_CHANGE)
         {
@@ -321,8 +322,9 @@ void lc3_back(lc3_state& state)
                 }
                 else
                 {
+                    short old = state.mem[info.location];
                     state.mem[info.location] = info.value;
-                    lc3_notify_plugins_write(state, info.location, info.value);
+                    lc3_notify_plugins_write(state, info.location, info.value, old);
                 }
             }
         }
