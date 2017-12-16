@@ -5,6 +5,8 @@ include_directories(../liblc3)
 
 include(CodeCoverage)
 
+APPEND_COVERAGE_COMPILER_FLAGS()
+
 file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 
 foreach(testSrc ${TEST_SRCS})
@@ -13,4 +15,10 @@ foreach(testSrc ${TEST_SRCS})
         target_link_libraries(${testName} lc3 ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
         set_target_properties(${testName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR})
         add_test(NAME ${testName} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/${testName})
+
+        SETUP_TARGET_FOR_COVERAGE(
+            NAME "${testName}_coverage"
+            EXECUTABLE ${testName} -j ${PROCESSOR_COUNT}
+            DEPENDENCIES ${testName}
+        )
 endforeach(testSrc)
