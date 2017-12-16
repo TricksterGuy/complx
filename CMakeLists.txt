@@ -14,7 +14,7 @@ option(ENABLE_DEV "Build dev version" OFF)
 option(ENABLE_TESTS "Enable testing" OFF)
 
 if(ENABLE_TESTS)
-enable_testing()
+    enable_testing()
 endif(ENABLE_TESTS)
 
 # Require C++11 build
