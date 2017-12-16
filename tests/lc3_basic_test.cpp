@@ -1,7 +1,4 @@
-#define BOOST_TEST_MAIN
-#if !defined(WINDOWS)
-    #define BOOST_TEST_DYN_LINK
-#endif
+#define BOOST_TEST_MODULE LC3_Test_Suite
 #include <boost/test/auto_unit_test.hpp>
 #include <iostream>
 #include <fstream>

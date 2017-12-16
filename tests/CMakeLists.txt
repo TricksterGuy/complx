@@ -5,20 +5,31 @@ include_directories(../liblc3)
 
 include(CodeCoverage)
 
+if(CMAKE_HOST_UNIX)
+    add_definitions(-DBOOST_TEST_DYN_LINK=1)
+endif(CMAKE_HOST_UNIX)
+
 APPEND_COVERAGE_COMPILER_FLAGS()
 
-file(GLOB TEST_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
+file(GLOB SRC_TESTS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 
-foreach(testSrc ${TEST_SRCS})
-        get_filename_component(testName ${testSrc} NAME_WE)
-        add_executable(${testName} ${testSrc})
-        target_link_libraries(${testName} lc3 ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
-        set_target_properties(${testName} PROPERTIES RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_SOURCE_DIR})
-        add_test(NAME ${testName} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/${testName})
+add_executable(
+    lc3_test_suite
+    ${SRC_TESTS}
+)
 
-        SETUP_TARGET_FOR_COVERAGE(
-            NAME "${testName}_coverage"
-            EXECUTABLE ${testName} -j ${PROCESSOR_COUNT}
-            DEPENDENCIES ${testName}
-        )
-endforeach(testSrc)
+target_link_libraries(
+    lc3_test_suite
+    lc3
+    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+)
+
+set_target_properties(lc3_test_suite PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+add_test(NAME lc3_test_suite WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/lc3_test_suite)
+
+setup_target_for_coverage(
+    NAME "lc3_test_coverage"
+    EXECUTABLE lc3_test_suite -j ${PROCESSOR_COUNT}
+    DEPENDENCIES lc3_test_suite
+)
