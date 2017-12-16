@@ -137,6 +137,7 @@ function(SETUP_TARGET_FOR_COVERAGE)
     set(options NONE)
     set(oneValueArgs NAME)
     set(multiValueArgs EXECUTABLE EXECUTABLE_ARGS DEPENDENCIES)
+
     cmake_parse_arguments(Coverage "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     if(NOT LCOV_PATH)

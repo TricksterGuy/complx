@@ -35,6 +35,7 @@ BOOST_FIXTURE_TEST_CASE(TestInstructionPlugin, LC3Test)
     std::stringstream file(asm_file);
     std::vector<code_range> ranges;
     lc3_assemble(state, file, ranges, options);
+    BOOST_REQUIRE(state.instructionPlugin != nullptr);
     BOOST_REQUIRE_EQUAL(state.mem[0x3002], short(0xD401));
     BOOST_REQUIRE_EQUAL(state.mem[0x3003], short(0xD624));
     lc3_run(state, 5);
@@ -99,6 +100,8 @@ BOOST_FIXTURE_TEST_CASE(TestInstructionPluginDisassemble, LC3Test)
     std::vector<code_range> ranges;
     lc3_assemble(state, file, ranges, options);
 
+    BOOST_REQUIRE(state.instructionPlugin != nullptr);
+
     for (unsigned int i = 0; i < answers_basic.size(); i++)
         BOOST_CHECK_EQUAL(lc3_basic_disassemble(state, state.mem[0x3000 + i]), answers_basic[i]);
 
@@ -125,6 +128,8 @@ BOOST_FIXTURE_TEST_CASE(TestTrapPlugin, LC3Test)
     std::stringstream file(asm_file);
     std::vector<code_range> ranges;
     lc3_assemble(state, file, ranges, options);
+    BOOST_REQUIRE(state.trapPlugins[0x80] != nullptr);
+    BOOST_REQUIRE(lc3_sym_lookup(state, "UDIV") == -1);
     BOOST_REQUIRE_EQUAL(state.mem[0x3002], short(0xF080));
     lc3_run(state, 4);
     BOOST_REQUIRE(state.halted);
@@ -148,6 +153,8 @@ BOOST_FIXTURE_TEST_CASE(TestTrapPluginDisassemble, LC3Test)
     std::stringstream file(asm_file);
     std::vector<code_range> ranges;
     lc3_assemble(state, file, ranges, options);
+    BOOST_REQUIRE(state.trapPlugins[0x80] != nullptr);
+    BOOST_REQUIRE(lc3_sym_lookup(state, "UDIV") == -1);
     BOOST_REQUIRE_EQUAL(state.mem[0x3002], short(0xF080));
     BOOST_CHECK_EQUAL(lc3_basic_disassemble(state, state.mem[0x3002]), "TRAP x80");
     BOOST_CHECK_EQUAL(lc3_disassemble(state, state.mem[0x3002]), "UDIV");

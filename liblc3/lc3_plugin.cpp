@@ -171,7 +171,6 @@ bool lc3_install_plugin(lc3_state& state, const std::string& filename, const Plu
         // Unknown type I don't support.
         return false;
     }
-
     // Register
     state.filePlugin[filename] = infos;
     return true;

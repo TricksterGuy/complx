@@ -1,9 +1,7 @@
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(../liblc3)
 
-option(ENABLE_COVERAGE "Enable testing coverage" OFF)
 
 if(CMAKE_HOST_UNIX)
     add_definitions(-DBOOST_TEST_DYN_LINK=1)
@@ -27,9 +25,15 @@ set_target_properties(lc3_test_suite PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE
 add_test(NAME lc3_test_suite WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/lc3_test_suite)
 
 if(ENABLE_COVERAGE)
-    include(CodeCoverage)
+    set(CMAKE_SKIP_RPATH FALSE)
+    set(CMAKE_INSTALL_RPATH
+        ${CMAKE_CURRENT_BINARY_DIR}
+        ${CMAKE_CURRENT_BINARY_DIR}/plugins/devices
+        ${CMAKE_CURRENT_BINARY_DIR}/plugins/instructions
+        ${CMAKE_CURRENT_BINARY_DIR}/plugins/traps
+        ${CMAKE_CURRENT_BINARY_DIR}/plugins/other)
 
-    APPEND_COVERAGE_COMPILER_FLAGS()
+    set(COVERAGE_EXCLUDES 'boost/*' 'c++/*' 'tests/*')
 
     setup_target_for_coverage(
         NAME "lc3_test_coverage"

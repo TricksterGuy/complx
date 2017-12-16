@@ -5,6 +5,9 @@ if(CMAKE_VERSION VERSION_EQUAL 3.0 OR CMAKE_VERSION VERSION_GREATER 3.0)
 endif()
 project(complx-tools)
 
+# Add code coverage stuff.
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
 option(ENABLE_PLUGINS "Enable Official Plugins" ON)
 option(ENABLE_LC3EDIT "Build lc3edit" OFF)
 option(ENABLE_COMP "Build comp" OFF)
@@ -12,6 +15,7 @@ option(ENABLE_COMPLX "Build complx" ON)
 option(ENABLE_LC3TEST "Build lc3test" ON)
 option(ENABLE_DEV "Build dev version" OFF)
 option(ENABLE_TESTS "Enable testing" OFF)
+option(ENABLE_COVERAGE "Enable testing coverage" OFF)
 
 if(ENABLE_TESTS)
     enable_testing()
@@ -24,10 +28,17 @@ if(NOT CMAKE_CXX_FLAGS MATCHES "-std=(c|gnu)\\+\\+11")
 endif()
 
 # Additional debug flags
-set(CMAKE_CXX_FLAGS_DEBUG "-g -pg -fprofile-arcs -ftest-coverage --coverage")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -pg")
 # Install directories
 set(CMAKE_INSTALL_LIBDIR lib CACHE STRING "where to install libraries/plugins")
 set(CMAKE_INSTALL_BINDIR bin CACHE STRING "where to install programs")
+
+if(ENABLE_COVERAGE)
+    include(CodeCoverage)
+
+    append_coverage_compiler_flags()
+endif(ENABLE_COVERAGE)
+
 
 # Set default warning flags
 set(PROJECT_WARNING_FLAGS "-Wall -Wno-deprecated -Wno-deprecated-declarations" CACHE STRING "Compiler warning flags to include")
