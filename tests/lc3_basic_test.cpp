@@ -717,10 +717,17 @@ BOOST_FIXTURE_TEST_CASE(TestLoadHex, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(TestLoadSym, LC3Test)
 {
-    std::ifstream file("testdata/devreg.sym");
-    BOOST_REQUIRE(file.good());
+    std::stringstream file(std::string(
+    "DDR\t3005\n"
+    "DSR\t3004\n"
+    "KBDR\t3028\n"
+    "KBSR\t3027\n"
+    "MCR\t503\n"
+    "POLLIN\t3020\n"
+    "POLLIN2\t3023\n"
+    "POLLOUT\t3000\n"));
+
     lc3_load_sym(state, file);
-    file.close();
 
     BOOST_CHECK_EQUAL(state.symbols["MCR"],     0x0503);
     BOOST_CHECK_EQUAL(state.symbols["KBDR"],    0x3028);
