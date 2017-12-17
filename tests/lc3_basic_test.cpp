@@ -1100,7 +1100,7 @@ BOOST_FIXTURE_TEST_CASE(TestTrapInstructions, LC3Test)
     state.input = &std::cin;
     state.output = &std::cout;
 
-    std::istringstream verify("AInput character: BHELLO WORLD01234567890");
+    std::istringstream verify(progoutput.str());
     BOOST_CHECK_EQUAL(verify.get(), 'A');
 
     const std::string answers[3] = {"Input character: ", "HELLO WORLD", "01234567890"};
@@ -1127,16 +1127,22 @@ BOOST_FIXTURE_TEST_CASE(TestTrapInstructions, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(TestDeviceRegisters, LC3Test)
 {
-    std::ifstream file("testdata/devreg.obj", std::ios::binary);
-    BOOST_REQUIRE(file.good());
+    const unsigned char devreg[] = {
+        0x30, 0x00, 0x00, 0x06, 0xa0, 0x03, 0x07, 0xfe, 0xb2, 0x02, 0xf0, 0x25,
+        0xfe, 0x04, 0xfe, 0x06, 0x30, 0x20, 0x00, 0x09, 0xa0, 0x06, 0x07, 0xfe,
+        0xa2, 0x05, 0xa0, 0x03, 0x07, 0xfe, 0xa4, 0x02, 0xf0, 0x25, 0xfe, 0x00,
+        0xfe, 0x02, 0x05, 0x00, 0x00, 0x04, 0x50, 0x20, 0xa2, 0x01, 0xb0, 0x00,
+        0xff, 0xfe
+    };
+    const unsigned int devreg_len = 50;
+
+    std::stringstream file(std::string(reinterpret_cast<const char*>(devreg), devreg_len));
     lc3_load(state, file, lc3_reader_obj);
-    file.close();
 
-    state.regs[0x1] = 65;
+    state.regs[1] = 65;
 
-    std::ifstream proginput("testdata/devreginput.txt");
-    std::ofstream progoutput("testdata/devregoutput.txt");
-    BOOST_REQUIRE(proginput.good() && progoutput.good());
+    std::istringstream proginput("BC");
+    std::ostringstream progoutput;
 
     state.input = &proginput;
     state.output = &progoutput;
@@ -1149,27 +1155,24 @@ BOOST_FIXTURE_TEST_CASE(TestDeviceRegisters, LC3Test)
     state.pc = 0x3020;
     lc3_run(state);
 
-    BOOST_CHECK_EQUAL(state.regs[0x1], 66);
-    BOOST_CHECK_EQUAL(state.regs[0x2], 67);
+    BOOST_CHECK_EQUAL(state.regs[1], 66);
+    BOOST_CHECK_EQUAL(state.regs[2], 67);
 
     // Execute MCR Test
     state.halted = 0;
     state.pc = 0x500;
     lc3_run(state);
 
-    BOOST_CHECK_EQUAL(state.halted, 0x1);
+    BOOST_CHECK_EQUAL(state.halted, 1);
     BOOST_CHECK_EQUAL(state.pc, 0x502);
     BOOST_CHECK_EQUAL(state.warnings, 0U); // No warning since its in the OS MEM.
     BOOST_CHECK_EQUAL(state.regs[1], (short)0x8000);
 
-    proginput.close();
-    progoutput.close();
     state.input = &std::cin;
     state.output = &std::cout;
 
-    std::ifstream verify("testdata/devregoutput.txt");
+    std::istringstream verify(progoutput.str());
     BOOST_CHECK_EQUAL(verify.get(), 65);
-    verify.close();
 }
 
 BOOST_FIXTURE_TEST_CASE(TestSymbolTable, LC3Test)
