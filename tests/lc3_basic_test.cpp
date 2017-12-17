@@ -40,6 +40,11 @@ unsigned int disassemble_len = 120;
 
 const std::string disassemble_sym = "LABEL\t3039";
 
+unsigned char simple[] = {
+  0x30, 0x00, 0x00, 0x06, 0x20, 0x03, 0x22, 0x03, 0x14, 0x01, 0xf0, 0x25,
+  0x00, 0x3c, 0x00, 0x06
+};
+unsigned int simple_len = 16;
 
 BOOST_FIXTURE_TEST_CASE(InstructionDecodeTest, LC3Test)
 {
@@ -674,10 +679,9 @@ BOOST_FIXTURE_TEST_CASE(TestMemoryInstructions, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(TestLoadObj, LC3Test)
 {
-    std::ifstream file("testdata/simple.obj", std::ios::binary);
-    BOOST_REQUIRE(file.good());
+    std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));
+
     lc3_load(state, file, lc3_reader_obj);
-    file.close();
 
     BOOST_CHECK_EQUAL(state.mem[0x3000], 0x2003);
     BOOST_CHECK_EQUAL(state.mem[0x3001], 0x2203);
@@ -723,10 +727,8 @@ BOOST_FIXTURE_TEST_CASE(TestLoadSym, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(TestRunOne, LC3Test)
 {
-    std::ifstream file("testdata/simple.obj", std::ios::binary);
-    BOOST_REQUIRE(file.good());
+    std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));
     lc3_load(state, file, lc3_reader_obj);
-    file.close();
 
     lc3_step(state);
 
@@ -741,10 +743,8 @@ BOOST_FIXTURE_TEST_CASE(TestRunOne, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(TestRunMany, LC3Test)
 {
-    std::ifstream file("testdata/simple.obj", std::ios::binary);
-    BOOST_REQUIRE(file.good());
+    std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));
     lc3_load(state, file, lc3_reader_obj);
-    file.close();
 
     lc3_run(state, 3);
 
@@ -762,10 +762,8 @@ BOOST_FIXTURE_TEST_CASE(TestRunMany, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(TestRun, LC3Test)
 {
-    std::ifstream file("testdata/simple.obj", std::ios::binary);
-    BOOST_REQUIRE(file.good());
+    std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));
     lc3_load(state, file, lc3_reader_obj);
-    file.close();
 
     lc3_run(state);
 
@@ -783,10 +781,8 @@ BOOST_FIXTURE_TEST_CASE(TestRun, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(TestBack, LC3Test)
 {
-    std::ifstream file("testdata/simple.obj", std::ios::binary);
-    BOOST_REQUIRE(file.good());
+    std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));
     lc3_load(state, file, lc3_reader_obj);
-    file.close();
 
     lc3_step(state);
     lc3_back(state);
@@ -805,10 +801,8 @@ BOOST_FIXTURE_TEST_CASE(TestBack, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(TestBackMany, LC3Test)
 {
-    std::ifstream file("testdata/simple.obj", std::ios::binary);
-    BOOST_REQUIRE(file.good());
+    std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));
     lc3_load(state, file, lc3_reader_obj);
-    file.close();
 
     lc3_run(state, 3);
     lc3_rewind(state, 3);
@@ -827,10 +821,8 @@ BOOST_FIXTURE_TEST_CASE(TestBackMany, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(TestBackFull, LC3Test)
 {
-    std::ifstream file("testdata/simple.obj", std::ios::binary);
-    BOOST_REQUIRE(file.good());
+    std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));
     lc3_load(state, file, lc3_reader_obj);
-    file.close();
 
     lc3_run(state);
     lc3_rewind(state);
@@ -849,10 +841,8 @@ BOOST_FIXTURE_TEST_CASE(TestBackFull, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(TestBackInvalid, LC3Test)
 {
-    std::ifstream file("testdata/simple.obj", std::ios::binary);
-    BOOST_REQUIRE(file.good());
+    std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));
     lc3_load(state, file, lc3_reader_obj);
-    file.close();
 
     lc3_back(state);
 
@@ -986,10 +976,8 @@ BOOST_FIXTURE_TEST_CASE(TestFinish, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(TestUndoStack, LC3Test)
 {
-    std::ifstream file("testdata/simple.obj", std::ios::binary);
-    BOOST_REQUIRE(file.good());
+    std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));
     lc3_load(state, file, lc3_reader_obj);
-    file.close();
 
     state.max_stack_size = 1;
 
