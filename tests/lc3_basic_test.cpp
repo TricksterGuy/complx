@@ -55,6 +55,12 @@ F025
 003C
 0006)";
 
+const unsigned char simplesubr[] = {
+    0x30, 0x00, 0x00, 0x09, 0x48, 0x02, 0x00, 0x00, 0xf0, 0x25, 0x20, 0x03,
+    0x22, 0x03, 0x14, 0x01, 0xc1, 0xc0, 0x00, 0x3c, 0x00, 0x06
+};
+const unsigned int simplesubr_len = 22;
+
 BOOST_FIXTURE_TEST_CASE(InstructionDecodeTest, LC3Test)
 {
     std::stringstream file(std::string(reinterpret_cast<char*>(allinstrs), allinstrs_len));
@@ -931,10 +937,8 @@ BOOST_FIXTURE_TEST_CASE(TestBackR7, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(TestNextLine, LC3Test)
 {
-    std::ifstream file("testdata/simplesubr.obj", std::ios::binary);
-    BOOST_REQUIRE(file.good());
+    std::stringstream file(std::string(reinterpret_cast<const char*>(simplesubr), simplesubr_len));
     lc3_load(state, file, lc3_reader_obj);
-    file.close();
 
     lc3_next_line(state);
 
@@ -952,10 +956,8 @@ BOOST_FIXTURE_TEST_CASE(TestNextLine, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(TestPrevLine, LC3Test)
 {
-    std::ifstream file("testdata/simplesubr.obj", std::ios::binary);
-    BOOST_REQUIRE(file.good());
+    std::stringstream file(std::string(reinterpret_cast<const char*>(simplesubr), simplesubr_len));
     lc3_load(state, file, lc3_reader_obj);
-    file.close();
 
     lc3_next_line(state);
     lc3_prev_line(state);
@@ -974,10 +976,8 @@ BOOST_FIXTURE_TEST_CASE(TestPrevLine, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(TestFinish, LC3Test)
 {
-    std::ifstream file("testdata/simplesubr.obj", std::ios::binary);
-    BOOST_REQUIRE(file.good());
+    std::stringstream file(std::string(reinterpret_cast<const char*>(simplesubr), simplesubr_len));
     lc3_load(state, file, lc3_reader_obj);
-    file.close();
 
     lc3_step(state);
     lc3_finish(state);
