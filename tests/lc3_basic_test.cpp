@@ -1021,10 +1021,17 @@ BOOST_FIXTURE_TEST_CASE(TestUndoStack, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(TestTrapInstructions, LC3Test)
 {
-    std::ifstream file("testdata/traps.obj", std::ios::binary);
-    BOOST_REQUIRE(file.good());
+    const unsigned char traps[] = {
+        0x30, 0x00, 0x00, 0x1b, 0xf0, 0x21, 0xf0, 0x23, 0xf0, 0x20, 0xe0, 0x04,
+        0xf0, 0x22, 0xe0, 0x0e, 0xf0, 0x24, 0xf0, 0x25, 0x00, 0x48, 0x00, 0x45,
+        0x00, 0x4c, 0x00, 0x4c, 0x00, 0x4f, 0x00, 0x20, 0x00, 0x57, 0x00, 0x4f,
+        0x00, 0x52, 0x00, 0x4c, 0x00, 0x44, 0x00, 0x00, 0x31, 0x30, 0x33, 0x32,
+        0x35, 0x34, 0x37, 0x36, 0x39, 0x38, 0x00, 0x30, 0x00, 0x00
+    };
+    const unsigned int traps_len = 58;
+
+    std::stringstream file(std::string(reinterpret_cast<const char*>(traps), traps_len));
     lc3_load(state, file, lc3_reader_obj);
-    file.close();
 
     BOOST_CHECK_EQUAL(state.mem[0x3000], (short)0xF021);
     BOOST_CHECK_EQUAL(state.mem[0x3001], (short)0xF023);
@@ -1055,10 +1062,8 @@ BOOST_FIXTURE_TEST_CASE(TestTrapInstructions, LC3Test)
     BOOST_CHECK_EQUAL(state.mem[0x301A], 0x0000);
 
 
-    std::ifstream proginput("testdata/trapsinput.txt");
-    std::ofstream progoutput("testdata/trapsoutput.txt");
-
-    BOOST_REQUIRE(proginput.good() && progoutput.good());
+    std::istringstream proginput("BC");
+    std::ostringstream progoutput;
 
     state.input = &proginput;
     state.output = &progoutput;
@@ -1092,16 +1097,14 @@ BOOST_FIXTURE_TEST_CASE(TestTrapInstructions, LC3Test)
     BOOST_CHECK_EQUAL(state.pc, 0x3007);
     BOOST_CHECK_EQUAL(state.regs[7], 0x3008);
 
-    proginput.close();
-    progoutput.close();
     state.input = &std::cin;
     state.output = &std::cout;
 
-    std::ifstream verify("testdata/trapsoutput.txt");
-    BOOST_CHECK_EQUAL(verify.get(), 65);
+    std::istringstream verify("AInput character: BHELLO WORLD01234567890");
+    BOOST_CHECK_EQUAL(verify.get(), 'A');
 
-    char* str = new char[18];
     const std::string answers[3] = {"Input character: ", "HELLO WORLD", "01234567890"};
+    char str[18];
     std::string val;
 
     verify.get(str, 18);
@@ -1120,9 +1123,6 @@ BOOST_FIXTURE_TEST_CASE(TestTrapInstructions, LC3Test)
     str[12] = 0;
     val = str;
     BOOST_CHECK_EQUAL(val, answers[2]);
-    delete[] str;
-
-    verify.close();
 }
 
 BOOST_FIXTURE_TEST_CASE(TestDeviceRegisters, LC3Test)
