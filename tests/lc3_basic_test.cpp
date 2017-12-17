@@ -874,16 +874,18 @@ BOOST_FIXTURE_TEST_CASE(TestBackInvalid, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(TestBackStore, LC3Test)
 {
-    std::ifstream file("testdata/store.obj", std::ios::binary);
-    BOOST_REQUIRE(file.good());
-    lc3_load(state, file, lc3_reader_obj);
-    file.close();
+    const unsigned char store[] = {
+        0x30, 0x00, 0x00, 0x04, 0x10, 0x2f, 0x30, 0x01, 0xf0, 0x25, 0x1e, 0xd4
+    };
 
-    // GIMME SYMBOLS
-    std::ifstream symfile("testdata/store.sym");
-    BOOST_REQUIRE(symfile.good());
-    lc3_load_sym(state, symfile);
-    symfile.close();
+    const unsigned int store_len = 12;
+
+    std::stringstream file(std::string(reinterpret_cast<const char*>(store), store_len));
+    lc3_load(state, file, lc3_reader_obj);
+
+    std::stringstream sym_file("HELLO\t3003");
+    lc3_load_sym(state, sym_file);
+
 
     state.regs[0] = 0;
     // ADD R0, R0, 15
