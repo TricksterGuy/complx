@@ -16,17 +16,34 @@ struct LC3Test
     }
 };
 
-const std::string all_instrs(
-    "\x30\x00\x00\x12"
-    "\x0E\x01\x10\x42\x10\x62\x21\xFF"
-    "\x31\xFF\x4F\xFF\x40\x00\x50\x42"
-    "\x50\x62\x60\x42\x70\x42\x90\x7F"
-    "\xA1\xFF\xB1\xFF\xC1\xC0\xC0\x00"
-    "\xE1\xFF\xF0\x25", 40);
+unsigned char allinstrs[] = {
+  0x30, 0x00, 0x00, 0x12, 0x0e, 0x01, 0x10, 0x42, 0x10, 0x62, 0x21, 0xff,
+  0x31, 0xff, 0x4f, 0xff, 0x40, 0x00, 0x50, 0x42, 0x50, 0x62, 0x60, 0x42,
+  0x70, 0x42, 0x90, 0x7f, 0xa1, 0xff, 0xb1, 0xff, 0xc1, 0xc0, 0xc0, 0x00,
+  0xe1, 0xff, 0xf0, 0x25
+};
+unsigned int allinstrs_len = 40;
+
+unsigned char disassemble[] = {
+  0x30, 0x00, 0x00, 0x3a, 0x50, 0x00, 0x50, 0x41, 0x50, 0x01, 0x50, 0x42,
+  0x50, 0x3f, 0x50, 0x7f, 0x51, 0xe0, 0x50, 0x27, 0x50, 0x67, 0x10, 0x01,
+  0x10, 0x42, 0x10, 0x20, 0x10, 0x60, 0x10, 0x21, 0x10, 0x3f, 0x10, 0x27,
+  0x10, 0x67, 0x90, 0x3f, 0x90, 0x7f, 0x0e, 0x00, 0x00, 0x30, 0x00, 0x06,
+  0x08, 0x22, 0x04, 0x21, 0x02, 0x20, 0x0c, 0x1f, 0x0a, 0x1e, 0x06, 0x1d,
+  0x0e, 0x1c, 0x0e, 0x1b, 0x0e, 0x01, 0x07, 0xfa, 0x48, 0x18, 0x48, 0x01,
+  0x40, 0x40, 0xc1, 0xc0, 0xc0, 0x00, 0x20, 0x13, 0x30, 0x12, 0x60, 0x40,
+  0x60, 0x47, 0x70, 0x40, 0x70, 0x47, 0xa0, 0x0d, 0xb0, 0x0c, 0xb1, 0xfc,
+  0xe0, 0x0a, 0xe0, 0x01, 0xf0, 0x20, 0xf0, 0x21, 0xf0, 0x22, 0xf0, 0x23,
+  0xf0, 0x24, 0xf0, 0x25, 0xf0, 0xff, 0x80, 0x00, 0xd3, 0x92, 0x23, 0x28
+};
+unsigned int disassemble_len = 120;
+
+const std::string disassemble_sym = "LABEL\t3039";
+
 
 BOOST_FIXTURE_TEST_CASE(InstructionDecodeTest, LC3Test)
 {
-    std::stringstream file(all_instrs);
+    std::stringstream file(std::string(reinterpret_cast<char*>(allinstrs), allinstrs_len));
     file.ignore(4);
 
     unsigned short data;
@@ -97,7 +114,7 @@ BOOST_FIXTURE_TEST_CASE(InstructionDecodeTest, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(InstructionBasicDisassembleTest, LC3Test)
 {
-    std::stringstream file(all_instrs);
+    std::stringstream file(std::string(reinterpret_cast<char*>(allinstrs), allinstrs_len));
     file.ignore(4);
     unsigned short data;
 
@@ -156,15 +173,13 @@ BOOST_FIXTURE_TEST_CASE(InstructionBasicDisassembleTest, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(TestDisassemble, LC3Test)
 {
-    std::ifstream file("testdata/disassemble.obj", std::ios::binary);
     unsigned short data;
-    BOOST_REQUIRE(file.good());
+
+    std::stringstream file(std::string(reinterpret_cast<char*>(disassemble), disassemble_len));
     file.ignore(4);
 
-    std::ifstream sym_file("testdata/disassemble.sym");
-    BOOST_REQUIRE(sym_file.good());
+    std::stringstream sym_file(disassemble_sym);
     lc3_load_sym(state, sym_file);
-    sym_file.close();
 
     const std::vector<std::string> answers = {
         "AND R0, R0, R0",
@@ -234,21 +249,17 @@ BOOST_FIXTURE_TEST_CASE(TestDisassemble, LC3Test)
         std::string instruct = lc3_disassemble(state, data);
         BOOST_CHECK_EQUAL(instruct,  answers[i]);
     }
-
-    file.close();
 }
 
 BOOST_FIXTURE_TEST_CASE(TestSmartDisassemble, LC3Test)
 {
-    std::ifstream file("testdata/disassemble.obj", std::ios::binary);
     unsigned short data;
-    BOOST_REQUIRE(file.good());
+
+    std::stringstream file(std::string(reinterpret_cast<char*>(disassemble), disassemble_len));
     file.ignore(4);
 
-    std::ifstream sym_file("testdata/disassemble.sym");
-    BOOST_REQUIRE(sym_file.good());
+    std::stringstream sym_file(disassemble_sym);
     lc3_load_sym(state, sym_file);
-    sym_file.close();
 
     const std::vector<std::string> answers = {
         "TEST R0",
@@ -330,8 +341,6 @@ BOOST_FIXTURE_TEST_CASE(TestSmartDisassemble, LC3Test)
         std::string instruct = lc3_smart_disassemble(state, data);
         BOOST_CHECK_EQUAL(instruct,  answers[i]);
     }
-
-    file.close();
 }
 
 BOOST_FIXTURE_TEST_CASE(TestArithInstructions, LC3Test)
