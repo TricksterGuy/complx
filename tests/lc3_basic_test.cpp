@@ -1340,9 +1340,23 @@ BOOST_FIXTURE_TEST_CASE(InstructionBasicAssembleTest, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(InstructionAssembleTest, LC3Test)
 {
+    std::istringstream file(
+        ".orig x3000\n"
+        "\tLD R0, A\n"
+        "\tLD R1, B\n"
+        "\tADD R2, R0, R1\n"
+        "\tHALT\n"
+        "\tA .fill 60\n"
+        "\tB .fill 6\n"
+        ".end"
+    );
+
     try
     {
-        lc3_assemble(state, "testdata/simple.asm");
+        std::vector<code_range> ranges;
+        LC3AssembleOptions options;
+        options.multiple_errors = false;
+        lc3_assemble(state, file, ranges, options);
     }
     catch (LC3AssembleException e)
     {
