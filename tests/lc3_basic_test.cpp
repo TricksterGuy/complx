@@ -46,6 +46,15 @@ unsigned char simple[] = {
 };
 unsigned int simple_len = 16;
 
+const std::string simple_hex = R"(3000
+0006
+2003
+2203
+1401
+F025
+003C
+0006)";
+
 BOOST_FIXTURE_TEST_CASE(InstructionDecodeTest, LC3Test)
 {
     std::stringstream file(std::string(reinterpret_cast<char*>(allinstrs), allinstrs_len));
@@ -694,10 +703,8 @@ BOOST_FIXTURE_TEST_CASE(TestLoadObj, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(TestLoadHex, LC3Test)
 {
-    std::ifstream file("testdata/simple.hex");
-    BOOST_REQUIRE(file.good());
+    std::stringstream file(simple_hex);
     lc3_load(state, file, lc3_reader_hex);
-    file.close();
 
     BOOST_CHECK_EQUAL(state.mem[0x3000], 0x2003);
     BOOST_CHECK_EQUAL(state.mem[0x3001], 0x2203);
