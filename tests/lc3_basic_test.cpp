@@ -901,10 +901,14 @@ BOOST_FIXTURE_TEST_CASE(TestBackStore, LC3Test)
 
 BOOST_FIXTURE_TEST_CASE(TestBackR7, LC3Test)
 {
-    std::ifstream file("testdata/simple2.obj", std::ios::binary);
-    BOOST_REQUIRE(file.good());
+    const unsigned char simple2[] = {
+        0x30, 0x00, 0x00, 0x02, 0x1e, 0x01, 0xf0, 0x25
+    };
+
+    const unsigned int simple2_len = 8;
+
+    std::stringstream file(std::string(reinterpret_cast<const char*>(simple2), simple2_len));
     lc3_load(state, file, lc3_reader_obj);
-    file.close();
 
     state.regs[0] = 25;
     state.regs[1] = 75;
