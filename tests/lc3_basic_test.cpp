@@ -16,9 +16,17 @@ struct LC3Test
     }
 };
 
+const std::string all_instrs(
+    "\x30\x00\x00\x12"
+    "\x0E\x01\x10\x42\x10\x62\x21\xFF"
+    "\x31\xFF\x4F\xFF\x40\x00\x50\x42"
+    "\x50\x62\x60\x42\x70\x42\x90\x7F"
+    "\xA1\xFF\xB1\xFF\xC1\xC0\xC0\x00"
+    "\xE1\xFF\xF0\x25", 40);
+
 BOOST_FIXTURE_TEST_CASE(InstructionDecodeTest, LC3Test)
 {
-    std::ifstream file("testdata/allinstrs.obj", std::ios::binary);
+    std::stringstream file(all_instrs);
     file.ignore(4);
 
     unsigned short data;
@@ -68,8 +76,6 @@ BOOST_FIXTURE_TEST_CASE(InstructionDecodeTest, LC3Test)
     };
 
 
-    BOOST_REQUIRE(file.good());
-
     for (int i = 0; i < 18; i++)
     {
         file.read((char*) &data, sizeof(unsigned short));
@@ -87,13 +93,12 @@ BOOST_FIXTURE_TEST_CASE(InstructionDecodeTest, LC3Test)
 
     BOOST_CHECK_EQUAL(error.data.opcode, 0xD);
     BOOST_CHECK_EQUAL(error.data.data, 0x392);
-
-    file.close();
 }
 
 BOOST_FIXTURE_TEST_CASE(InstructionBasicDisassembleTest, LC3Test)
 {
-    std::ifstream file("testdata/allinstrs.obj", std::ios::binary);
+    std::stringstream file(all_instrs);
+    file.ignore(4);
     unsigned short data;
 
     const std::string answers[18] = {
@@ -117,9 +122,6 @@ BOOST_FIXTURE_TEST_CASE(InstructionBasicDisassembleTest, LC3Test)
         "TRAP x25",
     };
 
-    BOOST_REQUIRE(file.good());
-    file.ignore(4);
-
     for (unsigned int i = 0; i < 18; i++)
     {
         file.read((char*) &data, sizeof(unsigned short));
@@ -127,8 +129,6 @@ BOOST_FIXTURE_TEST_CASE(InstructionBasicDisassembleTest, LC3Test)
         std::string instruct = lc3_basic_disassemble(state, data);
         BOOST_CHECK_EQUAL(instruct,  answers[i]);
     }
-
-    file.close();
 
     // Test special cases
     const std::string more_answers[5] =
