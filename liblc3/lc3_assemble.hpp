@@ -90,10 +90,10 @@ struct LC3AssembleContext
 {
     std::vector<std::string> tokens;
     mutable std::vector<LC3AssembleException> exceptions;
-    std::string line;
-    lc3_state* state;
-    int lineno;
-    unsigned short address;
+    std::string line = "";
+    lc3_state* state = nullptr;
+    int lineno = -1;
+    unsigned short address = 0x0000;
     LC3AssembleOptions options;
 };
 

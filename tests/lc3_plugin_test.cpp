@@ -6,15 +6,15 @@
 #include <lc3_all.hpp>
 #include "ExpressionEvaluator.hpp"
 
-struct LC3Test
+struct LC3PluginTest
 {
-    LC3Test()
+    LC3PluginTest()
     {
         lc3_init(state, false);
         options.multiple_errors = false;
     }
 
-    ~LC3Test()
+    ~LC3PluginTest()
     {
         lc3_remove_plugins(state);
     }
@@ -23,7 +23,7 @@ struct LC3Test
     LC3AssembleOptions options;
 };
 
-BOOST_FIXTURE_TEST_CASE(TestInstructionPlugin, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestInstructionPlugin, LC3PluginTest)
 {
     const std::string asm_file =
     ";@plugin filename=lc3_multiply\n"
@@ -64,7 +64,7 @@ BOOST_FIXTURE_TEST_CASE(TestInstructionPlugin, LC3Test)
     BOOST_CHECK_EQUAL(state.regs[3], 0);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestInstructionPluginDisassemble, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestInstructionPluginDisassemble, LC3PluginTest)
 {
     const std::string asm_file =
     ";@plugin filename=lc3_multiply\n"
@@ -117,7 +117,7 @@ BOOST_FIXTURE_TEST_CASE(TestInstructionPluginDisassemble, LC3Test)
         BOOST_CHECK_EQUAL(lc3_smart_disassemble(state, state.mem[0x3000 + i]), answers_advanced[i]);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestTrapPlugin, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestTrapPlugin, LC3PluginTest)
 {
     const std::string asm_file =
     ";@plugin filename=lc3_udiv vector=x80\n"
@@ -142,7 +142,7 @@ BOOST_FIXTURE_TEST_CASE(TestTrapPlugin, LC3Test)
     BOOST_CHECK_EQUAL(state.regs[1], 0);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestTrapPluginViaVector, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestTrapPluginViaVector, LC3PluginTest)
 {
     const std::string asm_file =
     ";@plugin filename=lc3_udiv vector=x80\n"
@@ -167,7 +167,7 @@ BOOST_FIXTURE_TEST_CASE(TestTrapPluginViaVector, LC3Test)
     BOOST_CHECK_EQUAL(state.regs[1], 0);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestTrapPluginDisassemble, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestTrapPluginDisassemble, LC3PluginTest)
 {
     const std::string asm_file =
     ";@plugin filename=lc3_udiv vector=x80\n"
@@ -189,4 +189,35 @@ BOOST_FIXTURE_TEST_CASE(TestTrapPluginDisassemble, LC3Test)
     BOOST_CHECK_EQUAL(lc3_basic_disassemble(state, state.mem[0x3002]), "TRAP x80");
     BOOST_CHECK_EQUAL(lc3_disassemble(state, state.mem[0x3002]), "UDIV");
     BOOST_CHECK_EQUAL(lc3_smart_disassemble(state, state.mem[0x3002]), "UDIV");
+}
+
+bool is_plugin_fail(const LC3AssembleException& ex)
+{
+    return ex.get_id() == PLUGIN_FAILED_TO_LOAD;
+}
+
+BOOST_FIXTURE_TEST_CASE(TestTrapPluginAssembleFailure, LC3PluginTest)
+{
+    const std::string asm_file =
+    ";@plugin filename=lc3_udiv\n"
+    ".orig x3000\n"
+    "   ADD R0, R2, R3\n"
+    ".end";
+
+    std::stringstream file(asm_file);
+    std::vector<code_range> ranges;
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, is_plugin_fail);
+}
+
+BOOST_FIXTURE_TEST_CASE(TestTrapPluginAssembleFailure2, LC3PluginTest)
+{
+    const std::string asm_file =
+    ";@plugin filename=lc3_udiv vector=800\n"
+    ".orig x3000\n"
+    "   ADD R0, R2, R3\n"
+    ".end";
+
+    std::stringstream file(asm_file);
+    std::vector<code_range> ranges;
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, is_plugin_fail);
 }

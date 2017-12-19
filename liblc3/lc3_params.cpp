@@ -4,6 +4,8 @@
 #include <cerrno>
 #include "lc3_params.hpp"
 
+///TODO more proper error checking of these functions.
+
 bool lc3_params_has_key(const PluginParams& params, const std::string& key)
 {
     return params.find(key) != params.end();

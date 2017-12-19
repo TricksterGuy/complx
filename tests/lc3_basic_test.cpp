@@ -6,11 +6,11 @@
 #include <lc3_all.hpp>
 #include "ExpressionEvaluator.hpp"
 
-struct LC3Test
+struct LC3BasicTest
 {
     lc3_state state;
 
-    LC3Test()
+    LC3BasicTest()
     {
         lc3_init(state, false);
     }
@@ -61,7 +61,7 @@ const unsigned char simplesubr[] = {
 };
 const unsigned int simplesubr_len = 22;
 
-BOOST_FIXTURE_TEST_CASE(InstructionDecodeTest, LC3Test)
+BOOST_FIXTURE_TEST_CASE(InstructionDecodeTest, LC3BasicTest)
 {
     std::stringstream file(std::string(reinterpret_cast<char*>(allinstrs), allinstrs_len));
     file.ignore(4);
@@ -132,7 +132,7 @@ BOOST_FIXTURE_TEST_CASE(InstructionDecodeTest, LC3Test)
     BOOST_CHECK_EQUAL(error.data.data, 0x392);
 }
 
-BOOST_FIXTURE_TEST_CASE(InstructionBasicDisassembleTest, LC3Test)
+BOOST_FIXTURE_TEST_CASE(InstructionBasicDisassembleTest, LC3BasicTest)
 {
     std::stringstream file(std::string(reinterpret_cast<char*>(allinstrs), allinstrs_len));
     file.ignore(4);
@@ -191,7 +191,7 @@ BOOST_FIXTURE_TEST_CASE(InstructionBasicDisassembleTest, LC3Test)
     BOOST_CHECK_EQUAL(nop0, more_answers[4]);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestDisassemble, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestDisassemble, LC3BasicTest)
 {
     unsigned short data;
 
@@ -271,7 +271,7 @@ BOOST_FIXTURE_TEST_CASE(TestDisassemble, LC3Test)
     }
 }
 
-BOOST_FIXTURE_TEST_CASE(TestSmartDisassemble, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestSmartDisassemble, LC3BasicTest)
 {
     unsigned short data;
 
@@ -363,7 +363,7 @@ BOOST_FIXTURE_TEST_CASE(TestSmartDisassemble, LC3Test)
     }
 }
 
-BOOST_FIXTURE_TEST_CASE(TestArithInstructions, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestArithInstructions, LC3BasicTest)
 {
     arithreg_instr add_r, and_r;
     arithimm_instr add_i, and_i;
@@ -441,7 +441,7 @@ BOOST_FIXTURE_TEST_CASE(TestArithInstructions, LC3Test)
     BOOST_CHECK_EQUAL(state.p, 0);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestControlInstructions, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestControlInstructions, LC3BasicTest)
 {
     br_instr brnzp, brn, brz, brp, brnil;
     jsr_instr jsr;
@@ -561,7 +561,7 @@ BOOST_FIXTURE_TEST_CASE(TestControlInstructions, LC3Test)
     BOOST_CHECK_EQUAL(state.regs[0x7], 0x3000);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestErrorInstructions, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestErrorInstructions, LC3BasicTest)
 {
     lc3_instr instr;
 
@@ -591,7 +591,7 @@ BOOST_FIXTURE_TEST_CASE(TestErrorInstructions, LC3Test)
     BOOST_CHECK_EQUAL(state.warnings, 1U);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestMemoryInstructions, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestMemoryInstructions, LC3BasicTest)
 {
     memoryoffset_instr ld, st, ldi, sti, lea;
     memoryreg_instr ldr, str;
@@ -692,7 +692,7 @@ BOOST_FIXTURE_TEST_CASE(TestMemoryInstructions, LC3Test)
     BOOST_CHECK_EQUAL(state.p, 0);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestLoadObj, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestLoadObj, LC3BasicTest)
 {
     std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));
 
@@ -707,7 +707,7 @@ BOOST_FIXTURE_TEST_CASE(TestLoadObj, LC3Test)
     BOOST_CHECK_EQUAL(state.mem[0x3006], 0x0000);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestLoadHex, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestLoadHex, LC3BasicTest)
 {
     std::stringstream file(simple_hex);
     lc3_load(state, file, lc3_reader_hex);
@@ -721,7 +721,7 @@ BOOST_FIXTURE_TEST_CASE(TestLoadHex, LC3Test)
     BOOST_CHECK_EQUAL(state.mem[0x3006], 0x0000);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestLoadSym, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestLoadSym, LC3BasicTest)
 {
     std::stringstream file(std::string(
     "DDR\t3005\n"
@@ -745,7 +745,7 @@ BOOST_FIXTURE_TEST_CASE(TestLoadSym, LC3Test)
     BOOST_CHECK_EQUAL(state.symbols["POLLOUT"], 0x3000);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestRunOne, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestRunOne, LC3BasicTest)
 {
     std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));
     lc3_load(state, file, lc3_reader_obj);
@@ -761,7 +761,7 @@ BOOST_FIXTURE_TEST_CASE(TestRunOne, LC3Test)
     BOOST_CHECK_EQUAL(state.undo_stack.size(), 1U);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestRunMany, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestRunMany, LC3BasicTest)
 {
     std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));
     lc3_load(state, file, lc3_reader_obj);
@@ -780,7 +780,7 @@ BOOST_FIXTURE_TEST_CASE(TestRunMany, LC3Test)
     BOOST_CHECK_EQUAL(state.undo_stack.size(), 3U);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestRun, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestRun, LC3BasicTest)
 {
     std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));
     lc3_load(state, file, lc3_reader_obj);
@@ -799,7 +799,7 @@ BOOST_FIXTURE_TEST_CASE(TestRun, LC3Test)
     BOOST_CHECK_EQUAL(state.undo_stack.size(), 4U);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestBack, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestBack, LC3BasicTest)
 {
     std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));
     lc3_load(state, file, lc3_reader_obj);
@@ -819,7 +819,7 @@ BOOST_FIXTURE_TEST_CASE(TestBack, LC3Test)
     BOOST_CHECK_EQUAL(state.undo_stack.size(), 0U);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestBackMany, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestBackMany, LC3BasicTest)
 {
     std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));
     lc3_load(state, file, lc3_reader_obj);
@@ -839,7 +839,7 @@ BOOST_FIXTURE_TEST_CASE(TestBackMany, LC3Test)
     BOOST_CHECK_EQUAL(state.undo_stack.size(), 0U);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestBackFull, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestBackFull, LC3BasicTest)
 {
     std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));
     lc3_load(state, file, lc3_reader_obj);
@@ -859,7 +859,7 @@ BOOST_FIXTURE_TEST_CASE(TestBackFull, LC3Test)
     BOOST_CHECK_EQUAL(state.undo_stack.size(), 0U);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestBackInvalid, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestBackInvalid, LC3BasicTest)
 {
     std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));
     lc3_load(state, file, lc3_reader_obj);
@@ -878,7 +878,7 @@ BOOST_FIXTURE_TEST_CASE(TestBackInvalid, LC3Test)
     BOOST_CHECK_EQUAL(state.undo_stack.size(), 0U);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestBackStore, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestBackStore, LC3BasicTest)
 {
     const unsigned char store[] = {
         0x30, 0x00, 0x00, 0x04, 0x10, 0x2f, 0x30, 0x01, 0xf0, 0x25, 0x1e, 0xd4
@@ -905,7 +905,7 @@ BOOST_FIXTURE_TEST_CASE(TestBackStore, LC3Test)
     BOOST_CHECK_EQUAL(state.mem[state.symbols["HELLO"]], 7892);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestBackR7, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestBackR7, LC3BasicTest)
 {
     const unsigned char simple2[] = {
         0x30, 0x00, 0x00, 0x02, 0x1e, 0x01, 0xf0, 0x25
@@ -935,7 +935,7 @@ BOOST_FIXTURE_TEST_CASE(TestBackR7, LC3Test)
     BOOST_CHECK_EQUAL(state.undo_stack.size(), 0U);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestNextLine, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestNextLine, LC3BasicTest)
 {
     std::stringstream file(std::string(reinterpret_cast<const char*>(simplesubr), simplesubr_len));
     lc3_load(state, file, lc3_reader_obj);
@@ -954,7 +954,7 @@ BOOST_FIXTURE_TEST_CASE(TestNextLine, LC3Test)
     BOOST_CHECK_EQUAL(state.undo_stack.size(), 5U);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestPrevLine, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestPrevLine, LC3BasicTest)
 {
     std::stringstream file(std::string(reinterpret_cast<const char*>(simplesubr), simplesubr_len));
     lc3_load(state, file, lc3_reader_obj);
@@ -974,7 +974,7 @@ BOOST_FIXTURE_TEST_CASE(TestPrevLine, LC3Test)
     BOOST_CHECK_EQUAL(state.undo_stack.size(), 0U);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestFinish, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestFinish, LC3BasicTest)
 {
     std::stringstream file(std::string(reinterpret_cast<const char*>(simplesubr), simplesubr_len));
     lc3_load(state, file, lc3_reader_obj);
@@ -994,7 +994,7 @@ BOOST_FIXTURE_TEST_CASE(TestFinish, LC3Test)
     BOOST_CHECK_EQUAL(state.undo_stack.size(), 5U);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestUndoStack, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestUndoStack, LC3BasicTest)
 {
     std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));
     lc3_load(state, file, lc3_reader_obj);
@@ -1019,7 +1019,7 @@ BOOST_FIXTURE_TEST_CASE(TestUndoStack, LC3Test)
 
 }
 
-BOOST_FIXTURE_TEST_CASE(TestTrapInstructions, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestTrapInstructions, LC3BasicTest)
 {
     const unsigned char traps[] = {
         0x30, 0x00, 0x00, 0x1b, 0xf0, 0x21, 0xf0, 0x23, 0xf0, 0x20, 0xe0, 0x04,
@@ -1125,7 +1125,7 @@ BOOST_FIXTURE_TEST_CASE(TestTrapInstructions, LC3Test)
     BOOST_CHECK_EQUAL(val, answers[2]);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestDeviceRegisters, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestDeviceRegisters, LC3BasicTest)
 {
     const unsigned char devreg[] = {
         0x30, 0x00, 0x00, 0x06, 0xa0, 0x03, 0x07, 0xfe, 0xb2, 0x02, 0xf0, 0x25,
@@ -1175,7 +1175,7 @@ BOOST_FIXTURE_TEST_CASE(TestDeviceRegisters, LC3Test)
     BOOST_CHECK_EQUAL(verify.get(), 65);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestSymbolTable, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestSymbolTable, LC3BasicTest)
 {
     // LOL is not in the symbol table.
     BOOST_CHECK_EQUAL(lc3_sym_lookup(state, "LOL"), -1);
@@ -1225,7 +1225,7 @@ BOOST_FIXTURE_TEST_CASE(TestSymbolTable, LC3Test)
     BOOST_CHECK_EQUAL(lc3_sym_rev_lookup(state, 0x3000), "");
 }
 
-BOOST_FIXTURE_TEST_CASE(TestBreakpoints, LC3Test)
+BOOST_FIXTURE_TEST_CASE(TestBreakpoints, LC3BasicTest)
 {
     lc3_add_break(state, 0x3012);
     lc3_add_break(state, 0x3016, "", "1");
@@ -1255,7 +1255,7 @@ BOOST_FIXTURE_TEST_CASE(TestBreakpoints, LC3Test)
     BOOST_CHECK(lc3_remove_break(state, 0x3040));
 }
 
-BOOST_FIXTURE_TEST_CASE(InstructionBasicAssembleTest, LC3Test)
+BOOST_FIXTURE_TEST_CASE(InstructionBasicAssembleTest, LC3BasicTest)
 {
     const std::vector<std::string> instruct = {
         "BR #1",
@@ -1347,7 +1347,7 @@ BOOST_FIXTURE_TEST_CASE(InstructionBasicAssembleTest, LC3Test)
     }
 }
 
-BOOST_FIXTURE_TEST_CASE(InstructionAssembleTest, LC3Test)
+BOOST_FIXTURE_TEST_CASE(InstructionAssembleTest, LC3BasicTest)
 {
     std::istringstream file(
         ".orig x3000\n"
