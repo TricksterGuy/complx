@@ -57,11 +57,20 @@ std::vector<RLEColorEntry> InstructionPlugin::GetInstructionColoring(unsigned sh
 bool lc3_install_plugin(lc3_state& state, const std::string& filename, const PluginParams& params)
 {
     std::string realfilename = "lib" + filename + SO_SUFFIX;
-    void *hndl = dlopen(realfilename.c_str(), RTLD_NOW);
+#ifdef PLUGIN_INSTALL_PREFIX
+#ifdef WINDOWS
+    std::string full_path = PLUGIN_INSTALL_PREFIX + "\\" + realfilename;
+#else
+    std::string full_path = PLUGIN_INSTALL_PREFIX + "/" + realfilename;
+#endif
+#else
+    std::string full_path = realfilename;
+#endif
+    void *hndl = dlopen(full_path.c_str(), RTLD_NOW);
     // Failed to load.
     if(hndl == NULL)
     {
-        fprintf(stderr, "Plugin %s failed to load! Reason: %s\n", filename.c_str(), dlerror());
+        fprintf(stderr, "Plugin %s failed to load! Path: %s Reason: %s\n", filename.c_str(), full_path.c_str(), dlerror());
         return false;
     }
 

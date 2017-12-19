@@ -14,6 +14,11 @@ struct LC3Test
         options.multiple_errors = false;
     }
 
+    ~LC3Test()
+    {
+        lc3_remove_plugins(state);
+    }
+
     lc3_state state;
     LC3AssembleOptions options;
 };
