@@ -117,6 +117,42 @@ BOOST_FIXTURE_TEST_CASE(TestInstructionPluginDisassemble, LC3PluginTest)
         BOOST_CHECK_EQUAL(lc3_smart_disassemble(state, state.mem[0x3000 + i]), answers_advanced[i]);
 }
 
+bool is_syntax_error(const LC3AssembleException& ex)
+{
+    return ex.get_id() == SYNTAX_ERROR;
+}
+
+BOOST_FIXTURE_TEST_CASE(TestInstructionPluginAssembleFail, LC3PluginTest)
+{
+    const std::string asm_file =
+    ";@plugin filename=lc3_multiply\n"
+    ".orig x3000\n"
+    "    MUL R0, R0\n"
+    ".end";
+
+    std::stringstream file(asm_file);
+    std::vector<code_range> ranges;
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, is_syntax_error);
+}
+
+bool is_extra_input(const LC3AssembleException& ex)
+{
+    return ex.get_id() == EXTRA_INPUT;
+}
+
+BOOST_FIXTURE_TEST_CASE(TestInstructionPluginAssembleFail2, LC3PluginTest)
+{
+    const std::string asm_file =
+    ";@plugin filename=lc3_multiply\n"
+    ".orig x3000\n"
+    "    MUL R0, R0, R3, R4\n"
+    ".end";
+
+    std::stringstream file(asm_file);
+    std::vector<code_range> ranges;
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, is_extra_input);
+}
+
 BOOST_FIXTURE_TEST_CASE(TestTrapPlugin, LC3PluginTest)
 {
     const std::string asm_file =
