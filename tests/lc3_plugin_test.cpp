@@ -203,6 +203,29 @@ BOOST_FIXTURE_TEST_CASE(TestTrapPluginViaVector, LC3PluginTest)
     BOOST_CHECK_EQUAL(state.regs[1], 0);
 }
 
+BOOST_FIXTURE_TEST_CASE(TestTrapPluginDivByZero, LC3PluginTest)
+{
+    const std::string asm_file =
+    ";@plugin filename=lc3_udiv vector=x80\n"
+    ".orig x3000\n"
+    "    AND R0, R0, 0\n"
+    "    AND R1, R1, 0\n"
+    "    UDIV\n"
+    "    HALT\n"
+    ".end";
+
+    std::stringstream file(asm_file);
+    std::vector<code_range> ranges;
+    lc3_assemble(state, file, ranges, options);
+    BOOST_REQUIRE(state.trapPlugins[0x80] != nullptr);
+    BOOST_REQUIRE(lc3_sym_lookup(state, "UDIV") == -1);
+    BOOST_REQUIRE_EQUAL(state.mem[0x3002], short(0xF080));
+    lc3_run(state, 4);
+    BOOST_REQUIRE(state.halted);
+    BOOST_CHECK_EQUAL(state.regs[0], -1);
+    BOOST_CHECK_EQUAL(state.regs[1], -1);
+}
+
 BOOST_FIXTURE_TEST_CASE(TestTrapPluginDisassemble, LC3PluginTest)
 {
     const std::string asm_file =
