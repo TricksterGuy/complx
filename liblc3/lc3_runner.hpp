@@ -3,44 +3,127 @@
 
 #include "lc3.hpp"
 
-/*
-=================================
-Initialization and Play Functions
-=================================
-*/
-/** Initializes the lc3 state */
+/** lc3_init
+  *
+  * Initializes the state of the lc3.
+  * @param state LC3State object.
+  * @param randomize_registers if true randomizes registers.
+  * @param randomize_memory if true randomizes memory.
+  * @param fill_value ignored if randomize_XXX is true otherwise sets registers/memory to this value (except R7).
+  */
 void lc3_init(lc3_state& state, bool randomize_registers = true, bool randomize_memory = false, short fill_value = 0);
-/** Removes all installed plugins */
+/** lc3_remove_plugins
+  *
+  * Removes all installed lc3 plugins.
+  * @param state LC3State object.
+  */
 void lc3_remove_plugins(lc3_state& state);
-/** Runs until halt */
+/** lc3_run
+  *
+  * Executes instructions until the lc3 is halted.
+  * @param state LC3State object.
+  */
 void lc3_run(lc3_state& state);
-/** Runs for X instructions */
+/** lc3_run
+  *
+  * Runs for X instructions or until the lc3 is halted.
+  * @param state LC3State object.
+  * @param num Number of instructions to execute.
+  */
 void lc3_run(lc3_state& state, unsigned int num);
-/** Runs one instruction */
+/** lc3_step
+  *
+  * Executes one instruction.
+  * @param state LC3State object.
+  */
 void lc3_step(lc3_state& state);
-/** Backsteps one instruction */
+/** lc3_back
+  *
+  * Attempts to backsteps (undoes) one instruction.
+  * This may not be possible depending on the size of the undo stack.
+  * @param state LC3State object.
+  */
 void lc3_back(lc3_state& state);
-/** Backsteps many instructions */
+/** lc3_rewind
+  *
+  * Attempts to backstep a number of instructions.
+  * This may not be possible depending on the size of the undo stack.
+  * @param state LC3State object.
+  * @param num Number of instructions to back step.
+  */
 void lc3_rewind(lc3_state& state, unsigned int num);
-/** Fully rewind back to initial state */
+/** lc3_rewind
+  *
+  * Attempts to backstep as many instructions as possible to get back to initial state.
+  * This may not be possible depending on the size of the undo stack.
+  * @param state LC3State object.
+  */
 void lc3_rewind(lc3_state& state);
-/** Executes the next line and blackboxes any subroutines and traps*/
+/** lc3_next_line
+  *
+  * Executes the next line and blackboxes any subroutines and traps.
+  * @param state LC3State object.
+  */
 void lc3_next_line(lc3_state& state);
-/** Goes back one line again blackboxes any subroutines and traps */
+/** lc3_prev_line
+  *
+  * Goes back one line again blackboxes any subroutines and traps.
+  * This may not be possible depending on the size of the undo stack.
+  * @param state LC3State object.
+  */
 void lc3_prev_line(lc3_state& state);
-/** Finishes the current subroutine */
+/** lc3_finish
+  *
+  * Finishes the current subroutine.
+  * @param state LC3State object.
+  */
 void lc3_finish(lc3_state& state);
-/** Checks and processes interrupt.  Returns true if an interrupt occurred */
+/** lc3_interrupt
+  *
+  * Checks for and processes a single pending interrupt.
+  * @param state LC3State object.
+  * @return true if an interrupt occurred.
+  */
 bool lc3_interrupt(lc3_state& state);
-/** Signals a keyboard interrupt */
+/** lc3_keyboard_interrupt
+  *
+  * Signals a keyboard interrupt.
+  * @param state LC3State object.
+  */
 void lc3_keyboard_interrupt(lc3_state& state);
-/** Singals a general interrupt will stack */
+/** lc3_signal_interrupt
+  *
+  * Adds an interrupt to be handled to the pending queue.
+  * Will stack if called multiple times with the same priority and interrupt vector.
+  * @param state LC3State object.
+  * @param priority Priority of the interrupt.
+  * @param vector Interrupt vector to be accessed when interrupt occurs.
+  */
 void lc3_signal_interrupt(lc3_state& state, int priority, int vector);
-/** Singals a general interrupt only if it does not already exist pending */
+/** lc3_signal_interrupt_once
+  *
+  * Adds an interrupt to be handled to the pending queue ONLY if it doesn't already exist.
+  * @param state LC3State object.
+  * @param priority Priority of the interrupt.
+  * @param vector Interrupt vector to be accessed when interrupt occurs.
+  * @return bool true if it was added false otherwise.
+  */
 bool lc3_signal_interrupt_once(lc3_state& state, int priority, int vector);
-/** Ticks all LC3 Plugins */
+/** lc3_tick_plugins
+  *
+  * Calls OnTick for all plugins.
+  * This happens before the instruction is fetch.
+  * @param state LC3State object.
+  */
 void lc3_tick_plugins(lc3_state& state);
+/** lc3_tock_plugins
+  *
+  * Calls OnTock for all plugins.
+  * This happens after the instruction is executed.
+  * @param state LC3State object.
+  */
 /** Tocks all LC3 Plugins */
 void lc3_tock_plugins(lc3_state& state);
+
 
 #endif

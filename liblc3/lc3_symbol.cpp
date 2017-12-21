@@ -1,10 +1,6 @@
 #include "lc3_symbol.hpp"
 #include <sstream>
 
-/** lc3_load_sym
-  *
-  * Loads the given symbol file (liblc3 format) into the program.
-  */
 int lc3_load_sym(lc3_state& state, std::istream& file)
 {
     // Once upon a time there was the simplc3 tools
@@ -41,11 +37,6 @@ int lc3_load_sym(lc3_state& state, std::istream& file)
     return 0;
 }
 
-/** lc3_sym_lookup
-  *
-  * Looks up the given symbol in the symbol table
-  * @return -1 if the symbol was not found else the value.
-  */
 int lc3_sym_lookup(lc3_state& state, const std::string& symbol)
 {
     std::map<std::string, unsigned short>::iterator i = state.symbols.find(symbol);
@@ -55,11 +46,6 @@ int lc3_sym_lookup(lc3_state& state, const std::string& symbol)
     return i->second;
 }
 
-/** lc3_sym_rev_lookup
-  *
-  * Looks at the given memory address for a symbol.
-  * @return the empty string if no symbol else the symbol name.
-  */
 const std::string lc3_sym_rev_lookup(lc3_state& state, unsigned short addr)
 {
     std::map<unsigned short, std::string>::iterator i = state.rev_symbols.find(addr);
@@ -69,12 +55,6 @@ const std::string lc3_sym_rev_lookup(lc3_state& state, unsigned short addr)
     return i->second;
 }
 
-/** lc3_sym_add
-  *
-  * Adds this symbol to the symbol table.
-  * @return true if added successfully (no replacements) false if symbol already exists
-  * @warning if the symbol already exists it will be overwritten.
-  */
 bool lc3_sym_add(lc3_state& state, const std::string& symbol, unsigned short addr)
 {
     bool ret = (state.symbols.find(symbol) == state.symbols.end());
@@ -83,10 +63,6 @@ bool lc3_sym_add(lc3_state& state, const std::string& symbol, unsigned short add
     return ret;
 }
 
-/** lc3_sym_delete
-  *
-  * Deletes the symbol from the symbol table
-  */
 void lc3_sym_delete(lc3_state& state, const std::string& symbol)
 {
     int addr = lc3_sym_lookup(state, symbol);
@@ -96,10 +72,6 @@ void lc3_sym_delete(lc3_state& state, const std::string& symbol)
     lc3_sym_delete(state, addr);
 }
 
-/** lc3_sym_delete
-  *
-  * Deletes the symbol that refers to the address given.
-  */
 void lc3_sym_delete(lc3_state& state, unsigned short addr)
 {
     std::string symbol = lc3_sym_rev_lookup(state, addr);
@@ -111,10 +83,6 @@ void lc3_sym_delete(lc3_state& state, unsigned short addr)
     state.rev_symbols.erase(addr);
 }
 
-/** lc3_sym_clear
-  *
-  * Clears the symbol table
-  */
 void lc3_sym_clear(lc3_state& state)
 {
     state.symbols.clear();

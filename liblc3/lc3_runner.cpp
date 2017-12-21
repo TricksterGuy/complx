@@ -9,15 +9,6 @@
 #include <cstdlib>
 #include <dlfcn.h>
 
-/** lc3_init
-  *
-  * Initializes the state of the lc3
-  *
-  * @param state An LC3 state
-  * @param randomize_registers if true randomizes registers
-  * @param randomize_memory if true randomizes memory
-  * @param fill_value ignored if randomize_XXX is true otherwise sets registers/memory to this value (except R7).
-  */
 void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory, short fill_value)
 {
     // Set Registers
@@ -117,10 +108,6 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     state.in_lc3test = false;
 }
 
-/** lc3_remove_plugins
-  *
-  *
-  */
 void lc3_remove_plugins(lc3_state& state)
 {
     state.instructionPlugin = NULL;
@@ -151,10 +138,6 @@ void lc3_remove_plugins(lc3_state& state)
     state.address_plugins[0xFFFE] = NULL;
 }
 
-/** lc3_run
-  *
-  * Runs the machine until the machine is halted.
-  */
 void lc3_run(lc3_state& state)
 {
     // Do this until halted
@@ -165,11 +148,6 @@ void lc3_run(lc3_state& state)
     }
 }
 
-/** lc3_run
-  *
-  * Runs the machine until the machine is halted or
-  * it executes num instructions.
-  */
 void lc3_run(lc3_state& state, unsigned int num)
 {
     unsigned int i = 0;
@@ -183,10 +161,6 @@ void lc3_run(lc3_state& state, unsigned int num)
     }
 }
 
-/** lc3_step
-  *
-  * Executes one instruction
-  */
 void lc3_step(lc3_state& state)
 {
     // If we are halted then don't step.
@@ -271,10 +245,6 @@ void lc3_step(lc3_state& state)
     lc3_break_test(state, &interrupt);
 }
 
-/** lc3_back
-  *
-  * Backsteps one instruction
-  */
 void lc3_back(lc3_state& state)
 {
     // If there are no changes in the stack we are done
@@ -353,10 +323,6 @@ void lc3_back(lc3_state& state)
     state.undo_stack.pop_back();
 }
 
-/** lc3_rewind
-  *
-  * Backsteps many instructions
-  */
 void lc3_rewind(lc3_state& state, unsigned int num)
 {
     bool interrupt_begin = false;
@@ -372,10 +338,6 @@ void lc3_rewind(lc3_state& state, unsigned int num)
     }
 }
 
-/** lc3_rewind
-  *
-  * Backsteps as far as it can.
-  */
 void lc3_rewind(lc3_state& state)
 {
     bool interrupt_begin = false;
@@ -389,10 +351,6 @@ void lc3_rewind(lc3_state& state)
     }
 }
 
-/** lc3_next_line
-  *
-  * Executes the next line blackboxing any subroutines.
-  */
 void lc3_next_line(lc3_state& state)
 {
     // Subroutine depth
@@ -425,10 +383,6 @@ void lc3_next_line(lc3_state& state)
     while (depth != 0 && !state.halted);
 }
 
-/** lc3_prev_line
-  *
-  * Undos the current instruction ignoring subroutines
-  */
 void lc3_prev_line(lc3_state& state)
 {
     // Subroutine depth
@@ -467,10 +421,6 @@ void lc3_prev_line(lc3_state& state)
     while (depth != 0 && !state.halted && !state.undo_stack.empty());
 }
 
-/** lc3_finish
-  *
-  * Finishes the current subroutine
-  */
 void lc3_finish(lc3_state& state)
 {
     // Subroutine depth We assume the user is already in a subroutine and just wants to get out of it
@@ -502,10 +452,6 @@ void lc3_finish(lc3_state& state)
     while (depth != 0 && !state.halted);
 }
 
-/** lc3_interrupt
-  *
-  * Checks for and processes a single pending interrupt.
-  */
 bool lc3_interrupt(lc3_state& state)
 {
     // No interrupts? return.
@@ -567,21 +513,11 @@ bool lc3_interrupt(lc3_state& state)
     return true;
 }
 
-/** lc3_keyboard_interrupt
-  *
-  * Signals a keyboard interrupt
-  */
 void lc3_keyboard_interrupt(lc3_state& state)
 {
     lc3_signal_interrupt_once(state, 4, 0x80);
 }
 
-/** lc3_signal_interrupt
-  *
-  * Adds an interrupt to be handled to the pending queue.
-  * @param priority Priority of the interrupt
-  * @param vector Interrupt vector to be accessed when interrupt occurs
-  */
 void lc3_signal_interrupt(lc3_state& state, int priority, int vector)
 {
     lc3_interrupt_req interrupt;
@@ -590,13 +526,6 @@ void lc3_signal_interrupt(lc3_state& state, int priority, int vector)
     state.interrupts.push_back(interrupt);
 }
 
-/** lc3_signal_interrupt_once
-  *
-  * Adds an interrupt to be handled to the pending queue ONLY if it doesn't already exist.
-  * @param priority Priority of the interrupt
-  * @param vector Interrupt vector to be accessed when interrupt occurs
-  * @return bool true if it was added false otherwise
-  */
 bool lc3_signal_interrupt_once(lc3_state& state, int priority, int vector)
 {
     // Try to find this interrupt
@@ -613,11 +542,6 @@ bool lc3_signal_interrupt_once(lc3_state& state, int priority, int vector)
     return true;
 }
 
-/** lc3_tick_plugins
-  *
-  *
-  *
-  */
 void lc3_tick_plugins(lc3_state& state)
 {
     if (state.instructionPlugin != NULL)
@@ -629,11 +553,6 @@ void lc3_tick_plugins(lc3_state& state)
         state.plugins[i]->OnTick(state);
 }
 
-/** lc3_tock_plugins
-  *
-  *
-  *
-  */
 void lc3_tock_plugins(lc3_state& state)
 {
     if (state.instructionPlugin != NULL)
