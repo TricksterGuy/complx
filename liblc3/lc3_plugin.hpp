@@ -60,45 +60,73 @@ public:
     const std::set<unsigned short>& GetBoundAddresses() const {return addresses;}
     /** Get the bound interrupt vectors the plugin will send from */
     const std::set<unsigned char>& GetBoundInterrupts() const {return interrupts;}
-    /** Able to run in lc3test */
+    /** Able to run in lc3_test */
     virtual bool AvailableInLC3Test() const {return true;}
 
-    /** Called when a memory address is about to be read allowing you to return any value you want dynamically.
+    /** OnRead
+      *
+      * Called when a memory address is about to be read allowing you to return any value you want dynamically.
       * For this function to be called, you must call BindAddress/BindAddressRange in your plugin's constructor.
+      * @param state LC3State object.
+      * @param address Address to be read from.
+      * @return the data at that address, or some value dynamically.
       */
     virtual short OnRead(lc3_state& state, unsigned short address) {return state.mem[address];}
-    /** Called when a memory address is about to be written to allowing you to do whatever you want with the value.
+    /** OnWrite
+      *
+      * Called when a memory address is about to be written to allowing you to do whatever you want with the value.
       * For this function to be called, you must call BindAddress/BindAddressRange in your plugin's constructor.
+      * @param state LC3State object.
+      * @param address Address to written to.
+      * @param value Value to write at address.
       */
     virtual void OnWrite(lc3_state& state, unsigned short address, short value) {state.mem[address] = value;}
-    /** Called at the beginning of the instruction execution cycle exactly before an instruction is fetched
+    /** OnTick
+      *
+      * Called at the beginning of the instruction execution cycle exactly before an instruction is fetched.
       * This is not called when the user back steps.
+      * @param state LC3State object.
       */
     virtual void OnTick(lc3_state& state) {}
-    /** Called at the end of the instruction execution cycle exactly after an instruction is executed
+    /** OnTock
+      *
+      * Called at the end of the instruction execution cycle exactly after an instruction is executed.
       * This is not called when the user back steps.
+      * @param state LC3State object.
       */
     virtual void OnTock(lc3_state& state) {}
 
-    /** Users should not call this directly
-      * Commits the bound addresses and interrupts
+    /** Commit
+      *
+      * Users should not call this function directly.
+      * Commits the bound addresses and interrupts.
       */
     void Commit() {locked = true;}
 
 protected:
-    /** Bind the plugin to subscribe for updates to an address.
+    /** BindAddresses
+      *
+      * Bind the plugin to subscribe for updates to an address.
       * Can be called multiple times to acquire multiple addresses.
       * This should only be called in your Plugin's constructor.
+      * @param address Address to subscribe to.
       */
     void BindAddress(unsigned short address);
-    /** Bind the plugin to subscribe for updates for address range [address, address + length).
+    /** BindNAddresses
+      *
+      * Bind the plugin to subscribe for updates for address range [address, address + length).
       * Can be called multiple times to acquire multiple addresses.
       * This should only be called in your Plugin's constructor.
+      * @param address Starting address to subscribe to.
+      * @param length Number of address to subscribe to starting from address.
       */
     void BindNAddresses(unsigned short address, unsigned short length);
-    /** Bind the plugin to use an Interrupt Vector.
+    /** BindInterrupt
+      *
+      * Bind the plugin to use an Interrupt Vector.
       * Can be called multiple times to acquire multiple interrupt vectors.
       * This should only be called in your Plugin's constructor.
+      * @param int_vector Interrupt vector to subscribe to.
       */
     void BindInterrupt(unsigned char int_vector);
 
@@ -132,7 +160,13 @@ public:
     virtual std::string GetTrapName() const = 0;
     /** Gets trap vector plugin is bound to */
     unsigned char GetTrapVector() const {return vector;}
-    /** Handles execution of the trap.  Please fill out any changes made to lc3_state to the lc3_state_change object */
+    /** OnExecute
+      *
+      * Handles execution of the trap.
+      * Any changes made to lc3_state must be filled out in the lc3_state_change reference given.
+      * @param state LC3State object.
+      * @param changes Record of changes made to LC3State object as part of execution.
+      */
     virtual void OnExecute(lc3_state& state, lc3_state_change& changes) = 0;
 private:
     unsigned char vector;
@@ -140,7 +174,13 @@ private:
 
 struct LC3AssembleContext;
 
-// For Instruction Coloring.  These entries have a color and a number of bits to color. Going from most significant to least significant bits.
+/**
+  * For Instruction Coloring.
+  * These determine the color of each bit in the Binary column in the GUI.
+  * This can only control the least significant 12 bits of the binary representation.
+  * These entries have a color and a number of bits to color.
+  * The ordering is from most significant to least significant bit.
+  */
 struct RLEColorEntry
 {
     unsigned char r;
@@ -172,19 +212,49 @@ public:
     virtual ~InstructionPlugin() {}
     /** A note to the assembler what the opcode of the new instruction is called */
     virtual std::string GetOpcode() const = 0;
-    /** Called when an instruction needs to be assembled, the entire part of the line containing the instruction is passed in see LC3AssembleContext */
+    /** DoAssembleOne
+      *
+      * Called when an instruction needs to be assembled.
+      * The entire part of the line containing the instruction is passed in.
+      * @see LC3AssembleContext .
+      * @param state LC3State object.
+      * @param context LC3AssembleContext.
+      */
     virtual unsigned short DoAssembleOne(lc3_state& state, LC3AssembleContext& context) = 0;
-    /** Called when the new instruction is decoded, fill out the lc3_instr object passed in. */
+    /** OnDecode
+      *
+      * Called when the new instruction is decoded.
+      * Fill out the lc3_instr object passed in.
+      * @param state LC3State object.
+      * @param data Bits to decode.
+      * @param instr lc3_instr object to fill in.
+      */
     virtual void OnDecode(lc3_state& state, unsigned short data, lc3_instr& instr) = 0;
-    /** Called when the new instruction is executed.  Do whatever you want.  Be sure to mark any changes to lc3_state in the lc3_state_change object passed in */
+    /** OnExecute
+      *
+      * Called when the new instruction is executed.
+      * Changes to lc3_state must be recorded in the lc3_state_change object passed in
+      * @param state LC3State object.
+      * @param instruction Instruction data.
+      * @param changes Record of changes made to LC3State object as part of execution.
+      */
     virtual void OnExecute(lc3_state& state, lc3_instr& instruction, lc3_state_change& changes) = 0;
-    /** Called when a disassembled version of the new instruction is requested */
+    /** OnDisassemble
+      *
+      * Called when a disassembled version of the new instruction is requested /
+      * @param state LC3State object.
+      * @param instruction Instruction data.
+      * @param level Disassemble level.
+      */
     virtual std::string OnDisassemble(lc3_state& state, lc3_instr& instr, unsigned int level) = 0;
-    /** Optional. Called to get the instruction coloring for this instruction.
+    /** GetInstructionColoring
+      *
+      * Called to get the instruction coloring for this instruction.
       * Note that the opcode bits should not be included, the other 12 bits can be colored.
-      * For example to color the instruction [data12 red]
-      * "return" {{255, 0, 0, 12}}
-      * @return A vector containing several color entries
+      * For example to color the instruction [data12 red]:
+      * `return {{255, 0, 0, 12}}`.
+      * @param instr decoded bits for the instruction.
+      * @return A vector containing several color entries.
       */
     virtual std::vector<RLEColorEntry> GetInstructionColoring(unsigned short instr) const;
 };
@@ -206,13 +276,19 @@ struct PluginInfo
 
 /** lc3_install_plugin
   *
-  * Installs a plugin given by the filename. This should not be called directly
-  * @note the filename is minus the lib and .so extension.
+  * Installs a plugin given by the filename.
+  * This should not be called directly.
+  * @param state LC3State object.
+  * @param filename Filename of the plugin minus the lib and .so/.dll extension.
+  * @param params Params to install the plugin, like the trap vector, or memory address to bind to.
   */
 bool lc3_install_plugin(lc3_state& state, const std::string& filename, const PluginParams& params);
 /** lc3_uninstall_plugin
   *
-  * Uninstalls a plugin given by the filename
+  * Uninstalls a plugin given by the filename.
+  * This should not be called directly.
+  * @param state LC3State object.
+  * @param filename Filename of the plugin minus the lib and .so/.dll extension.
   */
 bool lc3_uninstall_plugin(lc3_state& state, const std::string& filename);
 
