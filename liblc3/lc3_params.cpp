@@ -31,7 +31,7 @@ bool lc3_params_read_bool(const PluginParams& params, const std::string& key, bo
 
     if (val == std::string("true") || val == std::string("yes") || val == std::string("1"))
         var = true;
-    else if (val == std::string("false") || val == std::string("no") ||val == std::string("0"))
+    else if (val == std::string("false") || val == std::string("no") || val == std::string("0"))
         var = false;
     else
         return false;
