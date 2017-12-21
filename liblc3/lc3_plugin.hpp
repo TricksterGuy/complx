@@ -181,9 +181,10 @@ public:
     /** Called when a disassembled version of the new instruction is requested */
     virtual std::string OnDisassemble(lc3_state& state, lc3_instr& instr, unsigned int level) = 0;
     /** Optional. Called to get the instruction coloring for this instruction.
-      * return an array containing several color entries
-      * For example to color the instruction [opcode4 - green] [data12 red]
-      * "return" {{0, 255, 0, 4}, {255, 0, 0, 12}}
+      * Note that the opcode bits should not be included, the other 12 bits can be colored.
+      * For example to color the instruction [data12 red]
+      * "return" {{255, 0, 0, 12}}
+      * @return A vector containing several color entries
       */
     virtual std::vector<RLEColorEntry> GetInstructionColoring(unsigned short instr) const;
 };
