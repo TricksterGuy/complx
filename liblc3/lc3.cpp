@@ -76,12 +76,6 @@ const char* ADV_DISASSEMBLE_LOOKUP[16][8] =
     {"GETC", "OUT", "PUTS", "IN", "PUTSP", "HALT", "TRAP x%02x"},
 };
 
-/** lc3_basic_disassemble
-  *
-  * Disassembles the data into a readable string
-  * @param data lc3 word
-  * @return the instruction as a readable string.
-  */
 std::string lc3_basic_disassemble(lc3_state& state, unsigned short data)
 {
     lc3_instr instr = lc3_decode(state, data);
@@ -187,12 +181,6 @@ std::string lc3_basic_disassemble(lc3_state& state, unsigned short data)
     return buf;
 }
 
-/** lc3_disassemble
-  *
-  * Disassembles the data into a readable string
-  * @param data lc3 word
-  * @return the instruction as a readable string.
-  */
 std::string lc3_disassemble(lc3_state& state, unsigned short data)
 {
     lc3_instr instr = lc3_decode(state, data);
@@ -339,10 +327,6 @@ std::string lc3_disassemble(lc3_state& state, unsigned short data)
     return buf;
 }
 
-/** lc3_smart_disassemble
-  *
-  * Disassembles the instruction into something a little more high level
-  */
 std::string lc3_smart_disassemble(lc3_state& state, unsigned short instruction)
 {
     lc3_instr instr = lc3_decode(state, instruction);
@@ -563,11 +547,6 @@ std::string lc3_smart_disassemble(lc3_state& state, unsigned short instruction)
     return buf;
 }
 
-/** lc3_load
-  *
-  * Loads the given file into the machine.
-  * @param reader is a function pointer to read in words into the machine.
-  */
 int lc3_load(lc3_state& state, std::istream& file, int (*reader)(std::istream&))
 {
     if (!file.good()) return -1;
@@ -591,10 +570,6 @@ int lc3_load(lc3_state& state, std::istream& file, int (*reader)(std::istream&))
     return 0;
 }
 
-/** lc3_reader_hex
-  *
-  * Reads in a file from a .hex file (instructions as hexadecimal)
-  */
 int lc3_reader_hex(std::istream& file)
 {
     std::string line;
@@ -610,10 +585,6 @@ int lc3_reader_hex(std::istream& file)
     return result;
 }
 
-/** lc3_reader_obj
-  *
-  * Reads in a file from a .obj file (output from as2obj)
-  */
 int lc3_reader_obj(std::istream& file)
 {
     unsigned short data;
@@ -624,11 +595,6 @@ int lc3_reader_obj(std::istream& file)
     return ((data >> 8) & 0xFF) | ((data & 0xFF) << 8);
 }
 
-/** lc3_read_char
-  *
-  * Reads a character and consumes it
-  * @return -1 if there is nothing in the input else the character
-  */
 int lc3_read_char(lc3_state& state, std::istream& file)
 {
     char c = file.get();
@@ -641,11 +607,6 @@ int lc3_read_char(lc3_state& state, std::istream& file)
     return c;
 }
 
-/** lc3_peek_char
-  *
-  * Reads a character without consuming it
-  * @return -1 if there is nothing in the input else the character
-  */
 int lc3_peek_char(lc3_state& state, std::istream& file)
 {
     char c = file.peek();
@@ -658,11 +619,6 @@ int lc3_peek_char(lc3_state& state, std::istream& file)
     return c;
 }
 
-/** lc3_write_char
-  *
-  * Checks and then prints a character
-  * @return -1 on failure 0 on success
-  */
 int lc3_write_char(lc3_state& state, std::ostream& file, int chr)
 {
     if (chr > 255 || !(isgraph(chr) || isspace(chr)))
@@ -670,11 +626,6 @@ int lc3_write_char(lc3_state& state, std::ostream& file, int chr)
     return state.writer(state, file, chr);
 }
 
-/** lc3_do_write_char
-  *
-  * Writes a character to the output
-  * @return -1 on failure 0 on success
-  */
 int lc3_do_write_char(lc3_state& state, std::ostream& file, int chr)
 {
     if (!file.good()) return -1;
@@ -682,11 +633,6 @@ int lc3_do_write_char(lc3_state& state, std::ostream& file, int chr)
     return (!file.good()) ? -1 : 0;
 }
 
-/** lc3_write_str
-  *
-  * Writes a string to the output
-  * @returns -1 on failure 0 on success
-  */
 int lc3_write_str(lc3_state& state, int (*writer)(lc3_state& state, std::ostream& file, int), std::ostream& file, const std::string& str)
 {
     for (unsigned int i = 0; i < str.size(); i++)
@@ -696,19 +642,6 @@ int lc3_write_str(lc3_state& state, int (*writer)(lc3_state& state, std::ostream
     return 0;
 }
 
-/** lc3_set_true_traps
-  *
-  * Enables or disables true traps
-  */
-void lc3_set_true_traps(lc3_state& state, int value)
-{
-    state.true_traps = value != 0;
-}
-
-/** lc3_randomize
-  *
-  * Randomizes LC-3 Memory
-  */
 void lc3_randomize(lc3_state& state)
 {
     // If true traps is set overwrite overwrite overwrite!

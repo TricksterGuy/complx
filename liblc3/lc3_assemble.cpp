@@ -46,10 +46,6 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
 void process_plugin_info(lc3_state& state, const LC3AssembleContext& context);
 void parse_params(const std::string& line, std::map<std::string, std::string>& params);
 
-/** what
-  *
-  * Error message.
-  */
 std::string LC3AssembleException::what() const throw()
 {
     std::string ret;
@@ -227,10 +223,6 @@ std::string LC3AssembleException::what() const throw()
     return ret;
 }
 
-/** lc3_assemble_one
-  *
-  * Assembles one instruction.
-  */
 unsigned short lc3_assemble_one(lc3_state& state, unsigned short address, const std::string& line, int lineno, const LC3AssembleOptions& options)
 {
     LC3AssembleContext context;
@@ -401,21 +393,12 @@ unsigned short lc3_assemble_one(lc3_state& state, LC3AssembleContext& context)
     return instruction;
 }
 
-/** lc3_assemble
-  *
-  * Assembles a file pointed to by filename to the lc3_state given
-  */
 void lc3_assemble(lc3_state& state, const std::string& filename, const LC3AssembleOptions& options)
 {
     std::vector<code_range> ranges;
     lc3_assemble(state, filename, ranges, options);
 }
 
-/** lc3_assemble
-  *
-  * Assembles a file pointed to by filename to the lc3_state given
-  * @note this overload is not meant to be used externally use the version without the vector.
-  */
 void lc3_assemble(lc3_state& state, const std::string& filename, std::vector<code_range>& ranges, const LC3AssembleOptions& options)
 {
     std::ifstream file(filename.c_str());
@@ -862,10 +845,6 @@ symbolcheckdone:
     }
 }
 
-/** lc3_assemble
-  *
-  * Assembles a file to an .obj and .sym file
-  */
 bool lc3_assemble(const std::string& filename, const std::string& output_prefix, const LC3AssembleOptions& options)
 {
     lc3_state state;

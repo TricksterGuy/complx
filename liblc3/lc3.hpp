@@ -9,15 +9,21 @@
 #include <vector>
 #include <cstdlib>
 
+/** Sign Character */
 #define SIGN_CHR(x) (((x) < 0) ? "-" : "+")
+/** Sign Character only if negative */
 #define SIGN_NEG_CHR(x) (((x) < 0) ? "-" : "")
+/** Absolute value */
 #define ABS(x) (((x) < 0) ? -(x) : (x))
 
-// Given 3 values when 2 of them are equal
-// Returns the not equal one
-// That is given 3, 7, 3 this will return 7
+/**
+  * Given 3 values when 2 of them are equal
+  * Returns the not equal one
+  * That is given 3, 7, 3 this will return 7
+  */
 #define OTHER(x, y, z) ((x) ^ (y) ^ (z))
 
+/** Instruction opcodes */
 enum lc3_instruction_t
 {
     BR_INSTR    = 0,
@@ -40,6 +46,7 @@ enum lc3_instruction_t
     TRAP_INSTR  = 15
 };
 
+/** Predefined traps provided by LC3 OS */
 enum TRAPS
 {
     TRAP_GETC = 0x20,
@@ -50,6 +57,7 @@ enum TRAPS
     TRAP_HALT = 0x25
 };
 
+/** Predefined Device Registers */
 enum DEVICES
 {
     DEV_KBSR = 0xFE00,
@@ -59,6 +67,7 @@ enum DEVICES
     DEV_MCR = 0xFFFE
 };
 
+/** Runtime warning types */
 enum WARNINGS
 {
     LC3_OUT_OF_INPUT = 0,
@@ -77,6 +86,7 @@ enum WARNINGS
     LC3_WARNINGS               // Must be last.
 };
 
+/** Cases for Smart Disassembling */
 enum DISASSEMBLE_CASES
 {
 
@@ -93,8 +103,6 @@ enum DISASSEMBLE_CASES
     BR_NP = 5,
     BR_ZP = 6,
 
-
-
     ADD_EQ_REG = 0,
     ADD_TWO_REGS = 1,
     ADD_TEST = 2,
@@ -104,19 +112,15 @@ enum DISASSEMBLE_CASES
     ADD_EQ_VAL = 6,
     ADD_REG_VAL = 7,
 
-
-
     // Used for LD,LDI,ST,STI,LEA
     MEM_LABEL = 0,
     MEM_OFFSET = 1,
     MEM_OFFSET_0 = 2,
 
-
     JSR_LABEL = 0,
     JSR_OFFSET = 1,
     JSR_OFFSET_0 = 3,
     JSR_JSRR = 2,
-
 
     AND_TEST = 0,
     AND_SET = 1,
@@ -126,14 +130,15 @@ enum DISASSEMBLE_CASES
     AND_NUM = 5,
     AND_REG_NUM = 6,
 
-
     LDR_STR = 0,
+
     JMP_REG = 0,
     JMP_R7 = 1,
 
     TRAP_OTHER = 6
 };
 
+/** Disassemble levels */
 enum DISASSEMBLE_LEVELS
 {
     LC3_BASIC_DISASSEMBLE,
@@ -141,14 +146,13 @@ enum DISASSEMBLE_LEVELS
     LC3_ADVANCED_DISASSEMBLE
 };
 
-// Plugins forward declaration
 class Plugin;
 class InstructionPlugin;
 class DeviceRegisterPlugin;
 class TrapFunctionPlugin;
 struct PluginInfo;
 
-// AND, ADD, NOT
+/** Arithmetic instruction type with registers. */
 typedef struct arithreg_instruction
 {
     unsigned short opcode:4;
@@ -159,6 +163,7 @@ typedef struct arithreg_instruction
     unsigned short sr2:3;
 } arithreg_instruction;
 
+/** Arithmetic instruction type with immediate value. */
 typedef struct arithimm_instruction
 {
     unsigned short opcode:4;
@@ -168,6 +173,7 @@ typedef struct arithimm_instruction
     signed short imm:5;
 } arithimm_instruction;
 
+/** Not instruction type. */
 typedef struct not_instruction
 {
     unsigned short opcode:4;
@@ -176,6 +182,7 @@ typedef struct not_instruction
     unsigned short unused:6;
 } not_instruction;
 
+/** Union for Arithmetic instruction type. */
 typedef union arith_instruction
 {
     arithimm_instruction imm;
@@ -183,7 +190,7 @@ typedef union arith_instruction
     not_instruction inv;
 } arith_instruction;
 
-// BR
+/** Branch instruction type. */
 typedef struct br_instruction
 {
     unsigned short opcode:4;
@@ -193,7 +200,7 @@ typedef struct br_instruction
     signed short pc_offset:9;
 } br_instruction;
 
-// JMP RET
+/** Jump instruction type. */
 typedef struct jmp_instruction
 {
     unsigned short opcode:4;
@@ -202,7 +209,7 @@ typedef struct jmp_instruction
     unsigned short unused_6:6;
 } jmp_instruction;
 
-// JSR JSRR
+/** Jump to subroutine type. */
 typedef struct jsr_instruction
 {
     unsigned short opcode:4;
@@ -210,6 +217,7 @@ typedef struct jsr_instruction
     signed short pc_offset:11;
 } jsr_instruction;
 
+/** Jump to subroutine within register type. */
 typedef struct jsrr_instruction
 {
     unsigned short opcode:4;
@@ -219,13 +227,14 @@ typedef struct jsrr_instruction
     unsigned short unused_6:6;
 } jsrr_instruction;
 
+/** Type for subroutine instruction. */
 typedef union subr_instruction
 {
     jsr_instruction jsr;
     jsrr_instruction jsrr;
 } subr_instruction;
 
-// LD LDI LEA STI ST
+/** Type for memory instructions with offset. */
 typedef struct memoryoffset_instruction
 {
     unsigned short opcode:4;
@@ -233,7 +242,7 @@ typedef struct memoryoffset_instruction
     signed short pc_offset:9;
 } memoryoffset_instruction;
 
-// LDR STR
+/** Type for memory instructions with base register and offset. */
 typedef struct memoryreg_instruction
 {
     unsigned short opcode:4;
@@ -242,12 +251,14 @@ typedef struct memoryreg_instruction
     signed short offset:6;
 } memoryreg_instruction;
 
+/** Type for all memory instructions */
 typedef union memory_instruction
 {
     memoryoffset_instruction offset;
     memoryreg_instruction reg;
 } memory_instruction;
 
+/** Type for TRAPs */
 typedef struct trap_instruction
 {
     unsigned short opcode:4;
@@ -255,6 +266,7 @@ typedef struct trap_instruction
     unsigned short vector:8;
 } trap_instruction;
 
+/** General instruction type for lc3 */
 typedef struct instruction_t
 {
     unsigned short opcode:4;
@@ -280,9 +292,8 @@ typedef trap_instruction trap_instr;
   * contains the data for the different types of instructions
   * Note: the bits field != the instruction as data
   * The bits field gets it as how the system is representing
-  * it in memory not the actual LC3 view of it.
-  * That is TRAP x25 = 0xF025 but will appear in the
-  * system as 0x250F
+  * it in memory due to endianness not the actual LC3 view of it.
+  * That is TRAP x25 = 0xF025 but could appear in memory as 0x250F
   */
 typedef union lc3_instr
 {
@@ -297,6 +308,7 @@ typedef union lc3_instr
     unsigned short bits;
 } lc3_instr;
 
+/** Enumeration of possible things that can change as part of instruction execution. */
 enum lc3_change_t
 {
     LC3_NO_CHANGE = 0,
@@ -310,6 +322,7 @@ enum lc3_change_t
     LC3_INTERRUPT = 8,          // Signals a processed interrupt. (LC3_INTERRUPT_BEGIN changes to this after its processed.
 };
 
+/** Caches the last value for a register/memory address as part of execution. */
 typedef struct lc3_change_info
 {
     bool is_reg;
@@ -317,6 +330,7 @@ typedef struct lc3_change_info
     unsigned short value;
 } lc3_change_info;
 
+/** Record of stats for a breakpoint. */
 typedef struct lc3_breakpoint_info
 {
     bool enabled;
@@ -327,6 +341,7 @@ typedef struct lc3_breakpoint_info
     std::string condition;
 } lc3_breakpoint_info;
 
+/** Record of stats for a watchpoint. */
 typedef struct lc3_watchpoint_info
 {
     bool enabled;
@@ -338,6 +353,7 @@ typedef struct lc3_watchpoint_info
     std::string condition;
 } lc3_watchpoint_info;
 
+/** Record of stats for a blackbox. */
 typedef struct lc3_blackbox_info
 {
     bool enabled;
@@ -347,6 +363,7 @@ typedef struct lc3_blackbox_info
     std::string condition;
 } lc3_blackbox_info;
 
+/** Record of subroutine information. */
 typedef struct lc3_subroutine_info
 {
     unsigned short address;
@@ -356,6 +373,7 @@ typedef struct lc3_subroutine_info
     std::vector<std::string> params;
 } lc3_subroutine_info;
 
+/** Record of subroutine calls made in the program. */
 typedef struct lc3_subroutine_call
 {
     unsigned short address;
@@ -363,6 +381,7 @@ typedef struct lc3_subroutine_call
     bool is_trap;
 } lc3_subroutine_call;
 
+/** Record of active subroutine call info for each call made */
 typedef struct lc3_subroutine_call_info
 {
     unsigned short address;
@@ -370,6 +389,7 @@ typedef struct lc3_subroutine_call_info
     std::vector<unsigned short> params;
 } lc3_subroutine_call_info;
 
+/** Record of stats per memory address */
 typedef struct lc3_memory_stats
 {
     lc3_memory_stats() : reads(0), writes(0) {}
@@ -377,12 +397,14 @@ typedef struct lc3_memory_stats
     unsigned long writes;
 } lc3_memory_stats;
 
+/** Record of active interrupt requests */
 typedef struct lc3_interrupt_req
 {
     unsigned char priority:3;
     unsigned char vector;
 } lc3_interrupt_req;
 
+/** Changed information with previous value for undo stack */
 typedef struct lc3_state_change
 {
     unsigned short pc;
@@ -402,6 +424,7 @@ typedef struct lc3_state_change
 
 typedef void (*interrupt_test_func)(void);
 
+/** Main type for a running lc3 machine */
 typedef struct lc3_state
 {
     short regs[8];
@@ -489,53 +512,118 @@ typedef struct lc3_state
     bool in_lc3test;
 } lc3_state;
 
-/*
- * =======================
- * Disassembling Functions
- * =======================
- */
-/** Disassemble the data passed in no label information a straight disassemble */
+/** lc3_basic_disassemble
+  *
+  * Disassemble the data passed in.
+  * @param state LC3State object.
+  * @param data Instruction data.
+  * @return The disassembled instruction as a string.
+  */
 std::string lc3_basic_disassemble(lc3_state& state, unsigned short data);
-/** Disassemble the data passed in with label information */
+/** lc3_disassemble
+  *
+  * Disassemble the data passed in with label information
+  * This utilizes symbol table information in its output.
+  * @param state LC3State object.
+  * @param data Instruction data.
+  * @return The disassembled instruction as a string.
+  */
 std::string lc3_disassemble(lc3_state& state, unsigned short data);
-/** Disassembles the data passed into it You need symbol information to get the best results */
+/** lc3_smart_disassemble
+  *
+  * Disassembles the instruction into something a little more high level.
+  * This utilizes symbol table information in its output.
+  * @param state LC3State object.
+  * @param data Instruction data.
+  * @return The disassembled instruction as a string.
+  */
 std::string lc3_smart_disassemble(lc3_state& state, unsigned short data);
 
-/*
- * ======================
- * Loading Data Functions
- * ======================
- */
-/** Loads the given file into the machine */
+/** lc3_load
+  *
+  * Loads the given file into the machine.
+  * @param state LC3State object.
+  * @param file Input stream to read from.
+  * @param reader is a function pointer to read in words into the machine.
+  * @return Zero on success, nonzero for failure.
+  */
 int lc3_load(lc3_state& state, std::istream& file, int (*reader)(std::istream&));
-/** Reader for .obj files */
+/** lc3_reader_obj
+  *
+  * Reads in a file from a .obj file (output from as2obj).
+  * @param file Input stream to read the obj file from.
+  * @return Zero on success, nonzero for failure.
+  */
 int lc3_reader_obj(std::istream& file);
-/** Reader for .hex files */
+/** lc3_reader_obj
+  *
+  * Reads in a file from a .hex file (instructions as hexadecimal).
+  * @param file Input stream to read the hex file from.
+  * @return Zero on success, nonzero for failure.
+  */
 int lc3_reader_hex(std::istream& file);
-/*
- * ======================
- * I/O Functions
- * ======================
- */
 
-/** Reads in a character from the input stream passed in */
+
+/** lc3_read_char
+  *
+  * Reads in a character from the input stream passed in and consumes it.
+  * @param state LC3State object.
+  * @param file Stream to read from.
+  * @return -1 if there is nothing in the input stream otherwise the character.
+  */
 int lc3_read_char(lc3_state& state, std::istream& file);
-/** Gets (Peek) next character from the input stream passed in */
+/** lc3_peek_char
+  *
+  * Gets (Peek) next character from the input stream passed in without consuming it.
+  * @param state LC3State object.
+  * @param file Stream to read from.
+  * @return -1 if there is nothing in the input stream otherwise the character.
+  */
 int lc3_peek_char(lc3_state& state, std::istream& file);
-/** Checks and warns if a non printable character is printed then print it */
+/** lc3_write_char
+  *
+  * Checks and warns if a non printable character is printed, then prints it.
+  * @param state LC3State object.
+  * @param file Stream to write to.
+  * @param chr Character to write.
+  * @return Zero on success nonzero on failure.
+  */
 int lc3_write_char(lc3_state& state, std::ostream& file, int);
-/** Writes a character to the output stream passed in */
-int lc3_do_write_char(lc3_state& state, std::ostream& file, int);
-/** Writes a string to the output stream passed in */
+/** lc3_do_write_char
+  *
+  * Lc3Writer function that writes a character to the output.
+  * @param state LC3State object.
+  * @param file Stream to write to.
+  * @param chr Character to write.
+  * @return Zero on success nonzero on failure.
+  */
+int lc3_do_write_char(lc3_state& state, std::ostream& file, int chr);
+/** lc3_write_str
+  *
+  * Writes a string to the output
+  * @param state LC3State object.
+  * @param writer Writer function
+  * @param file Stream to write to.
+  * @param str String to write.
+  * @return Zero on success nonzero on failure.
+  */
 int lc3_write_str(lc3_state& state, int (*writer)(lc3_state& state, std::ostream& file, int), std::ostream& file, const std::string& str);
-/** Enables true traps loads the OS code into the lc3 */
-void lc3_set_true_traps(lc3_state& state, int value);
+
+/** lc3_set_true_traps
+  *
+  * Enables or disables true traps, by default true traps is enabled.
+  * The true traps setting enables actually running the code for the traps instead of emulating them in C.
+  * @param state LC3State object.
+  * @param value If true enable true traps, otherwise disable.
+  */
+inline void lc3_set_true_traps(lc3_state& state, bool value) {state.true_traps = value;}
 /** Generate a random number LC-3 */
-inline unsigned short lc3_random(void)
-{
-    return rand() & 0xFFFF;
-}
-/** Randomize LC-3 Memory */
+inline unsigned short lc3_random(void) {return rand() & 0xFFFF;}
+/** lc3_randomize
+  *
+  * Randomizes LC3 Memory
+  * @param state LC3State object.
+  */
 void lc3_randomize(lc3_state& state);
 
 #endif

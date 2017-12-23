@@ -1,5 +1,5 @@
-#ifndef EXPRESSION_EVALUATOR__INC__
-#define EXPRESSION_EVALUATOR__INC__
+#ifndef EXPRESSION_EVALUATOR_HPP
+#define EXPRESSION_EVALUATOR_HPP
 
 #include <stack>
 #include <string>
@@ -7,41 +7,42 @@
 
 namespace ExpressionEvaluator
 {
-typedef union eval_value
-{
-    int (*func)(bool, int);
-    int value;
-} eval_value;
 
-typedef struct eval_type
-{
-    int type;
-    eval_value eval;
+    typedef union eval_value
+    {
+        int (*func)(bool, int);
+        int value;
+    } eval_value;
 
-} eval_type;
+    typedef struct eval_type
+    {
+        int type;
+        eval_value eval;
 
-extern std::map<std::string, eval_type> symbol_table;
-extern int (*OnUndefinedSymbol)(const std::string& symbol, bool hasref, int ref, int& error);
+    } eval_type;
 
-enum
-{
-    eval_ok = 0,
-    eval_unbalanced,
-    eval_invalidoperator,
-    eval_invalidoperand,
-    eval_malformedreference,
-    eval_undefinedsymbol,
-    eval_evalerr
-};
+    extern std::map<std::string, eval_type> symbol_table;
+    extern int (*OnUndefinedSymbol)(const std::string& symbol, bool hasref, int ref, int& error);
 
-enum
-{
-    EVAL_VALUE = 0,
-    EVAL_FUNCTION = 1
-};
+    enum
+    {
+        eval_ok = 0,
+        eval_unbalanced,
+        eval_invalidoperator,
+        eval_invalidoperand,
+        eval_malformedreference,
+        eval_undefinedsymbol,
+        eval_evalerr
+    };
 
-//template <typename T> int Calculate(std::string expr, T &r);
-int Calculate(std::string expr, int &r);
+    enum
+    {
+        EVAL_VALUE = 0,
+        EVAL_FUNCTION = 1
+    };
+
+    int Calculate(std::string expr, int &r);
+
 }
 
 #endif

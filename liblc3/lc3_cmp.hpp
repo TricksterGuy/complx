@@ -3,6 +3,8 @@
 
 #include "lc3_test.hpp"
 
+///TODO consider moving to lc3_test.hpp
+
 struct lc3_test_output;
 
 enum lc3_cmp_type
@@ -28,10 +30,18 @@ enum lc3_cmp_type
     CMP_SIZE,
 };
 
+/** Typedef for a comparision function for test output */
 typedef bool (*lc3_cmp)(const void*, const void*);
 
 extern lc3_cmp lc3_comparators[CMP_SIZE];
 
-bool lc3_test_check(lc3_test_output& test_cond, const void*, const void*);
+/** lc3_test_check
+  *
+  * Checks the condition against expected and actual inputs
+  * @param test_cond Test output atom to check
+  * @param actual Actual value, may be a short, string, or vector.
+  * @param expected Actual value, may be a short, string, or vector.
+  */
+bool lc3_test_check(lc3_test_output& test_cond, const void* actual, const void* expected);
 
 #endif

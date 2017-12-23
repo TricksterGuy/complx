@@ -7,7 +7,9 @@
 #include <vector>
 #include <stdexcept>
 
-// For .orig statements
+/** Code ranges present in the .asm file when assembled.
+  * Each .orig .end pair will translate into an object of this type.
+  */
 struct code_range
 {
     code_range(unsigned int loc, unsigned int sz) : location(loc), size(sz) {}
@@ -26,6 +28,7 @@ struct code_range
     unsigned int size;
 };
 
+/** Enumeration of possible problems that may occur in assembling a file */
 enum LC3AssembleExceptionTypes
 {
     UNKNOWN_ERROR = 0,
@@ -56,19 +59,31 @@ enum LC3AssembleExceptionTypes
     PLUGIN_FAILED_TO_LOAD,
 };
 
+/** Exception class for assembler errors */
 class LC3AssembleException
 {
 public:
+    /** Constructor
+      *
+      * @param line_str line causing the error.
+      * @param args Arguments for formatting.
+      * @param errorid Error ID. @see LC3AssembleExceptionTypes
+      * @param linenum Line number.
+      */
     LC3AssembleException(const std::string& line_str, const std::vector<std::string>& args, int errorid = UNKNOWN_ERROR, int linenum = -1) throw() :
         line(line_str), params(args), id(errorid), lineno(linenum) {}
+    /** Constructor
+      *
+      * @param line_str line causing the error.
+      * @param param Parameter for formatting.
+      * @param errorid Error ID. @see LC3AssembleExceptionTypes
+      * @param linenum Line number.
+      */
     LC3AssembleException(const std::string& line_str, const std::string& param, int errorid = UNKNOWN_ERROR, int linenum = -1) throw() :
         line(line_str), params(1, param), id(errorid), lineno(linenum) {}
     ~LC3AssembleException() throw() {}
     std::string what() const throw();
-    int get_id() const
-    {
-        return id;
-    }
+    int get_id() const {return id;}
 private:
     std::string line;
     std::vector<std::string> params;
@@ -77,6 +92,7 @@ private:
     mutable char what_str[1024];
 };
 
+/** Options for the lc3_assemble functions */
 struct LC3AssembleOptions
 {
     bool multiple_errors = true;
@@ -86,6 +102,7 @@ struct LC3AssembleOptions
     bool process_debug_comments = true;
 };
 
+/** Contextual information pass among assemble/parser functions */
 struct LC3AssembleContext
 {
     std::vector<std::string> tokens;
@@ -97,11 +114,58 @@ struct LC3AssembleContext
     LC3AssembleOptions options;
 };
 
+/** lc3_assemble_one
+  *
+  * Assembles a single instruction.
+  * @param state LC3State object.
+  * @param address Address of the instruction.
+  * @param line Text to assemble.
+  * @param lineno Line number.
+  * @param options Assembler options.
+  * @return The assembled data.
+  * @throw LC3AssembleException on error
+  */
 unsigned short lc3_assemble_one(lc3_state& state, unsigned short address, const std::string& line, int lineno = -1, const LC3AssembleOptions& options = LC3AssembleOptions());
+/** lc3_assemble
+  *
+  * Assembles a file into the LC3State object given.
+  * @param state LC3State object.
+  * @param filename Path to file to assemble.
+  * @param ranges Output parameter for list of .orig/.end pairs.
+  * @param options Assembler options.
+  * @throw LC3AssembleException on error
+  */
 void lc3_assemble(lc3_state& state, const std::string& filename, std::vector<code_range>& ranges, const LC3AssembleOptions& options = LC3AssembleOptions());
+/** lc3_assemble
+  *
+  * Assembles a file into the LC3State object given.
+  * @param state LC3State object.
+  * @param filename Path to file to assemble.
+  * @param ranges Output parameter for list of .orig/.end pairs.
+  * @param options Assembler options.
+  * @throw LC3AssembleException on error
+  */
 void lc3_assemble(lc3_state& state, const std::string& filename, const LC3AssembleOptions& options = LC3AssembleOptions());
+/** lc3_assemble
+  *
+  * Assembles a file into an object and sym file.
+  * @param filename Path to file to assemble.
+  * @param output_prefix Filename without extension to save the object and sym file.
+  * @param options Assembler options.
+  * @return True on success.
+  * @throw LC3AssembleException on error
+  */
 bool lc3_assemble(const std::string& filename, const std::string& output_prefix = "", const LC3AssembleOptions& options = LC3AssembleOptions());
-// test only
+
+/** lc3_assemble
+  *
+  * Assembles a file into the LC3State object given (Test only)
+  * @param state LC3State object.
+  * @param file Stream containing the assembly code to assemble.
+  * @param ranges Output parameter for list of .orig/.end pairs.
+  * @param options Assembler options.
+  * @throw LC3AssembleException on error
+  */
 void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>& ranges, const LC3AssembleOptions& options);
 
 #endif
