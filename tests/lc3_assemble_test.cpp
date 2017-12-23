@@ -129,13 +129,63 @@ BOOST_FIXTURE_TEST_CASE(StringzTest, LC3AssembleTest)
 
     ranges.clear();
 
-    std::istringstream bad_file(
+    file.clear();
+    file.str(
         ".orig x3000\n"
         ".stringz lol\n"
         ".end"
     );
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, IS_EXCEPTION(MALFORMED_STRING));
 
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, bad_file, ranges, options), LC3AssembleException, IS_EXCEPTION(MALFORMED_STRING));
+    file.clear();
+    file.str(
+        ".orig x3000\n"
+        ".stringz lol\"lol\"\n"
+        ".end"
+    );
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, IS_EXCEPTION(MALFORMED_STRING));
+
+    file.clear();
+    file.str(
+        ".orig x3000\n"
+        ".stringz \"lol\n"
+        ".end"
+    );
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, IS_EXCEPTION(UNTERMINATED_STRING));
+
+    // "lol\" Stray escape character.
+    file.clear();
+    file.str(
+        ".orig x3000\n"
+        ".stringz \"lol\\\"\n"
+        ".end"
+    );
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, IS_EXCEPTION(MALFORMED_STRING));
+
+    // Unknown escape sequence \z.
+    file.clear();
+    file.str(
+        ".orig x3000\n"
+        ".stringz \"lol\\z\"\n"
+        ".end"
+    );
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, IS_EXCEPTION(MALFORMED_STRING));
+
+    file.clear();
+    file.str(
+        ".orig x3000\n"
+        ".stringz \"lol\n"
+        ".end"
+    );
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, IS_EXCEPTION(UNTERMINATED_STRING));
+
+    file.clear();
+    file.str(
+        ".orig xfff0\n"
+        ".stringz \"I am a long strong at the end of memory.\"\n"
+        ".end"
+    );
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, IS_EXCEPTION(MEMORY_OVERFLOW));
 }
 
 BOOST_FIXTURE_TEST_CASE(InvalidSymbolTest, LC3AssembleTest)
