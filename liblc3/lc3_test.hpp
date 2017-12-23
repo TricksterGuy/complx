@@ -7,6 +7,7 @@
 #include "lc3.hpp"
 #include "lc3_cmp.hpp"
 
+/** Type of test item */
 enum lc3_test_type
 {
     TEST_INVALID = 0,
@@ -21,6 +22,7 @@ enum lc3_test_type
     TEST_SIZE,
 };
 
+/** Record of lc3 subroutine precondition */
 typedef struct lc3_subr_input
 {
     std::string name;
@@ -31,6 +33,7 @@ typedef struct lc3_subr_input
     std::vector<lc3_subroutine_info> subroutines; // Will be filled out by <calls> in test-subr output.
 } lc3_subr_input;
 
+/** Record of expected subroutine call info */
 typedef struct lc3_subr_output_subr_call
 {
     std::string name;
@@ -38,6 +41,7 @@ typedef struct lc3_subr_output_subr_call
     bool required;
 } lc3_subr_output_subr_call;
 
+/** Record of lc3 subroutine postconditions to check */
 typedef struct lc3_subr_output
 {
     lc3_subr_output() : points_answer(0), points_params(0), points_r6(0),  points_r7(0), points_r5(0), points_locals(0),
@@ -60,6 +64,7 @@ typedef struct lc3_subr_output
     unsigned int deductions_edist;
 } lc3_subr_output;
 
+/** Main record for a single precondition for a given test. */
 typedef struct lc3_test_input
 {
     lc3_test_input() : type(0) {}
@@ -76,6 +81,7 @@ typedef struct lc3_test_input
     lc3_subr_input subroutine;
 } lc3_test_input;
 
+/** Main record for a single postcondition to check for a given test. */
 typedef struct lc3_test_output
 {
     lc3_test_output() : type(0), cmp_type(0), passed(false), earned(0), points(0) {}
@@ -100,6 +106,7 @@ typedef struct lc3_test_output
     std::string extra_output;
 } lc3_test_output;
 
+/** Main record for a given test case. */
 typedef struct lc3_test
 {
     lc3_test() : points(0), max_points(0), passed(false), true_traps(false), interrupt_enabled(false),
@@ -124,6 +131,7 @@ typedef struct lc3_test
     unsigned long warnings;
 } lc3_test;
 
+/** Main record for a suite of tests */
 typedef struct lc3_test_suite
 {
     lc3_test_suite() : passed(false), points(0), max_points(0) {}
@@ -133,11 +141,54 @@ typedef struct lc3_test_suite
     std::vector<lc3_test> tests;
 } lc3_test_suite;
 
+/** lc3_run_test_suite
+  *
+  * Runs an entire test suite.
+  * @param suite An lc3_test_suite, the results will be written to the object.
+  * @param filename Path to an assembly file.
+  * @param seed Random seed to use.
+  */
 void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, int seed = -1);
+/** lc3_run_test_case
+  *
+  * Runs a single test case.
+  * @param test An lc3_test, the results will be written to the object.
+  * @param filename Path to an assembly file.
+  * @param seed Random seed to use.
+  */
 void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed = -1);
+
+/** lc3_write_test_report
+  *
+  * Writes a test suite report to the stringstream given.
+  * @param oss Output stringstream to write to.
+  * @param suite An lc3_test_suite lc3_run_test_suite must be called previously on the suite.
+  * @param filename Path to an assembly file.
+  */
 void lc3_write_test_report(std::stringstream& oss, lc3_test_suite& suite, const std::string& filename);
+/** lc3_write_test_report
+  *
+  * Writes a test case report to the stringstream given.
+  * @param oss Output stringstream to write to.
+  * @param test An lc3_test lc3_run_test_case must be called previously on the test.
+  * @param minipass_count Output param for how many postconditions were passed.
+  * @param total_minitests Output param for total number of postconditions in test case.
+  */
 void lc3_write_test_report(std::stringstream& oss, lc3_test& test, int& minipass_count, int& total_minitests);
+
+/** lc3_test_input_string
+  *
+  * Gives a human readable version of the test input precondition.
+  * @param test lc3 test input precondition.
+  * @return Human readable version of the test input precondition.
+  */
 std::string lc3_test_input_string(lc3_test_input& test);
+/** lc3_test_output_string
+  *
+  * Gives a human readable version of the test output postcondition.
+  * @param test lc3 test output postcondition.
+  * @return Human readable version of the test output postcondition.
+  */
 std::string lc3_test_output_string(lc3_test_output& test);
 
 #endif
