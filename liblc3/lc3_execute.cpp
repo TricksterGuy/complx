@@ -20,14 +20,6 @@ const char* WARNING_MESSAGES[LC3_WARNINGS] =
     "PUTSP found an unexpected NUL byte at address x%04x",
 };
 
-/** lc3_decode
-  *
-  * Decodes the given instruction
-  *
-  * @param state : lc3 state
-  * @param data : Instruction data
-  * @return the data in instruction form
-  */
 lc3_instr lc3_decode(lc3_state& state, unsigned short data)
 {
     lc3_instr instr;
@@ -104,10 +96,6 @@ lc3_instr lc3_decode(lc3_state& state, unsigned short data)
     return instr;
 }
 
-/** lc3_execute
-  *
-  * Executes the given instruction
-  */
 const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
 {
     // Initialize Changes (We don't know everything yet)
@@ -391,10 +379,6 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
     return changes;
 }
 
-/** lc3_trap
-  *
-  * Executes the trap instruction passed in.
-  */
 void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
 {
     // Declarations
@@ -522,11 +506,6 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
     }
 }
 
-/** lc3_setcc
-  *
-  * Updates the condition code registers.
-  * @param value value being stored in the register file.
-  */
 void lc3_setcc(lc3_state& state, short value)
 {
     state.n = value < 0;
@@ -534,11 +513,6 @@ void lc3_setcc(lc3_state& state, short value)
     state.p = value > 0;
 }
 
-/** lc3_mem_read
-  *
-  * Reads from memory
-  * @param addr the address to read from
-  */
 short lc3_mem_read(lc3_state& state, unsigned short addr, bool privileged)
 {
     state.memory_ops[addr].reads++;
@@ -605,12 +579,6 @@ short lc3_mem_read(lc3_state& state, unsigned short addr, bool privileged)
     return state.mem[addr];
 }
 
-/** lc3_mem_write
-  *
-  * Writes to memory
-  * @param address the address to write to.
-  * @param val the value to put into memory.
-  */
 void lc3_mem_write(lc3_state& state, unsigned short addr, short value, bool privileged)
 {
     state.memory_ops[addr].writes++;
@@ -673,10 +641,6 @@ void lc3_mem_write(lc3_state& state, unsigned short addr, short value, bool priv
     state.mem[addr] = value;
 }
 
-/** lc3_warning
-  *
-  * Prints a warning message on the warnings stream.
-  */
 void lc3_warning(lc3_state& state, unsigned int warn_id, short arg1, short arg2)
 {
     if (state.warn_limits.find(warn_id) != state.warn_limits.end() && state.warn_limits[warn_id] <= state.warn_stats[warn_id])
@@ -701,10 +665,6 @@ void lc3_warning(lc3_state& state, unsigned int warn_id, short arg1, short arg2)
     }
 }
 
-/** lc3_warning
-  *
-  * Prints a warning message on the warnings stream.
-  */
 void lc3_warning(lc3_state& state, const std::string& msg)
 {
     char warning[256];
