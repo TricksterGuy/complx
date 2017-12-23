@@ -105,6 +105,41 @@ BOOST_FIXTURE_TEST_CASE(FillTest, LC3AssembleTest)
 
 }
 
+BOOST_FIXTURE_TEST_CASE(StringzTest, LC3AssembleTest)
+{
+    std::istringstream file(
+        ".orig x3000\n"
+        "A .stringz \"Hello!\"\n"
+        "B .stringz \"World\"\n"
+        ".end"
+    );
+    std::vector<code_range> ranges;
+    LC3AssembleOptions options;
+    options.multiple_errors = false;
+    lc3_assemble(state, file, ranges, options);
+
+    BOOST_CHECK_EQUAL(state.mem[0x3000], 'H');
+    BOOST_CHECK_EQUAL(state.mem[0x3001], 'e');
+    BOOST_CHECK_EQUAL(state.mem[0x3002], 'l');
+    BOOST_CHECK_EQUAL(state.mem[0x3003], 'l');
+    BOOST_CHECK_EQUAL(state.mem[0x3004], 'o');
+    BOOST_CHECK_EQUAL(state.mem[0x3005], '!');
+    BOOST_CHECK_EQUAL(state.mem[0x3006], 0);
+    BOOST_CHECK_EQUAL(lc3_sym_lookup(state, "A"), 0x3000);
+
+    BOOST_CHECK_EQUAL(state.mem[0x3007], 'W');
+    BOOST_CHECK_EQUAL(state.mem[0x3008], 'o');
+    BOOST_CHECK_EQUAL(state.mem[0x3009], 'r');
+    BOOST_CHECK_EQUAL(state.mem[0x300A], 'l');
+    BOOST_CHECK_EQUAL(state.mem[0x300B], 'd');
+    BOOST_CHECK_EQUAL(state.mem[0x300C], 0);
+    BOOST_CHECK_EQUAL(lc3_sym_lookup(state, "B"), 0x3007);
+
+    ranges.clear();
+
+    ///TODO add bad cases.
+}
+
 BOOST_FIXTURE_TEST_CASE(InvalidSymbolTest, LC3AssembleTest)
 {
     std::istringstream long_sym(
