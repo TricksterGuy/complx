@@ -7,6 +7,8 @@
 #include <lc3_all.hpp>
 #include "ExpressionEvaluator.hpp"
 
+#define IS_EXCEPTION(type) [](const LC3AssembleException& e) {return e.get_id() == type;}
+
 struct LC3AssembleTest
 {
     lc3_state state;
@@ -16,16 +18,6 @@ struct LC3AssembleTest
         lc3_init(state, false);
     }
 };
-
-bool is_number_overflow(const LC3AssembleException& ex)
-{
-    return ex.get_id() == NUMBER_OVERFLOW;
-}
-
-bool is_invalid_symbol(const LC3AssembleException& ex)
-{
-    return ex.get_id() == INVALID_SYMBOL;
-}
 
 BOOST_FIXTURE_TEST_CASE(AddImmediateTest, LC3AssembleTest)
 {
@@ -41,10 +33,10 @@ BOOST_FIXTURE_TEST_CASE(AddImmediateTest, LC3AssembleTest)
     LC3AssembleOptions options;
     options.multiple_errors = false;
 
-    BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "ADD R0, R0, 16", -1, options), LC3AssembleException, is_number_overflow);
-    BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "ADD R0, R0, x1F", -1, options), LC3AssembleException, is_number_overflow);
-    BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "ADD R0, R0, x10", -1, options), LC3AssembleException, is_number_overflow);
-    BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "ADD R0, R0, xFFFF", -1, options), LC3AssembleException, is_number_overflow);
+    BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "ADD R0, R0, 16", -1, options), LC3AssembleException, IS_EXCEPTION(NUMBER_OVERFLOW));
+    BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "ADD R0, R0, x1F", -1, options), LC3AssembleException, IS_EXCEPTION(NUMBER_OVERFLOW));
+    BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "ADD R0, R0, x10", -1, options), LC3AssembleException, IS_EXCEPTION(NUMBER_OVERFLOW));
+    BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "ADD R0, R0, xFFFF", -1, options), LC3AssembleException, IS_EXCEPTION(NUMBER_OVERFLOW));
 }
 
 BOOST_FIXTURE_TEST_CASE(AndImmediateTest, LC3AssembleTest)
@@ -61,10 +53,10 @@ BOOST_FIXTURE_TEST_CASE(AndImmediateTest, LC3AssembleTest)
     LC3AssembleOptions options;
     options.multiple_errors = false;
 
-    BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "AND R0, R0, 16", -1, options), LC3AssembleException, is_number_overflow);
-    BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "AND R0, R0, x1F", -1, options), LC3AssembleException, is_number_overflow);
-    BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "AND R0, R0, x10", -1, options), LC3AssembleException, is_number_overflow);
-    BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "AND R0, R0, xFFFF", -1, options), LC3AssembleException, is_number_overflow);
+    BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "AND R0, R0, 16", -1, options), LC3AssembleException, IS_EXCEPTION(NUMBER_OVERFLOW));
+    BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "AND R0, R0, x1F", -1, options), LC3AssembleException, IS_EXCEPTION(NUMBER_OVERFLOW));
+    BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "AND R0, R0, x10", -1, options), LC3AssembleException, IS_EXCEPTION(NUMBER_OVERFLOW));
+    BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "AND R0, R0, xFFFF", -1, options), LC3AssembleException, IS_EXCEPTION(NUMBER_OVERFLOW));
 }
 
 BOOST_FIXTURE_TEST_CASE(FillTest, LC3AssembleTest)
@@ -101,7 +93,7 @@ BOOST_FIXTURE_TEST_CASE(FillTest, LC3AssembleTest)
         ".fill 32768\n"
         ".end"
     );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, bad_file, ranges, options), LC3AssembleException, is_number_overflow);
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, bad_file, ranges, options), LC3AssembleException, IS_EXCEPTION(NUMBER_OVERFLOW));
 
 }
 
@@ -137,7 +129,13 @@ BOOST_FIXTURE_TEST_CASE(StringzTest, LC3AssembleTest)
 
     ranges.clear();
 
-    ///TODO add bad cases.
+    std::istringstream bad_file(
+        ".orig x3000\n"
+        ".stringz lol\n"
+        ".end"
+    );
+
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, bad_file, ranges, options), LC3AssembleException, IS_EXCEPTION(MALFORMED_STRING));
 }
 
 BOOST_FIXTURE_TEST_CASE(InvalidSymbolTest, LC3AssembleTest)
@@ -151,42 +149,42 @@ BOOST_FIXTURE_TEST_CASE(InvalidSymbolTest, LC3AssembleTest)
     LC3AssembleOptions options;
     options.multiple_errors = false;
 
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, long_sym, ranges, options), LC3AssembleException, is_invalid_symbol);
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, long_sym, ranges, options), LC3AssembleException, IS_EXCEPTION(INVALID_SYMBOL));
 
     std::istringstream register_sym(
         ".orig x3000\n"
         "R0 .fill 0\n"
         ".end"
     );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, register_sym, ranges, options), LC3AssembleException, is_invalid_symbol);
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, register_sym, ranges, options), LC3AssembleException, IS_EXCEPTION(INVALID_SYMBOL));
 
     std::istringstream hexa_sym(
         ".orig x3000\n"
         "x8 .fill 0\n"
         ".end"
     );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, hexa_sym, ranges, options), LC3AssembleException, is_invalid_symbol);
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, hexa_sym, ranges, options), LC3AssembleException, IS_EXCEPTION(INVALID_SYMBOL));
 
     std::istringstream bin_sym(
         ".orig x3000\n"
         "b101 .fill 0\n"
         ".end"
     );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, bin_sym, ranges, options), LC3AssembleException, is_invalid_symbol);
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, bin_sym, ranges, options), LC3AssembleException, IS_EXCEPTION(INVALID_SYMBOL));
 
     std::istringstream num_sym(
         ".orig x3000\n"
         "8HIYA .fill 0\n"
         ".end"
     );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, num_sym, ranges, options), LC3AssembleException, is_invalid_symbol);
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, num_sym, ranges, options), LC3AssembleException, IS_EXCEPTION(INVALID_SYMBOL));
 
     std::istringstream invalid_sym(
         ".orig x3000\n"
         "DOLLADOLLA$$$ .fill 0\n"
         ".end"
     );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, invalid_sym, ranges, options), LC3AssembleException, is_invalid_symbol);
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, invalid_sym, ranges, options), LC3AssembleException, IS_EXCEPTION(INVALID_SYMBOL));
 }
 
 BOOST_FIXTURE_TEST_CASE(BinaryLiteralTest, LC3AssembleTest)
