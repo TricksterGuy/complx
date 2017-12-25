@@ -50,11 +50,7 @@ void trim(std::string& line)
         line = line.substr(start, end - start + 1);
 }
 
-/** process_str
-  *
-  * Unescapes and removes quotes from string
-  */
-std::string process_str(std::string str, const LC3AssembleContext& context)
+std::string process_str(const std::string& str, const LC3AssembleContext& context)
 {
     if (str[0] != '"' && str[0] != '\'')
     {
@@ -138,6 +134,7 @@ std::string process_str(std::string str, const LC3AssembleContext& context)
             case '5':
             case '6':
             case '7':
+                /// TODO handle cases like \777 correctly.
                 memset(buf, 0, 4);
                 buf[0] = str[i];
 

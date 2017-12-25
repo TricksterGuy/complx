@@ -49,8 +49,14 @@ class LC3AssembleContext;
 void trim(std::string& line);
 /* Removes comments from a string*/
 void remove_comments(std::string& line, std::string& comment);
-/* Processes and unescapes a string*/
-std::string process_str(std::string str, const LC3AssembleContext&);
+/** process_str
+  *
+  * Unescapes and removes quotes from string
+  * @param str String to unescape.
+  * @param context Assemble context.
+  * @return the unescaped string.
+  */
+std::string process_str(const std::string& str, const LC3AssembleContext& context);
 /* Gets the value from a .fill directive*/
 short get_fill_value(const std::string& value, const LC3AssembleContext& context);
 /* Gets the opcode from a line*/
