@@ -38,10 +38,12 @@ BOOST_FIXTURE_TEST_CASE(TestProcessStr, LC3ParserTest)
     BOOST_CHECK_EQUAL(process_str("\"\\x30\"", context), "0");
     BOOST_CHECK_EQUAL(process_str("\"\\x30000\"", context), "0000");
     BOOST_CHECK_EQUAL(process_str("\"\"", context), "");
-    BOOST_CHECK_EQUAL(process_str("\"\\377\"", context), "\xFF");
-    //BOOST_CHECK_EQUAL(process_str("\"\\777\"", context), "\777");
+    BOOST_CHECK_EQUAL(process_str("\"\\377\"", context), "\377");
+    BOOST_CHECK_EQUAL(process_str("\"\\777\"", context), "\377");
 
     BOOST_CHECK_EXCEPTION(process_str("\"\\xG\"", context), LC3AssembleException, IS_EXCEPTION(MALFORMED_STRING));
     BOOST_CHECK_EXCEPTION(process_str("\"\\8\"", context), LC3AssembleException, IS_EXCEPTION(MALFORMED_STRING));
 
+    context.options.warnings_as_errors = true;
+    BOOST_CHECK_EXCEPTION(process_str("\"\\777\"", context), LC3AssembleException, IS_EXCEPTION(MALFORMED_STRING));
 }

@@ -73,6 +73,7 @@ std::string process_str(const std::string& str, const LC3AssembleContext& contex
                 THROWANDDO(LC3AssembleException("", str, MALFORMED_STRING, context.lineno), goto endstringprocessing);
             }
             char num = 0;
+            long parsed_num = 0;
             char buf[4];
             switch(str[i])
             {
@@ -134,7 +135,6 @@ std::string process_str(const std::string& str, const LC3AssembleContext& contex
             case '5':
             case '6':
             case '7':
-                /// TODO handle cases like \777 correctly.
                 memset(buf, 0, 4);
                 buf[0] = str[i];
 
@@ -148,8 +148,11 @@ std::string process_str(const std::string& str, const LC3AssembleContext& contex
                         buf[2] = str[i];
                     }
                 }
-                num = strtol(buf, NULL, 8);
-                out << num;
+                parsed_num = strtol(buf, NULL, 8);
+                /// \777 in a C program compiles normally, but with a warning.
+                if (parsed_num > 0xFF)
+                    WARN(LC3AssembleException("", str, MALFORMED_STRING, context.lineno));
+                out << ((char)parsed_num);
                 break;
             default:
                 THROW(LC3AssembleException("", str, MALFORMED_STRING, context.lineno));
