@@ -408,7 +408,6 @@ void lc3_assemble(lc3_state& state, const std::string& filename, std::vector<cod
     lc3_assemble(state, file, ranges, options);
 }
 
-
 void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>& ranges, const LC3AssembleOptions& options)
 {
     std::vector<code_line> code;
@@ -843,6 +842,12 @@ symbolcheckdone:
     {
         throw context.exceptions;
     }
+}
+
+void lc3_assemble(lc3_state& state, std::istream& file, const LC3AssembleOptions& options)
+{
+    std::vector<code_range> ranges;
+    lc3_assemble(state, file, ranges, options);
 }
 
 bool lc3_assemble(const std::string& filename, const std::string& output_prefix, const LC3AssembleOptions& options)

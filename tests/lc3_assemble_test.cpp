@@ -7,7 +7,7 @@
 #include <lc3_all.hpp>
 #include "ExpressionEvaluator.hpp"
 
-#define IS_EXCEPTION(type) [](const LC3AssembleException& e) {return e.get_id() == type;}
+#define IS_EXCEPTION(type) [](const LC3AssembleException& e) {fprintf(stderr, "Exception: %s\n", e.what().c_str()); return e.get_id() == type;}
 
 struct LC3AssembleTest
 {
@@ -73,10 +73,9 @@ BOOST_FIXTURE_TEST_CASE(FillTest, LC3AssembleTest)
         ".fill x8000\n"
         ".end"
     );
-    std::vector<code_range> ranges;
     LC3AssembleOptions options;
     options.multiple_errors = false;
-    lc3_assemble(state, file, ranges, options);
+    lc3_assemble(state, file, options);
 
     BOOST_CHECK_EQUAL(state.mem[0x3000], 0);
     BOOST_CHECK_EQUAL(state.mem[0x3001], 1);
@@ -86,14 +85,13 @@ BOOST_FIXTURE_TEST_CASE(FillTest, LC3AssembleTest)
     BOOST_CHECK_EQUAL(state.mem[0x3005], 'A');
     BOOST_CHECK_EQUAL(state.mem[0x3006], -32768);
     BOOST_CHECK_EQUAL(state.mem[0x3007], -32768);
-    ranges.clear();
 
     std::istringstream bad_file(
         ".orig x3000\n"
         ".fill 32768\n"
         ".end"
     );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, bad_file, ranges, options), LC3AssembleException, IS_EXCEPTION(NUMBER_OVERFLOW));
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, bad_file, options), LC3AssembleException, IS_EXCEPTION(NUMBER_OVERFLOW));
 
 }
 
@@ -105,10 +103,9 @@ BOOST_FIXTURE_TEST_CASE(StringzTest, LC3AssembleTest)
         "B .stringz \"World\"\n"
         ".end"
     );
-    std::vector<code_range> ranges;
     LC3AssembleOptions options;
     options.multiple_errors = false;
-    lc3_assemble(state, file, ranges, options);
+    lc3_assemble(state, file, options);
 
     BOOST_CHECK_EQUAL(state.mem[0x3000], 'H');
     BOOST_CHECK_EQUAL(state.mem[0x3001], 'e');
@@ -127,15 +124,13 @@ BOOST_FIXTURE_TEST_CASE(StringzTest, LC3AssembleTest)
     BOOST_CHECK_EQUAL(state.mem[0x300C], 0);
     BOOST_CHECK_EQUAL(lc3_sym_lookup(state, "B"), 0x3007);
 
-    ranges.clear();
-
     file.clear();
     file.str(
         ".orig x3000\n"
         ".stringz lol\n"
         ".end"
     );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, IS_EXCEPTION(MALFORMED_STRING));
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, IS_EXCEPTION(MALFORMED_STRING));
 
     file.clear();
     file.str(
@@ -143,7 +138,7 @@ BOOST_FIXTURE_TEST_CASE(StringzTest, LC3AssembleTest)
         ".stringz lol\"lol\"\n"
         ".end"
     );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, IS_EXCEPTION(MALFORMED_STRING));
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, IS_EXCEPTION(MALFORMED_STRING));
 
     file.clear();
     file.str(
@@ -151,7 +146,7 @@ BOOST_FIXTURE_TEST_CASE(StringzTest, LC3AssembleTest)
         ".stringz \"lol\n"
         ".end"
     );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, IS_EXCEPTION(UNTERMINATED_STRING));
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, IS_EXCEPTION(UNTERMINATED_STRING));
 
     // "lol\" Stray escape character.
     file.clear();
@@ -160,7 +155,7 @@ BOOST_FIXTURE_TEST_CASE(StringzTest, LC3AssembleTest)
         ".stringz \"lol\\\"\n"
         ".end"
     );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, IS_EXCEPTION(MALFORMED_STRING));
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, IS_EXCEPTION(MALFORMED_STRING));
 
     // Unknown escape sequence \z.
     file.clear();
@@ -169,7 +164,7 @@ BOOST_FIXTURE_TEST_CASE(StringzTest, LC3AssembleTest)
         ".stringz \"lol\\z\"\n"
         ".end"
     );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, IS_EXCEPTION(MALFORMED_STRING));
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, IS_EXCEPTION(MALFORMED_STRING));
 
     file.clear();
     file.str(
@@ -177,7 +172,7 @@ BOOST_FIXTURE_TEST_CASE(StringzTest, LC3AssembleTest)
         ".stringz \"lol\n"
         ".end"
     );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, IS_EXCEPTION(UNTERMINATED_STRING));
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, IS_EXCEPTION(UNTERMINATED_STRING));
 
     file.clear();
     file.str(
@@ -185,7 +180,7 @@ BOOST_FIXTURE_TEST_CASE(StringzTest, LC3AssembleTest)
         ".stringz \"I am a long strong at the end of memory.\"\n"
         ".end"
     );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, IS_EXCEPTION(MEMORY_OVERFLOW));
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, IS_EXCEPTION(MEMORY_OVERFLOW));
 }
 
 BOOST_FIXTURE_TEST_CASE(InvalidSymbolTest, LC3AssembleTest)
@@ -195,46 +190,45 @@ BOOST_FIXTURE_TEST_CASE(InvalidSymbolTest, LC3AssembleTest)
         "IAMAVERYLONGSYMBOLGUIZE .fill 0\n"
         ".end"
     );
-    std::vector<code_range> ranges;
     LC3AssembleOptions options;
     options.multiple_errors = false;
 
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, long_sym, ranges, options), LC3AssembleException, IS_EXCEPTION(INVALID_SYMBOL));
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, long_sym, options), LC3AssembleException, IS_EXCEPTION(INVALID_SYMBOL));
 
     std::istringstream register_sym(
         ".orig x3000\n"
         "R0 .fill 0\n"
         ".end"
     );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, register_sym, ranges, options), LC3AssembleException, IS_EXCEPTION(INVALID_SYMBOL));
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, register_sym, options), LC3AssembleException, IS_EXCEPTION(INVALID_SYMBOL));
 
     std::istringstream hexa_sym(
         ".orig x3000\n"
         "x8 .fill 0\n"
         ".end"
     );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, hexa_sym, ranges, options), LC3AssembleException, IS_EXCEPTION(INVALID_SYMBOL));
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, hexa_sym, options), LC3AssembleException, IS_EXCEPTION(INVALID_SYMBOL));
 
     std::istringstream bin_sym(
         ".orig x3000\n"
         "b101 .fill 0\n"
         ".end"
     );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, bin_sym, ranges, options), LC3AssembleException, IS_EXCEPTION(INVALID_SYMBOL));
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, bin_sym, options), LC3AssembleException, IS_EXCEPTION(INVALID_SYMBOL));
 
     std::istringstream num_sym(
         ".orig x3000\n"
         "8HIYA .fill 0\n"
         ".end"
     );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, num_sym, ranges, options), LC3AssembleException, IS_EXCEPTION(INVALID_SYMBOL));
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, num_sym, options), LC3AssembleException, IS_EXCEPTION(INVALID_SYMBOL));
 
     std::istringstream invalid_sym(
         ".orig x3000\n"
         "DOLLADOLLA$$$ .fill 0\n"
         ".end"
     );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, invalid_sym, ranges, options), LC3AssembleException, IS_EXCEPTION(INVALID_SYMBOL));
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, invalid_sym, options), LC3AssembleException, IS_EXCEPTION(INVALID_SYMBOL));
 }
 
 BOOST_FIXTURE_TEST_CASE(BinaryLiteralTest, LC3AssembleTest)
@@ -250,10 +244,9 @@ BOOST_FIXTURE_TEST_CASE(BinaryLiteralTest, LC3AssembleTest)
         "LDR R0, R1, b011111\n"
         ".end"
     );
-    std::vector<code_range> ranges;
     LC3AssembleOptions options;
     options.multiple_errors = false;
-    lc3_assemble(state, file, ranges, options);
+    lc3_assemble(state, file, options);
 
     BOOST_CHECK_EQUAL(state.mem[0x3000], 0);
     BOOST_CHECK_EQUAL(state.mem[0x3001], 1);
@@ -262,4 +255,32 @@ BOOST_FIXTURE_TEST_CASE(BinaryLiteralTest, LC3AssembleTest)
     BOOST_CHECK_EQUAL(state.mem[0x3004], (short)0xE0F0);
     BOOST_CHECK_EQUAL(state.mem[0x3005], 0x4BC1);
     BOOST_CHECK_EQUAL(state.mem[0x3006], 0x605F);
+}
+
+BOOST_FIXTURE_TEST_CASE(InvalidRegisterTest, LC3AssembleTest)
+{
+    std::istringstream file(
+        ".orig x3000\n"
+        "ADD R8, R0, R0\n"
+        ".end"
+    );
+    LC3AssembleOptions options;
+    options.multiple_errors = false;
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, IS_EXCEPTION(INVALID_REGISTER));
+
+    file.clear();
+    file.str(
+        ".orig x3000\n"
+        "ADD R1000, R0, R0\n"
+        ".end"
+    );
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, IS_EXCEPTION(INVALID_REGISTER));
+
+    file.clear();
+    file.str(
+        ".orig x3000\n"
+        "ADD SYM, R0, R0\n"
+        ".end"
+    );
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, IS_EXCEPTION(INVALID_REGISTER));
 }

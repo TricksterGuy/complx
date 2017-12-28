@@ -1362,10 +1362,9 @@ BOOST_FIXTURE_TEST_CASE(InstructionAssembleTest, LC3BasicTest)
 
     try
     {
-        std::vector<code_range> ranges;
         LC3AssembleOptions options;
         options.multiple_errors = false;
-        lc3_assemble(state, file, ranges, options);
+        lc3_assemble(state, file, options);
     }
     catch (LC3AssembleException e)
     {

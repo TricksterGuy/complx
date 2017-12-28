@@ -38,8 +38,7 @@ BOOST_FIXTURE_TEST_CASE(TestInstructionPlugin, LC3PluginTest)
     ".end";
 
     std::stringstream file(asm_file);
-    std::vector<code_range> ranges;
-    lc3_assemble(state, file, ranges, options);
+    lc3_assemble(state, file, options);
     BOOST_REQUIRE(state.instructionPlugin != nullptr);
     BOOST_REQUIRE_EQUAL(state.mem[0x3002], short(0xD401));
     BOOST_REQUIRE_EQUAL(state.mem[0x3003], short(0xD624));
@@ -102,8 +101,7 @@ BOOST_FIXTURE_TEST_CASE(TestInstructionPluginDisassemble, LC3PluginTest)
     };
 
     std::stringstream file(asm_file);
-    std::vector<code_range> ranges;
-    lc3_assemble(state, file, ranges, options);
+    lc3_assemble(state, file, options);
 
     BOOST_REQUIRE(state.instructionPlugin != nullptr);
 
@@ -156,8 +154,7 @@ BOOST_FIXTURE_TEST_CASE(TestInstructionPluginAssembleFail, LC3PluginTest)
     ".end";
 
     std::stringstream file(asm_file);
-    std::vector<code_range> ranges;
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, is_syntax_error);
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, is_syntax_error);
 }
 
 bool is_extra_input(const LC3AssembleException& ex)
@@ -173,9 +170,8 @@ BOOST_FIXTURE_TEST_CASE(TestInstructionPluginAssembleFail2, LC3PluginTest)
     "    MUL R0, R0, R3, R4\n"
     ".end";
 
-    std::stringstream file(asm_file);
-    std::vector<code_range> ranges;
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, is_extra_input);
+    std::stringstream file(asm_file);;
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, is_extra_input);
 }
 
 BOOST_FIXTURE_TEST_CASE(TestTrapPlugin, LC3PluginTest)
@@ -192,8 +188,7 @@ BOOST_FIXTURE_TEST_CASE(TestTrapPlugin, LC3PluginTest)
     ".end";
 
     std::stringstream file(asm_file);
-    std::vector<code_range> ranges;
-    lc3_assemble(state, file, ranges, options);
+    lc3_assemble(state, file, options);
     BOOST_REQUIRE(state.trapPlugins[0x80] != nullptr);
     BOOST_REQUIRE(lc3_sym_lookup(state, "UDIV") == -1);
     BOOST_REQUIRE_EQUAL(state.mem[0x3002], short(0xF080));
@@ -217,8 +212,7 @@ BOOST_FIXTURE_TEST_CASE(TestTrapPluginViaVector, LC3PluginTest)
     ".end";
 
     std::stringstream file(asm_file);
-    std::vector<code_range> ranges;
-    lc3_assemble(state, file, ranges, options);
+    lc3_assemble(state, file, options);
     BOOST_REQUIRE(state.trapPlugins[0x80] != nullptr);
     BOOST_REQUIRE(lc3_sym_lookup(state, "UDIV") == -1);
     BOOST_REQUIRE_EQUAL(state.mem[0x3002], short(0xF080));
@@ -240,8 +234,7 @@ BOOST_FIXTURE_TEST_CASE(TestTrapPluginDivByZero, LC3PluginTest)
     ".end";
 
     std::stringstream file(asm_file);
-    std::vector<code_range> ranges;
-    lc3_assemble(state, file, ranges, options);
+    lc3_assemble(state, file, options);
     BOOST_REQUIRE(state.trapPlugins[0x80] != nullptr);
     BOOST_REQUIRE(lc3_sym_lookup(state, "UDIV") == -1);
     BOOST_REQUIRE_EQUAL(state.mem[0x3002], short(0xF080));
@@ -265,8 +258,7 @@ BOOST_FIXTURE_TEST_CASE(TestTrapPluginDisassemble, LC3PluginTest)
     ".end";
 
     std::stringstream file(asm_file);
-    std::vector<code_range> ranges;
-    lc3_assemble(state, file, ranges, options);
+    lc3_assemble(state, file, options);
     BOOST_REQUIRE(state.trapPlugins[0x80] != nullptr);
     BOOST_REQUIRE(lc3_sym_lookup(state, "UDIV") == -1);
     BOOST_REQUIRE_EQUAL(state.mem[0x3002], short(0xF080));
@@ -289,8 +281,7 @@ BOOST_FIXTURE_TEST_CASE(TestTrapPluginAssembleFailure, LC3PluginTest)
     ".end";
 
     std::stringstream file(asm_file);
-    std::vector<code_range> ranges;
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, is_plugin_fail);
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, is_plugin_fail);
 }
 
 BOOST_FIXTURE_TEST_CASE(TestTrapPluginAssembleFailure2, LC3PluginTest)
@@ -302,6 +293,5 @@ BOOST_FIXTURE_TEST_CASE(TestTrapPluginAssembleFailure2, LC3PluginTest)
     ".end";
 
     std::stringstream file(asm_file);
-    std::vector<code_range> ranges;
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, ranges, options), LC3AssembleException, is_plugin_fail);
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, is_plugin_fail);
 }

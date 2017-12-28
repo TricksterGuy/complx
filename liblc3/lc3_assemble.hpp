@@ -166,6 +166,16 @@ bool lc3_assemble(const std::string& filename, const std::string& output_prefix 
   * @param options Assembler options.
   * @throw LC3AssembleException on error
   */
-void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>& ranges, const LC3AssembleOptions& options);
+void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>& ranges, const LC3AssembleOptions& options = LC3AssembleOptions());
+
+/** lc3_assemble
+  *
+  * Assembles a file into the LC3State object given (Test only)
+  * @param state LC3State object.
+  * @param file Stream containing the assembly code to assemble.
+  * @param options Assembler options.
+  * @throw LC3AssembleException on error
+  */
+void lc3_assemble(lc3_state& state, std::istream& file, const LC3AssembleOptions& options = LC3AssembleOptions());
 
 #endif
