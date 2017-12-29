@@ -369,7 +369,7 @@ unsigned short lc3_assemble_one(lc3_state& state, LC3AssembleContext& context)
     case STR_INSTR:
         dr = get_register(tokens[0], context);
         sr1 = get_register(tokens[1], context);
-        sr2_imm = get_imm(tokens[2], 6, true, true, context);
+        sr2_imm = get_imm(tokens[2], 6, false, true, context);
         instruction |= (dr << 9) | (sr1 << 6) | sr2_imm;
         break;
     case TRAP_INSTR:

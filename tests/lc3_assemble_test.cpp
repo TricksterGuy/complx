@@ -7,15 +7,17 @@
 #include <lc3_all.hpp>
 #include "ExpressionEvaluator.hpp"
 
-#define IS_EXCEPTION(type) [](const LC3AssembleException& e) {fprintf(stderr, "Exception: %s\n", e.what().c_str()); return e.get_id() == type;}
+#define IS_EXCEPTION(type) [](const LC3AssembleException& e) {/*fprintf(stderr, "Exception: %s\n", e.what().c_str()); */return e.get_id() == type;}
 
 struct LC3AssembleTest
 {
     lc3_state state;
+    LC3AssembleOptions options;
 
     LC3AssembleTest()
     {
         lc3_init(state, false);
+        options.multiple_errors = false;
     }
 };
 
@@ -29,9 +31,6 @@ BOOST_FIXTURE_TEST_CASE(AddImmediateTest, LC3AssembleTest)
     BOOST_CHECK_EQUAL(lc3_assemble_one(state, 0x3000, "ADD R0, R0, 15"), 0x102F);
 
     BOOST_CHECK_EQUAL(lc3_assemble_one(state, 0x3000, "ADD R0, R0, xF"), 0x102F);
-
-    LC3AssembleOptions options;
-    options.multiple_errors = false;
 
     BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "ADD R0, R0, 16", -1, options), LC3AssembleException, IS_EXCEPTION(NUMBER_OVERFLOW));
     BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "ADD R0, R0, x1F", -1, options), LC3AssembleException, IS_EXCEPTION(NUMBER_OVERFLOW));
@@ -49,9 +48,6 @@ BOOST_FIXTURE_TEST_CASE(AndImmediateTest, LC3AssembleTest)
     BOOST_CHECK_EQUAL(lc3_assemble_one(state, 0x3000, "AND R0, R0, 15"), 0x502F);
 
     BOOST_CHECK_EQUAL(lc3_assemble_one(state, 0x3000, "AND R0, R0, xF"), 0x502F);
-
-    LC3AssembleOptions options;
-    options.multiple_errors = false;
 
     BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "AND R0, R0, 16", -1, options), LC3AssembleException, IS_EXCEPTION(NUMBER_OVERFLOW));
     BOOST_CHECK_EXCEPTION(lc3_assemble_one(state, 0x3000, "AND R0, R0, x1F", -1, options), LC3AssembleException, IS_EXCEPTION(NUMBER_OVERFLOW));
@@ -73,8 +69,6 @@ BOOST_FIXTURE_TEST_CASE(FillTest, LC3AssembleTest)
         ".fill x8000\n"
         ".end"
     );
-    LC3AssembleOptions options;
-    options.multiple_errors = false;
     lc3_assemble(state, file, options);
 
     BOOST_CHECK_EQUAL(state.mem[0x3000], 0);
@@ -103,8 +97,6 @@ BOOST_FIXTURE_TEST_CASE(StringzTest, LC3AssembleTest)
         "B .stringz \"World\"\n"
         ".end"
     );
-    LC3AssembleOptions options;
-    options.multiple_errors = false;
     lc3_assemble(state, file, options);
 
     BOOST_CHECK_EQUAL(state.mem[0x3000], 'H');
@@ -190,9 +182,6 @@ BOOST_FIXTURE_TEST_CASE(InvalidSymbolTest, LC3AssembleTest)
         "IAMAVERYLONGSYMBOLGUIZE .fill 0\n"
         ".end"
     );
-    LC3AssembleOptions options;
-    options.multiple_errors = false;
-
     BOOST_CHECK_EXCEPTION(lc3_assemble(state, long_sym, options), LC3AssembleException, IS_EXCEPTION(INVALID_SYMBOL));
 
     std::istringstream register_sym(
@@ -244,8 +233,6 @@ BOOST_FIXTURE_TEST_CASE(BinaryLiteralTest, LC3AssembleTest)
         "LDR R0, R1, b011111\n"
         ".end"
     );
-    LC3AssembleOptions options;
-    options.multiple_errors = false;
     lc3_assemble(state, file, options);
 
     BOOST_CHECK_EQUAL(state.mem[0x3000], 0);
@@ -264,8 +251,6 @@ BOOST_FIXTURE_TEST_CASE(InvalidRegisterTest, LC3AssembleTest)
         "ADD R8, R0, R0\n"
         ".end"
     );
-    LC3AssembleOptions options;
-    options.multiple_errors = false;
     BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, IS_EXCEPTION(INVALID_REGISTER));
 
     file.clear();
@@ -283,4 +268,22 @@ BOOST_FIXTURE_TEST_CASE(InvalidRegisterTest, LC3AssembleTest)
         ".end"
     );
     BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, IS_EXCEPTION(INVALID_REGISTER));
+}
+
+BOOST_FIXTURE_TEST_CASE(InvalidImmediateOffsetTest, LC3AssembleTest)
+{
+    std::istringstream file(
+        ".orig x3000\n"
+        "ADD R0, R0, 17\n"
+        ".end"
+    );
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, IS_EXCEPTION(NUMBER_OVERFLOW));
+
+    file.clear();
+    file.str(
+        ".orig x3000\n"
+        "LDR R0, R0, 65\n"
+        ".end"
+    );
+    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, IS_EXCEPTION(OFFSET_OVERFLOW));
 }
