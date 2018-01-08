@@ -2,7 +2,7 @@ complx
 ======
 [![Travis CI Build Status](https://travis-ci.org/TricksterGuy/complx.svg?branch=master)](https://travis-ci.org/TricksterGuy/complx)
 
-Complx the LC-3 Simulator used in CS2110 at Georgia Tech currently maintained and authored by Brandon (bwhitehead0308 [AT] gmail [DOT] com)
+Extensible LC-3 Simulator (GUI and CLI), Assembler, and Autograder/Test Framework written in C++. Mainly used in CS2110 at Georgia Tech.  Maintained by Brandon (bwhitehead0308 [AT] gmail [DOT] com)
 
 # Screenshot
 ![Main Screen](https://github.com/TricksterGuy/complx/blob/master/doc/main_screen.png)
@@ -45,7 +45,7 @@ complx is a suite of educational tools for learning lc3 assembly. It includes bo
     5. Plugin that adds a new trap that performs division and modulus
   * Plugins can add new device registers, traps, send interrupts, and add a new instruction
 
-# Installation from Packages via apt (Recommended! for Ubuntu Trusty\[14.04\] and beyond.)
+# Installation from Packages via apt (Recommended! Only for Ubuntu 16.04.)
 Execute these commands
 * sudo add-apt-repository ppa:tricksterguy87/ppa-gt-cs2110
 * sudo apt update
@@ -54,8 +54,6 @@ Execute these commands
 # Installation from Source via scripts
 You can run one of the install scripts depending on your platform, which does everything listed in the below section.
 * Ubuntu 14.04 and above sudo ./install.sh
-* Fedora 23 ./install_script_fedora23.sh
-
 
 # Installation from Source manually
 From the root directory of where you have the source code.
