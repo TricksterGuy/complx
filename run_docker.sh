@@ -7,7 +7,7 @@
 # Error out when anything goes wrong
 set -e
 
-IMAGE_NAME="jgkamat/complx"
+IMAGE_NAME="ausbin/complx"
 
 # get location of script
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -26,13 +26,13 @@ if ! docker images | grep -q "$IMAGE_NAME"; then
 fi
 
 if [ -n "$1" ] && [ -d "$1" ]; then
-	echo "Linking user specified dir '$1' on your system to '/home/developer/homework' in the container"
-	LINK="-v $1:/home/developer/homework"
+	echo "Linking user specified dir '$1' on your system to '/home/developer/workdir' in the container"
+	LINK="-v $1:/home/developer/workdir"
 fi
 
 # Docker image has been built, lets run it.
-# If this fails, run `xhost +` to disable x socket security (arch)
-docker run -ti \
+# If this fails, run `xhost +` to disable x socket security
+docker run \
 	-e DISPLAY=$DISPLAY \
 	-v /tmp/.X11-unix:/tmp/.X11-unix $LINK \
 	"$IMAGE_NAME"

@@ -1,41 +1,24 @@
+FROM ubuntu:16.04
 
-FROM ubuntu:15.04
-MAINTAINER Jay Kamat github@jgkamat.33mail.com
+# Need software-properties-common for add-apt-repository.
+# gnome-themes-standard prevents it from looking hideous.
+# libcanberra-gtk-module prevents the message `Gtk-Message: Failed to
+# load module "canberra-gtk-module"' which might confuse students.
 
-# A simple dockerimage for running complx 
-#
-# This dockerfile simply builds complx from source inside a dockerfile
+RUN apt-get update && \
+    apt-get install -y software-properties-common gnome-themes-standard libcanberra-gtk-module && \
+    add-apt-repository -y ppa:tricksterguy87/ppa-gt-cs2110 && \
+    apt-get update && \
+    apt-get install -y complx-tools && \
+    apt-get clean
 
-# Setup apt to be happy with no console input
-ENV DEBIAN_FRONTEND noninteractive
-
-# Use UTF-8
-RUN locale-gen en_US.UTF-8
-ENV LANG en_US.UTF-8
-
-# setup apt tools and other goodies we want
-RUN apt-get update --fix-missing && apt-get -y install make apt-utils wget curl htop iputils-ping vim-nox less debconf-utils git software-properties-common sudo tmux && apt-get clean
-
-# set up user <this is for running soccer later on>
-# Replace 1000 with your user / group id
-RUN export uid=1000 gid=1000 && \
-    mkdir -p /home/developer && \
-    echo "developer:x:${uid}:${gid}:Developer,,,:/home/developer:/bin/bash" >> /etc/passwd && \
-    echo "developer:x:${uid}:" >> /etc/group && \
-    echo "developer ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/developer && \
-    chmod 0440 /etc/sudoers.d/developer && \
-    chown ${uid}:${gid} -R /home/developer
+# Create a user. Running X11 apps as root is A Bad Thing(TM)
+RUN useradd --user-group --create-home --shell /bin/bash developer
 
 USER developer
-ENV HOME /home/developer
+# Create ~/.local/share/ so GTK won't generate a bunch of stderr noise
+# when trying to write to ~/.local/share/recently-used.xbel
+RUN mkdir -p /home/developer/workdir /home/developer/.local/share
 
-# do everything in root's home
-RUN mkdir -p /home/developer/complx
-WORKDIR /home/developer/
-
-ADD . complx
-WORKDIR /home/developer/complx
-
-RUN sudo ./install.sh
-
-CMD [ "complx" ]
+WORKDIR /home/developer/workdir
+CMD complx
