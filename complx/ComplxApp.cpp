@@ -61,6 +61,10 @@ static const wxCmdLineEntryDesc cmd_descriptions[] =
         wxCMD_LINE_OPTION, "m", "fill_memory", "Memory fill value default random",
         wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL
     },
+    {
+        wxCMD_LINE_OPTION, "C", "config_file", "Path to config file to use",
+        wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL
+    },
     { wxCMD_LINE_PARAM,  NULL, NULL, "input file", wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL},
     { wxCMD_LINE_NONE }
 };
@@ -70,7 +74,7 @@ IMPLEMENT_APP(ComplxApp)
 
 // Command line
 long disassemble = 1, stack_size = 65536, call_stack_size = 10000, true_traps = 0, interrupts = 0, highlight = 1, pc = 0x3000, memory_fill = 0, register_fill = 0;
-wxString address_str = wxEmptyString, register_fill_str = "random", memory_fill_str = "random";
+wxString address_str = wxEmptyString, register_fill_str = "random", memory_fill_str = "random", config_file = wxEmptyString;
 wxArrayString files;
 ComplxFrame* complxframe;
 
@@ -85,7 +89,7 @@ bool ComplxApp::OnInit()
     SetVendorName("Complx");
     SetAppName("Complx");
 
-    wxFileConfig *config = new wxFileConfig("Complx");
+    wxFileConfig *config = new wxFileConfig("Complx", wxEmptyString, config_file);
     wxConfigBase::Set(config);
 
     srand(time(NULL));
@@ -228,6 +232,7 @@ bool ComplxApp::OnCmdLineParsed(wxCmdLineParser& parser)
     parser.Found(_("t"),  &true_traps);
     parser.Found(_("ie"), &interrupts);
     parser.Found(_("i"),  &highlight);
+    parser.Found(_("C"),  &config_file);
 
     register_fill_str.MakeLower();
     memory_fill_str.MakeLower();
