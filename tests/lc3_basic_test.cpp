@@ -12,7 +12,7 @@ struct LC3BasicTest
 
     LC3BasicTest()
     {
-        lc3_init(state, false);
+        lc3_init(state, false, false);
     }
 };
 
@@ -183,12 +183,15 @@ BOOST_FIXTURE_TEST_CASE(InstructionBasicDisassembleTest, LC3BasicTest)
     std::string rti = lc3_basic_disassemble(state, 0x8000);
     std::string error = lc3_basic_disassemble(state, 0xD392);
     std::string nop0 = lc3_basic_disassemble(state, 0x0030);
+    std::string nop2 = lc3_basic_disassemble(state, 0x0E00);
 
     BOOST_CHECK_EQUAL(brn, more_answers[0]);
     BOOST_CHECK_EQUAL(nop, more_answers[1]);
     BOOST_CHECK_EQUAL(rti, more_answers[2]);
     BOOST_CHECK_EQUAL(error, more_answers[3]);
     BOOST_CHECK_EQUAL(nop0, more_answers[4]);
+    BOOST_CHECK_EQUAL(nop2, more_answers[1]);
+
 }
 
 BOOST_FIXTURE_TEST_CASE(TestDisassemble, LC3BasicTest)
@@ -361,6 +364,7 @@ BOOST_FIXTURE_TEST_CASE(TestSmartDisassemble, LC3BasicTest)
         std::string instruct = lc3_smart_disassemble(state, data);
         BOOST_CHECK_EQUAL(instruct,  answers[i]);
     }
+
 }
 
 BOOST_FIXTURE_TEST_CASE(TestArithInstructions, LC3BasicTest)
@@ -918,6 +922,7 @@ BOOST_FIXTURE_TEST_CASE(TestBackR7, LC3BasicTest)
 
     state.regs[0] = 25;
     state.regs[1] = 75;
+    state.regs[7] = 0x490;
 
     lc3_step(state);
     lc3_back(state);

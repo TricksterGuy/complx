@@ -30,7 +30,7 @@ MemoryGrid::MemoryGrid(wxWindow *parent, wxWindowID id, const wxPoint &pos, cons
 
     wxFont font = wxSystemSettings::GetFont(wxSYS_ANSI_FIXED_FONT);
     SetFont(font);
-    SetDefaultRowSize(font.GetPointSize());
+    SetDefaultRowSize(font.GetPixelSize().GetHeight());
 
     Connect(MemoryMenuBreakpoint, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryGrid::OnBreakpoint));
     Connect(MemoryMenuTemppoint, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryGrid::OnTemppoint));
@@ -114,7 +114,7 @@ void MemoryGrid::InitGridSizes(bool exact_column_sizing, const std::vector<int>&
     w -= labelSize;
     w -= 10;
 
-    /// TODO Apparently this can go below zero and cause an assertion failed
+    /// TODO Apparently this can go below zero and cause an assertion failed error.
     if (w < 0) w = 200;
 
     if (column_sizes.empty())

@@ -110,8 +110,8 @@ typedef struct lc3_test_output
 typedef struct lc3_test
 {
     lc3_test() : points(0), max_points(0), passed(false), true_traps(false), interrupt_enabled(false),
-        disable_plugins(false), randomize(false), has_max_executions(false), has_halted(false), has_halted_normally(false),
-        executions(0), max_executions(0), warnings(0) {}
+        disable_plugins(false), randomize(false), fully_randomize(false), has_max_executions(false), has_halted(false), has_halted_normally(false),
+        random_seed(-1), fill_value(-1), executions(0), max_executions(0), warnings(0) {}
     std::string name;
     std::string warning;
     std::vector<lc3_test_input> input;
@@ -123,9 +123,12 @@ typedef struct lc3_test
     bool interrupt_enabled;
     bool disable_plugins;
     bool randomize;
+    bool fully_randomize;
     bool has_max_executions;
     bool has_halted;
     bool has_halted_normally; // Halt via the instruction.
+    long random_seed;
+    int fill_value;
     unsigned long executions;
     unsigned long max_executions;
     unsigned long warnings;
@@ -147,8 +150,28 @@ typedef struct lc3_test_suite
   * @param suite An lc3_test_suite, the results will be written to the object.
   * @param filename Path to an assembly file.
   * @param seed Random seed to use.
+  * @param run Run number.
   */
-void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, int seed = -1);
+void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, int seed = -1, int run = 0);
+/** lc3_init_test_case
+  *
+  * Initializes and loads assembly file and sets up lc3_state to match the test's environment.
+  * @param state LC3State object.
+  * @param filename Path to an assembly file.
+  * @param test An lc3_test.
+  * @param seed Random seed to use.
+  * @param in_lc3_test true if this is being called via lc3_test binary. (The effect if true is that backstepping is disabled).
+  * @param run Run number. Random seed used in test will be incremented by this number
+  */
+void lc3_init_test_case(lc3_state& state, const std::string& filename, lc3_test& test, int seed = -1, bool in_lc3_test = false, int run = 0);
+/** lc3_setup_test_case
+  *
+  * Sets up a single test case by applying all of the input conditions to the current lc3_state.
+  * @param state LC3State object.
+  * @param test An lc3_test.
+  * @param input Input stream to set up.
+  */
+void lc3_setup_test_case(lc3_state& state, lc3_test& test, std::stringstream& input);
 /** lc3_run_test_case
   *
   * Runs a single test case.
@@ -156,7 +179,7 @@ void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, int 
   * @param filename Path to an assembly file.
   * @param seed Random seed to use.
   */
-void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed = -1);
+void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed = -1, int run = 0);
 
 /** lc3_write_test_report
   *
@@ -182,13 +205,13 @@ void lc3_write_test_report(std::stringstream& oss, lc3_test& test, int& minipass
   * @param test lc3 test input precondition.
   * @return Human readable version of the test input precondition.
   */
-std::string lc3_test_input_string(lc3_test_input& test);
+std::string lc3_test_input_string(const lc3_test_input& test);
 /** lc3_test_output_string
   *
   * Gives a human readable version of the test output postcondition.
   * @param test lc3 test output postcondition.
   * @return Human readable version of the test output postcondition.
   */
-std::string lc3_test_output_string(lc3_test_output& test);
+std::string lc3_test_output_string(const lc3_test_output& test);
 
 #endif

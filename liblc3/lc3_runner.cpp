@@ -9,19 +9,20 @@
 #include <cstdlib>
 #include <dlfcn.h>
 
-void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory, short fill_value)
+void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory, short register_fill_value, short memory_fill_value)
 {
     // Set Registers
-    state.regs[0] = randomize_registers ? lc3_random() : fill_value;
-    state.regs[1] = randomize_registers ? lc3_random() : fill_value;
-    state.regs[2] = randomize_registers ? lc3_random() : fill_value;
-    state.regs[3] = randomize_registers ? lc3_random() : fill_value;
-    state.regs[4] = randomize_registers ? lc3_random() : fill_value;
-    state.regs[5] = randomize_registers ? lc3_random() : fill_value;
-    state.regs[6] = randomize_registers ? lc3_random() : fill_value;
-    state.regs[7] = randomize_registers ? lc3_random() : 0x490;
+    state.regs[0] = randomize_registers ? lc3_random() : register_fill_value;
+    state.regs[1] = randomize_registers ? lc3_random() : register_fill_value;
+    state.regs[2] = randomize_registers ? lc3_random() : register_fill_value;
+    state.regs[3] = randomize_registers ? lc3_random() : register_fill_value;
+    state.regs[4] = randomize_registers ? lc3_random() : register_fill_value;
+    state.regs[5] = randomize_registers ? lc3_random() : register_fill_value;
+    state.regs[6] = randomize_registers ? lc3_random() : register_fill_value;
+    state.regs[7] = randomize_registers ? lc3_random() : register_fill_value;
 
     // PC is initially at address 3000
+    /// TODO Add PC parameter and avoid hardcoding this value.
     state.pc = 0x3000;
 
     // User mode
@@ -73,7 +74,7 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     else
     {
         for (unsigned int i = 0; i < 65536; i++)
-            state.mem[i] = fill_value;
+            state.mem[i] = memory_fill_value;
     }
 
     // Add LC3 OS

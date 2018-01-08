@@ -18,29 +18,26 @@
 #include <bitset>
 #include <algorithm>
 #include <iostream>
-#include <XmlTestParser.hpp>
 #include "icon64.xpm"
 
 #include "ComplxFrame.hpp"
 #include "MemoryGrid.hpp"
 #include "MemoryViewContainer.hpp"
+#include "AdvancedLoadDialog.hpp"
 #include "CallStackDialog.hpp"
 #include "CallSubroutineDialog.hpp"
 #include "DebugInfoDialog.hpp"
 #include "WatchpointDialog.hpp"
 #include "AddressDialog.hpp"
 #include "RunForDialog.hpp"
-#include "RunTestDialog.hpp"
+#include "SetupTestDialog.hpp"
 #include "LC3RunThread.hpp"
 #include "version.h"
 
 lc3_state state;
-lc3_test test;
 
 extern ComplxFrame* complxframe;
 int runforRunTime = 0;
-wxFileName currentFile;
-wxFileName currentTestFile;
 wxCriticalSection threadCS;
 LC3RunThread* thread = NULL;
 bool refreshednoio = false;
@@ -69,8 +66,6 @@ ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) : ComplxFrameDecl(NUL
 {
     InitImages();
 
-    menuStateTrueTraps->Check(opts.true_traps);
-    menuStateInterrupts->Check(opts.interrupts);
     menuViewInstructionHighlighting->Check(opts.highlight);
     menuViewBasic->Check(opts.disassemble == 0);
     menuViewNormal->Check(opts.disassemble == 1);
@@ -78,16 +73,8 @@ ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) : ComplxFrameDecl(NUL
 
     this->stack_size = opts.stack_size;
     this->call_stack_size = opts.call_stack_size;
-    OnInit();
 
-    if (!opts.pc.IsEmpty())
-    {
-        int addr;
-        lc3_calculate(state, opts.pc.ToStdString(), addr);
-        state.pc = addr;
-    }
-
-    if (!opts.file.IsEmpty()) DoLoadFile(wxFileName(opts.file));
+    DoLoadFile(opts.loading_options);
 
     memoryView = new MemoryView();
     memory->SetView(memoryView, opts.exact_column_sizing, opts.column_sizes);
@@ -95,10 +82,10 @@ ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) : ComplxFrameDecl(NUL
     memory->SetUnsignedMode(false);
     memory->SetHighlight(opts.highlight);
 
-    int widths[3] = {-7, -3, -3};
-    int styles[3] = {wxSB_NORMAL, wxSB_NORMAL, wxSB_NORMAL};
-    statusBar->SetStatusWidths(3, widths);
-    statusBar->SetStatusStyles(3, styles);
+    int widths[5] = {-6, -2, -2, -2, -2};
+    int styles[5] = {wxSB_NORMAL, wxSB_NORMAL, wxSB_NORMAL, wxSB_NORMAL, wxSB_NORMAL};
+    statusBar->SetStatusWidths(5, widths);
+    statusBar->SetStatusStyles(5, styles);
 
     UpdateMemory();
     UpdateStatus();
@@ -161,42 +148,9 @@ void ComplxFrame::OnIdle(wxIdleEvent& event)
     UpdateMemory();
 }
 
-/** OnRandomizeAndLoad
-  *
-  * Randomizes memory and loads a file
-  */
-void ComplxFrame::OnRandomizeAndLoad(wxCommandEvent& event)
-{
-    if (Running()) return;
-    wxFileDialog* dialog = new wxFileDialog(NULL, _("Load .asm file"), wxEmptyString, wxEmptyString, _("LC-3 Assembly Files (*.asm)|*.asm"), wxFD_OPEN|wxFD_FILE_MUST_EXIST|wxFD_CHANGE_DIR);
-    if (dialog->ShowModal() == wxID_OK)
-    {
-        wxFileName filename(dialog->GetPath());
-        OnInit(true, true);
-        DoLoadFile(filename);
-    }
-}
-
-/** OnRandomizeAndReload
-  *
-  * Called when the user wants to reload the last file.
-  */
-void ComplxFrame::OnRandomizeAndReload(wxCommandEvent& event)
-{
-    if (Running()) return;
-    if (currentFile.GetFullName().IsEmpty())
-    {
-        OnLoad(event);
-        return;
-    }
-
-    OnInit(true, true);
-    DoLoadFile(currentFile);
-}
-
 /** OnLoad
   *
-  * Called when a file needs to be loaded (and machine to be initialized)
+  * Called when a file needs to be loaded.
   */
 void ComplxFrame::OnLoad(wxCommandEvent& event)
 {
@@ -204,22 +158,89 @@ void ComplxFrame::OnLoad(wxCommandEvent& event)
     wxFileDialog* dialog = new wxFileDialog(NULL, _("Load .asm file"), wxEmptyString, wxEmptyString, _("LC-3 Assembly Files (*.asm)|*.asm"), wxFD_OPEN|wxFD_FILE_MUST_EXIST|wxFD_CHANGE_DIR);
     if (dialog->ShowModal() == wxID_OK)
     {
-        wxFileName filename(dialog->GetPath());
-        OnInit();
-        DoLoadFile(filename);
+        LoadingOptions opts;
+        opts.file = dialog->GetPath().ToStdString();
+        DoLoadFile(opts);
     }
 
     delete dialog;
 }
 
-/** OnInit
+
+/** OnCleanLoad
   *
-  * Called when the machine needs to be initialized
+  * Called when a file needs to be loaded with zero'd memory/registers.
   */
-void ComplxFrame::OnInit(bool randomize_registers, bool randomize_memory, short fill_value)
+void ComplxFrame::OnCleanLoad(wxCommandEvent& event)
+{
+    if (Running()) return;
+    wxFileDialog* dialog = new wxFileDialog(NULL, _("Load .asm file"), wxEmptyString, wxEmptyString, _("LC-3 Assembly Files (*.asm)|*.asm"), wxFD_OPEN|wxFD_FILE_MUST_EXIST|wxFD_CHANGE_DIR);
+    if (dialog->ShowModal() == wxID_OK)
+    {
+        LoadingOptions opts;
+        opts.file = dialog->GetPath().ToStdString();
+        opts.memory = ZEROED;
+        opts.registers = ZEROED;
+        DoLoadFile(opts);
+    }
+
+    delete dialog;
+}
+
+void ComplxFrame::OnAdvancedLoad(wxCommandEvent& event)
+{
+    if (Running()) return;
+
+    AdvancedLoadDialog* dialog = new AdvancedLoadDialog(this);
+    if (dialog->ShowModal() == wxID_OK)
+    {
+        LoadingOptions options = dialog->GetOptions();
+        if (options.file.empty())
+        {
+            wxMessageBox("No file to load", "Error");
+            delete dialog;
+            return;
+        }
+        reload_options = options;
+        DoLoadFile(reload_options);
+    }
+    delete dialog;
+}
+
+/** OnReload
+  *
+  * Called when the user wants to reload the last file.
+  */
+void ComplxFrame::OnReload(wxCommandEvent& event)
+{
+    if (Running()) return;
+    if (reload_options.file.empty())
+    {
+        OnLoad(event);
+        return;
+    }
+
+    DoLoadFile(reload_options);
+}
+
+
+/** DoLoadFile
+  *
+  * Handles loading an assembly file into the simulator
+  */
+void ComplxFrame::DoLoadFile(const LoadingOptions& opts)
 {
     static bool first = true;
-    lc3_init(state, randomize_registers, randomize_memory, fill_value);
+    auto* config = wxConfigBase::Get();
+
+    wxFileName filename(opts.file);
+    bool randomize_registers = opts.registers == RANDOMIZE;
+    bool randomize_memory = opts.memory == RANDOMIZE;
+    short fill_registers = opts.registers;
+    short fill_memory = opts.memory;
+
+    lc3_init(state, randomize_registers, randomize_memory, fill_registers, fill_memory);
+    state.pc = opts.pc;
 
     if (console != NULL) delete console;
     console = new LC3Console(this);
@@ -246,69 +267,15 @@ void ComplxFrame::OnInit(bool randomize_registers, bool randomize_memory, short 
         console->Move(x - console->GetSize().GetX(), y);
     }
 
-    lc3_set_true_traps(state, menuStateTrueTraps->IsChecked());
-    state.interrupt_enabled = menuStateInterrupts->IsChecked();
     state.max_stack_size = stack_size;
     state.max_call_stack_size = call_stack_size;
-}
+    // Fix for console stealing focus.
+    SetFocus();
 
-/** OnReload
-  *
-  * Called when the user wants to reload the last file.
-  */
-void ComplxFrame::OnReload(wxCommandEvent& event)
-{
-    if (Running()) return;
-    if (currentFile.GetFullName().IsEmpty())
-    {
-        OnLoad(event);
+    // Now the actual loading
+    if (opts.file.empty())
         return;
-    }
 
-    OnInit();
-    DoLoadFile(currentFile);
-}
-
-/** OnLoadOver
-  *
-  * Called when the user wants to load a new file over the current state
-  */
-void ComplxFrame::OnLoadOver(wxCommandEvent& event)
-{
-    if (Running()) return;
-    wxFileDialog* dialog = new wxFileDialog(NULL, _("Load .asm file"), wxEmptyString, wxEmptyString, _("LC-3 Assembly Files (*.asm)|*.asm"), wxFD_OPEN|wxFD_FILE_MUST_EXIST|wxFD_CHANGE_DIR);
-    if (dialog->ShowModal() == wxID_OK)
-    {
-        wxFileName filename(dialog->GetPath());
-        DoLoadFile(filename);
-    }
-
-    delete dialog;
-}
-
-/** OnReloadOver
-  *
-  * Called when the user wants to reload the last file over the current state.
-  */
-void ComplxFrame::OnReloadOver(wxCommandEvent& event)
-{
-    if (Running()) return;
-    if (currentFile.GetFullName().IsEmpty())
-    {
-        OnLoadOver(event);
-        return;
-    }
-
-    DoLoadFile(currentFile);
-}
-
-/** DoLoadFile
-  *
-  * Handles loading an assembly file into the simulator
-  */
-void ComplxFrame::DoLoadFile(const wxFileName& filename)
-{
-    //CleanUp();
     lc3_state dummy_state;
     lc3_init(dummy_state);
 
@@ -320,8 +287,13 @@ void ComplxFrame::DoLoadFile(const wxFileName& filename)
     state.rev_symbols.clear();
     lc3_remove_plugins(state);
 
+    bool tvt_modification = false;
+    bool ivt_modification = false;
+    bool subroutine_found = false;
+
     try
     {
+        ///TODO should only make one call to lc3_assemble.
         std::vector<code_range> ranges;
         LC3AssembleOptions options;
         options.multiple_errors = false;
@@ -337,13 +309,23 @@ void ComplxFrame::DoLoadFile(const wxFileName& filename)
         modified_addresses.clear();
         for (const auto& code_range : ranges)
             modified_addresses.push_back(ViewRange(code_range.location, code_range.location + code_range.size));
+        /// TODO Automatically determine state of true traps and interrupts via the code ranges.
         // Dummy call to update hidden addresses.
         wxCommandEvent event;
         OnUpdateHideAddresses(event);
+        // Check for TVT and IVT modification
+        for (const auto& code_range : ranges)
+        {
+            if ((code_range.location >= 0 && code_range.location <= 0xFF) || (code_range.location + code_range.size >= 0 && code_range.location + code_range.size <= 0xFF))
+                tvt_modification = true;
+            if ((code_range.location >= 0x100 && code_range.location <= 0x1FF) || (code_range.location + code_range.size >= 0x100 && code_range.location + code_range.size <= 0x1FF))
+                ivt_modification = true;
+        }
+        subroutine_found = DetectSubroutine(ranges);
     }
     catch (LC3AssembleException e)
     {
-        wxMessageBox(wxString::Format("ERROR! %s", e.what()), _("Loading ") + filename.GetFullName() + _(" Failed"));
+        wxMessageBox(wxString::Format("ERROR! %s", e.what()), wxString::Format("Loading %s failed", filename.GetFullName()));
         goto merge;
     }
     catch (std::vector<LC3AssembleException> e)
@@ -351,17 +333,57 @@ void ComplxFrame::DoLoadFile(const wxFileName& filename)
         std::stringstream oss;
         for (unsigned int i = 0; i < e.size(); i++)
             oss << e[i].what() << std::endl;
-        wxMessageBox(wxString::Format("ERROR! %s", oss.str()), _("Loading ") + filename.GetFullName() + _(" Failed"));
+        wxMessageBox(wxString::Format("ERROR! %s", oss.str()), wxString::Format("Loading %s failed", filename.GetFullName()));
         goto merge;
     }
 
-    //if (DoAssemble(filename)) return;
-    currentFile = filename;
-    currentTestFile.Clear();
+    lc3_set_true_traps(state, opts.true_traps || tvt_modification);
+    state.interrupt_enabled = opts.interrupts || ivt_modification;
+    console->SetInput(opts.console_input);
+    // Update menus
+    menuStateTrueTraps->Check(opts.true_traps || tvt_modification);
+    menuStateInterrupts->Check(opts.interrupts || ivt_modification);
+
+    if (tvt_modification)
+    {
+        bool tvt_popup = config->Read("/firsttimetrap", "").IsEmpty();
+        if (tvt_popup)
+        {
+            wxMessageBox("Pardon the interruption!\n"
+                         "It appears you have loaded a file with a custom trap.\n"
+                         "This will automatically enable true traps mode.\n"
+                         "This will allow you to step into the code for the standard traps (IN,OUT,GETC,PUTS,HALT) and your own custom trap.\n"
+                         "This notice to to remind you of the above, executing HALT will jump to some random code, but I assure you this random code is the code to HALT the LC-3.\n"
+                         "If you'd rather stop the execution right at the HALT statement then put a breakpoint on your HALT statement.\n",
+                         "Notice");
+            config->Write("/firsttimetrap", "1");
+        }
+    }
+
+    if (subroutine_found)
+    {
+        wxCommandEvent event;
+        OnControlModeAdvanced(event);
+        bool subroutine_popup = config->Read("/firsttimesubroutine", "").IsEmpty();
+        if (subroutine_popup)
+        {
+            wxMessageBox("Pardon the interruption!\n"
+                         "It appears you have loaded a file with a custom trap or subroutine.\n"
+                         "You may notice 3 new buttons in the control area.\n"
+                         "Next Line\n    Allows you to STEP OVER a subroutine or trap, meaning it will skip over it (but still execute it).\n"
+                         "Prev Line\n    Allows you to BACK STEP OVER a subroutine or trap.\n"
+                         "Finish\n    Allows you to STEP OUT of a subroutine, it finishes execution of it.\n\n"
+                         "Another thing to note if you want to always step over/out a subroutine to select the subroutine label and select mark as blackbox.\n"
+                         "If you use step on a JSR/JSRR/TRAP instruction that is blackboxed it will never step into it.\n"
+                         "For more information Read The Manual :)\n"
+                         , "Notice");
+            config->Write("/firsttimesubroutine", "1");
+        }
+    }
 
     SetTitle(wxString::Format("%s - %s", base_title, filename.GetFullPath()));
-merge:
 
+merge:
     std::map<std::string, unsigned short>::const_iterator i;
     std::map<unsigned short, std::string>::const_iterator j;
     for (i = symbol_table.begin(); i != symbol_table.end(); ++i)
@@ -373,11 +395,12 @@ merge:
         state.rev_symbols[j->first] = j->second;
     }
 
-    //DoLoad(filename);
     UpdateStatus();
     UpdateRegisters();
     UpdateMemory();
 
+    // Save in reload options
+    reload_options = opts;
 }
 
 /** OnQuit
@@ -530,7 +553,7 @@ void ComplxFrame::OnBaseChangeContext(wxMouseEvent& event)
   */
 void ComplxFrame::OnClearConsole(wxCommandEvent& event)
 {
-    console->Clear();
+    console->ClearOutput();
 }
 
 /** OnClearConsoleInput
@@ -540,6 +563,22 @@ void ComplxFrame::OnClearConsole(wxCommandEvent& event)
 void ComplxFrame::OnClearConsoleInput(wxCommandEvent& event)
 {
     console->ClearInput();
+}
+
+void ComplxFrame::OnControlModeSimple(wxCommandEvent& event)
+{
+    nextLineButton->Hide();
+    prevLineButton->Hide();
+    finishButton->Hide();
+    controlSizer->Layout();
+}
+
+void ComplxFrame::OnControlModeAdvanced(wxCommandEvent& event)
+{
+    nextLineButton->Show();
+    prevLineButton->Show();
+    finishButton->Show();
+    controlSizer->Layout();
 }
 
 /** OnRun
@@ -603,7 +642,6 @@ void ComplxFrame::OnRunAgain(wxCommandEvent& event)
     SetupExecution(RUNMODE_RUNFOR, runforRunTime);
     SetFocus();
 }
-
 
 /** OnStep
   *
@@ -1027,6 +1065,87 @@ void ComplxFrame::OnCallStack(wxCommandEvent& event)
     delete infos;
 }
 
+void ComplxFrame::OnSetupTest(wxCommandEvent& event)
+{
+    if (Running()) return;
+
+    if (reload_options.file.empty())
+        OnLoad(event);
+
+    if (reload_options.file.empty())
+    {
+        wxMessageBox("ERROR! An assembly file must be loaded to perform this operation", "Error");
+        return;
+    }
+
+    wxFileDialog* filedlg = new wxFileDialog(NULL, _("Load .xml file"), wxEmptyString, wxEmptyString, _("LC-3 Test Files (*.xml)|*.xml"), wxFD_OPEN|wxFD_FILE_MUST_EXIST|wxFD_CHANGE_DIR);
+    if (filedlg->ShowModal() != wxID_OK)
+    {
+        delete filedlg;
+        return;
+    }
+    std::string filename = filedlg->GetPath().ToStdString();
+    delete filedlg;
+
+    SetupTestDialog* dialog = new SetupTestDialog(filename, this);
+    lc3_test test;
+    if (dialog->ShowModal() != wxID_OK || !dialog->GetSelectedTest(test))
+    {
+        delete dialog;
+        return;
+    }
+
+    try
+    {
+        std::stringstream input;
+        lc3_init_test_case(state, filename, test, -1, true);
+        lc3_setup_test_case(state, test, input);
+        console->SetInput(input.str());
+        reload_options.tests = filename;
+    }
+    catch (const char* ex)
+    {
+        wxMessageBox(ex, "Error");
+    }
+
+    delete dialog;
+}
+
+void ComplxFrame::OnSwitchTest(wxCommandEvent& event)
+{
+    if (Running()) return;
+
+    if (reload_options.file.empty() || reload_options.tests.empty())
+    {
+        OnSetupTest(event);
+        return;
+    }
+
+    std::string filename = reload_options.tests;
+    SetupTestDialog* dialog = new SetupTestDialog(filename, this);
+    lc3_test test;
+    if (dialog->ShowModal() != wxID_OK || !dialog->GetSelectedTest(test))
+    {
+        delete dialog;
+        return;
+    }
+
+    try
+    {
+        std::stringstream input;
+        lc3_init_test_case(state, filename, test, -1, true);
+        lc3_setup_test_case(state, test, input);
+        console->SetInput(input.str());
+        reload_options.tests = filename;
+    }
+    catch (const char* ex)
+    {
+        wxMessageBox(ex, "Error");
+    }
+
+    delete dialog;
+}
+
 /** OnSubroutineCall
   *
   * "Calls" a subroutine uses same environment as lc3test
@@ -1035,10 +1154,10 @@ void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
 {
     if (Running()) return;
 
-    if (!currentFile.IsOk())
+    if (reload_options.file.empty())
         OnLoad(event);
 
-    if (!currentFile.IsOk())
+    if (reload_options.file.empty())
     {
         wxMessageBox("ERROR! An assembly file must be loaded to perform this operation", "Error");
         return;
@@ -1090,8 +1209,10 @@ void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
         goto end;
     }
 
-    OnInit(dialog->IsRandomRegisters(), dialog->IsRandomMemory());
-    DoLoadFile(currentFile);
+    reload_options.memory = dialog->IsRandomMemory() ? RANDOMIZE : ZEROED;
+    reload_options.registers = dialog->IsRandomRegisters() ? RANDOMIZE : ZEROED;
+
+    DoLoadFile(reload_options);
 
     state.regs[6] = state.mem[(unsigned short)stack_location] - params.size();
     state.pc = (unsigned short) subroutine_location;
@@ -1105,60 +1226,6 @@ void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
 
 end:
     delete dialog;
-}
-
-/** OnReinitialize
-  *
-  * Reinitializes the machine.
-  */
-void ComplxFrame::OnReinitialize(wxCommandEvent& event)
-{
-    OnInit();
-    UpdateRegisters();
-    UpdateMemory();
-    UpdateStatus();
-}
-
-/** @brief OnRandomize
-  *
-  * Randomizes the machine
-  */
-void ComplxFrame::OnRandomize(wxCommandEvent& event)
-{
-    OnInit(true, true);
-    UpdateRegisters();
-    UpdateMemory();
-    UpdateStatus();
-}
-
-/** @brief OnFillMemoryWith
-  *
-  * Allows user to specify a value to fill the entire memory with
-  */
-void ComplxFrame::OnFillMemoryWith(wxCommandEvent& event)
-{
-
-    wxString fill_value_str = wxGetTextFromUser(_("Please enter value to fill memory with"),
-                              _("Fill Memory With"),
-                              _(""),
-                              this);
-    if (fill_value_str.IsEmpty()) return;
-
-    std::string strdata = fill_value_str.ToStdString();
-
-    int data;
-    int error = lc3_calculate(state, strdata, data);
-    if (error) PrintError(error);
-    if (data < -32768 || data > 65535)
-    {
-        wxMessageBox(wxString::Format("ERROR value must be a 16 bit number got %d", data), _("Error"));
-        return;
-    }
-
-    OnInit(false, false, (short)data);
-    UpdateRegisters();
-    UpdateMemory();
-    UpdateStatus();
 }
 
 /** OnGoto
@@ -1269,82 +1336,6 @@ void ComplxFrame::OnDestroyView(wxCloseEvent& event)
     frame->Destroy();
 }
 
-/** OnRunTests
-  *
-  *
-  */
-void ComplxFrame::OnRunTests(wxCommandEvent& event)
-{
-    if (Running()) return;
-
-    if (!currentFile.IsOk())
-        OnLoad(event);
-
-    if (!currentFile.IsOk())
-    {
-        wxMessageBox("ERROR! An assembly file must be loaded to perform this operation", "Error");
-        return;
-    }
-
-    wxFileDialog* dialog = new wxFileDialog(NULL, _("Load .xml file"), wxEmptyString, wxEmptyString, _("LC-3 Test Files (*.xml)|*.xml"), wxFD_OPEN|wxFD_FILE_MUST_EXIST|wxFD_CHANGE_DIR);
-    if (dialog->ShowModal() != wxID_OK)
-    {
-        delete dialog;
-        return;
-    }
-
-    wxFileName filename(dialog->GetPath());
-    delete dialog;
-
-    lc3_test_suite suite;
-    if (TryLoadTests(suite, filename.GetFullPath()))
-        return;
-
-    currentTestFile = filename;
-
-    RunTestDialog* rtdialog = new RunTestDialog(this, filename.GetFullName().ToStdString(), suite);
-    rtdialog->ShowModal();
-}
-
-/** On RerunTests
-  *
-  *
-  */
-void ComplxFrame::OnRerunTests(wxCommandEvent& event)
-{
-    if (currentFile.GetFullName().IsEmpty())
-    {
-        OnRunTests(event);
-        return;
-    }
-
-    lc3_test_suite suite;
-    if (TryLoadTests(suite, currentTestFile.GetFullPath()))
-        return;
-
-    RunTestDialog* rtdialog = new RunTestDialog(this, currentTestFile.GetFullName().ToStdString(), suite);
-    rtdialog->ShowModal();
-}
-
-bool ComplxFrame::TryLoadTests(lc3_test_suite& suite, const wxString& path)
-{
-    try
-    {
-        if (!XmlTestParser().LoadTestSuite(suite, path.ToStdString()))
-        {
-            wxMessageBox(_("ERROR! Xml file not found or parse errors found"), _("Error"));
-            return true;
-        }
-    }
-    catch (XmlTestParserException x)
-    {
-        wxMessageBox(wxString::Format("ERROR %s\n", x.what().c_str()), _("Error"));
-        return EXIT_FAILURE;
-    }
-
-    return false;
-}
-
 /** OnAbout
   *
   * Displays information about this program
@@ -1404,12 +1395,10 @@ void ComplxFrame::OnCreateBugReport(wxCommandEvent& event)
 void ComplxFrame::OnFirstTime(wxCommandEvent& event)
 {
     wxMessageBox(wxString::Format("Hi! You are currently running version %s of Complx.\n\n"
-                                  "Since this is your first time running this program, here are a couple of things.\n\n"
+                                  "Since this is your first time running this program, here are a couple of tips.\n\n"
                                   "Thing 0: Write your assembly code in pluma/gedit (or any text editor) and save it as myfile.asm\n"
-                                  "Thing 1: Be thankful! I am the author of everything you are using.\n"
-                                  "Thing 2: DO NOT start these homework assignments on the day it's due.\n"
-                                  "Thing 3: Report any bugs to TAs or me directly (bwhitehead0308@gmail.com).\n\n"
-                                  "  Or you may file an issue at https://github.com/TricksterGuy/complx/issues",
+                                  "Thing 1: Report any bugs to TAs or me directly (bwhitehead0308@gmail.com).\n\n"
+                                  "File issues at https://github.com/TricksterGuy/complx/issues or via the menus at Help > Send Bug Report\n",
                                   Version::FULLVERSION_STRING),
                  "Hi from Brandon", wxICON_INFORMATION | wxOK);
 }
@@ -1435,10 +1424,6 @@ void ComplxFrame::OnTips(wxCommandEvent& event)
   */
 void ComplxFrame::UpdateMemory(void)
 {
-///TODO see if this is still needed on Linux.
-#ifndef WINDOWS
-    memory->SelectLocation(0);
-#endif
     memory->SelectLocation(state.pc);
     for (unsigned int i = 0; i < views.size(); i++)
         views[i]->Refresh();
@@ -1452,6 +1437,8 @@ void ComplxFrame::UpdateStatus(void)
 {
     statusBar->SetStatusText(wxString::Format(_("Executed %d"), state.executions), 1);
     statusBar->SetStatusText(wxString::Format(_("Warnings %d"), state.warnings), 2);
+    statusBar->SetStatusText(wxString::Format(_("True Traps %s"), state.true_traps ? "ON" : "OFF"), 3);
+    statusBar->SetStatusText(wxString::Format(_("Interrupts %s"), state.interrupt_enabled ? "ON" : "OFF"), 4);
 }
 
 /** UpdatePlay
@@ -1461,7 +1448,6 @@ void ComplxFrame::UpdateStatus(void)
 void ComplxFrame::UpdatePlay(void)
 {
     runButton->SetLabel(_("&Run"));
-    runForButton->SetLabel(_("R&un For"));
     stepButton->SetLabel(_("&Step"));
     backStepButton->SetLabel(_("&Back"));
     nextLineButton->SetLabel(_("&Next Line"));
@@ -1477,7 +1463,6 @@ void ComplxFrame::UpdatePlay(void)
 void ComplxFrame::UpdatePhrase(const wxString& message)
 {
     runButton->SetLabel(message);
-    runForButton->SetLabel(message);
     stepButton->SetLabel(message);
     backStepButton->SetLabel(message);
     nextLineButton->SetLabel(message);
@@ -1514,7 +1499,7 @@ void PrintError(int error)
     switch(error)
     {
     case 1:
-        msg = _("ERROR! Error evaluating expression: Unbalanced parethesis");
+        msg = _("ERROR! Error evaluating expression: Unbalanced parenthesis");
         break;
     case 2:
         msg = _("ERROR! Error evaluating expression: Invalid Operator");
@@ -1538,6 +1523,7 @@ void PrintError(int error)
 
 void InitImages()
 {
+    /// TODO this code may have to be updated.
     wxMemoryDC painter;
 
     wxBitmap nully(22, 16);
@@ -1612,4 +1598,19 @@ void InitImages()
 void DestroyImages()
 {
     infoImages->RemoveAll();
+}
+
+bool ComplxFrame::DetectSubroutine(const std::vector<code_range>& ranges)
+{
+    for (const auto& range : ranges)
+    {
+        for (unsigned int i = 0; i < range.size; i++)
+        {
+            unsigned short data = state.mem[range.location + i];
+            // JSR and JSRR share the same opcode.
+            if (((data >> 12) & 0xF) == JSR_INSTR || data == 0xC1C0)
+                return true;
+        }
+    }
+    return false;
 }

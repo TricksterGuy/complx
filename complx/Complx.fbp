@@ -133,7 +133,7 @@
                 <event name="OnSetFocus"></event>
                 <event name="OnSize"></event>
                 <event name="OnUpdateUI"></event>
-                <object class="wxMenu" expanded="1">
+                <object class="wxMenu" expanded="0">
                     <property name="label">File</property>
                     <property name="name">menuFile</property>
                     <property name="permission">protected</property>
@@ -141,37 +141,7 @@
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
                         <property name="enabled">1</property>
-                        <property name="help">Randomizes memory and loads a asm file</property>
-                        <property name="id">ID_RANDOMIZE_AND_LOAD</property>
-                        <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">Randomize and Load</property>
-                        <property name="name">menuFileRandomizeAndLoad</property>
-                        <property name="permission">none</property>
-                        <property name="shortcut">Ctrl+Alt+O</property>
-                        <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnRandomizeAndLoad</event>
-                        <event name="OnUpdateUI"></event>
-                    </object>
-                    <object class="wxMenuItem" expanded="0">
-                        <property name="bitmap"></property>
-                        <property name="checked">0</property>
-                        <property name="enabled">1</property>
-                        <property name="help">Randomizes memory and reloads a asm file</property>
-                        <property name="id">ID_RANDOMIZE_AND_RELOAD</property>
-                        <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">Randomize and Reload</property>
-                        <property name="name">menuFileRandomizeAndReload</property>
-                        <property name="permission">none</property>
-                        <property name="shortcut">Ctrl+Alt+R</property>
-                        <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnRandomizeAndReload</event>
-                        <event name="OnUpdateUI"></event>
-                    </object>
-                    <object class="wxMenuItem" expanded="0">
-                        <property name="bitmap"></property>
-                        <property name="checked">0</property>
-                        <property name="enabled">1</property>
-                        <property name="help">Initializes and loads an assembly file</property>
+                        <property name="help">Loads a asm file</property>
                         <property name="id">ID_LOAD</property>
                         <property name="kind">wxITEM_NORMAL</property>
                         <property name="label">&amp;Load</property>
@@ -186,7 +156,7 @@
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
                         <property name="enabled">1</property>
-                        <property name="help">Initializes and reloads last file</property>
+                        <property name="help">Reloads current asm file under same conditions.</property>
                         <property name="id">ID_RELOAD</property>
                         <property name="kind">wxITEM_NORMAL</property>
                         <property name="label">&amp;Reload</property>
@@ -201,30 +171,30 @@
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
                         <property name="enabled">1</property>
-                        <property name="help">Loads an assembly file</property>
-                        <property name="id">ID_LOAD_OVER</property>
+                        <property name="help">Zeroes out memory and loads asm file.</property>
+                        <property name="id">ID_CLEAN_LOAD</property>
                         <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">Load &amp;Over</property>
-                        <property name="name">menuFileLoadOver</property>
+                        <property name="label">&amp;Clean Load</property>
+                        <property name="name">menuFileCleanLoad</property>
                         <property name="permission">none</property>
                         <property name="shortcut">Ctrl+Shift+O</property>
                         <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnLoadOver</event>
+                        <event name="OnMenuSelection">OnCleanLoad</event>
                         <event name="OnUpdateUI"></event>
                     </object>
                     <object class="wxMenuItem" expanded="0">
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
                         <property name="enabled">1</property>
-                        <property name="help">Reloads last assembly file</property>
-                        <property name="id">ID_RELOAD_OVER</property>
+                        <property name="help">Opens dialog for loading program under special conditions.</property>
+                        <property name="id">ID_ADVANCED_LOAD</property>
                         <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">Reload O&amp;ver</property>
-                        <property name="name">menuFileReloadOver</property>
+                        <property name="label">&amp;Advanced Load...</property>
+                        <property name="name">menuFileAdvancedLoad</property>
                         <property name="permission">none</property>
-                        <property name="shortcut">Ctrl+Shift+R</property>
+                        <property name="shortcut"></property>
                         <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnReloadOver</event>
+                        <event name="OnMenuSelection">OnAdvancedLoad</event>
                         <event name="OnUpdateUI"></event>
                     </object>
                     <object class="separator" expanded="0">
@@ -241,13 +211,13 @@
                         <property name="label">&amp;Quit</property>
                         <property name="name">menuFileQuit</property>
                         <property name="permission">none</property>
-                        <property name="shortcut">Ctrl+W</property>
+                        <property name="shortcut">Ctrl+Q</property>
                         <property name="unchecked_bitmap"></property>
                         <event name="OnMenuSelection">OnQuit</event>
                         <event name="OnUpdateUI"></event>
                     </object>
                 </object>
-                <object class="wxMenu" expanded="1">
+                <object class="wxMenu" expanded="0">
                     <property name="label">View</property>
                     <property name="name">menuView</property>
                     <property name="permission">protected</property>
@@ -281,12 +251,12 @@
                         <event name="OnMenuSelection">OnGoto</event>
                         <event name="OnUpdateUI"></event>
                     </object>
-                    <object class="submenu" expanded="1">
+                    <object class="submenu" expanded="0">
                         <property name="bitmap"></property>
                         <property name="label">Hide Addresses</property>
                         <property name="name">menuViewHideAddresses</property>
                         <property name="permission">protected</property>
-                        <object class="wxMenuItem" expanded="1">
+                        <object class="wxMenuItem" expanded="0">
                             <property name="bitmap"></property>
                             <property name="checked">0</property>
                             <property name="enabled">1</property>
@@ -301,7 +271,7 @@
                             <event name="OnMenuSelection">OnUpdateHideAddresses</event>
                             <event name="OnUpdateUI"></event>
                         </object>
-                        <object class="wxMenuItem" expanded="1">
+                        <object class="wxMenuItem" expanded="0">
                             <property name="bitmap"></property>
                             <property name="checked">0</property>
                             <property name="enabled">1</property>
@@ -316,7 +286,7 @@
                             <event name="OnMenuSelection">OnUpdateHideAddresses</event>
                             <event name="OnUpdateUI"></event>
                         </object>
-                        <object class="wxMenuItem" expanded="1">
+                        <object class="wxMenuItem" expanded="0">
                             <property name="bitmap"></property>
                             <property name="checked">0</property>
                             <property name="enabled">1</property>
@@ -331,7 +301,7 @@
                             <event name="OnMenuSelection">OnUpdateHideAddresses</event>
                             <event name="OnUpdateUI"></event>
                         </object>
-                        <object class="wxMenuItem" expanded="1">
+                        <object class="wxMenuItem" expanded="0">
                             <property name="bitmap"></property>
                             <property name="checked">0</property>
                             <property name="enabled">1</property>
@@ -347,7 +317,7 @@
                             <event name="OnUpdateUI"></event>
                         </object>
                     </object>
-                    <object class="submenu" expanded="1">
+                    <object class="submenu" expanded="0">
                         <property name="bitmap"></property>
                         <property name="label">Disassemble</property>
                         <property name="name">menuViewDisassemble</property>
@@ -413,7 +383,7 @@
                         <event name="OnMenuSelection">OnInstructionHighlight</event>
                         <event name="OnUpdateUI"></event>
                     </object>
-                    <object class="wxMenuItem" expanded="1">
+                    <object class="wxMenuItem" expanded="0">
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
                         <property name="enabled">1</property>
@@ -429,7 +399,7 @@
                         <event name="OnUpdateUI"></event>
                     </object>
                 </object>
-                <object class="wxMenu" expanded="1">
+                <object class="wxMenu" expanded="0">
                     <property name="label">State</property>
                     <property name="name">menuState</property>
                     <property name="permission">protected</property>
@@ -574,50 +544,45 @@
                             <event name="OnUpdateUI"></event>
                         </object>
                     </object>
-                    <object class="wxMenuItem" expanded="0">
+                    <object class="submenu" expanded="0">
                         <property name="bitmap"></property>
-                        <property name="checked">0</property>
-                        <property name="enabled">1</property>
-                        <property name="help">Randomizes Memory</property>
-                        <property name="id">ID_RANDOMIZE</property>
-                        <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">Randomize</property>
-                        <property name="name">menuStateRandomize</property>
-                        <property name="permission">none</property>
-                        <property name="shortcut">Ctrl+J</property>
-                        <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnRandomize</event>
-                        <event name="OnUpdateUI"></event>
+                        <property name="label">Control Mode</property>
+                        <property name="name">menuStateControlMode</property>
+                        <property name="permission">protected</property>
+                        <object class="wxMenuItem" expanded="0">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help">Show commonly used control buttons.</property>
+                            <property name="id">ID_SIMPLE</property>
+                            <property name="kind">wxITEM_RADIO</property>
+                            <property name="label">Simple</property>
+                            <property name="name">menuStateControlModeSimple</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                            <event name="OnMenuSelection">OnControlModeSimple</event>
+                            <event name="OnUpdateUI"></event>
+                        </object>
+                        <object class="wxMenuItem" expanded="0">
+                            <property name="bitmap"></property>
+                            <property name="checked">0</property>
+                            <property name="enabled">1</property>
+                            <property name="help">Show control buttons related to subroutines.</property>
+                            <property name="id">ID_ADVANCED</property>
+                            <property name="kind">wxITEM_RADIO</property>
+                            <property name="label">Advanced</property>
+                            <property name="name">menuStateControlModeAdvanced</property>
+                            <property name="permission">none</property>
+                            <property name="shortcut"></property>
+                            <property name="unchecked_bitmap"></property>
+                            <event name="OnMenuSelection">OnControlModeAdvanced</event>
+                            <event name="OnUpdateUI"></event>
+                        </object>
                     </object>
-                    <object class="wxMenuItem" expanded="0">
-                        <property name="bitmap"></property>
-                        <property name="checked">0</property>
-                        <property name="enabled">1</property>
-                        <property name="help">Reinitializes Memory</property>
-                        <property name="id">ID_REINITIALIZE</property>
-                        <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">Reinitialize</property>
-                        <property name="name">menuStateReinitialize</property>
+                    <object class="separator" expanded="0">
+                        <property name="name">m_separator31</property>
                         <property name="permission">none</property>
-                        <property name="shortcut">Ctrl+K</property>
-                        <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnReinitialize</event>
-                        <event name="OnUpdateUI"></event>
-                    </object>
-                    <object class="wxMenuItem" expanded="1">
-                        <property name="bitmap"></property>
-                        <property name="checked">0</property>
-                        <property name="enabled">1</property>
-                        <property name="help">Fills memory with a specified value</property>
-                        <property name="id">ID_FILL_MEMORY_WITH</property>
-                        <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">Fill Memory With...</property>
-                        <property name="name">menuStateFillMemoryWith</property>
-                        <property name="permission">none</property>
-                        <property name="shortcut"></property>
-                        <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnFillMemoryWith</event>
-                        <event name="OnUpdateUI"></event>
                     </object>
                     <object class="wxMenuItem" expanded="0">
                         <property name="bitmap"></property>
@@ -629,7 +594,7 @@
                         <property name="label">True Traps</property>
                         <property name="name">menuStateTrueTraps</property>
                         <property name="permission">protected</property>
-                        <property name="shortcut">Ctrl+T</property>
+                        <property name="shortcut"></property>
                         <property name="unchecked_bitmap"></property>
                         <event name="OnMenuSelection">OnTrueTraps</event>
                         <event name="OnUpdateUI"></event>
@@ -644,7 +609,7 @@
                         <property name="label">Interrupts</property>
                         <property name="name">menuStateInterrupts</property>
                         <property name="permission">protected</property>
-                        <property name="shortcut">Ctrl+I</property>
+                        <property name="shortcut"></property>
                         <property name="unchecked_bitmap"></property>
                         <event name="OnMenuSelection">OnInterrupts</event>
                         <event name="OnUpdateUI"></event>
@@ -683,12 +648,8 @@
                         <event name="OnMenuSelection">OnClearConsoleInput</event>
                         <event name="OnUpdateUI"></event>
                     </object>
-                    <object class="separator" expanded="0">
-                        <property name="name">m_separator4</property>
-                        <property name="permission">none</property>
-                    </object>
                 </object>
-                <object class="wxMenu" expanded="0">
+                <object class="wxMenu" expanded="1">
                     <property name="label">Debug</property>
                     <property name="name">menuDebug</property>
                     <property name="permission">protected</property>
@@ -722,11 +683,11 @@
                         <event name="OnMenuSelection">OnCallStack</event>
                         <event name="OnUpdateUI"></event>
                     </object>
-                    <object class="separator" expanded="1">
+                    <object class="separator" expanded="0">
                         <property name="name">m_separator5</property>
                         <property name="permission">none</property>
                     </object>
-                    <object class="wxMenuItem" expanded="1">
+                    <object class="wxMenuItem" expanded="0">
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
                         <property name="enabled">1</property>
@@ -736,9 +697,24 @@
                         <property name="label">&amp;Setup Test..</property>
                         <property name="name">menuDebugSetupTest</property>
                         <property name="permission">none</property>
-                        <property name="shortcut"></property>
+                        <property name="shortcut">Ctrl+T</property>
                         <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection"></event>
+                        <event name="OnMenuSelection">OnSetupTest</event>
+                        <event name="OnUpdateUI"></event>
+                    </object>
+                    <object class="wxMenuItem" expanded="0">
+                        <property name="bitmap"></property>
+                        <property name="checked">0</property>
+                        <property name="enabled">1</property>
+                        <property name="help">Switches test case to debug.</property>
+                        <property name="id">ID_SWITCH_TEST</property>
+                        <property name="kind">wxITEM_NORMAL</property>
+                        <property name="label">Switch &amp;Test..</property>
+                        <property name="name">menuDebugSwitchTest</property>
+                        <property name="permission">none</property>
+                        <property name="shortcut">Ctrl+Shift+T</property>
+                        <property name="unchecked_bitmap"></property>
+                        <event name="OnMenuSelection">OnSwitchTest</event>
                         <event name="OnUpdateUI"></event>
                     </object>
                     <object class="wxMenuItem" expanded="0">
@@ -748,7 +724,7 @@
                         <property name="help">Simulates a subroutine call.</property>
                         <property name="id">ID_SIMULATE_SUBROUTINE_CALL</property>
                         <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">&amp;Simulate Subroutine Call...</property>
+                        <property name="label">Simulate Subroutine &amp;Call...</property>
                         <property name="name">menuDebugSimulateSubroutineCall</property>
                         <property name="permission">none</property>
                         <property name="shortcut"></property>
@@ -851,7 +827,7 @@
                         <event name="OnUpdateUI"></event>
                     </object>
                 </object>
-                <object class="wxMenu" expanded="1">
+                <object class="wxMenu" expanded="0">
                     <property name="label">Help</property>
                     <property name="name">menuHelp</property>
                     <property name="permission">protected</property>
@@ -900,7 +876,7 @@
                         <event name="OnMenuSelection">OnChangeLog</event>
                         <event name="OnUpdateUI"></event>
                     </object>
-                    <object class="wxMenuItem" expanded="1">
+                    <object class="wxMenuItem" expanded="0">
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
                         <property name="enabled">1</property>
@@ -962,16 +938,16 @@
                     </object>
                 </object>
             </object>
-            <object class="wxBoxSizer" expanded="0">
+            <object class="wxBoxSizer" expanded="1">
                 <property name="minimum_size"></property>
                 <property name="name">main</property>
                 <property name="orient">wxVERTICAL</property>
                 <property name="permission">none</property>
-                <object class="sizeritem" expanded="0">
+                <object class="sizeritem" expanded="1">
                     <property name="border">0</property>
                     <property name="flag">wxEXPAND | wxALL</property>
                     <property name="proportion">1</property>
-                    <object class="wxPanel" expanded="0">
+                    <object class="wxPanel" expanded="1">
                         <property name="BottomDockable">1</property>
                         <property name="LeftDockable">1</property>
                         <property name="RightDockable">1</property>
@@ -1045,14 +1021,14 @@
                         <event name="OnSetFocus"></event>
                         <event name="OnSize"></event>
                         <event name="OnUpdateUI"></event>
-                        <object class="wxBoxSizer" expanded="0">
+                        <object class="wxBoxSizer" expanded="1">
                             <property name="minimum_size"></property>
                             <property name="name">subsizer</property>
                             <property name="orient">wxVERTICAL</property>
                             <property name="permission">none</property>
                             <object class="sizeritem" expanded="0">
                                 <property name="border">5</property>
-                                <property name="flag">wxALL|wxEXPAND</property>
+                                <property name="flag">wxEXPAND</property>
                                 <property name="proportion">1</property>
                                 <object class="wxGrid" expanded="0">
                                     <property name="BottomDockable">1</property>
@@ -1193,22 +1169,19 @@
                                     <event name="OnUpdateUI"></event>
                                 </object>
                             </object>
-                            <object class="sizeritem" expanded="0">
-                                <property name="border">0</property>
+                            <object class="sizeritem" expanded="1">
+                                <property name="border">5</property>
                                 <property name="flag">wxEXPAND</property>
                                 <property name="proportion">0</property>
-                                <object class="wxGridSizer" expanded="0">
-                                    <property name="cols">8</property>
-                                    <property name="hgap">0</property>
+                                <object class="wxBoxSizer" expanded="0">
                                     <property name="minimum_size"></property>
                                     <property name="name">controlSizer</property>
-                                    <property name="permission">none</property>
-                                    <property name="rows">1</property>
-                                    <property name="vgap">0</property>
+                                    <property name="orient">wxHORIZONTAL</property>
+                                    <property name="permission">protected</property>
                                     <object class="sizeritem" expanded="0">
                                         <property name="border">2</property>
                                         <property name="flag">wxALL|wxEXPAND</property>
-                                        <property name="proportion">0</property>
+                                        <property name="proportion">1</property>
                                         <object class="wxButton" expanded="0">
                                             <property name="BottomDockable">1</property>
                                             <property name="LeftDockable">1</property>
@@ -1296,95 +1269,7 @@
                                     <object class="sizeritem" expanded="0">
                                         <property name="border">2</property>
                                         <property name="flag">wxALL|wxEXPAND</property>
-                                        <property name="proportion">0</property>
-                                        <object class="wxButton" expanded="0">
-                                            <property name="BottomDockable">1</property>
-                                            <property name="LeftDockable">1</property>
-                                            <property name="RightDockable">1</property>
-                                            <property name="TopDockable">1</property>
-                                            <property name="aui_layer"></property>
-                                            <property name="aui_name"></property>
-                                            <property name="aui_position"></property>
-                                            <property name="aui_row"></property>
-                                            <property name="best_size"></property>
-                                            <property name="bg"></property>
-                                            <property name="caption"></property>
-                                            <property name="caption_visible">1</property>
-                                            <property name="center_pane">0</property>
-                                            <property name="close_button">1</property>
-                                            <property name="context_help"></property>
-                                            <property name="context_menu">1</property>
-                                            <property name="default">0</property>
-                                            <property name="default_pane">0</property>
-                                            <property name="dock">Dock</property>
-                                            <property name="dock_fixed">0</property>
-                                            <property name="docking">Left</property>
-                                            <property name="enabled">1</property>
-                                            <property name="fg"></property>
-                                            <property name="floatable">1</property>
-                                            <property name="font"></property>
-                                            <property name="gripper">0</property>
-                                            <property name="hidden">0</property>
-                                            <property name="id">wxID_ANY</property>
-                                            <property name="label">R&amp;un For</property>
-                                            <property name="max_size"></property>
-                                            <property name="maximize_button">0</property>
-                                            <property name="maximum_size"></property>
-                                            <property name="min_size"></property>
-                                            <property name="minimize_button">0</property>
-                                            <property name="minimum_size"></property>
-                                            <property name="moveable">1</property>
-                                            <property name="name">runForButton</property>
-                                            <property name="pane_border">1</property>
-                                            <property name="pane_position"></property>
-                                            <property name="pane_size"></property>
-                                            <property name="permission">protected</property>
-                                            <property name="pin_button">1</property>
-                                            <property name="pos"></property>
-                                            <property name="resize">Resizable</property>
-                                            <property name="show">1</property>
-                                            <property name="size"></property>
-                                            <property name="style"></property>
-                                            <property name="subclass"></property>
-                                            <property name="toolbar_pane">0</property>
-                                            <property name="tooltip">Runs your code for X instructions</property>
-                                            <property name="validator_data_type"></property>
-                                            <property name="validator_style">wxFILTER_NONE</property>
-                                            <property name="validator_type">wxDefaultValidator</property>
-                                            <property name="validator_variable"></property>
-                                            <property name="window_extra_style"></property>
-                                            <property name="window_name"></property>
-                                            <property name="window_style"></property>
-                                            <event name="OnButtonClick">OnRunFor</event>
-                                            <event name="OnChar"></event>
-                                            <event name="OnEnterWindow"></event>
-                                            <event name="OnEraseBackground"></event>
-                                            <event name="OnKeyDown"></event>
-                                            <event name="OnKeyUp"></event>
-                                            <event name="OnKillFocus"></event>
-                                            <event name="OnLeaveWindow"></event>
-                                            <event name="OnLeftDClick"></event>
-                                            <event name="OnLeftDown"></event>
-                                            <event name="OnLeftUp"></event>
-                                            <event name="OnMiddleDClick"></event>
-                                            <event name="OnMiddleDown"></event>
-                                            <event name="OnMiddleUp"></event>
-                                            <event name="OnMotion"></event>
-                                            <event name="OnMouseEvents"></event>
-                                            <event name="OnMouseWheel"></event>
-                                            <event name="OnPaint"></event>
-                                            <event name="OnRightDClick"></event>
-                                            <event name="OnRightDown"></event>
-                                            <event name="OnRightUp"></event>
-                                            <event name="OnSetFocus"></event>
-                                            <event name="OnSize"></event>
-                                            <event name="OnUpdateUI"></event>
-                                        </object>
-                                    </object>
-                                    <object class="sizeritem" expanded="0">
-                                        <property name="border">2</property>
-                                        <property name="flag">wxALL|wxEXPAND</property>
-                                        <property name="proportion">0</property>
+                                        <property name="proportion">1</property>
                                         <object class="wxButton" expanded="0">
                                             <property name="BottomDockable">1</property>
                                             <property name="LeftDockable">1</property>
@@ -1472,7 +1357,7 @@
                                     <object class="sizeritem" expanded="0">
                                         <property name="border">2</property>
                                         <property name="flag">wxALL|wxEXPAND</property>
-                                        <property name="proportion">0</property>
+                                        <property name="proportion">1</property>
                                         <object class="wxButton" expanded="0">
                                             <property name="BottomDockable">1</property>
                                             <property name="LeftDockable">1</property>
@@ -1560,7 +1445,7 @@
                                     <object class="sizeritem" expanded="0">
                                         <property name="border">2</property>
                                         <property name="flag">wxALL|wxEXPAND</property>
-                                        <property name="proportion">0</property>
+                                        <property name="proportion">1</property>
                                         <object class="wxButton" expanded="0">
                                             <property name="BottomDockable">1</property>
                                             <property name="LeftDockable">1</property>
@@ -1588,7 +1473,7 @@
                                             <property name="floatable">1</property>
                                             <property name="font"></property>
                                             <property name="gripper">0</property>
-                                            <property name="hidden">0</property>
+                                            <property name="hidden">1</property>
                                             <property name="id">wxID_ANY</property>
                                             <property name="label">&amp;Next Line</property>
                                             <property name="max_size"></property>
@@ -1648,7 +1533,7 @@
                                     <object class="sizeritem" expanded="0">
                                         <property name="border">2</property>
                                         <property name="flag">wxALL|wxEXPAND</property>
-                                        <property name="proportion">0</property>
+                                        <property name="proportion">1</property>
                                         <object class="wxButton" expanded="0">
                                             <property name="BottomDockable">1</property>
                                             <property name="LeftDockable">1</property>
@@ -1676,7 +1561,7 @@
                                             <property name="floatable">1</property>
                                             <property name="font"></property>
                                             <property name="gripper">0</property>
-                                            <property name="hidden">0</property>
+                                            <property name="hidden">1</property>
                                             <property name="id">wxID_ANY</property>
                                             <property name="label">&amp;Prev Line</property>
                                             <property name="max_size"></property>
@@ -1736,7 +1621,7 @@
                                     <object class="sizeritem" expanded="0">
                                         <property name="border">2</property>
                                         <property name="flag">wxALL|wxEXPAND</property>
-                                        <property name="proportion">0</property>
+                                        <property name="proportion">1</property>
                                         <object class="wxButton" expanded="0">
                                             <property name="BottomDockable">1</property>
                                             <property name="LeftDockable">1</property>
@@ -1764,7 +1649,7 @@
                                             <property name="floatable">1</property>
                                             <property name="font"></property>
                                             <property name="gripper">0</property>
-                                            <property name="hidden">0</property>
+                                            <property name="hidden">1</property>
                                             <property name="id">wxID_ANY</property>
                                             <property name="label">&amp;Finish</property>
                                             <property name="max_size"></property>
@@ -1823,8 +1708,8 @@
                                     </object>
                                     <object class="sizeritem" expanded="0">
                                         <property name="border">2</property>
-                                        <property name="flag">wxALL</property>
-                                        <property name="proportion">0</property>
+                                        <property name="flag">wxALL|wxEXPAND</property>
+                                        <property name="proportion">1</property>
                                         <object class="wxButton" expanded="0">
                                             <property name="BottomDockable">1</property>
                                             <property name="LeftDockable">1</property>
@@ -3809,7 +3694,7 @@
                 <property name="context_menu">1</property>
                 <property name="enabled">1</property>
                 <property name="fg"></property>
-                <property name="fields">3</property>
+                <property name="fields">5</property>
                 <property name="font"></property>
                 <property name="hidden">0</property>
                 <property name="id">wxID_ANY</property>
@@ -3819,7 +3704,7 @@
                 <property name="permission">protected</property>
                 <property name="pos"></property>
                 <property name="size"></property>
-                <property name="style">wxST_SIZEGRIP</property>
+                <property name="style">wxSTB_SIZEGRIP</property>
                 <property name="subclass"></property>
                 <property name="tooltip"></property>
                 <property name="window_extra_style"></property>

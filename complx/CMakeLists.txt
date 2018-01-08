@@ -5,6 +5,8 @@ include_directories(${complx-tools_SOURCE_DIR}/logging)
 set(SRC_COMPLX
     AddressDialog.cpp
     AddressDialogDecl.cpp
+    AdvancedLoadDialog.cpp
+    AdvancedLoadDialogDecl.cpp
     BreakpointDialog.cpp
     BreakpointDialogDecl.cpp
     CallStackDialog.cpp
@@ -29,8 +31,10 @@ set(SRC_COMPLX
     MemoryViewFrameDecl.cpp
     RunForDialog.cpp
     RunForDialogDecl.cpp
-    RunTestDialog.cpp
-    RunTestDialogDecl.cpp
+    #RunTestDialog.cpp
+    #RunTestDialogDecl.cpp
+    SetupTestDialog.cpp
+    SetupTestDialogDecl.cpp
     WatchpointDialog.cpp
     WatchpointDialogDecl.cpp
     icon32.xpm

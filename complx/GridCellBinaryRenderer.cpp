@@ -108,13 +108,18 @@ void GridCellBinaryRenderer::InstructionColor(wxGrid &grid, wxGridCellAttr &attr
     int width = dc.GetCharWidth(), height = rect.GetHeight();
     rect.Offset(2, 0);
 
-    dc.SetBrush(*wxBLACK);
-    dc.DrawRectangle(srect.GetX(), srect.GetY(), srect.GetWidth(), srect.GetHeight());
+    //dc.SetBrush(*wxBLACK);
+    //dc.DrawRectangle(srect.GetX(), srect.GetY(), srect.GetWidth(), srect.GetHeight());
 
     unsigned short instr = (unsigned short) grid.GetTable()->GetValueAsLong(item, column);
     int opcode = (instr >> 12) & 0xF;
 
-    if (instr >> 9 == 0 || (instr & (~0xE00)) == 0) return;
+    if (instr >> 9 == 0 || (instr & (~0xE00)) == 0)
+    {
+        dc.SetBrush(*wxBLACK);
+        dc.DrawRectangle(rect.GetX() - 2, rect.GetY(), width * 16 + 2, height);
+        return;
+    }
 
     dc.SetBrush(wxColour(0, 96, 96));
     dc.DrawRectangle(rect.GetX() - 2, rect.GetY(), width * 4 + 2, height);

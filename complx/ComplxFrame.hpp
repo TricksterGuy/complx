@@ -15,6 +15,7 @@
 #include "LC3Console.hpp"
 #include "MemoryView.hpp"
 #include "MemoryViewFrame.hpp"
+#include "LoadingOptions.hpp"
 
 enum
 {
@@ -34,14 +35,11 @@ public:
     struct Options
     {
         wxString title;
+        LoadingOptions loading_options;
         int disassemble;
         unsigned int stack_size;
         unsigned int call_stack_size;
-        bool true_traps;
-        bool interrupts;
         bool highlight;
-        wxString pc;
-        wxString file;
         int width;
         int height;
         std::vector<int> column_sizes;
@@ -51,46 +49,41 @@ public:
     ~ComplxFrame();
 
     // File menu event handlers
-    void OnRandomizeAndLoad(wxCommandEvent& event);
-    void OnRandomizeAndReload(wxCommandEvent& event);
-    void OnLoad(wxCommandEvent& event);
-    void OnReload(wxCommandEvent& event);
-    void OnLoadOver(wxCommandEvent& event);
-    void OnReloadOver(wxCommandEvent& event);
-    void OnLoadMachine(wxCommandEvent& event);
-    void OnSaveMachine(wxCommandEvent& event);
-    void OnQuit(wxCommandEvent& event);
+    void OnLoad(wxCommandEvent& event) override;
+    void OnCleanLoad(wxCommandEvent& event) override;
+    void OnAdvancedLoad(wxCommandEvent& event) override;
+    void OnReload(wxCommandEvent& event) override;
+    void OnQuit(wxCommandEvent& event) override;
 
     // View menu event handlers
-    void OnNewView(wxCommandEvent& event);
-    void OnGoto(wxCommandEvent& event);
-    void OnUpdateHideAddresses(wxCommandEvent& event);
-    void OnHideAddressesCustom(wxCommandEvent& event);
-    void OnDumbDisassemble(wxCommandEvent& event);
-    void OnNormalDisassemble(wxCommandEvent& event);
-    void OnCDisassemble(wxCommandEvent& event);
-    void OnInstructionHighlight(wxCommandEvent& event);
-    void OnFlipMemory(wxCommandEvent& event);
+    void OnNewView(wxCommandEvent& event) override;
+    void OnGoto(wxCommandEvent& event) override;
+    void OnUpdateHideAddresses(wxCommandEvent& event) override;
+    void OnHideAddressesCustom(wxCommandEvent& event) override;
+    void OnDumbDisassemble(wxCommandEvent& event) override;
+    void OnNormalDisassemble(wxCommandEvent& event) override;
+    void OnCDisassemble(wxCommandEvent& event) override;
+    void OnInstructionHighlight(wxCommandEvent& event) override;
+    void OnFlipMemory(wxCommandEvent& event) override;
     // Helpers for view menu actions
     void OnDestroyView(wxCloseEvent& event);
 
     // State menu event handlers
-    void OnStep(wxCommandEvent& event);
-    void OnBackStep(wxCommandEvent& event);
-    void OnNextLine(wxCommandEvent& event);
-    void OnPrevLine(wxCommandEvent& event);
-    void OnRun(wxCommandEvent& event);
-    void OnRunFor(wxCommandEvent& event);
-    void OnRunAgain(wxCommandEvent& event);
-    void OnRewind(wxCommandEvent& event);
-    void OnFinish(wxCommandEvent& event);
-    void OnRandomize(wxCommandEvent& event);
-    void OnReinitialize(wxCommandEvent& event);
-    void OnFillMemoryWith(wxCommandEvent& event);
-    void OnTrueTraps(wxCommandEvent& event);
-    void OnInterrupts(wxCommandEvent& event);
-    void OnClearConsole(wxCommandEvent& event);
-    void OnClearConsoleInput(wxCommandEvent& event);
+    void OnStep(wxCommandEvent& event) override;
+    void OnBackStep(wxCommandEvent& event) override;
+    void OnNextLine(wxCommandEvent& event) override;
+    void OnPrevLine(wxCommandEvent& event) override;
+    void OnRun(wxCommandEvent& event) override;
+    void OnRunFor(wxCommandEvent& event) override;
+    void OnRunAgain(wxCommandEvent& event) override;
+    void OnRewind(wxCommandEvent& event) override;
+    void OnFinish(wxCommandEvent& event) override;
+    void OnControlModeSimple(wxCommandEvent& event) override;
+	void OnControlModeAdvanced(wxCommandEvent& event) override;
+    void OnTrueTraps(wxCommandEvent& event) override;
+    void OnInterrupts(wxCommandEvent& event) override;
+    void OnClearConsole(wxCommandEvent& event) override;
+    void OnClearConsoleInput(wxCommandEvent& event) override;
 
     // Helpers
     void OnTextKillFocus(wxFocusEvent& event);
@@ -100,29 +93,26 @@ public:
     void OnRegisterChanged(wxCommandEvent& text);
 
     // Debug menu event handlers
-    void OnUndoStack(wxCommandEvent& event);
-    void OnCallStack(wxCommandEvent& event);
-    void OnSubroutineCall(wxCommandEvent& event);
-    void OnBreakAndWatchpoints(wxCommandEvent& event);
-    void OnTemppoint(wxCommandEvent& event);
-    void OnBreakpoint(wxCommandEvent& event);
-    void OnWatchpoint(wxCommandEvent& event);
-    void OnAdvancedBreakpoint(wxCommandEvent& event);
-    void OnBlackbox(wxCommandEvent& event);
-
-    // Testing menu event handlers
-    void OnRunTests(wxCommandEvent& event);
-    void OnRerunTests(wxCommandEvent& event);
-    bool TryLoadTests(lc3_test_suite& suite, const wxString& path);
+    void OnUndoStack(wxCommandEvent& event) override;
+    void OnCallStack(wxCommandEvent& event) override;
+    void OnSetupTest(wxCommandEvent& event) override;
+    void OnSwitchTest(wxCommandEvent& event) override;
+    void OnSubroutineCall(wxCommandEvent& event) override;
+    void OnBreakAndWatchpoints(wxCommandEvent& event) override;
+    void OnTemppoint(wxCommandEvent& event) override;
+    void OnBreakpoint(wxCommandEvent& event) override;
+    void OnWatchpoint(wxCommandEvent& event) override;
+    void OnAdvancedBreakpoint(wxCommandEvent& event) override;
+    void OnBlackbox(wxCommandEvent& event) override;
 
     // Help menu event handlers
-    void OnDocs(wxCommandEvent& event);
-    void OnISA(wxCommandEvent& event);
-    void OnChangeLog(wxCommandEvent& event);
-    void OnCreateBugReport(wxCommandEvent& event);
-    void OnAbout(wxCommandEvent& event);
-    void OnFirstTime(wxCommandEvent& event);
-    void OnTips(wxCommandEvent& event);
+    void OnDocs(wxCommandEvent& event) override;
+    void OnISA(wxCommandEvent& event) override;
+    void OnChangeLog(wxCommandEvent& event) override;
+    void OnCreateBugReport(wxCommandEvent& event) override;
+    void OnAbout(wxCommandEvent& event) override;
+    void OnFirstTime(wxCommandEvent& event) override;
+    void OnTips(wxCommandEvent& event) override;
 
     // Misc event handlers required for THINGS.
     void OnActivate(wxActivateEvent& event);
@@ -144,6 +134,7 @@ public:
 
 private:
     LC3Console* console;
+    LoadingOptions reload_options;
     std::vector<MemoryViewFrame*> views;
     MemoryView* memoryView;
 
@@ -152,10 +143,20 @@ private:
     wxString base_title;
 
     void UpdateRegister(wxTextCtrl* text, int value, int index);
-    void OnInit(bool randomize_registers = true, bool randomize_memory = false, short fill_value = 0);
 
     void SetupExecution(int run_mode, int runtime = -1);
-    void DoLoadFile(const wxFileName& filename);
+    void DoLoadFile(const LoadingOptions& opts);
+    /** DetectSubroutine
+      *
+      * Attempts to detect if a subroutine is found in the loaded code
+      * The way this function works is it will try to find a RET, JSR, or JSRR instruction.
+      * We do not look at trap instructions since they are black boxed anyway if true traps are disabled,
+      * however if a custom trap is written then it will of course have a RETY statement.
+      * The usage of this function is for enabling or disabling the Next/Prev Line and Finish control buttons.
+      * @param ranges Code ranges the file that was loaded touches
+      * @return True if a subroutine was detected false otherwise
+      */
+    bool DetectSubroutine(const std::vector<code_range>& ranges);
 };
 
 #endif

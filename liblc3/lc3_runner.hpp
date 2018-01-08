@@ -9,9 +9,10 @@
   * @param state LC3State object.
   * @param randomize_registers if true randomizes registers.
   * @param randomize_memory if true randomizes memory.
-  * @param fill_value ignored if randomize_XXX is true otherwise sets registers/memory to this value (except R7).
+  * @param register_fill_value ignored if randomize_registers is true otherwise sets registers to this value.
+  * @param memory_fill_value ignored if randomize_memory is true otherwise sets memory to this value (except for TVT, IVT and lc3 os code).
   */
-void lc3_init(lc3_state& state, bool randomize_registers = true, bool randomize_memory = false, short fill_value = 0);
+void lc3_init(lc3_state& state, bool randomize_registers = true, bool randomize_memory = true, short register_fill_value = 0, short memory_fill_value = 0);
 /** lc3_remove_plugins
   *
   * Removes all installed lc3 plugins.

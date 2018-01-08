@@ -275,6 +275,14 @@ bool XmlTestParser::LoadTestSuite(lc3_test_suite& suite, const std::string filen
         child = getNextNode(child);
     }
 
+    for (const auto& test : suite.tests)
+    {
+        if (test.max_points != 0 && test.random_seed == -1 && test.randomize)
+        {
+            printf("Warning for test-case: %s! <random-seed> not set!\nA random seed should be set per test that uses randomization if this xml file is intended to be used as a autograder.\n", test.name.c_str());
+        }
+    }
+
     return true;
 }
 
@@ -297,6 +305,20 @@ bool XmlTestParser::LoadTest(lc3_test_suite& suite, wxXmlNode* root)
             test.max_executions = wxAtol(child->GetNodeContent());
         else if (child->GetName() == "randomize")
             test.randomize = wxAtoi(child->GetNodeContent()) != 0;
+        else if (child->GetName() == "fully-randomize")
+            test.fully_randomize = wxAtoi(child->GetNodeContent()) != 0;
+        else if (child->GetName() == "random-seed")
+        {
+            std::string seed = child->GetNodeContent().ToStdString();
+            test.random_seed = strtol(seed.c_str(), NULL, 10);
+        }
+        else if (child->GetName() == "fill-value")
+        {
+            std::string fill_value = child->GetNodeContent().ToStdString();
+            if (fill_value.size() > 1 && fill_value[0] == 'x')
+                fill_value = "0" + fill_value;
+            test.fill_value = strtol(fill_value.c_str(), NULL, 0);
+        }
         else if (child->GetName() == "interrupt-enabled")
             test.interrupt_enabled = wxAtoi(child->GetNodeContent()) != 0;
         else if (child->GetName() == "input")
@@ -583,6 +605,7 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
         else if (child->GetName() == "test-subr")
         {
             lc3_subr_output& subr = output.subroutine;
+
             while (grandchild)
             {
                 if (grandchild->GetName() == "answer")

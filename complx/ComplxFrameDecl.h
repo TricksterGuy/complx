@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Oct 26 2017)
+// C++ code generated with wxFormBuilder (version Jan  1 2018)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -44,12 +44,10 @@ class ComplxFrameDecl : public wxFrame
 	protected:
 		enum
 		{
-			ID_RANDOMIZE_AND_LOAD = 1000,
-			ID_RANDOMIZE_AND_RELOAD,
-			ID_LOAD,
+			ID_LOAD = 1000,
 			ID_RELOAD,
-			ID_LOAD_OVER,
-			ID_RELOAD_OVER,
+			ID_CLEAN_LOAD,
+			ID_ADVANCED_LOAD,
 			ID_QUIT,
 			ID_NEW_VIEW,
 			ID_GOTO_ADDRESS,
@@ -71,14 +69,15 @@ class ComplxFrameDecl : public wxFrame
 			ID_RUN_AGAIN,
 			ID_REWIND,
 			ID_FINISH,
-			ID_RANDOMIZE,
-			ID_REINITIALIZE,
-			ID_FILL_MEMORY_WITH,
+			ID_SIMPLE,
+			ID_ADVANCED,
 			ID_TRUE_TRAPS,
 			ID_INTERRUPTS,
 			ID_CLEAR_CONSOLE,
 			ID_UNDO_STACK,
 			ID_CALL_STACK,
+			ID_SETUP_TEST,
+			ID_SWITCH_TEST,
 			ID_SIMULATE_SUBROUTINE_CALL,
 			ID_BREAKPOINTS_AND_WATCHPOINTS,
 			ID_ADD_TEMPORARY_BREAKPOINT,
@@ -108,14 +107,15 @@ class ComplxFrameDecl : public wxFrame
 		wxMenuItem* menuViewInstructionHighlighting;
 		wxMenu* menuState;
 		wxMenu* menuStateControl;
+		wxMenu* menuStateControlMode;
 		wxMenuItem* menuStateTrueTraps;
 		wxMenuItem* menuStateInterrupts;
 		wxMenu* menuDebug;
 		wxMenu* menuHelp;
 		wxPanel* mainPanel;
 		MemoryGrid* memory;
+		wxBoxSizer* controlSizer;
 		wxButton* runButton;
-		wxButton* runForButton;
 		wxButton* stepButton;
 		wxButton* backStepButton;
 		wxButton* nextLineButton;
@@ -136,12 +136,10 @@ class ComplxFrameDecl : public wxFrame
 		
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnIdle( wxIdleEvent& event ) = 0;
-		virtual void OnRandomizeAndLoad( wxCommandEvent& event ) = 0;
-		virtual void OnRandomizeAndReload( wxCommandEvent& event ) = 0;
 		virtual void OnLoad( wxCommandEvent& event ) = 0;
 		virtual void OnReload( wxCommandEvent& event ) = 0;
-		virtual void OnLoadOver( wxCommandEvent& event ) = 0;
-		virtual void OnReloadOver( wxCommandEvent& event ) = 0;
+		virtual void OnCleanLoad( wxCommandEvent& event ) = 0;
+		virtual void OnAdvancedLoad( wxCommandEvent& event ) = 0;
 		virtual void OnQuit( wxCommandEvent& event ) = 0;
 		virtual void OnNewView( wxCommandEvent& event ) = 0;
 		virtual void OnGoto( wxCommandEvent& event ) = 0;
@@ -161,15 +159,16 @@ class ComplxFrameDecl : public wxFrame
 		virtual void OnRunAgain( wxCommandEvent& event ) = 0;
 		virtual void OnRewind( wxCommandEvent& event ) = 0;
 		virtual void OnFinish( wxCommandEvent& event ) = 0;
-		virtual void OnRandomize( wxCommandEvent& event ) = 0;
-		virtual void OnReinitialize( wxCommandEvent& event ) = 0;
-		virtual void OnFillMemoryWith( wxCommandEvent& event ) = 0;
+		virtual void OnControlModeSimple( wxCommandEvent& event ) = 0;
+		virtual void OnControlModeAdvanced( wxCommandEvent& event ) = 0;
 		virtual void OnTrueTraps( wxCommandEvent& event ) = 0;
 		virtual void OnInterrupts( wxCommandEvent& event ) = 0;
 		virtual void OnClearConsole( wxCommandEvent& event ) = 0;
 		virtual void OnClearConsoleInput( wxCommandEvent& event ) = 0;
 		virtual void OnUndoStack( wxCommandEvent& event ) = 0;
 		virtual void OnCallStack( wxCommandEvent& event ) = 0;
+		virtual void OnSetupTest( wxCommandEvent& event ) = 0;
+		virtual void OnSwitchTest( wxCommandEvent& event ) = 0;
 		virtual void OnSubroutineCall( wxCommandEvent& event ) = 0;
 		virtual void OnBreakAndWatchpoints( wxCommandEvent& event ) = 0;
 		virtual void OnTemppoint( wxCommandEvent& event ) = 0;

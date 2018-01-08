@@ -81,7 +81,7 @@ struct lc3_subroutine_call_info_cmp
     }
 };
 
-void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, int seed)
+void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, int seed, int run)
 {
     bool passed = true;
     unsigned int total_points = 0;
@@ -89,7 +89,7 @@ void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, int 
 
     for (unsigned int i = 0; i < suite.tests.size(); i++)
     {
-        lc3_run_test_case(suite.tests[i], filename, seed);
+        lc3_run_test_case(suite.tests[i], filename, seed, run);
         passed = passed && suite.tests[i].passed;
         points += suite.tests[i].points;
         total_points += suite.tests[i].max_points;
@@ -99,22 +99,39 @@ void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, int 
     suite.max_points = total_points;
 }
 
-void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
+void lc3_init_test_case(lc3_state& state, const std::string& filename, lc3_test& test, int seed, bool in_lc3_test, int run)
 {
-    lc3_state state;
-
     // Preliminary stuff
-    if (seed != -1)
-        srand(seed);
+    if (test.random_seed != -1)
+        srand(static_cast<unsigned int>(test.random_seed) + run);
+    else if (seed != -1)
+        srand(seed + run);
     else
         srand(time(NULL));
-    lc3_init(state, test.randomize, test.randomize);
+
+    // Cases
+    // randomize && fully_randomize - Old behavior of given each address and register a random value
+    // randomize && !fully_randomize - Generate a single random value and give each address and register that value.
+    // !randomize && fully_randomize - All addresses are 0, unless fill_value is not -1
+    // !randomize && !fully_randomize - see above
+    short fill_value = 0;
+    if (test.randomize && !test.fully_randomize)
+        fill_value = lc3_random();
+    if (test.fill_value != -1)
+        fill_value = static_cast<short>(test.fill_value);
+
+    lc3_init(state, test.randomize && test.fully_randomize, test.randomize && test.fully_randomize, fill_value, fill_value);
+
     if (test.true_traps) lc3_set_true_traps(state, 1);
     if (test.interrupt_enabled) state.interrupt_enabled = 1;
     bool disable_plugins = test.disable_plugins;
-    state.max_stack_size = 0;
-    state.max_call_stack_size = -1;
-    state.in_lc3test = true;
+
+    if (in_lc3_test)
+    {
+        state.max_stack_size = 0;
+        state.max_call_stack_size = -1;
+        state.in_lc3test = true;
+    }
 
     try
     {
@@ -131,9 +148,10 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
         throw e.what();
     }
 
+}
 
-    std::stringstream* newinput = new std::stringstream();
-
+void lc3_setup_test_case(lc3_state& state, lc3_test& test, std::stringstream& newinput)
+{
     // Set up test environment
     for (unsigned int i = 0; i < test.input.size(); i++)
     {
@@ -196,7 +214,7 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
             }
             break;
         case TEST_IO:
-            newinput->str(input.io);
+            newinput.str(input.io);
             break;
         case TEST_SUBROUTINE:
             break;
@@ -254,8 +272,18 @@ void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed)
             }
         }
     }
+}
 
+void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed, int run)
+{
+    lc3_state state;
+
+    lc3_init_test_case(state, filename, test, seed, true, run);
+
+    std::stringstream* newinput = new std::stringstream();
+    lc3_setup_test_case(state, test, *newinput);
     state.input = newinput;
+
     // Setup output capture device
     std::stringstream* newoutput = new std::stringstream();
     state.output = newoutput;
@@ -954,7 +982,7 @@ void lc3_write_test_report(std::stringstream& oss, lc3_test& test, int& minipass
     oss << "\n";
 }
 
-std::string lc3_test_input_string(lc3_test_input& test)
+std::string lc3_test_input_string(const lc3_test_input& test)
 {
     std::stringstream oss;
 
@@ -1015,7 +1043,7 @@ std::string lc3_test_input_string(lc3_test_input& test)
     return oss.str();
 }
 
-std::string lc3_test_output_string(lc3_test_output& test)
+std::string lc3_test_output_string(const lc3_test_output& test)
 {
     std::stringstream oss;
 

@@ -211,24 +211,20 @@ void LC3Console::Update()
     }
 }
 
-/** Clear
+/** ClearOutput
   *
-  * Clears the console.
+  * Clears the console output
   */
-void LC3Console::Clear()
+void LC3Console::ClearOutput()
 {
     wxCriticalSectionLocker enter(threadCS);
     output->SetValue(wxEmptyString);
 }
 
-/** ClearInput
-  *
-  * Clears the console input.
-  */
-void LC3Console::ClearInput()
+void LC3Console::SetInput(const std::string& str)
 {
     wxCriticalSectionLocker enter(threadCS);
-    input_text->ChangeValue(wxEmptyString);
+    input_text->ChangeValue(str);
     inputStream.seekg(0);
-    inputStream.str("");
+    inputStream.str(str);
 }

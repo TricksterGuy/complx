@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Oct 26 2017)
+// C++ code generated with wxFormBuilder (version Jan  1 2018)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -34,34 +34,26 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 
 	menu = new wxMenuBar( 0 );
 	menuFile = new wxMenu();
-	wxMenuItem* menuFileRandomizeAndLoad;
-	menuFileRandomizeAndLoad = new wxMenuItem( menuFile, ID_RANDOMIZE_AND_LOAD, wxString( _("Randomize and Load") ) + wxT('\t') + wxT("Ctrl+Alt+O"), _("Randomizes memory and loads a asm file"), wxITEM_NORMAL );
-	menuFile->Append( menuFileRandomizeAndLoad );
-
-	wxMenuItem* menuFileRandomizeAndReload;
-	menuFileRandomizeAndReload = new wxMenuItem( menuFile, ID_RANDOMIZE_AND_RELOAD, wxString( _("Randomize and Reload") ) + wxT('\t') + wxT("Ctrl+Alt+R"), _("Randomizes memory and reloads a asm file"), wxITEM_NORMAL );
-	menuFile->Append( menuFileRandomizeAndReload );
-
 	wxMenuItem* menuFileLoad;
-	menuFileLoad = new wxMenuItem( menuFile, ID_LOAD, wxString( _("&Load") ) + wxT('\t') + wxT("Ctrl+O"), _("Initializes and loads an assembly file"), wxITEM_NORMAL );
+	menuFileLoad = new wxMenuItem( menuFile, ID_LOAD, wxString( _("&Load") ) + wxT('\t') + wxT("Ctrl+O"), _("Loads a asm file"), wxITEM_NORMAL );
 	menuFile->Append( menuFileLoad );
 
 	wxMenuItem* menuFileReload;
-	menuFileReload = new wxMenuItem( menuFile, ID_RELOAD, wxString( _("&Reload") ) + wxT('\t') + wxT("Ctrl+R"), _("Initializes and reloads last file"), wxITEM_NORMAL );
+	menuFileReload = new wxMenuItem( menuFile, ID_RELOAD, wxString( _("&Reload") ) + wxT('\t') + wxT("Ctrl+R"), _("Reloads current asm file under same conditions."), wxITEM_NORMAL );
 	menuFile->Append( menuFileReload );
 
-	wxMenuItem* menuFileLoadOver;
-	menuFileLoadOver = new wxMenuItem( menuFile, ID_LOAD_OVER, wxString( _("Load &Over") ) + wxT('\t') + wxT("Ctrl+Shift+O"), _("Loads an assembly file"), wxITEM_NORMAL );
-	menuFile->Append( menuFileLoadOver );
+	wxMenuItem* menuFileCleanLoad;
+	menuFileCleanLoad = new wxMenuItem( menuFile, ID_CLEAN_LOAD, wxString( _("&Clean Load") ) + wxT('\t') + wxT("Ctrl+Shift+O"), _("Zeroes out memory and loads asm file."), wxITEM_NORMAL );
+	menuFile->Append( menuFileCleanLoad );
 
-	wxMenuItem* menuFileReloadOver;
-	menuFileReloadOver = new wxMenuItem( menuFile, ID_RELOAD_OVER, wxString( _("Reload O&ver") ) + wxT('\t') + wxT("Ctrl+Shift+R"), _("Reloads last assembly file"), wxITEM_NORMAL );
-	menuFile->Append( menuFileReloadOver );
+	wxMenuItem* menuFileAdvancedLoad;
+	menuFileAdvancedLoad = new wxMenuItem( menuFile, ID_ADVANCED_LOAD, wxString( _("&Advanced Load...") ) , _("Opens dialog for loading program under special conditions."), wxITEM_NORMAL );
+	menuFile->Append( menuFileAdvancedLoad );
 
 	menuFile->AppendSeparator();
 
 	wxMenuItem* menuFileQuit;
-	menuFileQuit = new wxMenuItem( menuFile, ID_QUIT, wxString( _("&Quit") ) + wxT('\t') + wxT("Ctrl+W"), _("Quits the program."), wxITEM_NORMAL );
+	menuFileQuit = new wxMenuItem( menuFile, ID_QUIT, wxString( _("&Quit") ) + wxT('\t') + wxT("Ctrl+Q"), _("Quits the program."), wxITEM_NORMAL );
 	menuFile->Append( menuFileQuit );
 
 	menu->Append( menuFile, _("File") );
@@ -156,22 +148,24 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 
 	menuState->Append( menuStateControlItem );
 
-	wxMenuItem* menuStateRandomize;
-	menuStateRandomize = new wxMenuItem( menuState, ID_RANDOMIZE, wxString( _("Randomize") ) + wxT('\t') + wxT("Ctrl+J"), _("Randomizes Memory"), wxITEM_NORMAL );
-	menuState->Append( menuStateRandomize );
+	menuStateControlMode = new wxMenu();
+	wxMenuItem* menuStateControlModeItem = new wxMenuItem( menuState, wxID_ANY, _("Control Mode"), wxEmptyString, wxITEM_NORMAL, menuStateControlMode );
+	wxMenuItem* menuStateControlModeSimple;
+	menuStateControlModeSimple = new wxMenuItem( menuStateControlMode, ID_SIMPLE, wxString( _("Simple") ) , _("Show commonly used control buttons."), wxITEM_RADIO );
+	menuStateControlMode->Append( menuStateControlModeSimple );
 
-	wxMenuItem* menuStateReinitialize;
-	menuStateReinitialize = new wxMenuItem( menuState, ID_REINITIALIZE, wxString( _("Reinitialize") ) + wxT('\t') + wxT("Ctrl+K"), _("Reinitializes Memory"), wxITEM_NORMAL );
-	menuState->Append( menuStateReinitialize );
+	wxMenuItem* menuStateControlModeAdvanced;
+	menuStateControlModeAdvanced = new wxMenuItem( menuStateControlMode, ID_ADVANCED, wxString( _("Advanced") ) , _("Show control buttons related to subroutines."), wxITEM_RADIO );
+	menuStateControlMode->Append( menuStateControlModeAdvanced );
 
-	wxMenuItem* menuStateFillMemoryWith;
-	menuStateFillMemoryWith = new wxMenuItem( menuState, ID_FILL_MEMORY_WITH, wxString( _("Fill Memory With...") ) , _("Fills memory with a specified value"), wxITEM_NORMAL );
-	menuState->Append( menuStateFillMemoryWith );
+	menuState->Append( menuStateControlModeItem );
 
-	menuStateTrueTraps = new wxMenuItem( menuState, ID_TRUE_TRAPS, wxString( _("True Traps") ) + wxT('\t') + wxT("Ctrl+T"), _("Enables True Traps"), wxITEM_CHECK );
+	menuState->AppendSeparator();
+
+	menuStateTrueTraps = new wxMenuItem( menuState, ID_TRUE_TRAPS, wxString( _("True Traps") ) , _("Enables True Traps"), wxITEM_CHECK );
 	menuState->Append( menuStateTrueTraps );
 
-	menuStateInterrupts = new wxMenuItem( menuState, ID_INTERRUPTS, wxString( _("Interrupts") ) + wxT('\t') + wxT("Ctrl+I"), _("Enables Interrupts"), wxITEM_CHECK );
+	menuStateInterrupts = new wxMenuItem( menuState, ID_INTERRUPTS, wxString( _("Interrupts") ) , _("Enables Interrupts"), wxITEM_CHECK );
 	menuState->Append( menuStateInterrupts );
 
 	menuState->AppendSeparator();
@@ -184,8 +178,6 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuStateClearConsoleInput = new wxMenuItem( menuState, wxID_ANY, wxString( _("Clear Console Input") ) , _("Clears the console input."), wxITEM_NORMAL );
 	menuState->Append( menuStateClearConsoleInput );
 
-	menuState->AppendSeparator();
-
 	menu->Append( menuState, _("State") );
 
 	menuDebug = new wxMenu();
@@ -197,8 +189,18 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuDebugCallStack = new wxMenuItem( menuDebug, ID_CALL_STACK, wxString( _("&Call Stack") ) , _("Views the call stack."), wxITEM_NORMAL );
 	menuDebug->Append( menuDebugCallStack );
 
+	menuDebug->AppendSeparator();
+
+	wxMenuItem* menuDebugSetupTest;
+	menuDebugSetupTest = new wxMenuItem( menuDebug, ID_SETUP_TEST, wxString( _("&Setup Test..") ) + wxT('\t') + wxT("Ctrl+T"), _("Sets up complx to debug a test."), wxITEM_NORMAL );
+	menuDebug->Append( menuDebugSetupTest );
+
+	wxMenuItem* menuDebugSwitchTest;
+	menuDebugSwitchTest = new wxMenuItem( menuDebug, ID_SWITCH_TEST, wxString( _("Switch &Test..") ) + wxT('\t') + wxT("Ctrl+Shift+T"), _("Switches test case to debug."), wxITEM_NORMAL );
+	menuDebug->Append( menuDebugSwitchTest );
+
 	wxMenuItem* menuDebugSimulateSubroutineCall;
-	menuDebugSimulateSubroutineCall = new wxMenuItem( menuDebug, ID_SIMULATE_SUBROUTINE_CALL, wxString( _("&Simulate Subroutine Call...") ) , _("Simulates a subroutine call."), wxITEM_NORMAL );
+	menuDebugSimulateSubroutineCall = new wxMenuItem( menuDebug, ID_SIMULATE_SUBROUTINE_CALL, wxString( _("Simulate Subroutine &Call...") ) , _("Simulates a subroutine call."), wxITEM_NORMAL );
 	menuDebug->Append( menuDebugSimulateSubroutineCall );
 
 	menuDebug->AppendSeparator();
@@ -299,51 +301,48 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 
 	subsizer->Add( memory, 1, wxALL|wxEXPAND, 5 );
 
-	wxGridSizer* controlSizer;
-	controlSizer = new wxGridSizer( 1, 8, 0, 0 );
+	controlSizer = new wxBoxSizer( wxHORIZONTAL );
 
 	runButton = new wxButton( mainPanel, wxID_ANY, _("&Run"), wxDefaultPosition, wxDefaultSize, 0 );
 	runButton->SetToolTip( _("Runs your code until it HALTs") );
 
-	controlSizer->Add( runButton, 0, wxALL|wxEXPAND, 2 );
-
-	runForButton = new wxButton( mainPanel, wxID_ANY, _("R&un For"), wxDefaultPosition, wxDefaultSize, 0 );
-	runForButton->SetToolTip( _("Runs your code for X instructions") );
-
-	controlSizer->Add( runForButton, 0, wxALL|wxEXPAND, 2 );
+	controlSizer->Add( runButton, 1, wxALL|wxEXPAND, 2 );
 
 	stepButton = new wxButton( mainPanel, wxID_ANY, _("&Step"), wxDefaultPosition, wxDefaultSize, 0 );
 	stepButton->SetToolTip( _("Runs one instruction") );
 
-	controlSizer->Add( stepButton, 0, wxALL|wxEXPAND, 2 );
+	controlSizer->Add( stepButton, 1, wxALL|wxEXPAND, 2 );
 
 	backStepButton = new wxButton( mainPanel, wxID_ANY, _("&Back"), wxDefaultPosition, wxDefaultSize, 0 );
 	backStepButton->SetToolTip( _("Undoes one instruction") );
 
-	controlSizer->Add( backStepButton, 0, wxALL|wxEXPAND, 2 );
+	controlSizer->Add( backStepButton, 1, wxALL|wxEXPAND, 2 );
 
 	nextLineButton = new wxButton( mainPanel, wxID_ANY, _("&Next Line"), wxDefaultPosition, wxDefaultSize, 0 );
+	nextLineButton->Hide();
 	nextLineButton->SetToolTip( _("Run the next instruction (blackboxes subroutines)") );
 
-	controlSizer->Add( nextLineButton, 0, wxALL|wxEXPAND, 2 );
+	controlSizer->Add( nextLineButton, 1, wxALL|wxEXPAND, 2 );
 
 	prevLineButton = new wxButton( mainPanel, wxID_ANY, _("&Prev Line"), wxDefaultPosition, wxDefaultSize, 0 );
+	prevLineButton->Hide();
 	prevLineButton->SetToolTip( _("Undoes the last instruction (blackboxing subroutines)") );
 
-	controlSizer->Add( prevLineButton, 0, wxALL|wxEXPAND, 2 );
+	controlSizer->Add( prevLineButton, 1, wxALL|wxEXPAND, 2 );
 
 	finishButton = new wxButton( mainPanel, wxID_ANY, _("&Finish"), wxDefaultPosition, wxDefaultSize, 0 );
+	finishButton->Hide();
 	finishButton->SetToolTip( _("Steps out of the current subroutine.") );
 
-	controlSizer->Add( finishButton, 0, wxALL|wxEXPAND, 2 );
+	controlSizer->Add( finishButton, 1, wxALL|wxEXPAND, 2 );
 
 	rewindButton = new wxButton( mainPanel, wxID_ANY, _("Rewin&d"), wxDefaultPosition, wxDefaultSize, 0 );
 	rewindButton->SetToolTip( _("Rewinds back to start (or undoes all of the instructions in the stack)") );
 
-	controlSizer->Add( rewindButton, 0, wxALL, 2 );
+	controlSizer->Add( rewindButton, 1, wxALL|wxEXPAND, 2 );
 
 
-	subsizer->Add( controlSizer, 0, wxEXPAND, 0 );
+	subsizer->Add( controlSizer, 0, wxEXPAND, 5 );
 
 	wxFlexGridSizer* stateSizer;
 	stateSizer = new wxFlexGridSizer( 3, 4, 8, 16 );
@@ -612,18 +611,16 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 
 	this->SetSizer( main );
 	this->Layout();
-	statusBar = this->CreateStatusBar( 3, wxST_SIZEGRIP, wxID_ANY );
+	statusBar = this->CreateStatusBar( 5, wxSTB_SIZEGRIP, wxID_ANY );
 
 	this->Centre( wxBOTH );
 
 	// Connect Events
 	this->Connect( wxEVT_IDLE, wxIdleEventHandler( ComplxFrameDecl::OnIdle ) );
-	this->Connect( menuFileRandomizeAndLoad->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnRandomizeAndLoad ) );
-	this->Connect( menuFileRandomizeAndReload->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnRandomizeAndReload ) );
 	this->Connect( menuFileLoad->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnLoad ) );
 	this->Connect( menuFileReload->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReload ) );
-	this->Connect( menuFileLoadOver->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnLoadOver ) );
-	this->Connect( menuFileReloadOver->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReloadOver ) );
+	this->Connect( menuFileCleanLoad->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnCleanLoad ) );
+	this->Connect( menuFileAdvancedLoad->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnAdvancedLoad ) );
 	this->Connect( menuFileQuit->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnQuit ) );
 	this->Connect( menuViewNew->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnNewView ) );
 	this->Connect( menuViewGoto->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnGoto ) );
@@ -645,15 +642,16 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	this->Connect( menuStateControlRunAgain->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnRunAgain ) );
 	this->Connect( menuStateControlRewind->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnRewind ) );
 	this->Connect( menuStateControlFinish->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnFinish ) );
-	this->Connect( menuStateRandomize->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnRandomize ) );
-	this->Connect( menuStateReinitialize->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReinitialize ) );
-	this->Connect( menuStateFillMemoryWith->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnFillMemoryWith ) );
+	this->Connect( menuStateControlModeSimple->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnControlModeSimple ) );
+	this->Connect( menuStateControlModeAdvanced->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnControlModeAdvanced ) );
 	this->Connect( menuStateTrueTraps->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTrueTraps ) );
 	this->Connect( menuStateInterrupts->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnInterrupts ) );
 	this->Connect( menuStateClearConsole->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnClearConsole ) );
 	this->Connect( menuStateClearConsoleInput->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnClearConsoleInput ) );
 	this->Connect( menuDebugUndoStack->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUndoStack ) );
 	this->Connect( menuDebugCallStack->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnCallStack ) );
+	this->Connect( menuDebugSetupTest->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnSetupTest ) );
+	this->Connect( menuDebugSwitchTest->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnSwitchTest ) );
 	this->Connect( menuDebugSimulateSubroutineCall->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnSubroutineCall ) );
 	this->Connect( menuDebugBreakWatchpoints->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnBreakAndWatchpoints ) );
 	this->Connect( menuDebugTemporary->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTemppoint ) );
@@ -669,7 +667,6 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	this->Connect( menuHelpTips->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTips ) );
 	this->Connect( menuHelpAbout->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnAbout ) );
 	runButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnRun ), NULL, this );
-	runForButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnRunFor ), NULL, this );
 	stepButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnStep ), NULL, this );
 	backStepButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnBackStep ), NULL, this );
 	nextLineButton->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnNextLine ), NULL, this );
@@ -720,12 +717,10 @@ ComplxFrameDecl::~ComplxFrameDecl()
 {
 	// Disconnect Events
 	this->Disconnect( wxEVT_IDLE, wxIdleEventHandler( ComplxFrameDecl::OnIdle ) );
-	this->Disconnect( ID_RANDOMIZE_AND_LOAD, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnRandomizeAndLoad ) );
-	this->Disconnect( ID_RANDOMIZE_AND_RELOAD, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnRandomizeAndReload ) );
 	this->Disconnect( ID_LOAD, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnLoad ) );
 	this->Disconnect( ID_RELOAD, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReload ) );
-	this->Disconnect( ID_LOAD_OVER, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnLoadOver ) );
-	this->Disconnect( ID_RELOAD_OVER, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReloadOver ) );
+	this->Disconnect( ID_CLEAN_LOAD, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnCleanLoad ) );
+	this->Disconnect( ID_ADVANCED_LOAD, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnAdvancedLoad ) );
 	this->Disconnect( ID_QUIT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnQuit ) );
 	this->Disconnect( ID_NEW_VIEW, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnNewView ) );
 	this->Disconnect( ID_GOTO_ADDRESS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnGoto ) );
@@ -747,15 +742,16 @@ ComplxFrameDecl::~ComplxFrameDecl()
 	this->Disconnect( ID_RUN_AGAIN, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnRunAgain ) );
 	this->Disconnect( ID_REWIND, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnRewind ) );
 	this->Disconnect( ID_FINISH, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnFinish ) );
-	this->Disconnect( ID_RANDOMIZE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnRandomize ) );
-	this->Disconnect( ID_REINITIALIZE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReinitialize ) );
-	this->Disconnect( ID_FILL_MEMORY_WITH, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnFillMemoryWith ) );
+	this->Disconnect( ID_SIMPLE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnControlModeSimple ) );
+	this->Disconnect( ID_ADVANCED, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnControlModeAdvanced ) );
 	this->Disconnect( ID_TRUE_TRAPS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTrueTraps ) );
 	this->Disconnect( ID_INTERRUPTS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnInterrupts ) );
 	this->Disconnect( ID_CLEAR_CONSOLE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnClearConsole ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnClearConsoleInput ) );
 	this->Disconnect( ID_UNDO_STACK, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUndoStack ) );
 	this->Disconnect( ID_CALL_STACK, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnCallStack ) );
+	this->Disconnect( ID_SETUP_TEST, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnSetupTest ) );
+	this->Disconnect( ID_SWITCH_TEST, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnSwitchTest ) );
 	this->Disconnect( ID_SIMULATE_SUBROUTINE_CALL, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnSubroutineCall ) );
 	this->Disconnect( ID_BREAKPOINTS_AND_WATCHPOINTS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnBreakAndWatchpoints ) );
 	this->Disconnect( ID_ADD_TEMPORARY_BREAKPOINT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTemppoint ) );
@@ -771,7 +767,6 @@ ComplxFrameDecl::~ComplxFrameDecl()
 	this->Disconnect( ID_TIPS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTips ) );
 	this->Disconnect( ID_ABOUT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnAbout ) );
 	runButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnRun ), NULL, this );
-	runForButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnRunFor ), NULL, this );
 	stepButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnStep ), NULL, this );
 	backStepButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnBackStep ), NULL, this );
 	nextLineButton->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnNextLine ), NULL, this );

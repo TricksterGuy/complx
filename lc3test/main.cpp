@@ -81,7 +81,7 @@ int main(int argc, char** argv)
         test_suite = suite;
         try
         {
-            lc3_run_test_suite(test_suite, asmfile, random_seed);
+            lc3_run_test_suite(test_suite, asmfile, random_seed, i);
         }
         catch (const char* x)
         {

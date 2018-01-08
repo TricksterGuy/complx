@@ -17,8 +17,18 @@ public:
     std::stringstream inputStream;
     void OnReadChar();
     void Update();
-    void Clear();
-    void ClearInput();
+    void ClearOutput();
+    /** SetInput
+      *
+      * Sets the console input to str.
+      * @param str String to set the console input to.
+      */
+    void SetInput(const std::string& str);
+    /** ClearInput
+      *
+      * Clears the console input.
+      */
+    void ClearInput() {SetInput("");}
 private:
     wxStreamToTextRedirector* stotxt;
     //void OnChar(wxKeyEvent& event);
