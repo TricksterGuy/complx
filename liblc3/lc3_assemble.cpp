@@ -13,11 +13,11 @@
 #include <cstring>
 #include <cerrno>
 
-#ifdef LINUX
+#ifdef __linux__
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #else
-#ifdef WINDOWS
+#ifdef _WIN32
 #include <winsock2.h>
 #endif
 #endif

@@ -67,12 +67,7 @@ set(CMAKE_SKIP_RPATH TRUE)
 include(${wxWidgets_USE_FILE})
 endif(ENABLE_COMPLX OR ENABLE_LC3TEST)
 
-if(CMAKE_HOST_UNIX)
-    add_definitions(-DLINUX)
-endif(CMAKE_HOST_UNIX)
-
 if(CMAKE_HOST_WIN32)
-    add_definitions(-DWINDOWS)
     # Needed for htons
     set(LIBLC3_EXTRA_LIBS ws2_32)
     # Windows doesn't set include directories correctly?

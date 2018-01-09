@@ -19,6 +19,10 @@
 #include <wx/tipdlg.h>
 #include <wx/wxprec.h>
 
+#ifdef __linux__
+#include <glib.h>
+#endif
+
 static const wxCmdLineEntryDesc cmd_descriptions[] =
 {
     {
@@ -74,6 +78,24 @@ wxString address_str = wxEmptyString, register_fill_str = "random", memory_fill_
 wxArrayString files;
 ComplxFrame* complxframe;
 
+wxConfig* CreateConfig(void)
+{
+#ifdef __linux__
+    /// TODO remove when wxWidgets 3.2 trickles itself down to sweet Ubuntu (3.1 has xdg support).
+    wxString config_dir = wxString::FromUTF8(g_build_filename(g_get_user_config_dir(), "complx", NULL));
+    wxString config_file = config_dir + wxFILE_SEP_PATH + "complx.cfg";
+    if (!wxFileName::Mkdir(config_dir, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL))
+    {
+        fprintf(stderr, "Couldn't create config file directory. Home folder is not writable?\n");
+        config_file = wxEmptyString;
+    }
+    wxFileConfig* config = new wxFileConfig("complx", wxEmptyString, config_file);
+#else
+    wxFileConfig* config = new wxFileConfig("complx");
+#endif
+    return config;
+}
+
 /** OnInit
  *
  * Initializes the program
@@ -85,7 +107,8 @@ bool ComplxApp::OnInit()
     SetVendorName("Complx");
     SetAppName("Complx");
 
-    wxFileConfig *config = new wxFileConfig("Complx");
+
+    wxConfig* config = CreateConfig();
     wxConfigBase::Set(config);
 
     srand(time(NULL));

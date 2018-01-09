@@ -11,7 +11,7 @@ void PrintError(int error);
 
 void MakeCellVisible(MemoryGrid* memory, unsigned short addr)
 {
-#ifndef WINDOWS
+#ifndef _WIN32
     memory->SelectLocation(addr > 0xFFF0 ? 0xFFFF : 0);
 #endif
     memory->SelectLocation(addr);
