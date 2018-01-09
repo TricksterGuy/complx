@@ -16,6 +16,7 @@
 #include <wx/config.h>
 #include <wx/fileconf.h>
 #include <wx/msgdlg.h>
+#include <wx/stdpaths.h>
 #include <wx/tipdlg.h>
 #include <wx/wxprec.h>
 
@@ -85,7 +86,32 @@ bool ComplxApp::OnInit()
     SetVendorName("Complx");
     SetAppName("Complx");
 
-    wxFileConfig *config = new wxFileConfig("Complx");
+    // Follow the XDG spec on Linux and BSDs (but not macOS)
+    #if defined __UNIX__ && !(defined __APPLE__)
+        wxString xdgConfigHome;
+
+        if (!wxGetEnv("XDG_CONFIG_HOME", &xdgConfigHome)) {
+            // GetUserConfigDir() returns ~
+            xdgConfigHome = wxStandardPaths::Get().GetUserConfigDir() + "/.config";
+        }
+
+        wxString complxConfigHome = xdgConfigHome + "/complx/";
+
+        if (!wxFileName::Mkdir(complxConfigHome, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL)) {
+            wxMessageBox(wxString::Format("Could not create configuration "
+                                          "directory %s. Do you have write "
+                                          "permissions to your home directory?\n\n",
+                                          complxConfigHome), "Can't save configuration");
+            return false;
+        }
+
+        wxString localFilename = complxConfigHome + "complx.conf";
+    // On macOS and Windows, use the default wxWidgets behavior
+    #else
+        wxString localFilename = wxEmptyString;
+    #endif
+
+    wxFileConfig *config = new wxFileConfig("Complx", wxEmptyString, localFilename);
     wxConfigBase::Set(config);
 
     srand(time(NULL));
