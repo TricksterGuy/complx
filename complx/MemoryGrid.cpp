@@ -1,11 +1,10 @@
 #include <wx/msgdlg.h>
-#include <wx/bitmap.h>
-#include <wx/imaglist.h>
 #include <wx/dcmemory.h>
 #include <wx/colour.h>
 #include <wx/brush.h>
 #include <wx/menu.h>
 #include <wx/dcclient.h>
+#include <wx/config.h>
 #include "MemoryGrid.hpp"
 #include "MemoryView.hpp"
 #include "GridCellInfoRenderer.hpp"
@@ -30,7 +29,15 @@ MemoryGrid::MemoryGrid(wxWindow *parent, wxWindowID id, const wxPoint &pos, cons
 
     wxFont font = wxSystemSettings::GetFont(wxSYS_ANSI_FIXED_FONT);
     SetFont(font);
-    SetDefaultRowSize(font.GetPixelSize().GetHeight());
+
+    auto* config = wxConfigBase::Get();
+    long minrowsize = font.GetPixelSize().GetHeight();
+    long rowsize = minrowsize;
+    if (!config->Read("/rowsize", &rowsize))
+        config->Write("/rowsize", rowsize);
+
+    rowsize = std::max(minrowsize, std::min(64L, rowsize));
+    SetDefaultRowSize(rowsize);
 
     Connect(MemoryMenuBreakpoint, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryGrid::OnBreakpoint));
     Connect(MemoryMenuTemppoint, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryGrid::OnTemppoint));
@@ -181,14 +188,21 @@ void MemoryGrid::InitGridSizes(bool exact_column_sizing, const std::vector<int>&
   */
 void MemoryGrid::SelectLocation(unsigned short location)
 {
+    int w, h;
+    GetClientSize(&w, &h);
+    int row_size = GetDefaultRowSize();
+    int num_rows = row_size == 0 ? 8 : h / GetDefaultRowSize() - 2;
+    num_rows = std::max(1, num_rows);
+
     MemoryView* view = dynamic_cast<MemoryView*>(GetTable());
     if (view) location = view->AddressToView(location);
     last_address = location;
     // Handles close to edge!
-    int n_location = (location + 8 + 1) > 0xFFFF ? location : location + 8 + 1;
+    int n_location = (location + num_rows / 2) > 0xFFFF ? location : location + num_rows / 2;
+    // This centers it on screen.
     SelectRow(location);
     SetGridCursor(location, 0);
-    MakeCellVisible((location < 16) ? location : n_location, 0);
+    MakeCellVisible((location < num_rows) ? location : n_location, 0);
     Refresh();
 }
 
