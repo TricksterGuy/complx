@@ -70,9 +70,8 @@ AdvancedLoadDialogDecl::AdvancedLoadDialogDecl( wxWindow* parent, wxWindowID id,
 	
 	bSizer5->Add( regInitializer, 0, wxTOP|wxBOTTOM|wxRIGHT, 5 );
 	
-	regFillValue = new wxSpinCtrl( m_panel2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS|wxSP_WRAP, -32768, 32767, 0 );
+	regFillValue = new wxTextCtrl( m_panel2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	regFillValue->Enable( false );
-	regFillValue->SetToolTip( _("Fill value") );
 	
 	bSizer5->Add( regFillValue, 0, wxALL, 5 );
 	
@@ -94,9 +93,8 @@ AdvancedLoadDialogDecl::AdvancedLoadDialogDecl( wxWindow* parent, wxWindowID id,
 	
 	bSizer51->Add( memInitializer, 0, wxTOP|wxBOTTOM|wxRIGHT, 5 );
 	
-	memFillValue = new wxSpinCtrl( m_panel2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS|wxSP_WRAP, -32768, 32767, 0 );
+	memFillValue = new wxTextCtrl( m_panel2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	memFillValue->Enable( false );
-	memFillValue->SetToolTip( _("Fill value.") );
 	
 	bSizer51->Add( memFillValue, 0, wxALL, 5 );
 	
@@ -152,7 +150,6 @@ AdvancedLoadDialogDecl::AdvancedLoadDialogDecl( wxWindow* parent, wxWindowID id,
 	
 	this->SetSizer( bSizer6 );
 	this->Layout();
-	bSizer6->Fit( this );
 	
 	this->Centre( wxBOTH );
 	

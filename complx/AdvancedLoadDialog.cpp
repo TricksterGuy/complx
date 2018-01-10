@@ -14,6 +14,8 @@ LoadingOptions AdvancedLoadDialog::GetOptions()
     options.file = file;
     options.tests = xmlFile->GetPath().ToStdString();
     options.console_input = consoleInput->GetValue().ToStdString();
+    int ret = -1;
+    int error;
     switch(regInitializer->GetSelection())
     {
         case 0:
@@ -23,7 +25,8 @@ LoadingOptions AdvancedLoadDialog::GetOptions()
             options.registers = ZEROED;
             break;
         case 2:
-            options.registers = static_cast<ValueInitializationMethod>(regFillValue->GetValue());
+            error = lc3_calculate(state, regFillValue->GetValue().ToStdString(), ret);
+            options.registers = error ? ZEROED : static_cast<ValueInitializationMethod>(ret);
             break;
     }
     switch(memInitializer->GetSelection())
@@ -35,12 +38,12 @@ LoadingOptions AdvancedLoadDialog::GetOptions()
             options.memory = ZEROED;
             break;
         case 2:
-            options.memory = static_cast<ValueInitializationMethod>(memFillValue->GetValue());
+            error = lc3_calculate(state, memFillValue->GetValue().ToStdString(), ret);
+            options.memory = error ? ZEROED : static_cast<ValueInitializationMethod>(ret);
             break;
     }
-    int ret = -1;
-    int error = lc3_calculate(state, pcValue->GetValue().ToStdString(), ret);
-    options.pc = ret == -1 ? 0x3000 : ret;
+    error = lc3_calculate(state, pcValue->GetValue().ToStdString(), ret);
+    options.pc = error != 0 ? 0x3000 : ret;
     options.true_traps = trueTraps->IsChecked();
     options.interrupts = interrupts->IsChecked();
     return options;

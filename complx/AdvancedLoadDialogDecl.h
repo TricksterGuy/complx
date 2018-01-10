@@ -20,7 +20,6 @@
 #include <wx/filepicker.h>
 #include <wx/textctrl.h>
 #include <wx/choice.h>
-#include <wx/spinctrl.h>
 #include <wx/sizer.h>
 #include <wx/checkbox.h>
 #include <wx/button.h>
@@ -47,10 +46,10 @@ class AdvancedLoadDialogDecl : public wxDialog
 		wxTextCtrl* consoleInput;
 		wxStaticText* m_staticText0;
 		wxChoice* regInitializer;
-		wxSpinCtrl* regFillValue;
+		wxTextCtrl* regFillValue;
 		wxStaticText* m_staticText4;
 		wxChoice* memInitializer;
-		wxSpinCtrl* memFillValue;
+		wxTextCtrl* memFillValue;
 		wxStaticText* m_staticText5;
 		wxTextCtrl* pcValue;
 		wxStaticText* m_staticText7;
@@ -67,7 +66,7 @@ class AdvancedLoadDialogDecl : public wxDialog
 	
 	public:
 		
-		AdvancedLoadDialogDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Advanced Load"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE ); 
+		AdvancedLoadDialogDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Advanced Load"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,360 ), long style = wxDEFAULT_DIALOG_STYLE ); 
 		~AdvancedLoadDialogDecl();
 	
 };
