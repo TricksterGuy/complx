@@ -7,7 +7,7 @@
 class AdvancedLoadDialog : public AdvancedLoadDialogDecl
 {
 public:
-    AdvancedLoadDialog(wxWindow* parent) : AdvancedLoadDialogDecl(parent) {}
+    AdvancedLoadDialog(wxWindow* parent, const LoadingOptions& opts);
     ~AdvancedLoadDialog() {}
     LoadingOptions GetOptions();
 	void OnRegChoice(wxCommandEvent& event) override;

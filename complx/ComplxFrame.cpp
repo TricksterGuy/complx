@@ -191,7 +191,7 @@ void ComplxFrame::OnAdvancedLoad(wxCommandEvent& event)
 {
     if (Running()) return;
 
-    AdvancedLoadDialog* dialog = new AdvancedLoadDialog(this);
+    AdvancedLoadDialog* dialog = new AdvancedLoadDialog(this, reload_options);
     if (dialog->ShowModal() == wxID_OK)
     {
         LoadingOptions options = dialog->GetOptions();
