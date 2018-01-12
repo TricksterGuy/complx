@@ -31,9 +31,10 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
 
 
     // Set Control Flags
-    state.n = 0;
-    state.z = 1;
-    state.p = 0;
+    short rand_value = randomize_registers ? lc3_random() : register_fill_value;
+    state.n = rand_value < 0;
+    state.z = rand_value == 0;
+    state.p = rand_value > 0;
 
     // Set Additional Flags
     state.halted = 0;
