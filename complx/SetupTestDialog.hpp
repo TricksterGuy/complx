@@ -10,6 +10,7 @@ class SetupTestDialog : public SetupTestDialogDecl
 		SetupTestDialog(const std::string& test_suite_path, wxWindow* parent);
 		~SetupTestDialog() {}
 		bool GetSelectedTest(lc3_test& test);
+		bool IsValid() const {return valid;}
 	protected:
 		void OnChooseTest(wxCommandEvent& event) override;
 		void OnReloadXml(wxCommandEvent& event) override;
@@ -18,6 +19,7 @@ class SetupTestDialog : public SetupTestDialogDecl
         void PopulateConditions(const lc3_test& test);
         std::string filename;
         lc3_test_suite suite;
+        bool valid;
 };
 
 #endif

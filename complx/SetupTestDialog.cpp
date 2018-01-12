@@ -5,21 +5,18 @@ bool TryLoadTests(lc3_test_suite& suite, const std::string& path)
 {
     try
     {
-        if (!XmlTestParser().LoadTestSuite(suite, path))
-        {
-            wxMessageBox(_("ERROR! Xml file not found or parse errors found"), _("Error"));
-            return true;
-        }
+        XmlTestParser().LoadTestSuite(suite, path);
     }
     catch (XmlTestParserException x)
     {
         wxMessageBox(wxString::Format("ERROR %s\n", x.what().c_str()), _("Error"));
+        return false;
     }
 
-    return false;
+    return true;
 }
 
-SetupTestDialog::SetupTestDialog(const std::string& test_suite_path, wxWindow* parent) : SetupTestDialogDecl(parent), filename(test_suite_path)
+SetupTestDialog::SetupTestDialog(const std::string& test_suite_path, wxWindow* parent) : SetupTestDialogDecl(parent), filename(test_suite_path), valid(false)
 {
     PopulateTests();
 }
@@ -49,9 +46,13 @@ void SetupTestDialog::OnReloadXml(wxCommandEvent& event)
 
 void SetupTestDialog::PopulateTests()
 {
-    if (TryLoadTests(suite, filename))
+    if (!TryLoadTests(suite, filename))
+    {
+        valid = false;
         return;
+    }
 
+    valid = true;
     tests->SetSelection(wxNOT_FOUND);
     tests->Clear();
     for (auto& test : suite.tests)

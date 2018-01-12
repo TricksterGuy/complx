@@ -1089,7 +1089,7 @@ void ComplxFrame::OnSetupTest(wxCommandEvent& event)
 
     SetupTestDialog* dialog = new SetupTestDialog(filename, this);
     lc3_test test;
-    if (dialog->ShowModal() != wxID_OK || !dialog->GetSelectedTest(test))
+    if (!dialog->IsValid() || dialog->ShowModal() != wxID_OK || !dialog->GetSelectedTest(test))
     {
         delete dialog;
         return;
@@ -1124,7 +1124,7 @@ void ComplxFrame::OnSwitchTest(wxCommandEvent& event)
     std::string filename = reload_options.tests;
     SetupTestDialog* dialog = new SetupTestDialog(filename, this);
     lc3_test test;
-    if (dialog->ShowModal() != wxID_OK || !dialog->GetSelectedTest(test))
+    if (!dialog->IsValid() || dialog->ShowModal() != wxID_OK || !dialog->GetSelectedTest(test))
     {
         delete dialog;
         return;
