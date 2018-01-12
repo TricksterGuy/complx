@@ -1109,6 +1109,10 @@ void ComplxFrame::OnSetupTest(wxCommandEvent& event)
     }
 
     delete dialog;
+
+    UpdateMemory();
+    UpdateRegisters();
+    UpdateStatus();
 }
 
 void ComplxFrame::OnSwitchTest(wxCommandEvent& event)
@@ -1144,6 +1148,10 @@ void ComplxFrame::OnSwitchTest(wxCommandEvent& event)
     }
 
     delete dialog;
+
+    UpdateMemory();
+    UpdateRegisters();
+    UpdateStatus();
 }
 
 /** OnSubroutineCall
