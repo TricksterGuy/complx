@@ -19,6 +19,12 @@ bool TryLoadTests(lc3_test_suite& suite, const std::string& path)
 SetupTestDialog::SetupTestDialog(const std::string& test_suite_path, wxWindow* parent) : SetupTestDialogDecl(parent), filename(test_suite_path), valid(false)
 {
     PopulateTests();
+    if (!suite.tests.empty())
+    {
+        tests->SetSelection(0);
+        PopulateConditions(suite.tests[0]);
+    }
+
 }
 
 bool SetupTestDialog::GetSelectedTest(lc3_test& test)
@@ -41,19 +47,26 @@ void SetupTestDialog::OnChooseTest(wxCommandEvent& event)
 
 void SetupTestDialog::OnReloadXml(wxCommandEvent& event)
 {
+    int selection = tests->GetSelection();
     PopulateTests();
+    if (suite.tests.size() > (unsigned int) selection)
+    {
+        PopulateConditions(suite.tests[selection]);
+        tests->SetSelection(selection);
+    }
 }
 
 void SetupTestDialog::PopulateTests()
 {
-    if (!TryLoadTests(suite, filename))
+    lc3_test_suite new_suite;
+    if (!TryLoadTests(new_suite, filename))
     {
         valid = false;
         return;
     }
 
     valid = true;
-    tests->SetSelection(wxNOT_FOUND);
+    suite = new_suite;
     tests->Clear();
     for (auto& test : suite.tests)
         tests->Append(test.name, reinterpret_cast<void*>(&test));
