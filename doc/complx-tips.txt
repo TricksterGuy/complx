@@ -11,5 +11,7 @@ _("Temporary Breakpoints will trigger only once.  This is useful if you want to 
 _("Did you know if you moused over an instruction it will show you your comments for that line of code?")
 _("Did you know you should use the testing functionality built into this program.  You should check https://drive.google.com/folderview?id=0B6g7zcZaFwPTWDBuYnUtU19Lcnc&usp=sharing for starter files")
 _("Did you know that you can place debugging comments inline with your code and complx picks up on these?  For full documentation on this see this file - https://docs.google.com/file/d/0B6g7zcZaFwPTOE9taUhYTEVSTGc/edit?usp=sharing")
+_("Have you visited the File > Advanced Load yet?  This is a new feature for 2018, this menu allows you to set many aspects of the environment when loading, you are even allowed to set the initial console input!")
+_("Have you visited the Debug > Setup Test yet? This is a new feature for 2018, this menu allows you to pick out a test from the XML files and sets up complx with the same environment for the test.")
 _("Go here to report bugs / problems / annoyances - https://github.com/TricksterGuy/complx/issues")
 _("This is the last tip for now I'll add more in a future version")
