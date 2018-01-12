@@ -1098,7 +1098,7 @@ void ComplxFrame::OnSetupTest(wxCommandEvent& event)
     try
     {
         std::stringstream input;
-        lc3_init_test_case(state, filename, test, -1, true);
+        lc3_init_test_case(state, reload_options.file, test, -1, true);
         lc3_setup_test_case(state, test, input);
         console->SetInput(input.str());
         reload_options.tests = filename;
@@ -1133,7 +1133,7 @@ void ComplxFrame::OnSwitchTest(wxCommandEvent& event)
     try
     {
         std::stringstream input;
-        lc3_init_test_case(state, filename, test, -1, true);
+        lc3_init_test_case(state, reload_options.file, test, -1, true);
         lc3_setup_test_case(state, test, input);
         console->SetInput(input.str());
         reload_options.tests = filename;
