@@ -16,6 +16,7 @@ option(ENABLE_LC3TEST "Build lc3test" ON)
 option(ENABLE_DEV "Build dev version" OFF)
 option(ENABLE_TESTS "Enable testing" OFF)
 option(ENABLE_COVERAGE "Enable testing coverage" OFF)
+option(ENABLE_PYLC3 "Enable python bindings to liblc3" OFF)
 
 if(ENABLE_TESTS)
     enable_testing()
@@ -35,7 +36,6 @@ set(CMAKE_INSTALL_BINDIR bin CACHE STRING "where to install programs")
 
 if(ENABLE_COVERAGE)
     include(CodeCoverage)
-
     append_coverage_compiler_flags()
 endif(ENABLE_COVERAGE)
 
@@ -172,6 +172,10 @@ endif(ENABLE_LC3TEST)
 if(ENABLE_TESTS)
     add_subdirectory(tests)
 endif(ENABLE_TESTS)
+
+if (ENABLE_PYLC3)
+    add_subdirectory(pylc3)
+endif(ENABLE_PYLC3)
 
 # uninstall target
 configure_file(
