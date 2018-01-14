@@ -60,12 +60,12 @@ endif(CMAKE_BUILD_TYPE MATCHES "Debug")
 add_definitions(-DPREFIX=${CMAKE_INSTALL_PREFIX})
 add_definitions(-DSO_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
-if(ENABLE_COMPLX OR ENABLE_LC3TEST)
+if(ENABLE_COMPLX OR ENABLE_LC3TEST OR ENABLE_TESTS)
 set(wxWidgets_USE_LIBS stc xrc xml html adv net core base)
 find_package(wxWidgets REQUIRED)
 set(CMAKE_SKIP_RPATH TRUE)
 include(${wxWidgets_USE_FILE})
-endif(ENABLE_COMPLX OR ENABLE_LC3TEST)
+endif(ENABLE_COMPLX OR ENABLE_LC3TEST OR ENABLE_TESTS)
 
 if(CMAKE_HOST_WIN32)
     # Needed for htons
