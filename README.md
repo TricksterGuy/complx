@@ -45,17 +45,17 @@ complx is a suite of educational tools for learning lc3 assembly. It includes bo
     5. Plugin that adds a new trap that performs division and modulus
   * Plugins can add new device registers, traps, send interrupts, and add a new instruction
 
-# Installation from Packages via apt (Recommended! Only for Ubuntu 16.04.)
+# Installation from Packages via apt Recommended (Only for Ubuntu 16.04.)
 Execute these commands
 * sudo add-apt-repository ppa:tricksterguy87/ppa-gt-cs2110
 * sudo apt update
 * sudo apt install complx-tools
 
-# Installation from Source via scripts
+# Installation from Source via scripts (Only for Ubuntu 14.04 and above.)
 You can run one of the install scripts depending on your platform, which does everything listed in the below section.
-* Ubuntu 14.04 and above sudo ./install.sh
+* sudo ./install.sh
 
-# Installation from Source manually
+# Installation from Source manually (For debian based distros.)
 From the root directory of where you have the source code.
  1. Install dependencies (sudo apt-get install libwxgtk3.0-dev cmake build-essential libglib2.0-dev)
  2. Create a build directory (mkdir build && cd build)
