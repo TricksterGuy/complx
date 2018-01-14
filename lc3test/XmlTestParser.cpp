@@ -2,6 +2,9 @@
 #include <lc3_all.hpp>
 #include <sstream>
 
+#include <wx/wfstream.h>
+#include <wx/sstream.h>
+
 /** process_str
   *
   * Unescapes and removes quotes from string (see lc3_parser.cpp if you change this)
@@ -256,10 +259,23 @@ int GetCompareType(int type, const wxString& mode, const wxXmlNode* node)
   *
   *
   */
-bool XmlTestParser::LoadTestSuite(lc3_test_suite& suite, const std::string filename)
+bool XmlTestParser::LoadTestSuite(lc3_test_suite& suite, const std::string& filename)
+{
+    wxFileInputStream stream(filename);
+    if (!stream.IsOk()) return false;
+    return LoadTestSuite(suite, stream);
+}
+
+bool XmlTestParser::LoadTestSuiteData(lc3_test_suite& suite, const std::string& data)
+{
+    wxStringInputStream stream(data);
+    return LoadTestSuite(suite, stream);
+}
+
+bool XmlTestParser::LoadTestSuite(lc3_test_suite& suite, wxInputStream& stream)
 {
     wxXmlDocument doc;
-    if (!doc.Load(filename.c_str())) return false;
+    if (!doc.Load(stream)) return false;
 
     wxXmlNode* child = doc.GetRoot()->GetChildren();
 
@@ -284,6 +300,7 @@ bool XmlTestParser::LoadTestSuite(lc3_test_suite& suite, const std::string filen
     }
 
     return true;
+
 }
 
 bool XmlTestParser::LoadTest(lc3_test_suite& suite, wxXmlNode* root)

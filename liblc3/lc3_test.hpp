@@ -214,4 +214,34 @@ std::string lc3_test_input_string(const lc3_test_input& test);
   */
 std::string lc3_test_output_string(const lc3_test_output& test);
 
+
+/** lc3_run_test_suite
+  *
+  * Runs an entire test suite.
+  * @param suite An lc3_test_suite, the results will be written to the object.
+  * @param stream An input stream.
+  * @param seed Random seed to use.
+  * @param run Run number.
+  */
+void lc3_run_test_suite(lc3_test_suite& suite, std::istream& stream, int seed = -1, int run = 0);
+/** lc3_init_test_case
+  *
+  * Initializes and loads assembly file and sets up lc3_state to match the test's environment.
+  * @param state LC3State object.
+  * @param stream An input stream.
+  * @param test An lc3_test.
+  * @param seed Random seed to use.
+  * @param in_lc3_test true if this is being called via lc3_test binary. (The effect if true is that backstepping is disabled).
+  * @param run Run number. Random seed used in test will be incremented by this number
+  */
+void lc3_init_test_case(lc3_state& state, std::istream& stream, lc3_test& test, int seed = -1, bool in_lc3_test = false, int run = 0);
+/** lc3_run_test_case
+  *
+  * Runs a single test case.
+  * @param test An lc3_test, the results will be written to the object.
+  * @param stream An input stream.
+  * @param seed Random seed to use.
+  */
+void lc3_run_test_case(lc3_test& test, std::istream& stream, int seed = -1, int run = 0);
+
 #endif

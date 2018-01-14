@@ -83,13 +83,21 @@ struct lc3_subroutine_call_info_cmp
 
 void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, int seed, int run)
 {
+    std::ifstream file(filename.c_str());
+    if (!file.good()) return;
+    lc3_run_test_suite(suite, file, seed, run);
+}
+
+void lc3_run_test_suite(lc3_test_suite& suite, std::istream& stream, int seed, int run)
+{
     bool passed = true;
     unsigned int total_points = 0;
     unsigned int points = 0;
 
     for (unsigned int i = 0; i < suite.tests.size(); i++)
     {
-        lc3_run_test_case(suite.tests[i], filename, seed, run);
+        stream.seekg(0).clear();
+        lc3_run_test_case(suite.tests[i], stream, seed, run);
         passed = passed && suite.tests[i].passed;
         points += suite.tests[i].points;
         total_points += suite.tests[i].max_points;
@@ -100,6 +108,13 @@ void lc3_run_test_suite(lc3_test_suite& suite, const std::string& filename, int 
 }
 
 void lc3_init_test_case(lc3_state& state, const std::string& filename, lc3_test& test, int seed, bool in_lc3_test, int run)
+{
+    std::ifstream file(filename.c_str());
+    if (!file.good()) return;
+    lc3_init_test_case(state, file, test, seed, in_lc3_test, run);
+}
+
+void lc3_init_test_case(lc3_state& state, std::istream& stream, lc3_test& test, int seed, bool in_lc3_test, int run)
 {
     // Preliminary stuff
     if (test.random_seed != -1)
@@ -141,7 +156,7 @@ void lc3_init_test_case(lc3_state& state, const std::string& filename, lc3_test&
         options.process_debug_comments = false;
         options.enable_warnings = false;
         options.disable_plugins = disable_plugins;
-        lc3_assemble(state, filename, options);
+        lc3_assemble(state, stream, options);
     }
     catch (LC3AssembleException e)
     {
@@ -276,9 +291,16 @@ void lc3_setup_test_case(lc3_state& state, lc3_test& test, std::stringstream& ne
 
 void lc3_run_test_case(lc3_test& test, const std::string& filename, int seed, int run)
 {
+    std::ifstream file(filename.c_str());
+    if (!file.good()) return;
+    lc3_run_test_case(test, file, seed, run);
+}
+
+void lc3_run_test_case(lc3_test& test, std::istream& stream, int seed, int run)
+{
     lc3_state state;
 
-    lc3_init_test_case(state, filename, test, seed, true, run);
+    lc3_init_test_case(state, stream, test, seed, true, run);
 
     std::stringstream* newinput = new std::stringstream();
     lc3_setup_test_case(state, test, *newinput);

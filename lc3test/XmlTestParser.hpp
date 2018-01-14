@@ -29,11 +29,13 @@ public:
         static XmlTestParser singleton;
         return singleton;
     }
-    bool LoadTestSuite(lc3_test_suite& suite, const std::string filename);
+    bool LoadTestSuite(lc3_test_suite& suite, const std::string& filename);
+    bool LoadTestSuiteData(lc3_test_suite& suite, const std::string& data);
 private:
     XmlTestParser() {};                                     // Private constructor
     XmlTestParser(const XmlTestParser&);                    // Prevent copy-construction
     XmlTestParser& operator=(const XmlTestParser&);         // Prevent assignment
+    bool LoadTestSuite(lc3_test_suite& suite, wxInputStream& stream);
     bool LoadTest(lc3_test_suite& suite, wxXmlNode* root);
     bool LoadTestInput(lc3_test& suite, wxXmlNode* root);
     bool LoadTestOutput(lc3_test& suite, wxXmlNode* root);

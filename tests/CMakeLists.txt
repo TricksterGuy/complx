@@ -13,11 +13,13 @@ file(GLOB SRC_TESTS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 add_executable(
     lc3_test_suite
     ${SRC_TESTS}
+    ../lc3test/XmlTestParser.cpp
 )
 
 target_link_libraries(
     lc3_test_suite
     lc3
+    ${wxWidgets_LIBRARIES}
     ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
 )
 
@@ -47,7 +49,7 @@ if(ENABLE_COVERAGE)
         ${CMAKE_BINARY_DIR}/plugins/traps
         ${CMAKE_BINARY_DIR}/plugins/other)
 
-    set(COVERAGE_EXCLUDES 'boost/*' 'c++/*' 'tests/*')
+    set(COVERAGE_EXCLUDES 'boost/*' 'c++/*' 'tests/*' 'wx' 'wx/*')
 
     setup_target_for_coverage(
         NAME "lc3_test_coverage"
