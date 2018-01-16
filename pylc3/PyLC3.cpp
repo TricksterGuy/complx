@@ -28,3 +28,11 @@ bool LC3TestSuite::load(const std::string& filename)
     return XmlTestParser().LoadTestSuite(suite, filename);
 }
 
+LC3Test LC3TestSuite::get_test(unsigned int id) const
+{
+    if (id >= suite.tests.size())
+    {
+        return LC3Test();
+    }
+    return LC3Test(suite.tests[id]);
+}
