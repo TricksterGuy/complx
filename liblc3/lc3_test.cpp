@@ -96,7 +96,8 @@ void lc3_run_test_suite(lc3_test_suite& suite, std::istream& stream, int seed, i
 
     for (unsigned int i = 0; i < suite.tests.size(); i++)
     {
-        stream.seekg(0).clear();
+        stream.clear();
+        stream.seekg(0, stream.beg);
         lc3_run_test_case(suite.tests[i], stream, seed, run);
         passed = passed && suite.tests[i].passed;
         points += suite.tests[i].points;
@@ -314,22 +315,20 @@ void lc3_run_test_case(lc3_test& test, std::istream& stream, int seed, int run)
 
     if (test.has_max_executions)
     {
-        unsigned long i = 0;
+        /*unsigned long i = 0;
         // Do this num times or until halted.
         while (i < test.max_executions && !state.halted)
         {
-            /*printf("%04x: %s (%x)\n", state.pc, lc3_disassemble(state, state.mem[state.pc]).c_str(), (unsigned short)state.mem[state.pc]);
+            printf("%04x: %s (%x)\n", state.pc, lc3_disassemble(state, state.mem[state.pc]).c_str(), (unsigned short)state.mem[state.pc]);
             printf("R0 %6d|x%04x\tR1 %6d|x%04x\tR2 %6d|x%04x\tR3 %6d|x%04x\nR4 %6d|x%04x\tR5 %6d|x%04x\tR6 %6d|x%04x\tR7 %6d|x%04x\nCC: %s\tPC: %04x\n\n",
                    state.regs[0], (unsigned short)state.regs[0], state.regs[1], (unsigned short)state.regs[1], state.regs[2], (unsigned short)state.regs[2],
                    state.regs[3], (unsigned short)state.regs[3], state.regs[4], (unsigned short)state.regs[4], state.regs[5], (unsigned short)state.regs[5],
                    state.regs[6], (unsigned short)state.regs[6], state.regs[7], (unsigned short)state.regs[7], (state.n ? "N" : (state.z ? "Z" : "P")),
-                   (unsigned short) state.pc);*/
-            // Step one instruction
+                   (unsigned short) state.pc);
             lc3_step(state);
-            // Increment instruction count
             i++;
-        }
-        //lc3_run(state, test.max_executions);
+        }*/
+        lc3_run(state, test.max_executions);
     }
     else
         lc3_run(state);
