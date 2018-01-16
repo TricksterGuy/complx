@@ -123,7 +123,6 @@ void lc3_tick_plugins(lc3_state& state);
   * This happens after the instruction is executed.
   * @param state LC3State object.
   */
-/** Tocks all LC3 Plugins */
 void lc3_tock_plugins(lc3_state& state);
 
 
