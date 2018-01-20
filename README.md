@@ -57,7 +57,7 @@ You can run one of the install scripts depending on your platform, which does ev
 
 # Installation from Source manually (For debian based distros.)
 From the root directory of where you have the source code.
- 1. Install dependencies (sudo apt-get install libwxgtk3.0-dev cmake build-essential libglib2.0-dev)
+ 1. Install dependencies (sudo apt install libwxgtk3.0-dev cmake build-essential libglib2.0-dev)
  2. Create a build directory (mkdir build && cd build)
  3. Generate a Makefile via cmake (cmake ..)
  4. Build the program (make)
