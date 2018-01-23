@@ -4,11 +4,14 @@ complx
 
 Extensible LC-3 Simulator (GUI and CLI), Assembler, and Autograder/Test Framework written in C++. Mainly used in CS2110 at Georgia Tech.  Maintained by Brandon (bwhitehead0308 [AT] gmail [DOT] com)
 
-# Screenshot
-![Main Screen](https://github.com/TricksterGuy/complx/blob/master/doc/main_screen.png)
-
 # Overview
 complx is a suite of educational tools for learning lc3 assembly. It includes both a gui and cli based simulator (named complx and comp respectively), an assembler (as2obj), a very simple program that runs lc3 assembly files and spits out whats printed to the console (lc3runner), and a framework for testing and grading lc3 assembly code (lc3test).  Complx also be extended with plugins that add additional functionality to the LC3.  The tools also come with a C++ interface to the LC3 (liblc3). Complx was written using the wxWidgets library.
+
+# Installation
+
+[Installing Prebuilt Binaries](https://github.com/TricksterGuy/complx/wiki/Installing-Prebuilt-Binaries)
+
+[Build Instructions for Linux](https://github.com/TricksterGuy/complx/wiki/Building-for-Linux)
 
 # Features
 * Both a textual and graphical user interface available
@@ -45,22 +48,5 @@ complx is a suite of educational tools for learning lc3 assembly. It includes bo
     5. Plugin that adds a new trap that performs division and modulus
   * Plugins can add new device registers, traps, send interrupts, and add a new instruction
 
-# Installation from Packages via apt Recommended (Only for Ubuntu 16.04.)
-Execute these commands
-* sudo add-apt-repository ppa:tricksterguy87/ppa-gt-cs2110
-* sudo apt update
-* sudo apt install complx-tools
-
-# Installation from Source via scripts (Only for Ubuntu 14.04 and above.)
-You can run one of the install scripts depending on your platform, which does everything listed in the below section.
-* sudo ./install.sh
-
-# Installation from Source manually (For debian based distros.)
-From the root directory of where you have the source code.
- 1. Install dependencies (sudo apt-get install libwxgtk3.0-dev cmake build-essential libglib2.0-dev)
- 2. Create a build directory (mkdir build && cd build)
- 3. Generate a Makefile via cmake (cmake ..)
- 4. Build the program (make)
- 5. Install the program (sudo make install)
- 6. Run ldconfig (sudo ldconfig)
-
+# Screenshot
+![Main Screen](https://github.com/TricksterGuy/complx/blob/master/doc/main_screen.png)
