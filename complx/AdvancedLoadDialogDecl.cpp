@@ -132,7 +132,7 @@ AdvancedLoadDialogDecl::AdvancedLoadDialogDecl( wxWindow* parent, wxWindowID id,
 	
 	strictExecution = new wxCheckBox( m_panel2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	strictExecution->SetValue(true); 
-	strictExecution->SetToolTip( _("Enable processing of lc3 interrupts.  This is automatically configued based on your assembly code.") );
+	strictExecution->SetToolTip( _("Enables strict execution mode.") );
 	
 	fgSizer1->Add( strictExecution, 0, wxTOP|wxBOTTOM|wxRIGHT, 5 );
 	
