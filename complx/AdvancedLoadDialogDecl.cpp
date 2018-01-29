@@ -21,7 +21,7 @@ AdvancedLoadDialogDecl::AdvancedLoadDialogDecl( wxWindow* parent, wxWindowID id,
 	bSizer7 = new wxBoxSizer( wxVERTICAL );
 	
 	wxFlexGridSizer* fgSizer1;
-	fgSizer1 = new wxFlexGridSizer( 0, 2, 0, 0 );
+	fgSizer1 = new wxFlexGridSizer( 9, 2, 0, 0 );
 	fgSizer1->AddGrowableCol( 1 );
 	fgSizer1->SetFlexibleDirection( wxBOTH );
 	fgSizer1->SetNonFlexibleGrowMode( wxFLEX_GROWMODE_SPECIFIED );
@@ -125,6 +125,16 @@ AdvancedLoadDialogDecl::AdvancedLoadDialogDecl( wxWindow* parent, wxWindowID id,
 	interrupts->SetToolTip( _("Enable processing of lc3 interrupts.  This is automatically configued based on your assembly code.") );
 	
 	fgSizer1->Add( interrupts, 0, wxTOP|wxBOTTOM|wxRIGHT, 5 );
+	
+	m_staticText81 = new wxStaticText( m_panel2, wxID_ANY, _("Strict Execution"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText81->Wrap( -1 );
+	fgSizer1->Add( m_staticText81, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	strictExecution = new wxCheckBox( m_panel2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	strictExecution->SetValue(true); 
+	strictExecution->SetToolTip( _("Enable processing of lc3 interrupts.  This is automatically configued based on your assembly code.") );
+	
+	fgSizer1->Add( strictExecution, 0, wxTOP|wxBOTTOM|wxRIGHT, 5 );
 	
 	
 	bSizer7->Add( fgSizer1, 1, wxEXPAND, 5 );

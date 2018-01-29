@@ -109,7 +109,7 @@ typedef struct lc3_test_output
 /** Main record for a given test case. */
 typedef struct lc3_test
 {
-    lc3_test() : points(0), max_points(0), passed(false), true_traps(false), interrupt_enabled(false),
+    lc3_test() : points(0), max_points(0), passed(false), true_traps(false), interrupt_enabled(false), strict_execution(true),
         disable_plugins(false), randomize(false), fully_randomize(false), has_max_executions(false), has_halted(false), has_halted_normally(false),
         random_seed(-1), fill_value(-1), executions(0), max_executions(0), warnings(0) {}
     std::string name;
@@ -121,6 +121,7 @@ typedef struct lc3_test
     bool passed;
     bool true_traps;
     bool interrupt_enabled;
+    bool strict_execution;
     bool disable_plugins;
     bool randomize;
     bool fully_randomize;

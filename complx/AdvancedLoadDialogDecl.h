@@ -56,6 +56,8 @@ class AdvancedLoadDialogDecl : public wxDialog
 		wxCheckBox* trueTraps;
 		wxStaticText* m_staticText8;
 		wxCheckBox* interrupts;
+		wxStaticText* m_staticText81;
+		wxCheckBox* strictExecution;
 		wxButton* m_button1;
 		wxButton* m_button2;
 		
@@ -66,7 +68,7 @@ class AdvancedLoadDialogDecl : public wxDialog
 	
 	public:
 		
-		AdvancedLoadDialogDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Advanced Load"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,360 ), long style = wxDEFAULT_DIALOG_STYLE ); 
+		AdvancedLoadDialogDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Advanced Load"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 499,393 ), long style = wxDEFAULT_DIALOG_STYLE ); 
 		~AdvancedLoadDialogDecl();
 	
 };

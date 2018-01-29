@@ -73,6 +73,7 @@ class ComplxFrameDecl : public wxFrame
 			ID_ADVANCED,
 			ID_TRUE_TRAPS,
 			ID_INTERRUPTS,
+			ID_STRICT_EXECUTION_MODE,
 			ID_CLEAR_CONSOLE,
 			ID_UNDO_STACK,
 			ID_CALL_STACK,
@@ -110,6 +111,7 @@ class ComplxFrameDecl : public wxFrame
 		wxMenu* menuStateControlMode;
 		wxMenuItem* menuStateTrueTraps;
 		wxMenuItem* menuStateInterrupts;
+		wxMenuItem* menuStateStrictExecution;
 		wxMenu* menuDebug;
 		wxMenu* menuHelp;
 		wxPanel* mainPanel;
@@ -163,6 +165,7 @@ class ComplxFrameDecl : public wxFrame
 		virtual void OnControlModeAdvanced( wxCommandEvent& event ) = 0;
 		virtual void OnTrueTraps( wxCommandEvent& event ) = 0;
 		virtual void OnInterrupts( wxCommandEvent& event ) = 0;
+		virtual void OnStrictExecution( wxCommandEvent& event ) = 0;
 		virtual void OnClearConsole( wxCommandEvent& event ) = 0;
 		virtual void OnClearConsoleInput( wxCommandEvent& event ) = 0;
 		virtual void OnUndoStack( wxCommandEvent& event ) = 0;

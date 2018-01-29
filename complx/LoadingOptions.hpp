@@ -31,6 +31,8 @@ struct LoadingOptions
     bool true_traps = false;
     /** Override interrupts setting */
     bool interrupts = false;
+    /** Override strict execution setting */
+    bool strict_execution = true;
 };
 
 #endif

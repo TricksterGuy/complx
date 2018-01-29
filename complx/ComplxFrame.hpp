@@ -82,6 +82,7 @@ public:
 	void OnControlModeAdvanced(wxCommandEvent& event) override;
     void OnTrueTraps(wxCommandEvent& event) override;
     void OnInterrupts(wxCommandEvent& event) override;
+    void OnStrictExecution(wxCommandEvent& event) override;
     void OnClearConsole(wxCommandEvent& event) override;
     void OnClearConsoleInput(wxCommandEvent& event) override;
 

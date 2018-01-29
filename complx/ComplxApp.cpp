@@ -34,7 +34,7 @@ static const wxCmdLineEntryDesc cmd_descriptions[] =
         wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL
     },
     {
-        wxCMD_LINE_OPTION, "s", "stack_size", "Sets the undo stack size default 65536 instructions",
+        wxCMD_LINE_OPTION, "u", "undo_stack_size", "Sets the undo stack size default 65536 instructions",
         wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL
     },
     {
@@ -62,6 +62,10 @@ static const wxCmdLineEntryDesc cmd_descriptions[] =
         wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL
     },
     {
+        wxCMD_LINE_OPTION, "s", "strict_execution", "Enable strict execution mode 0 = no 1 = yes (default)",
+        wxCMD_LINE_VAL_NUMBER, wxCMD_LINE_PARAM_OPTIONAL
+    },
+    {
         wxCMD_LINE_OPTION, "m", "fill_memory", "Memory fill value default random",
         wxCMD_LINE_VAL_STRING, wxCMD_LINE_PARAM_OPTIONAL
     },
@@ -73,7 +77,7 @@ static const wxCmdLineEntryDesc cmd_descriptions[] =
 IMPLEMENT_APP(ComplxApp)
 
 // Command line
-long disassemble = 1, stack_size = 65536, call_stack_size = 10000, true_traps = 0, interrupts = 0, highlight = 1, pc = 0x3000, memory_fill = 0, register_fill = 0;
+long disassemble = 1, stack_size = 65536, call_stack_size = 10000, true_traps = 0, interrupts = 0, highlight = 1, pc = 0x3000, memory_fill = 0, register_fill = 0, strict_execution = 1;
 wxString address_str = wxEmptyString, register_fill_str = "random", memory_fill_str = "random";
 wxArrayString files;
 ComplxFrame* complxframe;
@@ -123,6 +127,7 @@ bool ComplxApp::OnInit()
     opts.stack_size = stack_size;
     opts.call_stack_size = call_stack_size;
     opts.highlight = highlight != 0;
+    opts.loading_options.strict_execution = strict_execution != 0;
     opts.width = 800;
     opts.height = 600;
 
@@ -244,13 +249,14 @@ int ComplxApp::OnExit()
 bool ComplxApp::OnCmdLineParsed(wxCmdLineParser& parser)
 {
     parser.Found(_("d"),  &disassemble);
-    parser.Found(_("s"),  &stack_size);
+    parser.Found(_("u"),  &stack_size);
     parser.Found(_("a"),  &address_str);
     parser.Found(_("r"),  &register_fill_str);
     parser.Found(_("m"),  &memory_fill_str);
     parser.Found(_("t"),  &true_traps);
     parser.Found(_("ie"), &interrupts);
     parser.Found(_("i"),  &highlight);
+    parser.Found(_("s"),  &strict_execution);
 
     register_fill_str.MakeLower();
     memory_fill_str.MakeLower();

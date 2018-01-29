@@ -75,14 +75,15 @@ enum WARNINGS
     LC3_RESERVED_MEM_READ = 2,
     LC3_UNSUPPORTED_TRAP = 3,
     LC3_UNSUPPORTED_INSTRUCTION = 4,
-    LC3_USER_RTI = 5,
-    LC3_INVALID_CHARACTER_WRITE = 6,
-    LC3_PUTS_INVALID_MEMORY = 7,
-    LC3_DISPLAY_NOT_READY = 8,
-    LC3_KEYBOARD_NOT_READY = 9,
-    LC3_TURN_OFF_VIA_MCR = 10,
-    LC3_PUTSP_INVALID_MEMORY = 11,
-    LC3_PUTSP_UNEXPECTED_NUL = 12,
+    LC3_MALFORMED_INSTRUCTION = 5,
+    LC3_USER_RTI = 6,
+    LC3_INVALID_CHARACTER_WRITE = 7,
+    LC3_PUTS_INVALID_MEMORY = 8,
+    LC3_DISPLAY_NOT_READY = 9,
+    LC3_KEYBOARD_NOT_READY = 10,
+    LC3_TURN_OFF_VIA_MCR = 11,
+    LC3_PUTSP_INVALID_MEMORY = 12,
+    LC3_PUTSP_UNEXPECTED_NUL = 13,
     LC3_WARNINGS               // Must be last.
 };
 
@@ -437,6 +438,7 @@ typedef struct lc3_state
     unsigned char halted:1;
     unsigned char true_traps:1;
     unsigned char interrupt_enabled:1;
+    unsigned char strict_execution:1;
     unsigned int warnings;
     unsigned int executions;
 
@@ -528,7 +530,7 @@ std::string lc3_basic_disassemble(lc3_state& state, unsigned short data);
   * @param data Instruction data.
   * @return The disassembled instruction as a string.
   */
-std::string lc3_disassemble(lc3_state& state, unsigned short data);
+std::string lc3_normal_disassemble(lc3_state& state, unsigned short data);
 /** lc3_smart_disassemble
   *
   * Disassembles the instruction into something a little more high level.
@@ -538,6 +540,18 @@ std::string lc3_disassemble(lc3_state& state, unsigned short data);
   * @return The disassembled instruction as a string.
   */
 std::string lc3_smart_disassemble(lc3_state& state, unsigned short data);
+
+/** lc3_disassemble
+  *
+  * Entry function for disassembling instructions.
+  * If state.strict_execution is enabled will append a ! at the end of the instruction.
+  *
+  * @param state LC3State object.
+  * @param data Instruction data.
+  * @param level disassemle level (0: basic, 1: normal, 2:high level)
+  * @return The disassembled instruction as a string.
+  */
+std::string lc3_disassemble(lc3_state& state, unsigned short data, int level);
 
 /** lc3_load
   *

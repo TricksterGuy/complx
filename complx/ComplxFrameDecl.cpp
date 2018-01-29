@@ -162,11 +162,15 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 
 	menuState->AppendSeparator();
 
-	menuStateTrueTraps = new wxMenuItem( menuState, ID_TRUE_TRAPS, wxString( _("True Traps") ) , _("Enables True Traps"), wxITEM_CHECK );
+	menuStateTrueTraps = new wxMenuItem( menuState, ID_TRUE_TRAPS, wxString( _("&True Traps") ) , _("Enables True Traps"), wxITEM_CHECK );
 	menuState->Append( menuStateTrueTraps );
 
-	menuStateInterrupts = new wxMenuItem( menuState, ID_INTERRUPTS, wxString( _("Interrupts") ) , _("Enables Interrupts"), wxITEM_CHECK );
+	menuStateInterrupts = new wxMenuItem( menuState, ID_INTERRUPTS, wxString( _("&Interrupts") ) , _("Enables Interrupts"), wxITEM_CHECK );
 	menuState->Append( menuStateInterrupts );
+
+	menuStateStrictExecution = new wxMenuItem( menuState, ID_STRICT_EXECUTION_MODE, wxString( _("&Strict Execution Mode") ) + wxT('\t') + wxT("Ctrl+S"), _("Enables strict execution mode."), wxITEM_CHECK );
+	menuState->Append( menuStateStrictExecution );
+	menuStateStrictExecution->Check( true );
 
 	menuState->AppendSeparator();
 
@@ -299,7 +303,7 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	memory->SetDefaultCellAlignment( wxALIGN_LEFT, wxALIGN_CENTRE );
 	memory->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, wxEmptyString ) );
 
-	subsizer->Add( memory, 1, wxALL|wxEXPAND, 5 );
+	subsizer->Add( memory, 1, wxEXPAND, 5 );
 
 	controlSizer = new wxBoxSizer( wxHORIZONTAL );
 
@@ -646,6 +650,7 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	this->Connect( menuStateControlModeAdvanced->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnControlModeAdvanced ) );
 	this->Connect( menuStateTrueTraps->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTrueTraps ) );
 	this->Connect( menuStateInterrupts->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnInterrupts ) );
+	this->Connect( menuStateStrictExecution->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnStrictExecution ) );
 	this->Connect( menuStateClearConsole->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnClearConsole ) );
 	this->Connect( menuStateClearConsoleInput->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnClearConsoleInput ) );
 	this->Connect( menuDebugUndoStack->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUndoStack ) );
@@ -746,6 +751,7 @@ ComplxFrameDecl::~ComplxFrameDecl()
 	this->Disconnect( ID_ADVANCED, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnControlModeAdvanced ) );
 	this->Disconnect( ID_TRUE_TRAPS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTrueTraps ) );
 	this->Disconnect( ID_INTERRUPTS, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnInterrupts ) );
+	this->Disconnect( ID_STRICT_EXECUTION_MODE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnStrictExecution ) );
 	this->Disconnect( ID_CLEAR_CONSOLE, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnClearConsole ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnClearConsoleInput ) );
 	this->Disconnect( ID_UNDO_STACK, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUndoStack ) );

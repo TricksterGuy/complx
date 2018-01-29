@@ -132,6 +132,112 @@ BOOST_FIXTURE_TEST_CASE(InstructionDecodeTest, LC3BasicTest)
     BOOST_CHECK_EQUAL(error.data.data, 0x392);
 }
 
+
+BOOST_FIXTURE_TEST_CASE(InstructionDecodeTest2, LC3BasicTest)
+{
+    lc3_instr instr;
+
+    instr = lc3_decode(state, 0x1008);
+    BOOST_REQUIRE_EQUAL(instr.arith.reg.opcode, ADD_INSTR);
+    BOOST_REQUIRE(!instr.arith.reg.is_imm);
+    BOOST_CHECK_EQUAL(instr.arith.reg.dr, 0);
+    BOOST_CHECK_EQUAL(instr.arith.reg.sr1, 0);
+    BOOST_CHECK_EQUAL(instr.arith.reg.sr2, 0);
+    BOOST_CHECK_EQUAL(instr.arith.reg.unused, 1);
+
+    instr = lc3_decode(state, 0);
+    BOOST_REQUIRE_EQUAL(instr.br.opcode, BR_INSTR);
+    BOOST_CHECK_EQUAL(instr.br.n, 0);
+    BOOST_CHECK_EQUAL(instr.br.z, 0);
+    BOOST_CHECK_EQUAL(instr.br.p, 0);
+    BOOST_CHECK_EQUAL(instr.br.pc_offset, 0);
+
+    instr = lc3_decode(state, 1);
+    BOOST_REQUIRE_EQUAL(instr.br.opcode, BR_INSTR);
+    BOOST_CHECK_EQUAL(instr.br.n, 0);
+    BOOST_CHECK_EQUAL(instr.br.z, 0);
+    BOOST_CHECK_EQUAL(instr.br.p, 0);
+    BOOST_CHECK_EQUAL(instr.br.pc_offset, 1);
+
+    instr = lc3_decode(state, 0xC200);
+    BOOST_REQUIRE_EQUAL(instr.jmp.opcode, JMP_INSTR);
+    BOOST_CHECK_EQUAL(instr.jmp.unused_3, 1);
+    BOOST_CHECK_EQUAL(instr.jmp.base_r, 0);
+    BOOST_CHECK_EQUAL(instr.jmp.unused_6, 0);
+
+    instr = lc3_decode(state, 0xC001);
+    BOOST_REQUIRE_EQUAL(instr.jmp.opcode, JMP_INSTR);
+    BOOST_CHECK_EQUAL(instr.jmp.unused_3, 0);
+    BOOST_CHECK_EQUAL(instr.jmp.base_r, 0);
+    BOOST_CHECK_EQUAL(instr.jmp.unused_6, 1);
+
+    instr = lc3_decode(state, 0x4200);
+    BOOST_REQUIRE_EQUAL(instr.subr.jsrr.opcode, JSRR_INSTR);
+    BOOST_REQUIRE_EQUAL(instr.subr.jsrr.is_jsr, 0);
+    BOOST_CHECK_EQUAL(instr.subr.jsrr.unused_2, 1);
+    BOOST_CHECK_EQUAL(instr.subr.jsrr.base_r, 0);
+    BOOST_CHECK_EQUAL(instr.subr.jsrr.unused_6, 0);
+
+    instr = lc3_decode(state, 0x4001);
+    BOOST_REQUIRE_EQUAL(instr.subr.jsrr.opcode, JSRR_INSTR);
+    BOOST_REQUIRE_EQUAL(instr.subr.jsrr.is_jsr, 0);
+    BOOST_CHECK_EQUAL(instr.subr.jsrr.unused_2, 0);
+    BOOST_CHECK_EQUAL(instr.subr.jsrr.base_r, 0);
+    BOOST_CHECK_EQUAL(instr.subr.jsrr.unused_6, 1);
+
+    instr = lc3_decode(state, 0x5008);
+    BOOST_REQUIRE_EQUAL(instr.arith.reg.opcode, AND_INSTR);
+    BOOST_REQUIRE(!instr.arith.reg.is_imm);
+    BOOST_CHECK_EQUAL(instr.arith.reg.dr, 0);
+    BOOST_CHECK_EQUAL(instr.arith.reg.sr1, 0);
+    BOOST_CHECK_EQUAL(instr.arith.reg.sr2, 0);
+    BOOST_CHECK_EQUAL(instr.arith.reg.unused, 1);
+
+    instr = lc3_decode(state, 0x903E);
+    BOOST_REQUIRE_EQUAL(instr.arith.inv.opcode, NOT_INSTR);
+    BOOST_CHECK_EQUAL(instr.arith.inv.dr, 0);
+    BOOST_CHECK_EQUAL(instr.arith.inv.sr1, 0);
+    BOOST_CHECK_EQUAL(instr.arith.inv.unused, 0x3E);
+
+    instr = lc3_decode(state, 0xF100);
+    BOOST_REQUIRE_EQUAL(instr.trap.opcode, TRAP_INSTR);
+    BOOST_CHECK_EQUAL(instr.trap.unused, 1);
+    BOOST_CHECK_EQUAL(instr.trap.vector, 0);
+}
+
+BOOST_FIXTURE_TEST_CASE(MalformedInstructionTest, LC3BasicTest)
+{
+    const std::vector<unsigned short> malformed_instructions = {0, 1, 0x1008, 0x4001, 0x4200, 0x5008, 0x903E, 0xC001, 0xC200, 0xF100};
+
+    for (const auto& data : malformed_instructions)
+    {
+        BOOST_MESSAGE("data = x" << std::hex << data);
+        lc3_instr instr = lc3_decode(state, data);
+        lc3_state_change change = lc3_execute(state, instr);
+        BOOST_CHECK(state.halted);
+        BOOST_CHECK_EQUAL(state.warnings, 1);
+        BOOST_CHECK_EQUAL(state.pc, 0x2FFF);
+        BOOST_CHECK_EQUAL(change.pc, 0x3000);
+        BOOST_CHECK(!change.halted);
+        lc3_init(state, false, false);
+    }
+}
+
+BOOST_FIXTURE_TEST_CASE(MalformedInstructionDisassemble, LC3BasicTest)
+{
+    const std::vector<unsigned short> malformed_instructions = {0, 1, 0x1008, 0x4001, 0x4200, 0x5008, 0x903E, 0xC001, 0xC200, 0xF100};
+    const std::vector<std::string> answers = {"NOP *", "NOP *", "ADD R0, R0, R0 *", "JSRR R0 *", "JSRR R0 *", "AND R0, R0, R0 *", "NOT R0, R0 *", "JMP R0 *", "JMP R0 *", "TRAP x00 *"};
+
+
+    for (unsigned int i = 0; i < malformed_instructions.size(); i++)
+    {
+        BOOST_MESSAGE("data = x" << std::hex << malformed_instructions[i]);
+        std::string disassemble = lc3_disassemble(state, malformed_instructions[i], 0);
+        BOOST_CHECK_EQUAL(disassemble, answers[i]);
+    }
+}
+
+
 BOOST_FIXTURE_TEST_CASE(InstructionBasicDisassembleTest, LC3BasicTest)
 {
     std::stringstream file(std::string(reinterpret_cast<char*>(allinstrs), allinstrs_len));
@@ -269,7 +375,7 @@ BOOST_FIXTURE_TEST_CASE(TestDisassemble, LC3BasicTest)
         state.pc += 1;
         file.read((char*) &data, sizeof(unsigned short));
         data = ((data >> 8) & 0xFF) | ((data & 0xFF) << 8);
-        std::string instruct = lc3_disassemble(state, data);
+        std::string instruct = lc3_normal_disassemble(state, data);
         BOOST_CHECK_EQUAL(instruct,  answers[i]);
     }
 }
@@ -447,6 +553,8 @@ BOOST_FIXTURE_TEST_CASE(TestArithInstructions, LC3BasicTest)
 
 BOOST_FIXTURE_TEST_CASE(TestControlInstructions, LC3BasicTest)
 {
+    state.strict_execution = 0;
+
     br_instr brnzp, brn, brz, brp, brnil;
     jsr_instr jsr;
     jsrr_instr jsrr;
@@ -1232,6 +1340,7 @@ BOOST_FIXTURE_TEST_CASE(TestSymbolTable, LC3BasicTest)
 
 BOOST_FIXTURE_TEST_CASE(TestBreakpoints, LC3BasicTest)
 {
+    state.strict_execution = 0;
     lc3_add_break(state, 0x3012);
     lc3_add_break(state, 0x3016, "", "1");
     lc3_add_break(state, 0x3020, "", "0");

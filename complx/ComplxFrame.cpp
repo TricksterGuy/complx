@@ -340,9 +340,11 @@ void ComplxFrame::DoLoadFile(const LoadingOptions& opts)
     lc3_set_true_traps(state, opts.true_traps || tvt_modification);
     state.interrupt_enabled = opts.interrupts || ivt_modification;
     console->SetInput(opts.console_input);
+    state.strict_execution = opts.strict_execution;
     // Update menus
     menuStateTrueTraps->Check(opts.true_traps || tvt_modification);
     menuStateInterrupts->Check(opts.interrupts || ivt_modification);
+    menuStateStrictExecution->Check(opts.strict_execution);
 
     if (tvt_modification)
     {
@@ -993,6 +995,16 @@ void ComplxFrame::OnTrueTraps(wxCommandEvent& event)
 void ComplxFrame::OnInterrupts(wxCommandEvent& event)
 {
     state.interrupt_enabled = ~state.interrupt_enabled;
+    UpdateMemory();
+}
+
+/** OnStrictExecution
+  *
+  * Toggles strict execution mode.
+  */
+void ComplxFrame::OnStrictExecution(wxCommandEvent& event)
+{
+    state.strict_execution = ~state.strict_execution;
     UpdateMemory();
 }
 

@@ -324,6 +324,8 @@ bool XmlTestParser::LoadTest(lc3_test_suite& suite, wxXmlNode* root)
             test.randomize = wxAtoi(child->GetNodeContent()) != 0;
         else if (child->GetName() == "fully-randomize")
             test.fully_randomize = wxAtoi(child->GetNodeContent()) != 0;
+        else if (child->GetName() == "strict-execution")
+            test.strict_execution = wxAtoi(child->GetNodeContent()) != 0;
         else if (child->GetName() == "random-seed")
         {
             std::string seed = child->GetNodeContent().ToStdString();

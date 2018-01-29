@@ -181,7 +181,7 @@ std::string lc3_basic_disassemble(lc3_state& state, unsigned short data)
     return buf;
 }
 
-std::string lc3_disassemble(lc3_state& state, unsigned short data)
+std::string lc3_normal_disassemble(lc3_state& state, unsigned short data)
 {
     lc3_instr instr = lc3_decode(state, data);
     unsigned int opcode = instr.data.opcode;
@@ -545,6 +545,66 @@ std::string lc3_smart_disassemble(lc3_state& state, unsigned short instruction)
     }
 
     return buf;
+}
+
+std::string lc3_disassemble(lc3_state& state, unsigned short data, int level)
+{
+    std::string instr;
+    switch(level)
+    {
+        case 0:
+            instr = lc3_basic_disassemble(state, data);
+            break;
+        case 1:
+            instr = lc3_normal_disassemble(state, data);
+            break;
+        case 2:
+            instr = lc3_smart_disassemble(state, data);
+            break;
+        default:
+            instr = "";
+            break;
+    }
+
+    if (state.strict_execution)
+    {
+        switch((data >> 12) & 0xF)
+        {
+            case ADD_INSTR:
+            case AND_INSTR:
+                if ((data & 0x20) == 0 && (data & 0x18) != 0)
+                    instr += " *";
+                break;
+            case BR_INSTR:
+                if ((data & 0xE0) == 0)
+                    instr += " *";
+                break;
+            case JMP_INSTR:
+                if ((data & 0xE3F) != 0)
+                    instr += " *";
+                break;
+            case JSRR_INSTR:
+                if ((data & 0x800) == 0 && (data & 0x63F) != 0)
+                    instr += " *";
+                break;
+            case NOT_INSTR:
+                if ((data & 0x3F) != 0x3F)
+                    instr += " *";
+                break;
+            case RTI_INSTR:
+                if ((data & 0xFFF) != 0)
+                    instr += " *";
+                break;
+            case TRAP_INSTR:
+                if ((data & 0xF00) != 0)
+                    instr += " *";
+                break;
+            default:
+                break;
+        }
+    }
+
+    return instr;
 }
 
 int lc3_load(lc3_state& state, std::istream& file, int (*reader)(std::istream&))

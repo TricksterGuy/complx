@@ -24,6 +24,7 @@ AdvancedLoadDialog::AdvancedLoadDialog(wxWindow* parent, const LoadingOptions& o
     pcValue->SetValue(wxString::Format("x%04x", opts.pc));
     trueTraps->SetValue(opts.true_traps);
     interrupts->SetValue(opts.interrupts);
+    strictExecution->SetValue(opts.strict_execution);
 }
 
 LoadingOptions AdvancedLoadDialog::GetOptions()
@@ -68,6 +69,7 @@ LoadingOptions AdvancedLoadDialog::GetOptions()
     options.pc = error != 0 ? 0x3000 : ret;
     options.true_traps = trueTraps->IsChecked();
     options.interrupts = interrupts->IsChecked();
+    options.strict_execution = strictExecution->IsChecked();
     return options;
 }
 

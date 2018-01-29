@@ -399,7 +399,7 @@
                         <event name="OnUpdateUI"></event>
                     </object>
                 </object>
-                <object class="wxMenu" expanded="0">
+                <object class="wxMenu" expanded="1">
                     <property name="label">State</property>
                     <property name="name">menuState</property>
                     <property name="permission">protected</property>
@@ -591,7 +591,7 @@
                         <property name="help">Enables True Traps</property>
                         <property name="id">ID_TRUE_TRAPS</property>
                         <property name="kind">wxITEM_CHECK</property>
-                        <property name="label">True Traps</property>
+                        <property name="label">&amp;True Traps</property>
                         <property name="name">menuStateTrueTraps</property>
                         <property name="permission">protected</property>
                         <property name="shortcut"></property>
@@ -606,7 +606,7 @@
                         <property name="help">Enables Interrupts</property>
                         <property name="id">ID_INTERRUPTS</property>
                         <property name="kind">wxITEM_CHECK</property>
-                        <property name="label">Interrupts</property>
+                        <property name="label">&amp;Interrupts</property>
                         <property name="name">menuStateInterrupts</property>
                         <property name="permission">protected</property>
                         <property name="shortcut"></property>
@@ -614,8 +614,23 @@
                         <event name="OnMenuSelection">OnInterrupts</event>
                         <event name="OnUpdateUI"></event>
                     </object>
-                    <object class="separator" expanded="0">
-                        <property name="name">m_separator3</property>
+                    <object class="wxMenuItem" expanded="1">
+                        <property name="bitmap"></property>
+                        <property name="checked">1</property>
+                        <property name="enabled">1</property>
+                        <property name="help">Enables strict execution mode.</property>
+                        <property name="id">ID_STRICT_EXECUTION_MODE</property>
+                        <property name="kind">wxITEM_CHECK</property>
+                        <property name="label">&amp;Strict Execution Mode</property>
+                        <property name="name">menuStateStrictExecution</property>
+                        <property name="permission">protected</property>
+                        <property name="shortcut">Ctrl+S</property>
+                        <property name="unchecked_bitmap"></property>
+                        <event name="OnMenuSelection">OnStrictExecution</event>
+                        <event name="OnUpdateUI"></event>
+                    </object>
+                    <object class="separator" expanded="1">
+                        <property name="name">m_separator6</property>
                         <property name="permission">none</property>
                     </object>
                     <object class="wxMenuItem" expanded="0">
@@ -649,7 +664,7 @@
                         <event name="OnUpdateUI"></event>
                     </object>
                 </object>
-                <object class="wxMenu" expanded="1">
+                <object class="wxMenu" expanded="0">
                     <property name="label">Debug</property>
                     <property name="name">menuDebug</property>
                     <property name="permission">protected</property>
