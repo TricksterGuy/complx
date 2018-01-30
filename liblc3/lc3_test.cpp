@@ -140,7 +140,7 @@ void lc3_init_test_case(lc3_state& state, std::istream& stream, lc3_test& test, 
 
     if (test.true_traps) lc3_set_true_traps(state, 1);
     if (test.interrupt_enabled) state.interrupt_enabled = 1;
-    if (test.strict_execution) state.strict_execution = 1;
+    state.strict_execution = test.strict_execution;
     bool disable_plugins = test.disable_plugins;
 
     if (in_lc3_test)

@@ -576,7 +576,7 @@ std::string lc3_disassemble(lc3_state& state, unsigned short data, int level)
                     instr += " *";
                 break;
             case BR_INSTR:
-                if ((data & 0xE0) == 0)
+                if ((data & 0xE00) == 0)
                     instr += " *";
                 break;
             case JMP_INSTR:

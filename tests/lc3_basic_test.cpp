@@ -235,6 +235,10 @@ BOOST_FIXTURE_TEST_CASE(MalformedInstructionDisassemble, LC3BasicTest)
         std::string disassemble = lc3_disassemble(state, malformed_instructions[i], 0);
         BOOST_CHECK_EQUAL(disassemble, answers[i]);
     }
+
+    // This should not be considered malformed
+    std::string disassemble = lc3_disassemble(state, 0x0E00, 0);
+    BOOST_CHECK_EQUAL(disassemble, "NOP");
 }
 
 

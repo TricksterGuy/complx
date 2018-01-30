@@ -95,7 +95,7 @@ wxString MemoryView::GetValue(int item, int column)
     case MemoryInstruction:
         // Change the pc temporarily...
         state.pc = (unsigned short) (addr + 1);
-        instruction = lc3_disassemble(state, data, 0);
+        instruction = lc3_disassemble(state, data, disassemble_level);
         ret = wxString::FromUTF8(instruction.c_str());
         state.pc = pc;
         break;
