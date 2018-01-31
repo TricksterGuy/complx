@@ -71,6 +71,7 @@ typedef struct lc3_test_input
     unsigned int type;
     std::string address;
     /// TODO only one of these will be used.  Can't do this with a union
+    /// TODO clean this up, should only need a string or a vector string.
     std::string value;
     std::string registerval;
     std::string pcval;
