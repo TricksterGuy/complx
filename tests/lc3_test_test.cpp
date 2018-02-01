@@ -45,9 +45,12 @@ BOOST_FIXTURE_TEST_CASE(TestParseXML, LC3TestTest)
             <output>
                 <test-value condition="equals"><address>E</address><value>158</value></test-value>
                 <test-pointer><address>F</address><value>8</value></test-pointer>
+                <test-register><register>R7</register><value>52</value></test-register>
+                <test-pc><value>x3333</value></test-pc>
                 <test-array><address>G</address><value>8,6,4,3,4,5,3,4,2,91</value></test-array>
-                <test-string><address>H</address><value>!DLROW OLLEH</value></test-string>
+                <test-string points="3"><address>H</address><value>!DLROW OLLEH</value></test-string>
                 <test-stdout><value>HERE IS SOME OUTPUT</value></test-stdout>
+                <test-subr><answer>0</answer><points><answer>1</answer><params>1</params><r7>1</r7><r6>1</r6><r5>1</r5></points><deductions-per-mistake>1</deductions-per-mistake></test-subr>
             </output>
         </test-case>
     </test-suite>)";
@@ -66,6 +69,7 @@ BOOST_FIXTURE_TEST_CASE(TestParseXML, LC3TestTest)
     BOOST_CHECK_EQUAL(test.random_seed, 2110);
     BOOST_CHECK_EQUAL(test.interrupt_enabled, false);
     BOOST_CHECK_EQUAL(test.strict_execution, false);
+
 
     BOOST_REQUIRE_EQUAL(test.input.size(), 9);
 
@@ -113,7 +117,64 @@ BOOST_FIXTURE_TEST_CASE(TestParseXML, LC3TestTest)
 
 
 
-    //BOOST_REQUIRE_EQUAL(test.output.size(), 1);
+    BOOST_REQUIRE_EQUAL(test.output.size(), 8);
+
+    BOOST_CHECK_EQUAL(test.output[0].address, "E");
+    BOOST_CHECK_EQUAL(test.output[0].type, TEST_VALUE);
+    BOOST_CHECK_EQUAL(test.output[0].cmp_type, CMP_EQUAL);
+    BOOST_CHECK_EQUAL(test.output[0].value, "158");
+
+    BOOST_CHECK_EQUAL(test.output[1].address, "F");
+    BOOST_CHECK_EQUAL(test.output[1].type, TEST_POINTER);
+    BOOST_CHECK_EQUAL(test.output[1].cmp_type, CMP_EQUAL);
+    BOOST_CHECK_EQUAL(test.output[1].pointer, "8");
+
+    BOOST_CHECK_EQUAL(test.output[2].address, "R7");
+    BOOST_CHECK_EQUAL(test.output[2].type, TEST_REGISTER);
+    BOOST_CHECK_EQUAL(test.output[2].cmp_type, CMP_EQUAL);
+    BOOST_CHECK_EQUAL(test.output[2].registerval, "52");
+
+    BOOST_CHECK_EQUAL(test.output[3].type, TEST_PC);
+    BOOST_CHECK_EQUAL(test.output[3].cmp_type, CMP_EQUAL);
+    BOOST_CHECK_EQUAL(test.output[3].pcval, "x3333");
+
+    const std::vector<std::string> array_answer = {"8","6","4","3","4","5","3","4","2","91"};
+    BOOST_CHECK_EQUAL(test.output[4].address, "G");
+    BOOST_CHECK_EQUAL(test.output[4].type, TEST_ARRAY);
+    BOOST_CHECK_EQUAL(test.output[4].cmp_type, CMP_ARRAY_EQUAL);
+    BOOST_CHECK_EQUAL_COLLECTIONS(test.output[4].array.begin(), test.output[4].array.end(), array_answer.begin(), array_answer.end());
+
+    BOOST_CHECK_EQUAL(test.output[5].address, "H");
+    BOOST_CHECK_EQUAL(test.output[5].type, TEST_STRING);
+    BOOST_CHECK_EQUAL(test.output[5].cmp_type, CMP_STRING_EQUAL);
+    BOOST_CHECK_EQUAL(test.output[5].text, "!DLROW OLLEH");
+    BOOST_CHECK_EQUAL(test.output[5].points, 3);
+
+    BOOST_CHECK_EQUAL(test.output[6].type, TEST_IO);
+    BOOST_CHECK_EQUAL(test.output[6].cmp_type, CMP_STRING_EQUAL);
+    BOOST_CHECK_EQUAL(test.output[6].io, "HERE IS SOME OUTPUT");
+
+    BOOST_REQUIRE_EQUAL(test.output[7].type, TEST_SUBROUTINE);
+
+    lc3_subr_output& subr_output = test.output[7].subroutine;
+    BOOST_CHECK_EQUAL(subr_output.answer, "0");
+    BOOST_CHECK_EQUAL(subr_output.stack, "xF000");
+    BOOST_CHECK_EQUAL(subr_output.r5, "xCAFE");
+    BOOST_CHECK_EQUAL(subr_output.r7, "x8000");
+    BOOST_CHECK(subr_output.locals.empty());
+    BOOST_CHECK(subr_output.calls.empty());
+    const std::vector<std::string> out_params = {"1", "7", "20"};
+    BOOST_CHECK_EQUAL_COLLECTIONS(subr_output.params.begin(), subr_output.params.end(), out_params.begin(), out_params.end());
+    BOOST_CHECK_EQUAL(subr_output.points_answer, 1);
+    BOOST_CHECK_EQUAL(subr_output.points_params, 1);
+    BOOST_CHECK_EQUAL(subr_output.points_r6, 1);
+    BOOST_CHECK_EQUAL(subr_output.points_r7, 1);
+    BOOST_CHECK_EQUAL(subr_output.points_r5, 1);
+    BOOST_CHECK_EQUAL(subr_output.points_locals, 0);
+    BOOST_CHECK_EQUAL(subr_output.points_calls, 0);
+    BOOST_CHECK_EQUAL(subr_output.points_read_answer, 0);
+    BOOST_CHECK_EQUAL(subr_output.deductions_edist, 1);
+
 }
 
 BOOST_FIXTURE_TEST_CASE(SimpleTest, LC3TestTest)
