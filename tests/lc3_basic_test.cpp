@@ -207,7 +207,7 @@ BOOST_FIXTURE_TEST_CASE(InstructionDecodeTest2, LC3BasicTest)
 
 BOOST_FIXTURE_TEST_CASE(MalformedInstructionTest, LC3BasicTest)
 {
-    const std::vector<unsigned short> malformed_instructions = {0, 1, 0x1008, 0x4001, 0x4200, 0x5008, 0x903E, 0xC001, 0xC200, 0xF100};
+    const std::vector<unsigned short> malformed_instructions = {0, 1, 0x1008, 0x4001, 0x4200, 0x5008, 0x8001, 0x903E, 0xC001, 0xC200, 0xF100};
 
     for (const auto& data : malformed_instructions)
     {
@@ -225,8 +225,8 @@ BOOST_FIXTURE_TEST_CASE(MalformedInstructionTest, LC3BasicTest)
 
 BOOST_FIXTURE_TEST_CASE(MalformedInstructionDisassemble, LC3BasicTest)
 {
-    const std::vector<unsigned short> malformed_instructions = {0, 1, 0x1008, 0x4001, 0x4200, 0x5008, 0x903E, 0xC001, 0xC200, 0xF100};
-    const std::vector<std::string> answers = {"NOP *", "NOP *", "ADD R0, R0, R0 *", "JSRR R0 *", "JSRR R0 *", "AND R0, R0, R0 *", "NOT R0, R0 *", "JMP R0 *", "JMP R0 *", "TRAP x00 *"};
+    const std::vector<unsigned short> malformed_instructions = {0, 1, 0x1008, 0x4001, 0x4200, 0x5008, 0x8001, 0x903E, 0xC001, 0xC200, 0xF100};
+    const std::vector<std::string> answers = {"NOP *", "NOP *", "ADD R0, R0, R0 *", "JSRR R0 *", "JSRR R0 *", "AND R0, R0, R0 *", "RTI *", "NOT R0, R0 *", "JMP R0 *", "JMP R0 *", "TRAP x00 *"};
 
 
     for (unsigned int i = 0; i < malformed_instructions.size(); i++)

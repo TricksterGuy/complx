@@ -115,8 +115,6 @@ BOOST_FIXTURE_TEST_CASE(TestParseXML, LC3TestTest)
     const std::vector<std::string> answer_params = {"1", "7", "20"};
     BOOST_CHECK_EQUAL_COLLECTIONS(subr_input.params.begin(), subr_input.params.end(), answer_params.begin(), answer_params.end());
 
-
-
     BOOST_REQUIRE_EQUAL(test.output.size(), 8);
 
     BOOST_CHECK_EQUAL(test.output[0].address, "E");
@@ -174,7 +172,6 @@ BOOST_FIXTURE_TEST_CASE(TestParseXML, LC3TestTest)
     BOOST_CHECK_EQUAL(subr_output.points_calls, 0);
     BOOST_CHECK_EQUAL(subr_output.points_read_answer, 0);
     BOOST_CHECK_EQUAL(subr_output.deductions_edist, 1);
-
 }
 
 BOOST_FIXTURE_TEST_CASE(SimpleTest, LC3TestTest)
@@ -243,6 +240,90 @@ BOOST_FIXTURE_TEST_CASE(SimpleTest, LC3TestTest)
     BOOST_CHECK(test2.has_halted);
     BOOST_CHECK(test2.has_halted_normally);
     BOOST_CHECK_EQUAL(test2.executions, 5);
+}
+
+BOOST_FIXTURE_TEST_CASE(PointerTest, LC3TestTest)
+{
+    const std::string xml = R"(<?xml version="1.0" encoding="UTF-8"?>
+    <test-suite>
+        <test-case>
+            <name>ADD_PTR_TEST</name>
+            <has-max-executions>1</has-max-executions>
+            <max-executions>1000000</max-executions>
+            <randomize>1</randomize>
+            <fully-randomize>0</fully-randomize>
+            <input>
+                <test-pointer><address>A</address><value>1</value></test-pointer>
+                <test-pointer><address>B</address><value>2</value></test-pointer>
+            </input>
+            <output>
+                <test-pointer><address>ANSWER</address><value>3</value></test-pointer>
+            </output>
+        </test-case>
+    </test-suite>)";
+
+    BOOST_REQUIRE(XmlTestParser().LoadTestSuiteData(suite, xml));
+
+    std::stringstream assembly(R"(
+    .orig x3000
+        LDI R0, A
+        LDI R1, B
+        ADD R0, R1, R0
+        STI R0, ANSWER
+        HALT
+        A .fill x4000
+        B .fill x4001
+        ANSWER .fill x4002
+    .end
+    )");
+
+    lc3_run_test_suite(suite, assembly, 0, 0);
+
+    BOOST_REQUIRE(suite.passed);
+    BOOST_REQUIRE_EQUAL(suite.tests.size(), 1);
+
+    const lc3_test& test = suite.tests[0];
+    BOOST_CHECK(test.passed);
+    BOOST_CHECK(test.has_halted);
+    BOOST_CHECK(test.has_halted_normally);
+    BOOST_CHECK_EQUAL(test.executions, 5);
+}
+
+BOOST_FIXTURE_TEST_CASE(OutputTest, LC3TestTest)
+{
+    const std::string xml = R"(<?xml version="1.0" encoding="UTF-8"?>
+    <test-suite>
+        <test-case>
+            <name>Hello world test</name>
+            <has-max-executions>1</has-max-executions>
+            <max-executions>1000000</max-executions>
+            <output>
+                <test-stdout><value>HELLO WORLD!</value></test-stdout>
+            </output>
+        </test-case>
+    </test-suite>)";
+
+    BOOST_REQUIRE(XmlTestParser().LoadTestSuiteData(suite, xml));
+
+    std::stringstream assembly(R"(
+    .orig x3000
+        LEA R0, HELLO_WORLD
+        PUTS
+        HALT
+        HELLO_WORLD .stringz "HELLO WORLD!"
+    .end
+    )");
+
+    lc3_run_test_suite(suite, assembly, 0, 0);
+
+    BOOST_REQUIRE(suite.passed);
+    BOOST_REQUIRE_EQUAL(suite.tests.size(), 1);
+
+    const lc3_test& test = suite.tests[0];
+    BOOST_CHECK(test.passed);
+    BOOST_CHECK(test.has_halted);
+    BOOST_CHECK(test.has_halted_normally);
+    BOOST_CHECK_EQUAL(test.executions, 3);
 }
 
 BOOST_FIXTURE_TEST_CASE(StrictExecutionTest, LC3TestTest)
