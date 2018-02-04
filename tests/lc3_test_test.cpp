@@ -326,6 +326,56 @@ BOOST_FIXTURE_TEST_CASE(OutputTest, LC3TestTest)
     BOOST_CHECK_EQUAL(test.executions, 3);
 }
 
+BOOST_FIXTURE_TEST_CASE(SubroutineTest, LC3TestTest)
+{
+    const std::string xml = R"(<?xml version="1.0" encoding="UTF-8"?>
+    <test-suite>
+        <test-case>
+            <name>Hello world test</name>
+            <has-max-executions>1</has-max-executions>
+            <max-executions>1000000</max-executions>
+            <input>
+                <test-subr><name>RETURN7</name><stack>xF000</stack><r5>xCAFE</r5><r7>x8000</r7></test-subr>
+            </input>
+            <output>
+                <test-subr><answer>7</answer></test-subr>
+            </output>
+        </test-case>
+    </test-suite>)";
+
+    BOOST_REQUIRE(XmlTestParser().LoadTestSuiteData(suite, xml));
+
+    std::stringstream assembly(R"(
+    .orig x3000
+        RETURN7
+            ADD R6, R6, -3
+            STR R5, R6, 0
+            STR R7, R6, 1
+            AND R5, R5, 0
+            ADD R5, R5, 7
+            STR R5, R6, 2
+            LDR R5, R6, 0
+            LDR R7, R6, 1
+            ADD R6, R6, 2
+            RET
+    .end
+    )");
+
+    lc3_run_test_suite(suite, assembly, 0, 0);
+
+    std::stringstream oss;
+    lc3_write_test_report(oss, suite, "");
+
+    BOOST_REQUIRE(suite.passed);
+    BOOST_REQUIRE_EQUAL(suite.tests.size(), 1);
+
+    const lc3_test& test = suite.tests[0];
+    BOOST_CHECK(test.passed);
+    BOOST_CHECK(test.has_halted);
+    BOOST_CHECK(test.has_halted_normally);
+    BOOST_CHECK_EQUAL(test.executions, 11); // Plus implicit halt at x8000.
+}
+
 BOOST_FIXTURE_TEST_CASE(StrictExecutionTest, LC3TestTest)
 {
     const std::string xml = R"(<?xml version="1.0" encoding="UTF-8"?>

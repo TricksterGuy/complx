@@ -61,6 +61,7 @@ const unsigned char simplesubr[] = {
 };
 const unsigned int simplesubr_len = 22;
 
+
 BOOST_FIXTURE_TEST_CASE(InstructionDecodeTest, LC3BasicTest)
 {
     std::stringstream file(std::string(reinterpret_cast<char*>(allinstrs), allinstrs_len));
