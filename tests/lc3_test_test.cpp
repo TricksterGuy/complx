@@ -367,8 +367,6 @@ BOOST_FIXTURE_TEST_CASE(ArrayTest, LC3TestTest)
     BOOST_CHECK_EQUAL(test.executions, 1);
 }
 
-
-
 BOOST_FIXTURE_TEST_CASE(OutputTest, LC3TestTest)
 {
     const std::string xml = R"(<?xml version="1.0" encoding="UTF-8"?>
@@ -405,6 +403,87 @@ BOOST_FIXTURE_TEST_CASE(OutputTest, LC3TestTest)
     BOOST_CHECK(test.has_halted_normally);
     BOOST_CHECK_EQUAL(test.executions, 3);
 }
+
+BOOST_FIXTURE_TEST_CASE(RegisterTest, LC3TestTest)
+{
+    const std::string xml = R"(<?xml version="1.0" encoding="UTF-8"?>
+    <test-suite>
+        <test-case>
+            <name>JUST HALT</name>
+            <has-max-executions>1</has-max-executions>
+            <max-executions>1000000</max-executions>
+            <output>
+                <test-pc><value>x3000</value></test-pc>
+            </output>
+        </test-case>
+        <test-case>
+            <name>Hello world test</name>
+            <has-max-executions>1</has-max-executions>
+            <max-executions>1000000</max-executions>
+            <input>
+                <test-pc><value>x4000</value></test-pc>
+                <test-register><register>R0</register><value>65</value></test-register>
+            </input>
+            <output>
+                <test-stdout><value>A</value></test-stdout>
+                <test-pc><value>x4001</value></test-pc>
+            </output>
+        </test-case>
+        <test-case>
+            <name>Hello world test</name>
+            <has-max-executions>1</has-max-executions>
+            <max-executions>1000000</max-executions>
+            <input>
+                <test-pc><value>x5000</value></test-pc>
+                <test-stdin><value>A</value></test-stdin>
+            </input>
+            <output>
+                <test-register><register>R0</register><value>65</value></test-register>
+                <test-pc><value>x5001</value></test-pc>
+            </output>
+        </test-case>
+    </test-suite>)";
+
+    BOOST_REQUIRE(XmlTestParser().LoadTestSuiteData(suite, xml));
+
+    std::stringstream assembly(R"(
+    .orig x3000
+        HALT
+    .end
+    .orig x4000
+        OUT
+        HALT
+    .end
+    .orig x5000
+        GETC
+        HALT
+    .end
+    )");
+
+    lc3_run_test_suite(suite, assembly, 0, 0);
+
+    BOOST_REQUIRE(suite.passed);
+    BOOST_REQUIRE_EQUAL(suite.tests.size(), 3);
+
+    const lc3_test& test = suite.tests[0];
+    BOOST_CHECK(test.passed);
+    BOOST_CHECK(test.has_halted);
+    BOOST_CHECK(test.has_halted_normally);
+    BOOST_CHECK_EQUAL(test.executions, 1);
+
+    const lc3_test& test2 = suite.tests[1];
+    BOOST_CHECK(test2.passed);
+    BOOST_CHECK(test2.has_halted);
+    BOOST_CHECK(test2.has_halted_normally);
+    BOOST_CHECK_EQUAL(test2.executions, 2);
+
+    const lc3_test& test3 = suite.tests[2];
+    BOOST_CHECK(test3.passed);
+    BOOST_CHECK(test3.has_halted);
+    BOOST_CHECK(test3.has_halted_normally);
+    BOOST_CHECK_EQUAL(test3.executions, 2);
+}
+
 
 BOOST_FIXTURE_TEST_CASE(SubroutineTest, LC3TestTest)
 {
