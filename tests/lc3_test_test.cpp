@@ -490,7 +490,7 @@ BOOST_FIXTURE_TEST_CASE(SubroutineTest, LC3TestTest)
     const std::string xml = R"(<?xml version="1.0" encoding="UTF-8"?>
     <test-suite>
         <test-case>
-            <name>Hello world test</name>
+            <name>Return 7 test</name>
             <has-max-executions>1</has-max-executions>
             <max-executions>1000000</max-executions>
             <input>
@@ -533,6 +533,176 @@ BOOST_FIXTURE_TEST_CASE(SubroutineTest, LC3TestTest)
     BOOST_CHECK(test.has_halted);
     BOOST_CHECK(test.has_halted_normally);
     BOOST_CHECK_EQUAL(test.executions, 11); // Plus implicit halt at x8000.
+}
+
+BOOST_FIXTURE_TEST_CASE(SubroutineWithParamsAndCallsTest, LC3TestTest)
+{
+    // Psuedocode
+    // int a(int x, int y, int z) {
+    //   return b(x, y) + b(x, z) + b(y, z) + c(x);
+    // }
+    //
+    // int b(int x, int y) {
+    //    return x * y;
+    // }
+    //
+    // int c(int x) {
+    //    return x / 2;
+    // }
+    const std::string xml = R"(<?xml version="1.0" encoding="UTF-8"?>
+    <test-suite>
+        <test-case>
+            <name>A test</name>
+            <has-max-executions>1</has-max-executions>
+            <max-executions>1000000</max-executions>
+            <input>
+                <test-subr><name>A</name><stack>xF000</stack><r5>xCAFE</r5><r7>x8000</r7><params>3, 5, 7</params></test-subr>
+            </input>
+            <output>
+                <test-subr>
+                    <answer>72</answer>
+                    <calls>
+                        <call><name>B</name><params>3, 5</params></call>
+                        <call><name>B</name><params>3, 7</params></call>
+                        <call><name>B</name><params>5, 7</params></call>
+                        <call><name>C</name><params>3</params></call>
+                    </calls>
+                </test-subr>
+            </output>
+        </test-case>
+        <test-case>
+            <name>B test</name>
+            <has-max-executions>1</has-max-executions>
+            <max-executions>1000000</max-executions>
+            <input>
+                <test-subr><name>B</name><stack>xF000</stack><r5>xCAFE</r5><r7>x8000</r7><params>1, 3</params></test-subr>
+            </input>
+            <output>
+                <test-subr>
+                    <answer>3</answer>
+                </test-subr>
+            </output>
+        </test-case>
+        <test-case>
+            <name>C test</name>
+            <has-max-executions>1</has-max-executions>
+            <max-executions>1000000</max-executions>
+            <input>
+                <test-subr><name>C</name><stack>xF000</stack><r5>xCAFE</r5><r7>x8000</r7><params>6</params></test-subr>
+            </input>
+            <output>
+                <test-subr>
+                    <answer>3</answer>
+                </test-subr>
+            </output>
+        </test-case>
+    </test-suite>)";
+
+    BOOST_REQUIRE(XmlTestParser().LoadTestSuiteData(suite, xml));
+
+    std::stringstream assembly(R"(
+    ;@plugin filename=lc3_multiply
+    ;@plugin filename=lc3_udiv vector=x80
+
+    .orig x3000
+        A
+            ADD R6, R6, -3
+            STR R5, R6, 0
+            STR R7, R6, 1
+            ADD R5, R6, -1
+            LDR R0, R5, 4
+            LDR R1, R5, 5
+            ADD R6, R6, -3
+            STR R0, R6, 0
+            STR R1, R6, 1
+            JSR B
+            LDR R0, R6, 0
+            ADD R6, R6, 1
+            STR R0, R5, 0
+            LDR R0, R5, 4
+            LDR R1, R5, 6
+            STR R0, R6, 0
+            STR R1, R6, 1
+            JSR B
+            LDR R0, R6, 0
+            ADD R6, R6, 1
+            LDR R1, R5, 0
+            ADD R0, R0, R1
+            STR R0, R5, 0
+            LDR R0, R5, 5
+            LDR R1, R5, 6
+            STR R0, R6, 0
+            STR R1, R6, 1
+            JSR B
+            LDR R0, R6, 0
+            ADD R6, R6, 2
+            LDR R1, R5, 0
+            ADD R0, R0, R1
+            STR R0, R5, 0
+            LDR R0, R5, 4
+            STR R0, R6, 0
+            JSR C
+            LDR R0, R6, 0
+            ADD R6, R6, 2
+            LDR R1, R5, 0
+            ADD R0, R0, R1
+            STR R0, R5, 3
+            ADD R6, R5, 3
+            LDR R7, R5, 2
+            LDR R5, R5, 1
+            RET
+        B
+            ADD R6, R6, -3
+            STR R5, R6, 0
+            STR R7, R6, 1
+            ADD R5, R6, -1
+            LDR R0, R5, 4
+            LDR R1, R5, 5
+            MUL R0, R1, R0
+            STR R0, R5, 3
+            LDR R5, R6, 0
+            LDR R7, R6, 1
+            ADD R6, R6, 2
+            RET
+        C
+            ADD R6, R6, -3
+            STR R5, R6, 0
+            STR R7, R6, 1
+            ADD R5, R6, -1
+            LDR R0, R5, 4
+            AND R1, R1, 0
+            ADD R1, R1, 2
+            UDIV
+            STR R0, R5, 3
+            LDR R5, R6, 0
+            LDR R7, R6, 1
+            ADD R6, R6, 2
+            RET
+    .end
+    )");
+
+    lc3_run_test_suite(suite, assembly, 0, 0);
+
+    std::stringstream oss;
+    lc3_write_test_report(oss, suite, "");
+
+    BOOST_REQUIRE(suite.passed);
+    BOOST_REQUIRE_EQUAL(suite.tests.size(), 3);
+
+    const lc3_test& test = suite.tests[0];
+    BOOST_CHECK(test.passed);
+    BOOST_CHECK(test.has_halted);
+    BOOST_CHECK(test.has_halted_normally);
+
+    const lc3_test& test2 = suite.tests[1];
+    BOOST_CHECK(test2.passed);
+    BOOST_CHECK(test2.has_halted);
+    BOOST_CHECK(test2.has_halted_normally);
+
+    const lc3_test& test3 = suite.tests[2];
+    BOOST_CHECK(test3.passed);
+    BOOST_CHECK(test3.has_halted);
+    BOOST_CHECK(test3.has_halted_normally);
 }
 
 BOOST_FIXTURE_TEST_CASE(StrictExecutionTest, LC3TestTest)
