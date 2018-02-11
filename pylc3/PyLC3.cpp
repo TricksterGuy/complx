@@ -1,6 +1,4 @@
 #include "PyLC3.hpp"
-#include "XmlTestParser.hpp"
-
 
 bool LC3State::load(const std::string& filename)
 {
@@ -21,11 +19,6 @@ bool LC3State::load(const std::string& filename)
         return false;
     }
     return true;
-}
-
-bool LC3TestSuite::load(const std::string& filename)
-{
-    return XmlTestParser().LoadTestSuite(suite, filename);
 }
 
 LC3Test LC3TestSuite::get_test(unsigned int id) const
