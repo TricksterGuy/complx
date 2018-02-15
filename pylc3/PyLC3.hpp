@@ -85,6 +85,8 @@ class LC3TestSuite
 {
 public:
     LC3TestSuite() {}
+    /** loads an xml file */
+    bool load(const std::string& xml_file);
     /** @see lc3_run_test_suite */
     void run(const std::string& assembly_file, int run_number = 0) { lc3_run_test_suite(suite, assembly_file, -1, run_number); }
     /** Get LC3Test object */
