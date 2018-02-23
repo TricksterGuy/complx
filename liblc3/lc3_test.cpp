@@ -29,6 +29,45 @@ std::string join(const std::vector<std::string>& vec, const std::string& join)
     return oss.str();
 }
 
+std::string escape_str(const std::string& str)
+{
+    std::stringstream out;
+    for (unsigned int i = 0; i < str.size(); i++)
+    {
+        char c = str[i];
+        switch(c)
+        {
+            case '\a':
+                out << "\\a";
+                break;
+            case '\b':
+                out << "\\b";
+                break;
+            case '\f':
+                out << "\\f";
+                break;
+            case '\n':
+                out << "\\n";
+                break;
+            case '\r':
+                out << "\\r";
+                break;
+            case '\t':
+                out << "\\t";
+                break;
+            case '\v':
+                out << "\\v";
+                break;
+            default:
+                if (isprint(c))
+                    out << c;
+                else
+                    out << std::oct << "\\" << (static_cast<unsigned int>(c) & 0xFF) << std::dec;
+        }
+    }
+    return out.str();
+}
+
 /* Modified edit distance from Wikipedia */
 int edit_distance(const std::vector<short>& s, const std::vector<short>& t)
 {
@@ -349,6 +388,7 @@ void lc3_run_test_case(lc3_test& test, std::istream& stream, int seed, int run)
     {
         std::stringstream expected;
         std::stringstream actual;
+        std::stringstream temp;
 
         lc3_test_output& output = test.output[i];
         int value_calc;
@@ -421,14 +461,15 @@ void lc3_run_test_case(lc3_test& test, std::istream& stream, int seed, int run)
 
             while(short_cmp > 0 && short_cmp <= 255)
             {
-                actual.put((char) short_cmp);
+                temp.put((char) short_cmp);
                 value_calc++;
                 short_cmp = state.mem[(unsigned short)value_calc];
             }
 
-            str = actual.str();
+            str = temp.str();
+            actual << escape_str(str);
             output.passed = lc3_test_check(output, &str, &output.text);
-            expected << output.text;
+            expected << escape_str(output.text);
             break;
         case TEST_ARRAY:
             for (unsigned int j = 0; j < output.array.size(); j++)
@@ -448,8 +489,8 @@ void lc3_run_test_case(lc3_test& test, std::istream& stream, int seed, int run)
         case TEST_IO:
             str = newoutput->str();
             output.passed = lc3_test_check(output, &str, &output.io);
-            actual << str;
-            expected << output.io;
+            actual << escape_str(str);
+            expected << escape_str(output.io);
             break;
         case TEST_SUBROUTINE:
             break;
@@ -983,7 +1024,7 @@ void lc3_write_test_report(std::stringstream& oss, lc3_test& test, int& minipass
         else
         {
             oss << (j + 1) << " (" << (output.passed ? 'P' : 'F') << ") " << type << "\n  expected: " << output.expected <<
-                "\n    actual : " << output.actual << "\n";
+                "\n    actual: " << output.actual << "\n";
         }
 
         if (!output.extra_output.empty())

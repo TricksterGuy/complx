@@ -6,6 +6,8 @@
 #include "ExpressionEvaluator.hpp"
 #include "XmlTestParser.hpp"
 
+std::string escape_str(const std::string& str);
+
 struct LC3TestTest
 {
     lc3_state state;
@@ -376,23 +378,29 @@ BOOST_FIXTURE_TEST_CASE(OutputTest, LC3TestTest)
             <has-max-executions>1</has-max-executions>
             <max-executions>1000000</max-executions>
             <output>
-                <test-stdout><value>HELLO WORLD!</value></test-stdout>
+                <test-stdout><value>HELLO WORLD!\n</value></test-stdout>
             </output>
         </test-case>
     </test-suite>)";
 
     BOOST_REQUIRE(XmlTestParser().LoadTestSuiteData(suite, xml));
 
+
     std::stringstream assembly(R"(
     .orig x3000
         LEA R0, HELLO_WORLD
         PUTS
         HALT
-        HELLO_WORLD .stringz "HELLO WORLD!"
+        HELLO_WORLD .stringz "HELLO WORLD!\n"
     .end
     )");
 
     lc3_run_test_suite(suite, assembly, 0, 0);
+
+    //std::stringstream oss;
+    //lc3_write_test_report(oss, suite, "");
+    //BOOST_MESSAGE(oss.str());
+    //std::cout << oss.str() << "\n";
 
     BOOST_REQUIRE(suite.passed);
     BOOST_REQUIRE_EQUAL(suite.tests.size(), 1);
@@ -775,4 +783,14 @@ BOOST_FIXTURE_TEST_CASE(StrictExecutionTest, LC3TestTest)
     BOOST_CHECK(test2.has_halted);
     BOOST_CHECK(test2.has_halted_normally);
     BOOST_CHECK_EQUAL(test2.executions, 6);
+}
+
+BOOST_FIXTURE_TEST_CASE(EscapeStringTest, LC3TestTest)
+{
+    BOOST_CHECK_EQUAL(escape_str("\n"), "\\n");
+    BOOST_CHECK_EQUAL(escape_str("ABC"), "ABC");
+    BOOST_CHECK_EQUAL(escape_str("\tABC\n"), "\\tABC\\n");
+    BOOST_CHECK_EQUAL(escape_str("\r"), "\\r");
+    BOOST_CHECK_EQUAL(escape_str("\001\255\101"), "\\1\\255A");
+    BOOST_CHECK_EQUAL(escape_str("\a\b\f\n\r\t\v"), "\\a\\b\\f\\n\\r\\t\\v");
 }
