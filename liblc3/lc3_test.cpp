@@ -1091,7 +1091,7 @@ std::string lc3_test_input_string(const lc3_test_input& test)
         oss << test.text;
         break;
     case TEST_IO:
-        oss << "Input: ";
+        oss << "Console Input: ";
         oss << test.io;
         break;
     case TEST_SUBROUTINE:
@@ -1152,7 +1152,7 @@ std::string lc3_test_output_string(const lc3_test_output& test)
         oss << test.text << "\"";
         break;
     case TEST_IO:
-        oss << "Output " << get_comp_op(test.cmp_type) << " ";
+        oss << "Console Output " << get_comp_op(test.cmp_type) << " ";
         oss << test.io;
         break;
     case TEST_SUBROUTINE:
