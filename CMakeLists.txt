@@ -10,7 +10,6 @@ option(ENABLE_PLUGINS "Enable Official Plugins" ON)
 option(ENABLE_LC3EDIT "Build lc3edit" OFF)
 option(ENABLE_COMP "Build comp" OFF)
 option(ENABLE_COMPLX "Build complx" ON)
-option(ENABLE_LC3TEST "Build lc3test" ON)
 option(ENABLE_DEV "Build dev version" OFF)
 option(ENABLE_TESTS "Enable testing" OFF)
 option(ENABLE_COVERAGE "Enable testing coverage" OFF)
@@ -58,12 +57,12 @@ endif(CMAKE_BUILD_TYPE MATCHES "Debug")
 add_definitions(-DPREFIX=${CMAKE_INSTALL_PREFIX})
 add_definitions(-DSO_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
-if(ENABLE_COMPLX OR ENABLE_LC3TEST OR ENABLE_TESTS)
+if(ENABLE_COMPLX OR ENABLE_TESTS)
 set(wxWidgets_USE_LIBS stc xrc xml html adv net core base)
 find_package(wxWidgets REQUIRED)
 set(CMAKE_SKIP_RPATH TRUE)
 include(${wxWidgets_USE_FILE})
-endif(ENABLE_COMPLX OR ENABLE_LC3TEST OR ENABLE_TESTS)
+endif(ENABLE_COMPLX OR ENABLE_TESTS)
 
 if(CMAKE_HOST_WIN32)
     # Needed for htons
@@ -73,7 +72,6 @@ if(CMAKE_HOST_WIN32)
     #include_directories("C:/msys/1.0/local/include/wx-3.0")
 endif(CMAKE_HOST_WIN32)
 
-include_directories(${complx-tools_SOURCE_DIR}/lc3test)
 include_directories(${complx-tools_SOURCE_DIR}/liblc3)
 include_directories(${complx-tools_SOURCE_DIR}/logging)
 
@@ -90,8 +88,6 @@ set(SRC_LIBLC3
     liblc3/lc3_plugin.cpp
     liblc3/lc3_runner.cpp
     liblc3/lc3_symbol.cpp
-    liblc3/lc3_test.cpp
-    liblc3/lc3_cmp.cpp
 )
 
 set(SRC_LOGGING
@@ -162,10 +158,6 @@ endif(ENABLE_COMP)
 if(ENABLE_COMPLX)
     add_subdirectory(complx)
 endif(ENABLE_COMPLX)
-
-if(ENABLE_LC3TEST)
-	add_subdirectory(lc3test)
-endif(ENABLE_LC3TEST)
 
 if(ENABLE_TESTS)
     add_subdirectory(tests)

@@ -1,5 +1,6 @@
 #include "CallStackDialog.hpp"
 #include <lc3_all.hpp>
+#include <sstream>
 
 extern lc3_state state;
 

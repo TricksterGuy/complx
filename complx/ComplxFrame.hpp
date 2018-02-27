@@ -96,8 +96,6 @@ public:
     // Debug menu event handlers
     void OnUndoStack(wxCommandEvent& event) override;
     void OnCallStack(wxCommandEvent& event) override;
-    void OnSetupTest(wxCommandEvent& event) override;
-    void OnSwitchTest(wxCommandEvent& event) override;
     void OnSubroutineCall(wxCommandEvent& event) override;
     void OnBreakAndWatchpoints(wxCommandEvent& event) override;
     void OnTemppoint(wxCommandEvent& event) override;

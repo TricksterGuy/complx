@@ -12,8 +12,7 @@ file(GLOB SRC_TESTS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 
 add_executable(
     lc3_test_suite
-    ${SRC_TESTS}
-    ../lc3test/XmlTestParser.cpp)
+    ${SRC_TESTS})
 
 target_link_libraries(
     lc3_test_suite

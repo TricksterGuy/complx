@@ -80,25 +80,4 @@ private:
     lc3_test test;
 };
 
-/** A simple wrapper around lc3_test_suite struct to bind to python. */
-class LC3TestSuite
-{
-public:
-    LC3TestSuite() {}
-    /** loads an xml file */
-    bool load(const std::string& xml_file);
-    /** @see lc3_run_test_suite */
-    void run(const std::string& assembly_file, int run_number = 0) { lc3_run_test_suite(suite, assembly_file, -1, run_number); }
-    /** Get LC3Test object */
-    LC3Test get_test(unsigned int id) const;
-    /** Get number of tests */
-    unsigned int get_num_tests() const { return suite.tests.size(); }
-
-    bool get_passed() const { return suite.passed; }
-    bool get_points() const { return suite.points; }
-    bool get_max_points() const { return suite.max_points; }
-private:
-    lc3_test_suite suite;
-};
-
 #endif

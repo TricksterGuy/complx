@@ -37,15 +37,6 @@ AdvancedLoadDialogDecl::AdvancedLoadDialogDecl( wxWindow* parent, wxWindowID id,
 	
 	fgSizer1->Add( assemblyFile, 1, wxEXPAND|wxTOP|wxBOTTOM|wxRIGHT, 5 );
 	
-	m_staticText2 = new wxStaticText( m_panel2, wxID_ANY, _("Test XML File:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText2->Wrap( -1 );
-	fgSizer1->Add( m_staticText2, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
-	
-	xmlFile = new wxFilePickerCtrl( m_panel2, wxID_ANY, wxEmptyString, _("Select an xml file"), wxT("*.xml"), wxDefaultPosition, wxDefaultSize, wxFLP_CHANGE_DIR|wxFLP_DEFAULT_STYLE|wxFLP_FILE_MUST_EXIST|wxFLP_OPEN|wxFLP_USE_TEXTCTRL );
-	xmlFile->SetToolTip( _("Test XML file for Setup Test Dialog functions.") );
-	
-	fgSizer1->Add( xmlFile, 1, wxEXPAND|wxTOP|wxBOTTOM|wxRIGHT, 5 );
-	
 	m_staticText6 = new wxStaticText( m_panel2, wxID_ANY, _("Console Input:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText6->Wrap( -1 );
 	fgSizer1->Add( m_staticText6, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );

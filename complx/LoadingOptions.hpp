@@ -17,8 +17,6 @@ struct LoadingOptions
 {
     /** File to load. */
     std::string file;
-    /** Test file to load. */
-    std::string tests;
     /** Console input. */
     std::string console_input;
     /** How to initialize registers. */

@@ -7,7 +7,6 @@ extern lc3_state state;
 AdvancedLoadDialog::AdvancedLoadDialog(wxWindow* parent, const LoadingOptions& opts) : AdvancedLoadDialogDecl(parent)
 {
     assemblyFile->SetPath(opts.file);
-    xmlFile->SetPath(opts.tests);
     consoleInput->SetValue(opts.console_input);
     regInitializer->SetSelection(opts.registers == RANDOMIZE ? 0 : (opts.registers == ZEROED ? 1 : 2));
     if (opts.registers != RANDOMIZE && opts.registers != ZEROED)
@@ -35,7 +34,6 @@ LoadingOptions AdvancedLoadDialog::GetOptions()
         return options;
 
     options.file = file;
-    options.tests = xmlFile->GetPath().ToStdString();
     options.console_input = consoleInput->GetValue().ToStdString();
     int ret = -1;
     int error;

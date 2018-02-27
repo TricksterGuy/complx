@@ -6,4 +6,3 @@
 #include "lc3_symbol.hpp"
 #include "lc3_plugin.hpp"
 #include "lc3_assemble.hpp"
-#include "lc3_test.hpp"

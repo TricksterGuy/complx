@@ -21,7 +21,6 @@ add_custom_command(
 set(SRC_PYLC3
     PyLC3.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/PyLC3Gen.cpp
-    ../lc3test/XmlTestParser.cpp
 )
 
 add_library(

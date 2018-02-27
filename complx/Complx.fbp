@@ -664,7 +664,7 @@
                         <event name="OnUpdateUI"></event>
                     </object>
                 </object>
-                <object class="wxMenu" expanded="0">
+                <object class="wxMenu" expanded="1">
                     <property name="label">Debug</property>
                     <property name="name">menuDebug</property>
                     <property name="permission">protected</property>
@@ -701,36 +701,6 @@
                     <object class="separator" expanded="0">
                         <property name="name">m_separator5</property>
                         <property name="permission">none</property>
-                    </object>
-                    <object class="wxMenuItem" expanded="0">
-                        <property name="bitmap"></property>
-                        <property name="checked">0</property>
-                        <property name="enabled">1</property>
-                        <property name="help">Sets up complx to debug a test.</property>
-                        <property name="id">ID_SETUP_TEST</property>
-                        <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">&amp;Setup Test..</property>
-                        <property name="name">menuDebugSetupTest</property>
-                        <property name="permission">none</property>
-                        <property name="shortcut">Ctrl+T</property>
-                        <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnSetupTest</event>
-                        <event name="OnUpdateUI"></event>
-                    </object>
-                    <object class="wxMenuItem" expanded="0">
-                        <property name="bitmap"></property>
-                        <property name="checked">0</property>
-                        <property name="enabled">1</property>
-                        <property name="help">Switches test case to debug.</property>
-                        <property name="id">ID_SWITCH_TEST</property>
-                        <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">Switch &amp;Test..</property>
-                        <property name="name">menuDebugSwitchTest</property>
-                        <property name="permission">none</property>
-                        <property name="shortcut">Ctrl+Shift+T</property>
-                        <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnSwitchTest</event>
-                        <event name="OnUpdateUI"></event>
                     </object>
                     <object class="wxMenuItem" expanded="0">
                         <property name="bitmap"></property>
