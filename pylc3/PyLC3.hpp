@@ -52,32 +52,4 @@ private:
     lc3_state state;
 };
 
-/** A simple wrapper around lc3_test struct to bind to python. */
-class LC3Test
-{
-public:
-    LC3Test() {}
-    LC3Test(const lc3_test& ctest) : test(ctest) {}
-    const std::string& get_name() const { return test.name; }
-    const std::string& get_warning() const { return test.warning; }
-    unsigned int get_points() const { return test.points; }
-    unsigned int get_max_points() const { return test.max_points; }
-    bool get_passed() const { return test.passed; }
-    bool get_true_traps() const { return test.true_traps; }
-    bool get_interrupt_enabled() const { return test.interrupt_enabled; }
-    bool get_disable_plugins() const { return test.disable_plugins; }
-    bool get_randomize() const { return test.randomize; }
-    bool get_fully_randomize() const { return test.fully_randomize; }
-    bool has_max_executions() const { return test.has_max_executions; }
-    bool has_halted() const { return test.has_halted; }
-    bool has_halted_normally() const { return test.has_halted_normally; }
-    long get_random_seed() const { return test.random_seed; }
-    int get_fill_value() const { return test.fill_value; }
-    unsigned long get_executions() const { return test.executions; }
-    unsigned long get_max_executions() const { return test.max_executions; }
-    unsigned long get_warnings() const { return test.warnings; }
-private:
-    lc3_test test;
-};
-
 #endif
