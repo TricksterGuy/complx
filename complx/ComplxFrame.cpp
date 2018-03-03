@@ -230,7 +230,6 @@ void ComplxFrame::OnReload(wxCommandEvent& event)
   */
 void ComplxFrame::DoLoadFile(const LoadingOptions& opts)
 {
-    static bool first = true;
     auto* config = wxConfigBase::Get();
 
     wxFileName filename(opts.file);
@@ -242,35 +241,7 @@ void ComplxFrame::DoLoadFile(const LoadingOptions& opts)
     lc3_init(state, randomize_registers, randomize_memory, fill_registers, fill_memory);
     state.pc = opts.pc;
 
-    if (console != NULL) delete console;
-    console = new LC3Console(this);
-
-    state.input = &console->inputStream;
-    state.reader = complx_reader;
-    state.peek = complx_peek;
-    state.writer = complx_writer;
-    // For keyboard interrupts
-    state.interrupt_test.push_back(complx_step);
-
-    console->Show();
-
-    int x, y;
-    GetScreenPosition(&x, &y);
-    if (first)
-    {
-        Move(x + console->GetSize().GetX() / 2, y);
-        console->Move(x - console->GetSize().GetX() / 2, y);
-        first = false;
-    }
-    else
-    {
-        console->Move(x - console->GetSize().GetX(), y);
-    }
-
-    state.max_stack_size = stack_size;
-    state.max_call_stack_size = call_stack_size;
-    // Fix for console stealing focus.
-    SetFocus();
+    PostInit();
 
     // Now the actual loading
     if (opts.file.empty())
@@ -403,6 +374,44 @@ merge:
 
     // Save in reload options
     reload_options = opts;
+}
+
+/** PostInit
+  *
+  * Called after initializing.
+  */
+void ComplxFrame::PostInit()
+{
+    static bool first = true;
+    if (console != NULL) delete console;
+    console = new LC3Console(this);
+
+    state.input = &console->inputStream;
+    state.reader = complx_reader;
+    state.peek = complx_peek;
+    state.writer = complx_writer;
+    // For keyboard interrupts
+    state.interrupt_test.push_back(complx_step);
+
+    console->Show();
+
+    int x, y;
+    GetScreenPosition(&x, &y);
+    if (first)
+    {
+        Move(x + console->GetSize().GetX() / 2, y);
+        console->Move(x - console->GetSize().GetX() / 2, y);
+        first = false;
+    }
+    else
+    {
+        console->Move(x - console->GetSize().GetX(), y);
+    }
+
+    state.max_stack_size = stack_size;
+    state.max_call_stack_size = call_stack_size;
+    // Fix for console stealing focus.
+    SetFocus();
 }
 
 /** OnQuit
@@ -1111,6 +1120,7 @@ void ComplxFrame::OnSetupTest(wxCommandEvent& event)
     {
         std::stringstream input;
         lc3_init_test_case(state, reload_options.file, test, -1, false);
+        PostInit();
         lc3_setup_test_case(state, test, input);
         console->SetInput(input.str());
         reload_options.tests = filename;
@@ -1150,6 +1160,7 @@ void ComplxFrame::OnSwitchTest(wxCommandEvent& event)
     {
         std::stringstream input;
         lc3_init_test_case(state, reload_options.file, test, -1, false);
+        PostInit();
         lc3_setup_test_case(state, test, input);
         console->SetInput(input.str());
         reload_options.tests = filename;

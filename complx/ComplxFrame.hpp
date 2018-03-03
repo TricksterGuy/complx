@@ -147,6 +147,7 @@ private:
 
     void SetupExecution(int run_mode, int runtime = -1);
     void DoLoadFile(const LoadingOptions& opts);
+    void PostInit();
     /** DetectSubroutine
       *
       * Attempts to detect if a subroutine is found in the loaded code
