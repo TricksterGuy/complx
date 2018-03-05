@@ -14,6 +14,7 @@ class LC3Console : public LC3ConsoleDecl
 public:
     LC3Console(wxWindow* parent);
     ~LC3Console();
+    void OnClose(wxCloseEvent& event);
     std::stringstream inputStream;
     void OnReadChar();
     void Update();
