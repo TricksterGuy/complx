@@ -62,7 +62,8 @@ void PrintError(int error);
   *
   * Constructor
   */
-ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) : ComplxFrameDecl(NULL, wxID_ANY, opts.title, wxDefaultPosition, wxSize(opts.width, opts.height)), console(NULL), memoryView(NULL), base_title(opts.title)
+ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) :
+    ComplxFrameDecl(NULL, wxID_ANY, opts.title, wxDefaultPosition, wxSize(opts.width, opts.height)), console(NULL), memoryView(NULL), base_title(opts.title)
 {
     InitImages();
 
@@ -74,7 +75,7 @@ ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) : ComplxFrameDecl(NUL
     this->stack_size = opts.stack_size;
     this->call_stack_size = opts.call_stack_size;
 
-    DoLoadFile(opts.loading_options);
+    DoLoadFile(opts.loading_options, true);
 
     memoryView = new MemoryView();
     memory->SetView(memoryView, opts.exact_column_sizing, opts.column_sizes);
@@ -94,6 +95,7 @@ ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) : ComplxFrameDecl(NUL
     Connect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_IO, wxThreadEventHandler(ComplxFrame::OnIo));
     Connect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_NOIO, wxThreadEventHandler(ComplxFrame::OnNoIo));
     Connect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_OUTPUT, wxThreadEventHandler(ComplxFrame::OnOutput));
+    Connect(wxEVT_FSWATCHER, wxFileSystemWatcherEventHandler(ComplxFrame::OnFileTestsChanged));
 }
 
 /** ~ComplxFrame
@@ -124,6 +126,7 @@ ComplxFrame::~ComplxFrame()
     Disconnect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_IO, wxThreadEventHandler(ComplxFrame::OnIo));
     Disconnect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_NOIO, wxThreadEventHandler(ComplxFrame::OnNoIo));
     Disconnect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_OUTPUT, wxThreadEventHandler(ComplxFrame::OnOutput));
+    Disconnect(wxEVT_FSWATCHER, wxFileSystemWatcherEventHandler(ComplxFrame::OnFileTestsChanged));
     {
         wxCriticalSectionLocker enter(threadCS);
 
@@ -143,7 +146,8 @@ ComplxFrame::~ComplxFrame()
   */
 void ComplxFrame::OnIdle(wxIdleEvent& event)
 {
-    this->Disconnect(wxEVT_IDLE, wxIdleEventHandler(ComplxFrame::OnIdle));
+    Disconnect(wxEVT_IDLE, wxIdleEventHandler(ComplxFrame::OnIdle));
+    UpdateWatchedFiles(reload_options.file, reload_options.tests);
     UpdateRegisters();
     UpdateMemory();
 }
@@ -228,7 +232,7 @@ void ComplxFrame::OnReload(wxCommandEvent& event)
   *
   * Handles loading an assembly file into the simulator
   */
-void ComplxFrame::DoLoadFile(const LoadingOptions& opts)
+void ComplxFrame::DoLoadFile(const LoadingOptions& opts, bool initializing)
 {
     auto* config = wxConfigBase::Get();
 
@@ -372,8 +376,40 @@ merge:
     UpdateRegisters();
     UpdateMemory();
 
+    // wxFileSystemWatcher wants to be created when an event loop exists.
+    if (!initializing)
+        UpdateWatchedFiles(filename.GetFullPath().ToStdString(), opts.tests);
     // Save in reload options
     reload_options = opts;
+}
+
+void ComplxFrame::UpdateWatchedFiles(const std::string& file, const std::string& tests, bool remove_old)
+{
+#if 0
+    if (!fswatcher)
+    {
+        fswatcher.reset(new wxFileSystemWatcher());
+        fswatcher->SetOwner(this);
+    }
+
+    if (remove_old)
+    {
+        if (!reload_options.file.empty() && reload_options.file != file)
+            fswatcher->Remove(wxFileName(reload_options.file));
+        if (!reload_options.tests.empty()&& reload_options.tests != tests)
+            fswatcher->Remove(wxFileName(reload_options.tests));
+    }
+
+    if (!file.empty() && reload_options.file != file)
+        fswatcher->Add(wxFileName(file), wxFSW_EVENT_MODIFY);
+    if (!tests.empty()&& reload_options.tests != tests)
+        fswatcher->Add(wxFileName(tests), wxFSW_EVENT_MODIFY);
+#endif
+}
+
+void ComplxFrame::OnFileTestsChanged(wxFileSystemWatcherEvent& event)
+{
+    wxMessageBox("HI");
 }
 
 /** PostInit
