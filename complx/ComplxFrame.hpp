@@ -9,7 +9,6 @@
 
 #include <wx/event.h>
 #include <wx/filename.h>
-#include <wx/fswatcher.h>
 #include <wx/grid.h>
 #include <wx/textctrl.h>
 #include <wx/window.h>
@@ -126,7 +125,6 @@ public:
     void OnIo(wxThreadEvent& event);
     void OnOutput(wxThreadEvent& event);
     void OnNoIo(wxThreadEvent& event);
-    void OnFileTestsChanged(wxFileSystemWatcherEvent& event);
 
     // Other methods
     void OnGetIo();
@@ -147,14 +145,11 @@ private:
     long call_stack_size;
     wxString base_title;
 
-    std::unique_ptr<wxFileSystemWatcher> fswatcher;
-
     void UpdateRegister(wxTextCtrl* text, int value, int index);
 
     void SetupExecution(int run_mode, int runtime = -1);
-    void DoLoadFile(const LoadingOptions& opts, bool initializing = false);
+    void DoLoadFile(const LoadingOptions& opts);
     void PostInit();
-    void UpdateWatchedFiles(const std::string& file, const std::string& tests, bool remove_old = true);
     /** DetectSubroutine
       *
       * Attempts to detect if a subroutine is found in the loaded code
