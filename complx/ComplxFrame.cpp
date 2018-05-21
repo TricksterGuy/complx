@@ -375,6 +375,15 @@ merge:
 
     // Save in reload options
     reload_options = opts;
+
+    // Update timestamps
+    wxFileName file_loaded(reload_options.file);
+    reload_options.file_modification_time = file_loaded.GetModificationTime();
+    if (!reload_options.tests.empty())
+    {
+        wxFileName tests_loaded(reload_options.tests);
+        reload_options.tests_modification_time = tests_loaded.GetModificationTime();
+    }
 }
 
 /** PostInit
@@ -413,6 +422,48 @@ void ComplxFrame::PostInit()
     state.max_call_stack_size = call_stack_size;
     // Fix for console stealing focus.
     SetFocus();
+}
+
+void ComplxFrame::OnActivate(wxActivateEvent& event)
+{
+    bool reload_asm = false;
+    bool reload_tests = false;
+    /*if (!reload_options.tests.empty())
+    {
+        wxFileName tests_file(reload_options.tests);
+        if (tests_file.GetModificationTime().IsLaterThan(reload_options.tests_modification_time))
+        {
+            // To prevent multiple occurrences
+            reload_options.tests_modification_time = tests_file.GetModificationTime();
+            int answer = wxMessageBox(wxString::Format("%s has been modified.\n"
+                                                       "Do you wish to reload it?\n"
+                                                       "(Note simulation will be reset and breakpoints "
+                                                       "not present in code will not be reloaded.)", tests_file.GetFullName()),
+                                      "Reload test xml file?", wxOK | wxOK_DEFAULT | wxCANCEL);
+            reload_tests = answer == wxID_OK;
+        }
+    }*/
+    if (!reload_options.file.empty())
+    {
+        wxFileName asm_file(reload_options.file);
+        if (asm_file.GetModificationTime().IsLaterThan(reload_options.file_modification_time))
+        {
+            // To prevent multiple occurrences
+            reload_options.file_modification_time = asm_file.GetModificationTime();
+            if (!reload_tests)
+            {
+                int answer = wxMessageBox(wxString::Format("%s has been modified.\n"
+                                                           "Do you wish to reload it?\n"
+                                                           "(Note simulation will be reset and breakpoints "
+                                                           "not present in code will not be reloaded.)", asm_file.GetFullName()),
+                                          "Reload asm file?", wxOK | wxOK_DEFAULT | wxCANCEL);
+                reload_asm = answer == wxOK;
+            }
+        }
+    }
+
+    if (reload_asm)
+        DoLoadFile(reload_options);
 }
 
 /** OnQuit
