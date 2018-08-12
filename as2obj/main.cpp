@@ -11,7 +11,7 @@ int main(int argc, char** argv)
     if (argc < 2)
     {
 usage:
-        printf("Usage: as2obj file.asm [-all_errors] [-disable_plugins] [outfile] \n");
+        fprintf(stderr, "Usage: as2obj file.asm [-all_errors] [-disable_plugins] [outfile] \n");
         abort();
     }
 
