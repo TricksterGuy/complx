@@ -1,5 +1,6 @@
 #include "SetupTestDialog.hpp"
 #include <XmlTestParser.hpp>
+#include <wx/wx.h>
 
 bool TryLoadTests(lc3_test_suite& suite, const std::string& path)
 {
