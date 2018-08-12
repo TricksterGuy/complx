@@ -5,6 +5,8 @@ set(SRC_LC3TEST
     main.cpp
     XmlTestParser.cpp
     tinyxml2.cpp
+    TextResultEmitter.cpp
+    XmlResultEmitter.cpp
 )
 
 add_executable(
