@@ -4,6 +4,7 @@ include_directories(${complx-tools_SOURCE_DIR}/logging)
 set(SRC_LC3TEST
     main.cpp
     XmlTestParser.cpp
+    tinyxml2.cpp
 )
 
 add_executable(
