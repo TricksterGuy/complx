@@ -7,10 +7,6 @@
 #include <string>
 #include <vector>
 
-#include <wx/tokenzr.h>
-#include <wx/xml/xml.h>
-#include <wx/wx.h>
-
 #include <XmlTestParser.hpp>
 
 struct suite_summary

@@ -3,22 +3,22 @@
 
 #include <string>
 #include "lc3_test.hpp"
-#include <wx/tokenzr.h>
-#include <wx/xml/xml.h>
-#include <wx/wx.h>
+#include "tinyxml2.h"
 
 struct XmlTestParserException
 {
-    XmlTestParserException(const wxString& msg, const wxXmlNode* child) : message(msg), node(child) {}
+    XmlTestParserException(const std::string& msg, const tinyxml2::XMLElement* child) : message(msg), node(child) {}
     std::string what()
     {
-        if (node->GetLineNumber() != -1)
-            return wxString::Format("Found at line: %d %s", node->GetLineNumber(), message).ToStdString();
-        else
-            return message.ToStdString();
+        std::ostringstream oss;
+        if (node->GetLineNum() != -1)
+            oss << "Found at line: " << node->GetLineNum() << " ";
+
+        oss << message;
+        return oss.str();
     }
-    wxString message;
-    const wxXmlNode* node;
+    std::string message;
+    const tinyxml2::XMLElement* node;
 };
 
 class XmlTestParser
@@ -35,10 +35,10 @@ private:
     XmlTestParser() {};                                     // Private constructor
     XmlTestParser(const XmlTestParser&);                    // Prevent copy-construction
     XmlTestParser& operator=(const XmlTestParser&);         // Prevent assignment
-    bool LoadTestSuite(lc3_test_suite& suite, wxInputStream& stream);
-    bool LoadTest(lc3_test_suite& suite, wxXmlNode* root);
-    bool LoadTestInput(lc3_test& suite, wxXmlNode* root);
-    bool LoadTestOutput(lc3_test& suite, wxXmlNode* root);
+    bool LoadTestSuite(lc3_test_suite& suite, tinyxml2::XMLDocument* doc);
+    bool LoadTest(lc3_test_suite& suite, tinyxml2::XMLElement* root);
+    bool LoadTestInput(lc3_test& suite, tinyxml2::XMLElement* root);
+    bool LoadTestOutput(lc3_test& suite, tinyxml2::XMLElement* root);
 };
 
 inline XmlTestParser& XmlTestParser()

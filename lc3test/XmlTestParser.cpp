@@ -1,18 +1,45 @@
 #include "XmlTestParser.hpp"
+#include "tinyformat.h"
+#include <algorithm>
+#include <string>
 #include <lc3_all.hpp>
-#include <sstream>
 
-#include <wx/wfstream.h>
-#include <wx/sstream.h>
+/**
+ * Compare two strings, with support for ASCII case insensitivity
+ * @param a First string to compare
+ * @param b Second string to compare
+ * @param caseSensitive Whether or not the comparison should be case sensitive
+ * @return true if the strings are equal, false otherwise.
+ */
+bool isSameAs(std::string a, std::string b, bool caseSensitive=true) {
+    if (!caseSensitive) {
+        std::transform(a.begin(), a.end(), a.begin(), ::tolower);
+        std::transform(b.begin(), b.end(), b.begin(), ::tolower);
+    }
+    
+    return a == b;
+}
+
+/**
+ * Get the value of an attribute of an XML node, with support for a default value if the attribute does not set.
+ * @param node The node to read the attribute value of
+ * @param key The name of the attribute to read the value of
+ * @param default_value The default value to return if the attribute is not set.
+ * @return The value of the given attribute of the given node, or the default value provided if the attribute is not set.
+ */
+std::string getAttribute(const tinyxml2::XMLElement* node, const char * key, const char * default_value) {
+    const char * attr = node->Attribute(key);
+    return attr != nullptr ? attr : default_value;
+}
 
 /** process_str
   *
   * Unescapes and removes quotes from string (see lc3_parser.cpp if you change this)
   */
-wxString process_str(const wxString& wxStr, int& error)
+std::string process_str(const std::string& inStr, int& error)
 {
     // Preappend ""'s
-    std::string str = "\"" + wxStr.ToStdString() + "\"";
+    std::string str = "\"" + inStr + "\"";
 
     std::stringstream out;
     for (size_t i = 1; i < str.size() - 1; i++)
@@ -122,20 +149,7 @@ endstringprocessing:
     return error ? "" : out.str();
 }
 
-wxXmlNode* getNextNode(wxXmlNode* node)
-{
-    if (node == NULL) return NULL;
-    node = node->GetNext();
-
-    while (node != NULL && node->GetName().IsSameAs("comment"))
-    {
-        node = node->GetNext();
-    }
-
-    return node;
-}
-
-int GetCompareType(int type, const wxString& mode, const wxXmlNode* node)
+int GetCompareType(int type, const std::string& mode, const tinyxml2::XMLElement* node)
 {
     // -1, all 0 integral, 1 string, 2 array, 3 subr
     int detected_type = 0;
@@ -172,64 +186,64 @@ int GetCompareType(int type, const wxString& mode, const wxXmlNode* node)
     if (real_type == 3)
         return CMP_EQUAL;
 
-    if (mode.IsSameAs("equals", false) || mode.IsSameAs("==") || mode.IsSameAs("="))
+    if (isSameAs(mode, "equals", false) || isSameAs(mode, "==") || isSameAs(mode, "="))
     {
         detected_type = -1;
         comp_type = CMP_EQUAL;
     }
-    else if (mode.IsSameAs("less", false) || mode.IsSameAs("<"))
+    else if (isSameAs(mode, "less", false) || isSameAs(mode, "<"))
     {
         comp_type = CMP_LESS;
     }
-    else if (mode.IsSameAs("greater", false) || mode.IsSameAs(">"))
+    else if (isSameAs(mode, "greater", false) || isSameAs(mode, ">"))
     {
         comp_type = CMP_GREATER;
     }
-    else if (mode.IsSameAs("lessorequals", false) || mode.IsSameAs("<="))
+    else if (isSameAs(mode, "lessorequals", false) || isSameAs(mode, "<="))
     {
         comp_type = CMP_LESSEQUAL;
     }
-    else if (mode.IsSameAs("greaterorequals", false) || mode.IsSameAs(">="))
+    else if (isSameAs(mode, "greaterorequals", false) || isSameAs(mode, ">="))
     {
         comp_type = CMP_GREATEREQUAL;
     }
-    else if (mode.IsSameAs("notequals", false) || mode.IsSameAs("!="))
+    else if (isSameAs(mode, "notequals", false) || isSameAs(mode, "!="))
     {
         detected_type = -1;
         comp_type = CMP_NOTEQUAL;
     }
-    else if (mode.IsSameAs("equalsignorecase", false))
+    else if (isSameAs(mode, "equalsignorecase", false))
     {
         detected_type = 1;
         comp_type = CMP_STRING_EQUALIC;
     }
-    else if (mode.IsSameAs("notequalsignorecase", false))
+    else if (isSameAs(mode, "notequalsignorecase", false))
     {
         detected_type = 1;
         comp_type = CMP_STRING_NOTEQUALIC;
     }
-    else if (mode.IsSameAs("contains", false) || mode.IsSameAs("c", false))
+    else if (isSameAs(mode, "contains", false) || isSameAs(mode, "c", false))
     {
         detected_type = 1;
         comp_type = CMP_STRING_CONTAINS;
     }
-    else if (mode.IsSameAs("notcontains", false) || mode.IsSameAs("!c", false))
+    else if (isSameAs(mode, "notcontains", false) || isSameAs(mode, "!c", false))
     {
         detected_type = 1;
         comp_type = CMP_STRING_NOTCONTAINS;
     }
-    else if (mode.IsSameAs("containsignorecase", false))
+    else if (isSameAs(mode, "containsignorecase", false))
     {
         detected_type = 1;
         comp_type = CMP_STRING_CONTAINSIC;
     }
-    else if (mode.IsSameAs("notcontainsignorecase", false))
+    else if (isSameAs(mode, "notcontainsignorecase", false))
     {
         detected_type = 1;
         comp_type = CMP_STRING_NOTCONTAINSIC;
     }
     else
-        throw XmlTestParserException(wxString::Format("Unknown comparison condition %s", mode), node);
+        throw XmlTestParserException(tfm::format("Unknown comparison condition %s", mode), node);
 
     // Special case handling
     if (detected_type == -1 && comp_type == CMP_EQUAL)
@@ -250,7 +264,7 @@ int GetCompareType(int type, const wxString& mode, const wxXmlNode* node)
     }
 
     if (detected_type != real_type)
-        throw XmlTestParserException(wxString::Format("Condition %s is not applicable for %s", mode, node->GetName()), node);
+        throw XmlTestParserException(tfm::format("Condition %s is not applicable for %s", mode, node->Name()), node);
 
     return comp_type;
 }
@@ -261,41 +275,42 @@ int GetCompareType(int type, const wxString& mode, const wxXmlNode* node)
   */
 bool XmlTestParser::LoadTestSuite(lc3_test_suite& suite, const std::string& filename)
 {
-    wxFileInputStream stream(filename);
-    if (!stream.IsOk()) return false;
-    return LoadTestSuite(suite, stream);
+    tinyxml2::XMLDocument doc;
+    doc.LoadFile(filename.c_str());
+
+    if (doc.Error()) return false;
+
+    return LoadTestSuite(suite, &doc);
 }
 
 bool XmlTestParser::LoadTestSuiteData(lc3_test_suite& suite, const std::string& data)
 {
-    wxStringInputStream stream(data);
-    return LoadTestSuite(suite, stream);
+    tinyxml2::XMLDocument doc;
+    doc.Parse(data.c_str());
+
+    if (doc.Error()) return false;
+
+    return LoadTestSuite(suite, &doc);
 }
 
-bool XmlTestParser::LoadTestSuite(lc3_test_suite& suite, wxInputStream& stream)
+bool XmlTestParser::LoadTestSuite(lc3_test_suite& suite, tinyxml2::XMLDocument* doc)
 {
-    wxXmlDocument doc;
-    if (!doc.Load(stream)) return false;
-
-    wxXmlNode* child = doc.GetRoot()->GetChildren();
+    tinyxml2::XMLElement* child = doc->RootElement()->FirstChildElement();
 
     while (child)
     {
-        if (child->GetName() != "comment")
-        {
-            if (child->GetName() != "test-case")
-                throw XmlTestParserException("Child elements must be named test-case", child);
-            if (!LoadTest(suite, child))
-                return false;
-        }
-        child = getNextNode(child);
+        if (!isSameAs(child->Name(), "test-case"))
+            throw XmlTestParserException("Child elements must be named test-case", child);
+        if (!LoadTest(suite, child))
+            return false;
+        child = child->NextSiblingElement();
     }
 
     for (const auto& test : suite.tests)
     {
         if (test.max_points != 0 && test.random_seed == -1 && test.randomize)
         {
-            printf("Warning for test-case: %s! <random-seed> not set!\nA random seed should be set per test that uses randomization if this xml file is intended to be used as a autograder.\n", test.name.c_str());
+            fprintf(stderr, "Warning for test-case: %s! <random-seed> not set!\nA random seed should be set per test that uses randomization if this xml file is intended to be used as a autograder.\n", test.name.c_str());
         }
     }
 
@@ -303,395 +318,391 @@ bool XmlTestParser::LoadTestSuite(lc3_test_suite& suite, wxInputStream& stream)
 
 }
 
-bool XmlTestParser::LoadTest(lc3_test_suite& suite, wxXmlNode* root)
+bool XmlTestParser::LoadTest(lc3_test_suite& suite, tinyxml2::XMLElement* root)
 {
-    wxXmlNode* child = root->GetChildren();
+    tinyxml2::XMLElement* child = root->FirstChildElement();
 
     lc3_test test;
     while(child)
     {
-        if (child->GetName() == "name")
-            test.name = child->GetNodeContent();
-        else if (child->GetName() == "true-traps")
-            test.true_traps = wxAtoi(child->GetNodeContent()) != 0;
-        else if (child->GetName() == "has-max-executions")
-            test.has_max_executions = wxAtoi(child->GetNodeContent()) != 0;
-        else if (child->GetName() == "disable-plugins")
-            test.disable_plugins = wxAtoi(child->GetNodeContent()) != 0;
-        else if (child->GetName() == "max-executions")
-            test.max_executions = wxAtol(child->GetNodeContent());
-        else if (child->GetName() == "randomize")
-            test.randomize = wxAtoi(child->GetNodeContent()) != 0;
-        else if (child->GetName() == "fully-randomize")
-            test.fully_randomize = wxAtoi(child->GetNodeContent()) != 0;
-        else if (child->GetName() == "strict-execution")
-            test.strict_execution = wxAtoi(child->GetNodeContent()) != 0;
-        else if (child->GetName() == "random-seed")
+        if (isSameAs(child->Name(), "name"))
+            test.name = child->GetText();
+        else if (isSameAs(child->Name(), "true-traps"))
+            test.true_traps = atoi(child->GetText()) != 0;
+        else if (isSameAs(child->Name(), "has-max-executions"))
+            test.has_max_executions = atoi(child->GetText()) != 0;
+        else if (isSameAs(child->Name(), "disable-plugins"))
+            test.disable_plugins = atoi(child->GetText()) != 0;
+        else if (isSameAs(child->Name(), "max-executions"))
+            test.max_executions = atoi(child->GetText());
+        else if (isSameAs(child->Name(), "randomize"))
+            test.randomize = atoi(child->GetText()) != 0;
+        else if (isSameAs(child->Name(), "fully-randomize"))
+            test.fully_randomize = atoi(child->GetText()) != 0;
+        else if (isSameAs(child->Name(), "strict-execution"))
+            test.strict_execution = atoi(child->GetText()) != 0;
+        else if (isSameAs(child->Name(), "random-seed"))
         {
-            std::string seed = child->GetNodeContent().ToStdString();
+            std::string seed = child->GetText();
             test.random_seed = strtol(seed.c_str(), NULL, 10);
         }
-        else if (child->GetName() == "fill-value")
+        else if (isSameAs(child->Name(), "fill-value"))
         {
-            std::string fill_value = child->GetNodeContent().ToStdString();
+            std::string fill_value = child->GetText();
             if (fill_value.size() > 1 && fill_value[0] == 'x')
                 fill_value = "0" + fill_value;
             test.fill_value = strtol(fill_value.c_str(), NULL, 0);
         }
-        else if (child->GetName() == "interrupt-enabled")
-            test.interrupt_enabled = wxAtoi(child->GetNodeContent()) != 0;
-        else if (child->GetName() == "input")
+        else if (isSameAs(child->Name(), "interrupt-enabled"))
+            test.interrupt_enabled = atoi(child->GetText()) != 0;
+        else if (isSameAs(child->Name(), "input"))
         {
             if (!LoadTestInput(test, child))
                 throw XmlTestParserException("test-input improperly formatted", child);
         }
-        else if (child->GetName() == "output")
+        else if (isSameAs(child->Name(), "output"))
         {
             if (!LoadTestOutput(test, child))
                 throw XmlTestParserException("test-output improperly formatted", child);
         }
 
-        child = getNextNode(child);
+        child = child->NextSiblingElement();
     }
 
     suite.tests.push_back(test);
     return true;
 }
 
-bool XmlTestParser::LoadTestInput(lc3_test& test, wxXmlNode* root)
+bool XmlTestParser::LoadTestInput(lc3_test& test, tinyxml2::XMLElement* root)
 {
-    wxXmlNode* child = root->GetChildren();
+    tinyxml2::XMLElement* child = root->FirstChildElement();
     int error = 0;
 
     while(child)
     {
         lc3_test_input input;
-        wxXmlNode* grandchild = child->GetChildren();
-        if (child->GetName() == "test-value")
+        tinyxml2::XMLElement* grandchild = child->FirstChildElement();
+        if (isSameAs(child->Name(), "test-value"))
         {
             while (grandchild)
             {
-                if (grandchild->GetName() == "address")
-                    input.address = grandchild->GetNodeContent();
-                else if (grandchild->GetName() == "value")
-                    input.value = grandchild->GetNodeContent();
+                if (isSameAs(grandchild->Name(), "address"))
+                    input.address = grandchild->GetText();
+                else if (isSameAs(grandchild->Name(), "value"))
+                    input.value = grandchild->GetText();
                 else
-                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), grandchild->GetName()), grandchild);
-                grandchild = getNextNode(grandchild);
+                    throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
+                grandchild = grandchild->NextSiblingElement();
             }
             input.type = TEST_VALUE;
         }
-        else if (child->GetName() == "test-register")
+        else if (isSameAs(child->Name(), "test-register"))
         {
             while (grandchild)
             {
-                if (grandchild->GetName() == "register")
-                    input.address = grandchild->GetNodeContent();
-                else if (grandchild->GetName() == "value")
-                    input.registerval = grandchild->GetNodeContent();
+                if (isSameAs(grandchild->Name(), "register"))
+                    input.address = grandchild->GetText();
+                else if (isSameAs(grandchild->Name(), "value"))
+                    input.registerval = grandchild->GetText();
                 else
-                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), grandchild->GetName()), grandchild);
-                grandchild = getNextNode(grandchild);
+                    throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
+                grandchild = grandchild->NextSiblingElement();
             }
             input.type = TEST_REGISTER;
         }
-        else if (child->GetName() == "test-pc")
+        else if (isSameAs(child->Name(), "test-pc"))
         {
             while (grandchild)
             {
-                if (grandchild->GetName() == "value")
-                    input.pcval = grandchild->GetNodeContent();
+                if (isSameAs(grandchild->Name(), "value"))
+                    input.pcval = grandchild->GetText();
                 else
-                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), grandchild->GetName()), grandchild);
-                grandchild = getNextNode(grandchild);
+                    throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
+                grandchild = grandchild->NextSiblingElement();
             }
             input.type = TEST_PC;
         }
-        else if (child->GetName() == "test-pointer")
+        else if (isSameAs(child->Name(), "test-pointer"))
         {
             while (grandchild)
             {
-                if (grandchild->GetName() == "address")
-                    input.address = grandchild->GetNodeContent();
-                else if (grandchild->GetName() == "value")
-                    input.pointer = grandchild->GetNodeContent();
+                if (isSameAs(grandchild->Name(), "address"))
+                    input.address = grandchild->GetText();
+                else if (isSameAs(grandchild->Name(), "value"))
+                    input.pointer = grandchild->GetText();
                 else
-                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), grandchild->GetName()), grandchild);
-                grandchild = getNextNode(grandchild);
+                    throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
+                grandchild = grandchild->NextSiblingElement();
             }
             input.type = TEST_POINTER;
         }
-        else if (child->GetName() == "test-string")
+        else if (isSameAs(child->Name(), "test-string"))
         {
             while (grandchild)
             {
-                if (grandchild->GetName() == "address")
-                    input.address = grandchild->GetNodeContent();
-                else if (grandchild->GetName() == "value")
-                    input.text = process_str(grandchild->GetNodeContent(), error);
+                if (isSameAs(grandchild->Name(), "address"))
+                    input.address = grandchild->GetText();
+                else if (isSameAs(grandchild->Name(), "value"))
+                    input.text = process_str(grandchild->GetText(), error);
                 else
-                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), grandchild->GetName()), grandchild);
+                    throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
 
-                if (error) throw XmlTestParserException(wxString::Format("Malformed string %s in %s", grandchild->GetNodeContent(), child->GetName()), grandchild);
-                grandchild = getNextNode(grandchild);
+                if (error) throw XmlTestParserException(tfm::format("Malformed string %s in %s", grandchild->GetText(), child->Name()), grandchild);
+                grandchild = grandchild->NextSiblingElement();
             }
             input.type = TEST_STRING;
         }
-        else if (child->GetName() == "test-array")
+        else if (isSameAs(child->Name(), "test-array"))
         {
             while (grandchild)
             {
-                if (grandchild->GetName() == "address")
-                    input.address = grandchild->GetNodeContent();
-                else if (grandchild->GetName() == "value")
+                if (isSameAs(grandchild->Name(), "address"))
+                    input.address = grandchild->GetText();
+                else if (isSameAs(grandchild->Name(), "value"))
                 {
-                    tokenize(grandchild->GetNodeContent().ToStdString(), input.array, ",");
+                    tokenize(grandchild->GetText(), input.array, ",");
                     if (input.array.empty())
-                        throw XmlTestParserException(wxString::Format("%s must be given at least one element", child->GetName()), grandchild);
+                        throw XmlTestParserException(tfm::format("%s must be given at least one element", child->Name()), grandchild);
                 }
                 else
-                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), grandchild->GetName()), grandchild);
-                grandchild = getNextNode(grandchild);
+                    throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
+                grandchild = grandchild->NextSiblingElement();
             }
             input.type = TEST_ARRAY;
         }
-        else if (child->GetName() == "test-stdin")
+        else if (isSameAs(child->Name(), "test-stdin"))
         {
             while (grandchild)
             {
-                if (grandchild->GetName() == "value")
-                    input.io = process_str(grandchild->GetNodeContent(), error);
+                if (isSameAs(grandchild->Name(), "value"))
+                    input.io = process_str(grandchild->GetText(), error);
                 else
-                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), grandchild->GetName()), grandchild);
-                if (error) throw XmlTestParserException(wxString::Format("Malformed string %s in %s", grandchild->GetNodeContent(), child->GetName()), grandchild);
-                grandchild = getNextNode(grandchild);
+                    throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
+                if (error) throw XmlTestParserException(tfm::format("Malformed string %s in %s", grandchild->GetText(), child->Name()), grandchild);
+                grandchild = grandchild->NextSiblingElement();
             }
             input.type = TEST_IO;
         }
-        else if (child->GetName() == "test-subr")
+        else if (isSameAs(child->Name(), "test-subr"))
         {
             lc3_subr_input& subr = input.subroutine;
             while (grandchild)
             {
-                if (grandchild->GetName() == "name")
-                    subr.name = grandchild->GetNodeContent();
-                else if (grandchild->GetName() == "stack")
-                    subr.stack = grandchild->GetNodeContent();
-                else if (grandchild->GetName() == "r7")
-                    subr.r7 = grandchild->GetNodeContent();
-                else if (grandchild->GetName() == "r5")
-                    subr.r5 = grandchild->GetNodeContent();
-                else if (grandchild->GetName() == "params")
-                    tokenize(grandchild->GetNodeContent().ToStdString(), subr.params, ",");
+                if (isSameAs(grandchild->Name(), "name"))
+                    subr.name = grandchild->GetText();
+                else if (isSameAs(grandchild->Name(), "stack"))
+                    subr.stack = grandchild->GetText();
+                else if (isSameAs(grandchild->Name(), "r7"))
+                    subr.r7 = grandchild->GetText();
+                else if (isSameAs(grandchild->Name(), "r5"))
+                    subr.r5 = grandchild->GetText();
+                else if (isSameAs(grandchild->Name(), "params"))
+                    tokenize(grandchild->GetText(), subr.params, ",");
                 else
-                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), grandchild->GetName()), grandchild);
-                grandchild = getNextNode(grandchild);
+                    throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
+                grandchild = grandchild->NextSiblingElement();
             }
             input.type = TEST_SUBROUTINE;
         }
-        else if (child->GetName() != "comment")
-        {
-            return false;
-        }
         else
         {
-            child = getNextNode(child);
+            child = child->NextSiblingElement();
             continue;
         }
         test.input.push_back(input);
-        child = getNextNode(child);
+        child = child->NextSiblingElement();
     }
 
     return true;
 }
 
-bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
+bool XmlTestParser::LoadTestOutput(lc3_test& test, tinyxml2::XMLElement* root)
 {
-    wxXmlNode* child = root->GetChildren();
+    tinyxml2::XMLElement* child = root->FirstChildElement();
     int error = 0;
 
     while(child)
     {
-        wxXmlNode* grandchild = child->GetChildren();
+        tinyxml2::XMLElement* grandchild = child->FirstChildElement();
         lc3_test_output output;
         output.passed = false;
         output.points = 0;
 
-        wxString points = child->GetAttribute("points", "0");
-        wxString mode = child->GetAttribute("condition", "equals");
-        output.points = wxAtoi(points);
+        std::string points = getAttribute(child, "points", "0");
+        std::string mode = getAttribute(child, "condition", "equals");
+        output.points = atoi(points.c_str());
 
-        if (child->GetName() == "test-value")
+        if (isSameAs(child->Name(), "test-value"))
         {
             while (grandchild)
             {
-                if (grandchild->GetName() == "address")
-                    output.address = grandchild->GetNodeContent();
-                else if (grandchild->GetName() == "value")
-                    output.value = grandchild->GetNodeContent();
+                if (isSameAs(grandchild->Name(), "address"))
+                    output.address = grandchild->GetText();
+                else if (isSameAs(grandchild->Name(), "value"))
+                    output.value = grandchild->GetText();
                 else
-                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), grandchild->GetName()), grandchild);
-                grandchild = getNextNode(grandchild);
+                    throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
+                grandchild = grandchild->NextSiblingElement();
             }
             output.type = TEST_VALUE;
         }
-        else if (child->GetName() == "test-register")
+        else if (isSameAs(child->Name(), "test-register"))
         {
             while (grandchild)
             {
-                if (grandchild->GetName() == "register")
-                    output.address = grandchild->GetNodeContent();
-                else if (grandchild->GetName() == "value")
-                    output.registerval = grandchild->GetNodeContent();
+                if (isSameAs(grandchild->Name(), "register"))
+                    output.address = grandchild->GetText();
+                else if (isSameAs(grandchild->Name(), "value"))
+                    output.registerval = grandchild->GetText();
                 else
-                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), grandchild->GetName()), grandchild);
-                grandchild = getNextNode(grandchild);
+                    throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
+                grandchild = grandchild->NextSiblingElement();
             }
             output.type = TEST_REGISTER;
         }
-        else if (child->GetName() == "test-pc")
+        else if (isSameAs(child->Name(), "test-pc"))
         {
             while (grandchild)
             {
-                if (grandchild->GetName() == "value")
-                    output.pcval = grandchild->GetNodeContent();
+                if (isSameAs(grandchild->Name(), "value"))
+                    output.pcval = grandchild->GetText();
                 else
-                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), grandchild->GetName()), grandchild);
-                grandchild = getNextNode(grandchild);
+                    throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
+                grandchild = grandchild->NextSiblingElement();
             }
             output.type = TEST_PC;
         }
-        else if (child->GetName() == "test-pointer")
+        else if (isSameAs(child->Name(), "test-pointer"))
         {
             while (grandchild)
             {
-                if (grandchild->GetName() == "address")
-                    output.address = grandchild->GetNodeContent();
-                else if (grandchild->GetName() == "value")
-                    output.pointer = grandchild->GetNodeContent();
+                if (isSameAs(grandchild->Name(), "address"))
+                    output.address = grandchild->GetText();
+                else if (isSameAs(grandchild->Name(), "value"))
+                    output.pointer = grandchild->GetText();
                 else
-                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), grandchild->GetName()), grandchild);
-                grandchild = getNextNode(grandchild);
+                    throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
+                grandchild = grandchild->NextSiblingElement();
             }
             output.type = TEST_POINTER;
         }
-        else if (child->GetName() == "test-string")
+        else if (isSameAs(child->Name(), "test-string"))
         {
             while (grandchild)
             {
-                if (grandchild->GetName() == "address")
-                    output.address = grandchild->GetNodeContent();
-                else if (grandchild->GetName() == "value")
-                    output.text = process_str(grandchild->GetNodeContent(), error);
+                if (isSameAs(grandchild->Name(), "address"))
+                    output.address = grandchild->GetText();
+                else if (isSameAs(grandchild->Name(), "value"))
+                    output.text = process_str(grandchild->GetText(), error);
                 else
-                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), grandchild->GetName()), grandchild);
-                if (error) throw XmlTestParserException(wxString::Format("Malformed string %s in %s", grandchild->GetNodeContent(), child->GetName()), grandchild);
-                grandchild = getNextNode(grandchild);
+                    throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
+                if (error) throw XmlTestParserException(tfm::format("Malformed string %s in %s", grandchild->GetText(), child->Name()), grandchild);
+                grandchild = grandchild->NextSiblingElement();
             }
             output.type = TEST_STRING;
         }
-        else if (child->GetName() == "test-array")
+        else if (isSameAs(child->Name(), "test-array"))
         {
             while (grandchild)
             {
-                if (grandchild->GetName() == "address")
-                    output.address = grandchild->GetNodeContent();
-                else if (grandchild->GetName() == "value")
+                if (isSameAs(grandchild->Name(), "address"))
+                    output.address = grandchild->GetText();
+                else if (isSameAs(grandchild->Name(), "value"))
                 {
-                    tokenize(grandchild->GetNodeContent().ToStdString(), output.array, ",");
+                    tokenize(grandchild->GetText(), output.array, ",");
                     if (output.array.empty())
-                        throw XmlTestParserException(wxString::Format("%s must be given at least one element", child->GetName()), grandchild);
+                        throw XmlTestParserException(tfm::format("%s must be given at least one element", child->Name()), grandchild);
                 }
                 else
-                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), grandchild->GetName()), grandchild);
-                grandchild = getNextNode(grandchild);
+                    throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
+                grandchild = grandchild->NextSiblingElement();
             }
             output.type = TEST_ARRAY;
         }
-        else if (child->GetName() == "test-stdout")
+        else if (isSameAs(child->Name(), "test-stdout"))
         {
             while (grandchild)
             {
-                if (grandchild->GetName() == "value")
-                    output.io = process_str(grandchild->GetNodeContent(), error);
+                if (isSameAs(grandchild->Name(), "value"))
+                    output.io = process_str(grandchild->GetText(), error);
                 else
-                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), grandchild->GetName()), grandchild);
-                if (error) throw XmlTestParserException(wxString::Format("Malformed string %s in %s", grandchild->GetNodeContent(), child->GetName()), grandchild);
-                grandchild = getNextNode(grandchild);
+                    throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
+                if (error) throw XmlTestParserException(tfm::format("Malformed string %s in %s", grandchild->GetText(), child->Name()), grandchild);
+                grandchild = grandchild->NextSiblingElement();
             }
             output.type = TEST_IO;
         }
-        else if (child->GetName() == "test-subr")
+        else if (isSameAs(child->Name(), "test-subr"))
         {
             lc3_subr_output& subr = output.subroutine;
 
             while (grandchild)
             {
-                if (grandchild->GetName() == "answer")
-                    subr.answer = grandchild->GetNodeContent();
-                else if (grandchild->GetName() == "locals")
-                    tokenize(grandchild->GetNodeContent().ToStdString(), subr.locals, ",");
-                else if (grandchild->GetName() == "calls")
+                if (isSameAs(grandchild->Name(), "answer"))
+                    subr.answer = grandchild->GetText();
+                else if (isSameAs(grandchild->Name(), "locals"))
+                    tokenize(grandchild->GetText(), subr.locals, ",");
+                else if (isSameAs(grandchild->Name(), "calls"))
                 {
-                    wxXmlNode* ggchild = grandchild->GetChildren();
+                    tinyxml2::XMLElement* ggchild = grandchild->FirstChildElement();
                     while(ggchild)
                     {
-                        if (ggchild->GetName() == "call")
+                        if (isSameAs(ggchild->Name(), "call"))
                         {
-                            wxString required = ggchild->GetAttribute("required", "1");
-                            wxXmlNode* gggchild = ggchild->GetChildren();
+                            tinyxml2::XMLElement* gggchild = ggchild->FirstChildElement();
+                            std::string required = getAttribute(ggchild, "required", "1");
                             lc3_subr_output_subr_call call;
-                            call.required = wxAtoi(required) != 0;
+                            call.required = atoi(required.c_str());
                             while (gggchild)
                             {
-                                if (gggchild->GetName() == "name")
-                                    call.name = gggchild->GetNodeContent();
-                                else if (gggchild->GetName() == "params")
-                                    tokenize(gggchild->GetNodeContent().ToStdString(), call.params, ",");
+                                if (isSameAs(gggchild->Name(), "name"))
+                                    call.name = gggchild->GetText();
+                                else if (isSameAs(gggchild->Name(), "params"))
+                                    tokenize(gggchild->GetText(), call.params, ",");
                                 else
-                                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", ggchild->GetName(), gggchild->GetName()), gggchild);
-                                gggchild = getNextNode(gggchild);
+                                    throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", ggchild->Name(), gggchild->Name()), gggchild);
+                                gggchild = gggchild->NextSiblingElement();
                             }
                             subr.calls.push_back(call);
                         }
                         else
                         {
-                            throw XmlTestParserException(wxString::Format("2Unknown tag found in %s %s", child->GetName(), ggchild->GetName()), grandchild);
+                            throw XmlTestParserException(tfm::format("2Unknown tag found in %s %s", child->Name(), ggchild->Name()), grandchild);
                         }
-                        ggchild = getNextNode(ggchild);
+                        ggchild = ggchild->NextSiblingElement();
                     }
                 }
-                else if (grandchild->GetName() == "points")
+                else if (isSameAs(grandchild->Name(), "points"))
                 {
-                    wxXmlNode* ggchild = grandchild->GetChildren();
+                    tinyxml2::XMLElement* ggchild = grandchild->FirstChildElement();
                     while (ggchild)
                     {
-                        if (ggchild->GetName() == "answer")
-                            subr.points_answer = wxAtoi(ggchild->GetNodeContent());
-                        else if (ggchild->GetName() == "params")
-                            subr.points_params = wxAtoi(ggchild->GetNodeContent());
-                        else if (ggchild->GetName() == "r7")
-                            subr.points_r7 = wxAtoi(ggchild->GetNodeContent());
-                        else if (ggchild->GetName() == "r6")
-                            subr.points_r6 = wxAtoi(ggchild->GetNodeContent());
-                        else if (ggchild->GetName() == "r5")
-                            subr.points_r5 = wxAtoi(ggchild->GetNodeContent());
-                        else if (ggchild->GetName() == "locals")
-                            subr.points_locals = wxAtoi(ggchild->GetNodeContent());
-                        else if (ggchild->GetName() == "calls")
-                            subr.points_calls = wxAtoi(ggchild->GetNodeContent());
-                        else if (ggchild->GetName() == "read-answer")
-                            subr.points_read_answer = wxAtoi(ggchild->GetNodeContent());
+                        if (isSameAs(ggchild->Name(), "answer"))
+                            subr.points_answer = atoi(ggchild->GetText());
+                        else if (isSameAs(ggchild->Name(), "params"))
+                            subr.points_params = atoi(ggchild->GetText());
+                        else if (isSameAs(ggchild->Name(), "r7"))
+                            subr.points_r7 = atoi(ggchild->GetText());
+                        else if (isSameAs(ggchild->Name(), "r6"))
+                            subr.points_r6 = atoi(ggchild->GetText());
+                        else if (isSameAs(ggchild->Name(), "r5"))
+                            subr.points_r5 = atoi(ggchild->GetText());
+                        else if (isSameAs(ggchild->Name(), "locals"))
+                            subr.points_locals = atoi(ggchild->GetText());
+                        else if (isSameAs(ggchild->Name(), "calls"))
+                            subr.points_calls = atoi(ggchild->GetText());
+                        else if (isSameAs(ggchild->Name(), "read-answer"))
+                            subr.points_read_answer = atoi(ggchild->GetText());
                         else
-                            throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), ggchild->GetName()), ggchild);
-                        ggchild = getNextNode(ggchild);
+                            throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), ggchild->Name()), ggchild);
+                        ggchild = ggchild->NextSiblingElement();
                     }
                 }
-                else if (grandchild->GetName() == "deductions-per-mistake")
-                    subr.deductions_edist = wxAtoi(grandchild->GetNodeContent());
+                else if (isSameAs(grandchild->Name(), "deductions-per-mistake"))
+                    subr.deductions_edist = atoi(grandchild->GetText());
                 else
-                    throw XmlTestParserException(wxString::Format("Unknown tag found in %s %s", child->GetName(), grandchild->GetName()), grandchild);
-                grandchild = getNextNode(grandchild);
+                    throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
+                grandchild = grandchild->NextSiblingElement();
             }
             output.type = TEST_SUBROUTINE;
 
@@ -731,16 +742,14 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, wxXmlNode* root)
                 if (call.required)
                     output.points += subr.points_calls;
         }
-        else if (child->GetName() != "comment")
-            return false;
         else
         {
-            child = getNextNode(child);
+            child = child->NextSiblingElement();
             continue;
         }
         output.cmp_type = GetCompareType(output.type, mode, child);
         test.output.push_back(output);
-        child = getNextNode(child);
+        child = child->NextSiblingElement();
     }
 
     return true;
