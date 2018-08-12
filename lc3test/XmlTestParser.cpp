@@ -4,13 +4,32 @@
 #include <string>
 #include <lc3_all.hpp>
 
-bool isSameAs(std::string a, std::string b, bool caseSensitive=false) {
+/**
+ * Compare two strings, with support for ASCII case insensitivity
+ * @param a First string to compare
+ * @param b Second string to compare
+ * @param caseSensitive Whether or not the comparison should be case sensitive
+ * @return true if the strings are equal, false otherwise.
+ */
+bool isSameAs(std::string a, std::string b, bool caseSensitive=true) {
     if (!caseSensitive) {
         std::transform(a.begin(), a.end(), a.begin(), ::tolower);
         std::transform(b.begin(), b.end(), b.begin(), ::tolower);
     }
     
     return a == b;
+}
+
+/**
+ * Get the value of an attribute of an XML node, with support for a default value if the attribute does not set.
+ * @param node The node to read the attribute value of
+ * @param key The name of the attribute to read the value of
+ * @param default_value The default value to return if the attribute is not set.
+ * @return The value of the given attribute of the given node, or the default value provided if the attribute is not set.
+ */
+std::string getAttribute(const tinyxml2::XMLElement* node, const char * key, const char * default_value) {
+    const char * attr = node->Attribute(key);
+    return attr != nullptr ? attr : default_value;
 }
 
 /** process_str
@@ -276,17 +295,14 @@ bool XmlTestParser::LoadTestSuiteData(lc3_test_suite& suite, const std::string& 
 
 bool XmlTestParser::LoadTestSuite(lc3_test_suite& suite, tinyxml2::XMLDocument* doc)
 {
-    tinyxml2::XMLElement* child = doc->FirstChildElement();
+    tinyxml2::XMLElement* child = doc->RootElement()->FirstChildElement();
 
     while (child)
     {
-        if (child->Name() != "comment")
-        {
-            if (child->Name() != "test-case")
-                throw XmlTestParserException("Child elements must be named test-case", child);
-            if (!LoadTest(suite, child))
-                return false;
-        }
+        if (!isSameAs(child->Name(), "test-case"))
+            throw XmlTestParserException("Child elements must be named test-case", child);
+        if (!LoadTest(suite, child))
+            return false;
         child = child->NextSiblingElement();
     }
 
@@ -310,35 +326,35 @@ bool XmlTestParser::LoadTest(lc3_test_suite& suite, tinyxml2::XMLElement* root)
     while(child)
     {
         if (isSameAs(child->Name(), "name"))
-            test.name = child->Value();
+            test.name = child->GetText();
         else if (isSameAs(child->Name(), "true-traps"))
-            test.true_traps = atoi(child->Value()) != 0;
+            test.true_traps = atoi(child->GetText()) != 0;
         else if (isSameAs(child->Name(), "has-max-executions"))
-            test.has_max_executions = atoi(child->Value()) != 0;
+            test.has_max_executions = atoi(child->GetText()) != 0;
         else if (isSameAs(child->Name(), "disable-plugins"))
-            test.disable_plugins = atoi(child->Value()) != 0;
+            test.disable_plugins = atoi(child->GetText()) != 0;
         else if (isSameAs(child->Name(), "max-executions"))
-            test.max_executions = atoi(child->Value());
+            test.max_executions = atoi(child->GetText());
         else if (isSameAs(child->Name(), "randomize"))
-            test.randomize = atoi(child->Value()) != 0;
+            test.randomize = atoi(child->GetText()) != 0;
         else if (isSameAs(child->Name(), "fully-randomize"))
-            test.fully_randomize = atoi(child->Value()) != 0;
+            test.fully_randomize = atoi(child->GetText()) != 0;
         else if (isSameAs(child->Name(), "strict-execution"))
-            test.strict_execution = atoi(child->Value()) != 0;
+            test.strict_execution = atoi(child->GetText()) != 0;
         else if (isSameAs(child->Name(), "random-seed"))
         {
-            std::string seed = child->Value();
+            std::string seed = child->GetText();
             test.random_seed = strtol(seed.c_str(), NULL, 10);
         }
         else if (isSameAs(child->Name(), "fill-value"))
         {
-            std::string fill_value = child->Value();
+            std::string fill_value = child->GetText();
             if (fill_value.size() > 1 && fill_value[0] == 'x')
                 fill_value = "0" + fill_value;
             test.fill_value = strtol(fill_value.c_str(), NULL, 0);
         }
         else if (isSameAs(child->Name(), "interrupt-enabled"))
-            test.interrupt_enabled = atoi(child->Value()) != 0;
+            test.interrupt_enabled = atoi(child->GetText()) != 0;
         else if (isSameAs(child->Name(), "input"))
         {
             if (!LoadTestInput(test, child))
@@ -371,9 +387,9 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, tinyxml2::XMLElement* root)
             while (grandchild)
             {
                 if (isSameAs(grandchild->Name(), "address"))
-                    input.address = grandchild->Value();
+                    input.address = grandchild->GetText();
                 else if (isSameAs(grandchild->Name(), "value"))
-                    input.value = grandchild->Value();
+                    input.value = grandchild->GetText();
                 else
                     throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
                 grandchild = grandchild->NextSiblingElement();
@@ -385,9 +401,9 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, tinyxml2::XMLElement* root)
             while (grandchild)
             {
                 if (isSameAs(grandchild->Name(), "register"))
-                    input.address = grandchild->Value();
+                    input.address = grandchild->GetText();
                 else if (isSameAs(grandchild->Name(), "value"))
-                    input.registerval = grandchild->Value();
+                    input.registerval = grandchild->GetText();
                 else
                     throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
                 grandchild = grandchild->NextSiblingElement();
@@ -399,7 +415,7 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, tinyxml2::XMLElement* root)
             while (grandchild)
             {
                 if (isSameAs(grandchild->Name(), "value"))
-                    input.pcval = grandchild->Value();
+                    input.pcval = grandchild->GetText();
                 else
                     throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
                 grandchild = grandchild->NextSiblingElement();
@@ -411,9 +427,9 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, tinyxml2::XMLElement* root)
             while (grandchild)
             {
                 if (isSameAs(grandchild->Name(), "address"))
-                    input.address = grandchild->Value();
+                    input.address = grandchild->GetText();
                 else if (isSameAs(grandchild->Name(), "value"))
-                    input.pointer = grandchild->Value();
+                    input.pointer = grandchild->GetText();
                 else
                     throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
                 grandchild = grandchild->NextSiblingElement();
@@ -425,13 +441,13 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, tinyxml2::XMLElement* root)
             while (grandchild)
             {
                 if (isSameAs(grandchild->Name(), "address"))
-                    input.address = grandchild->Value();
+                    input.address = grandchild->GetText();
                 else if (isSameAs(grandchild->Name(), "value"))
-                    input.text = process_str(grandchild->Value(), error);
+                    input.text = process_str(grandchild->GetText(), error);
                 else
                     throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
 
-                if (error) throw XmlTestParserException(tfm::format("Malformed string %s in %s", grandchild->Value(), child->Name()), grandchild);
+                if (error) throw XmlTestParserException(tfm::format("Malformed string %s in %s", grandchild->GetText(), child->Name()), grandchild);
                 grandchild = grandchild->NextSiblingElement();
             }
             input.type = TEST_STRING;
@@ -441,10 +457,10 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, tinyxml2::XMLElement* root)
             while (grandchild)
             {
                 if (isSameAs(grandchild->Name(), "address"))
-                    input.address = grandchild->Value();
+                    input.address = grandchild->GetText();
                 else if (isSameAs(grandchild->Name(), "value"))
                 {
-                    tokenize(grandchild->Value(), input.array, ",");
+                    tokenize(grandchild->GetText(), input.array, ",");
                     if (input.array.empty())
                         throw XmlTestParserException(tfm::format("%s must be given at least one element", child->Name()), grandchild);
                 }
@@ -459,10 +475,10 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, tinyxml2::XMLElement* root)
             while (grandchild)
             {
                 if (isSameAs(grandchild->Name(), "value"))
-                    input.io = process_str(grandchild->Value(), error);
+                    input.io = process_str(grandchild->GetText(), error);
                 else
                     throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
-                if (error) throw XmlTestParserException(tfm::format("Malformed string %s in %s", grandchild->Value(), child->Name()), grandchild);
+                if (error) throw XmlTestParserException(tfm::format("Malformed string %s in %s", grandchild->GetText(), child->Name()), grandchild);
                 grandchild = grandchild->NextSiblingElement();
             }
             input.type = TEST_IO;
@@ -473,24 +489,20 @@ bool XmlTestParser::LoadTestInput(lc3_test& test, tinyxml2::XMLElement* root)
             while (grandchild)
             {
                 if (isSameAs(grandchild->Name(), "name"))
-                    subr.name = grandchild->Value();
+                    subr.name = grandchild->GetText();
                 else if (isSameAs(grandchild->Name(), "stack"))
-                    subr.stack = grandchild->Value();
+                    subr.stack = grandchild->GetText();
                 else if (isSameAs(grandchild->Name(), "r7"))
-                    subr.r7 = grandchild->Value();
+                    subr.r7 = grandchild->GetText();
                 else if (isSameAs(grandchild->Name(), "r5"))
-                    subr.r5 = grandchild->Value();
+                    subr.r5 = grandchild->GetText();
                 else if (isSameAs(grandchild->Name(), "params"))
-                    tokenize(grandchild->Value(), subr.params, ",");
+                    tokenize(grandchild->GetText(), subr.params, ",");
                 else
                     throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
                 grandchild = grandchild->NextSiblingElement();
             }
             input.type = TEST_SUBROUTINE;
-        }
-        else if (child->Name() != "comment")
-        {
-            return false;
         }
         else
         {
@@ -516,8 +528,8 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, tinyxml2::XMLElement* root)
         output.passed = false;
         output.points = 0;
 
-        std::string points = child->Attribute("points", "0");
-        std::string mode = child->Attribute("condition", "equals");
+        std::string points = getAttribute(child, "points", "0");
+        std::string mode = getAttribute(child, "condition", "equals");
         output.points = atoi(points.c_str());
 
         if (isSameAs(child->Name(), "test-value"))
@@ -525,9 +537,9 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, tinyxml2::XMLElement* root)
             while (grandchild)
             {
                 if (isSameAs(grandchild->Name(), "address"))
-                    output.address = grandchild->Value();
+                    output.address = grandchild->GetText();
                 else if (isSameAs(grandchild->Name(), "value"))
-                    output.value = grandchild->Value();
+                    output.value = grandchild->GetText();
                 else
                     throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
                 grandchild = grandchild->NextSiblingElement();
@@ -539,9 +551,9 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, tinyxml2::XMLElement* root)
             while (grandchild)
             {
                 if (isSameAs(grandchild->Name(), "register"))
-                    output.address = grandchild->Value();
+                    output.address = grandchild->GetText();
                 else if (isSameAs(grandchild->Name(), "value"))
-                    output.registerval = grandchild->Value();
+                    output.registerval = grandchild->GetText();
                 else
                     throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
                 grandchild = grandchild->NextSiblingElement();
@@ -553,7 +565,7 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, tinyxml2::XMLElement* root)
             while (grandchild)
             {
                 if (isSameAs(grandchild->Name(), "value"))
-                    output.pcval = grandchild->Value();
+                    output.pcval = grandchild->GetText();
                 else
                     throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
                 grandchild = grandchild->NextSiblingElement();
@@ -565,9 +577,9 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, tinyxml2::XMLElement* root)
             while (grandchild)
             {
                 if (isSameAs(grandchild->Name(), "address"))
-                    output.address = grandchild->Value();
+                    output.address = grandchild->GetText();
                 else if (isSameAs(grandchild->Name(), "value"))
-                    output.pointer = grandchild->Value();
+                    output.pointer = grandchild->GetText();
                 else
                     throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
                 grandchild = grandchild->NextSiblingElement();
@@ -579,12 +591,12 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, tinyxml2::XMLElement* root)
             while (grandchild)
             {
                 if (isSameAs(grandchild->Name(), "address"))
-                    output.address = grandchild->Value();
+                    output.address = grandchild->GetText();
                 else if (isSameAs(grandchild->Name(), "value"))
-                    output.text = process_str(grandchild->Value(), error);
+                    output.text = process_str(grandchild->GetText(), error);
                 else
                     throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
-                if (error) throw XmlTestParserException(tfm::format("Malformed string %s in %s", grandchild->Value(), child->Name()), grandchild);
+                if (error) throw XmlTestParserException(tfm::format("Malformed string %s in %s", grandchild->GetText(), child->Name()), grandchild);
                 grandchild = grandchild->NextSiblingElement();
             }
             output.type = TEST_STRING;
@@ -594,10 +606,10 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, tinyxml2::XMLElement* root)
             while (grandchild)
             {
                 if (isSameAs(grandchild->Name(), "address"))
-                    output.address = grandchild->Value();
+                    output.address = grandchild->GetText();
                 else if (isSameAs(grandchild->Name(), "value"))
                 {
-                    tokenize(grandchild->Value(), output.array, ",");
+                    tokenize(grandchild->GetText(), output.array, ",");
                     if (output.array.empty())
                         throw XmlTestParserException(tfm::format("%s must be given at least one element", child->Name()), grandchild);
                 }
@@ -612,10 +624,10 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, tinyxml2::XMLElement* root)
             while (grandchild)
             {
                 if (isSameAs(grandchild->Name(), "value"))
-                    output.io = process_str(grandchild->Value(), error);
+                    output.io = process_str(grandchild->GetText(), error);
                 else
                     throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
-                if (error) throw XmlTestParserException(tfm::format("Malformed string %s in %s", grandchild->Value(), child->Name()), grandchild);
+                if (error) throw XmlTestParserException(tfm::format("Malformed string %s in %s", grandchild->GetText(), child->Name()), grandchild);
                 grandchild = grandchild->NextSiblingElement();
             }
             output.type = TEST_IO;
@@ -627,9 +639,9 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, tinyxml2::XMLElement* root)
             while (grandchild)
             {
                 if (isSameAs(grandchild->Name(), "answer"))
-                    subr.answer = grandchild->Value();
+                    subr.answer = grandchild->GetText();
                 else if (isSameAs(grandchild->Name(), "locals"))
-                    tokenize(grandchild->Value(), subr.locals, ",");
+                    tokenize(grandchild->GetText(), subr.locals, ",");
                 else if (isSameAs(grandchild->Name(), "calls"))
                 {
                     tinyxml2::XMLElement* ggchild = grandchild->FirstChildElement();
@@ -638,16 +650,15 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, tinyxml2::XMLElement* root)
                         if (isSameAs(ggchild->Name(), "call"))
                         {
                             tinyxml2::XMLElement* gggchild = ggchild->FirstChildElement();
-                            const char* required = ggchild->Attribute("required");
-                            int requiredInt = required != nullptr ? atoi(required) : 1;
+                            std::string required = getAttribute(ggchild, "required", "1");
                             lc3_subr_output_subr_call call;
-                            call.required = requiredInt != 0;
+                            call.required = atoi(required.c_str());
                             while (gggchild)
                             {
                                 if (isSameAs(gggchild->Name(), "name"))
-                                    call.name = gggchild->Value();
+                                    call.name = gggchild->GetText();
                                 else if (isSameAs(gggchild->Name(), "params"))
-                                    tokenize(gggchild->Value(), call.params, ",");
+                                    tokenize(gggchild->GetText(), call.params, ",");
                                 else
                                     throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", ggchild->Name(), gggchild->Name()), gggchild);
                                 gggchild = gggchild->NextSiblingElement();
@@ -667,28 +678,28 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, tinyxml2::XMLElement* root)
                     while (ggchild)
                     {
                         if (isSameAs(ggchild->Name(), "answer"))
-                            subr.points_answer = atoi(ggchild->Value());
+                            subr.points_answer = atoi(ggchild->GetText());
                         else if (isSameAs(ggchild->Name(), "params"))
-                            subr.points_params = atoi(ggchild->Value());
+                            subr.points_params = atoi(ggchild->GetText());
                         else if (isSameAs(ggchild->Name(), "r7"))
-                            subr.points_r7 = atoi(ggchild->Value());
+                            subr.points_r7 = atoi(ggchild->GetText());
                         else if (isSameAs(ggchild->Name(), "r6"))
-                            subr.points_r6 = atoi(ggchild->Value());
+                            subr.points_r6 = atoi(ggchild->GetText());
                         else if (isSameAs(ggchild->Name(), "r5"))
-                            subr.points_r5 = atoi(ggchild->Value());
+                            subr.points_r5 = atoi(ggchild->GetText());
                         else if (isSameAs(ggchild->Name(), "locals"))
-                            subr.points_locals = atoi(ggchild->Value());
+                            subr.points_locals = atoi(ggchild->GetText());
                         else if (isSameAs(ggchild->Name(), "calls"))
-                            subr.points_calls = atoi(ggchild->Value());
+                            subr.points_calls = atoi(ggchild->GetText());
                         else if (isSameAs(ggchild->Name(), "read-answer"))
-                            subr.points_read_answer = atoi(ggchild->Value());
+                            subr.points_read_answer = atoi(ggchild->GetText());
                         else
                             throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), ggchild->Name()), ggchild);
                         ggchild = ggchild->NextSiblingElement();
                     }
                 }
                 else if (isSameAs(grandchild->Name(), "deductions-per-mistake"))
-                    subr.deductions_edist = atoi(grandchild->Value());
+                    subr.deductions_edist = atoi(grandchild->GetText());
                 else
                     throw XmlTestParserException(tfm::format("Unknown tag found in %s %s", child->Name(), grandchild->Name()), grandchild);
                 grandchild = grandchild->NextSiblingElement();
@@ -731,8 +742,6 @@ bool XmlTestParser::LoadTestOutput(lc3_test& test, tinyxml2::XMLElement* root)
                 if (call.required)
                     output.points += subr.points_calls;
         }
-        else if (child->Name() != "comment")
-            return false;
         else
         {
             child = child->NextSiblingElement();
