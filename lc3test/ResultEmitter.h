@@ -9,8 +9,10 @@
 #include <lc3_all.hpp>
 
 class ResultEmitter {
-    public:
-        virtual void lc3test_output_test_report(std::stringstream& oss, lc3_test_suite& suite, const std::string& filename);
+public:
+    virtual ~ResultEmitter() = default;
+    virtual void add_suite(lc3_test_suite& suite, const std::string& filename) = 0;
+    virtual void emit_results(std::ostream& os) = 0;
 };
 
 
