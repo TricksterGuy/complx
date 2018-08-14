@@ -1,12 +1,15 @@
 include_directories(${complx-tools_SOURCE_DIR}/liblc3)
 include_directories(${complx-tools_SOURCE_DIR}/logging)
+include_directories(${complx-tools_SOURCE_DIR}/thirdparty/tinyformat)
+include_directories(${complx-tools_SOURCE_DIR}/thirdparty/tinyxml2)
 
 set(SRC_LC3TEST
     main.cpp
     XmlTestParser.cpp
-    tinyxml2.cpp
     TextResultEmitter.cpp
     XmlResultEmitter.cpp
+
+    ../thirdparty/tinyxml2/tinyxml2.cpp
 )
 
 add_executable(

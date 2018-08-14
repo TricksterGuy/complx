@@ -1,6 +1,8 @@
 include_directories(${complx-tools_SOURCE_DIR}/lc3test)
 include_directories(${complx-tools_SOURCE_DIR}/liblc3)
 include_directories(${complx-tools_SOURCE_DIR}/logging)
+include_directories(${complx-tools_SOURCE_DIR}/thirdparty/tinyformat)
+include_directories(${complx-tools_SOURCE_DIR}/thirdparty/tinyxml2)
 
 if(CMAKE_HOST_UNIX)
     include(FindPkgConfig)
@@ -46,6 +48,7 @@ set(SRC_COMPLX
     icon32.xpm
 
     ../lc3test/XmlTestParser.cpp
+    ../thirdparty/tinyxml2/tinyxml2.cpp
 )
 
 add_executable(
