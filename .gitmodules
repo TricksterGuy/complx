@@ -1,6 +1,0 @@
-[submodule "thirdparty/tinyxml2"]
-	path = thirdparty/tinyxml2
-	url = https://github.com/leethomason/tinyxml2.git
-[submodule "thirdparty/tinyformat"]
-	path = thirdparty/tinyformat
-	url = https://github.com/c42f/tinyformat.git
