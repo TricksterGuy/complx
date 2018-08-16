@@ -1,6 +1,8 @@
 find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(../liblc3)
+include_directories(../thirdparty/tinyformat)
+include_directories(../thirdparty/tinyxml2)
 
 if(CMAKE_HOST_UNIX)
     add_definitions(-DBOOST_TEST_DYN_LINK=1)
@@ -13,7 +15,8 @@ file(GLOB SRC_TESTS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 add_executable(
     lc3_test_suite
     ${SRC_TESTS}
-    ../lc3test/XmlTestParser.cpp)
+    ../lc3test/XmlTestParser.cpp
+    ../thirdparty/tinyxml2/tinyxml2.cpp)
 
 target_link_libraries(
     lc3_test_suite
