@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-class LC3AssembleContext;
+struct LC3AssembleContext;
 
 #define THROW(exception) do \
 { \

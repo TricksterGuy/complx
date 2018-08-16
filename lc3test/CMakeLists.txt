@@ -1,9 +1,15 @@
 include_directories(${complx-tools_SOURCE_DIR}/liblc3)
 include_directories(${complx-tools_SOURCE_DIR}/logging)
+include_directories(${complx-tools_SOURCE_DIR}/thirdparty/tinyformat)
+include_directories(${complx-tools_SOURCE_DIR}/thirdparty/tinyxml2)
 
 set(SRC_LC3TEST
     main.cpp
     XmlTestParser.cpp
+    TextResultEmitter.cpp
+    XmlResultEmitter.cpp
+
+    ../thirdparty/tinyxml2/tinyxml2.cpp
 )
 
 add_executable(
@@ -14,7 +20,6 @@ add_executable(
 target_link_libraries(
     lc3test
     lc3
-    ${wxWidgets_LIBRARIES}
 )
 
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/lc3test DESTINATION ${CMAKE_INSTALL_BINDIR})
