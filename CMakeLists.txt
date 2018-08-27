@@ -13,7 +13,7 @@ option(ENABLE_COMPLX "Build complx" ON)
 option(ENABLE_DEV "Build dev version" OFF)
 option(ENABLE_TESTS "Enable testing" OFF)
 option(ENABLE_COVERAGE "Enable testing coverage" OFF)
-option(ENABLE_PYLC3 "Enable python bindings to liblc3" OFF)
+option(ENABLE_PYLC3 "Enable python bindings to liblc3" ON)
 
 if(ENABLE_TESTS)
     enable_testing()
