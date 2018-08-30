@@ -409,5 +409,5 @@ class LC3UnitTestCase(unittest.TestCase):
         self.assertEquals(self.state.output, output, self._generateReplay())
 
     def _generateReplay(self):
-        return "String to run test in complx: %s" % self.preconditions.encode()
+        return "String to set up this test in complx: %s" % self.preconditions.encode()
 
