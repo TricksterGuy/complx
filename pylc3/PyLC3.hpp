@@ -9,9 +9,9 @@ class LC3State
 public:
     LC3State() { lc3_init(state); };
     /** @see lc3_init */
-    void init(bool randomize_registers = true, bool randomize_memory = true, short register_fill_value = 0, short memory_fill_value = 0)
+    void init(bool randomize = true, short fill_value = 0)
     {
-        lc3_init(state, randomize_registers, randomize_memory, register_fill_value, memory_fill_value);
+        lc3_init(state, randomize, randomize, fill_value, fill_value);
     }
     /** @see lc3_assemble 
         @param filename Full path of the file to load.
@@ -49,6 +49,12 @@ public:
     /** @see lc3_remove_break */
     bool remove_breakpoint(unsigned short address) { return lc3_remove_break(state, address); }
 
+    /** @see srand */
+    void seed(unsigned int seed) { srand(seed); }
+
+    /** @see lc3_random */
+    unsigned short random() { return lc3_random(); }
+
     short get_r0() const { return state.regs[0]; }
     void set_r0(short r0) { state.regs[0] = r0; }
     short get_r1() const { return state.regs[1]; }
@@ -73,6 +79,11 @@ public:
     unsigned short get_pc() const { return state.pc; }
     void set_pc(unsigned short pc) { state.pc = pc; }
     bool has_halted() const { return state.halted; }
+
+    bool get_true_traps() const { return state.true_traps; }
+    void set_true_traps(bool setting) { lc3_set_true_traps(state, setting); }
+    bool get_interrupts() const { return state.interrupt_enabled; }
+    void set_interrupts(bool setting) { state.interrupt_enabled = setting; }
 
 private:
     lc3_state state;
