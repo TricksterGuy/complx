@@ -167,6 +167,27 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertHalted()
         self.assertString("STRING_LOC", "JELLO")
 
+    def testConsoleIO(self):
+        snippet = """
+        .orig x3000
+            GETC
+            ADD R0, R0, 1
+            OUT
+            GETC
+            ADD R0, R0, 1
+            OUT
+            GETC
+            ADD R0, R0, 1
+            OUT
+            HALT
+        .end
+        """
+        self.loadCode(snippet)
+        self.setConsoleInput("ADB")
+        self.runCode()
+        self.assertHalted()
+        self.assertConsoleOutput("BEC")
+
 
 if __name__ == '__main__':
     unittest.main()

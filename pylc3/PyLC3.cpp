@@ -1,5 +1,4 @@
 #include "PyLC3.hpp"
-#include <sstream>
 
 bool LC3State::load(const std::string& filename, bool testing_mode)
 {
@@ -17,6 +16,8 @@ bool LC3State::load(const std::string& filename, bool testing_mode)
         }
         else
         {
+            state.input = &in;
+            state.output = &out;
             state.max_stack_size = 0;
             state.max_call_stack_size = -1;
             state.in_lc3test = true;
@@ -40,6 +41,8 @@ bool LC3State::loadCode(const std::string& code)
 {
     try
     {
+        state.input = &in;
+        state.output = &out;
         std::vector<code_range> ranges;
         LC3AssembleOptions options;
         state.max_stack_size = 0;

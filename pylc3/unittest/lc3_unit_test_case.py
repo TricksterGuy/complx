@@ -261,7 +261,7 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         self.state.input = input
 
-        self.preconditions.addPrecondition(PreconditionFlag.input, "IN", input)
+        self.preconditions.addPrecondition(PreconditionFlag.input, "IN", [ord(char) for char in input])
 
     def callSubroutine(self, subroutine, params, r5=0xCAFE, r6=0xF000, r7=0x8000):
         """Sets the state to start executing a subroutine for the test.

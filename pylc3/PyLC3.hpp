@@ -1,13 +1,17 @@
 #ifndef PYLC3_HPP
 #define PYLC3_HPP
 
+#include <sstream>
 #include <lc3_all.hpp>
 
 /** A simple wrapper around lc3_state struct to bind to python. */
 class LC3State
 {
 public:
-    LC3State() { lc3_init(state); };
+    LC3State() 
+    { 
+        lc3_init(state);
+    };
     /** @see lc3_init */
     void init(bool randomize = true, short fill_value = 0)
     {
@@ -82,6 +86,12 @@ public:
     void set_pc(unsigned short pc) { state.pc = pc; }
     bool has_halted() const { return state.halted; }
 
+    std::string get_input() const { return in.str(); }
+    void set_input(std::string input) { in.str(input); }
+
+    std::string get_output() const { return out.str(); }
+    void set_output(std::string input) { out.str(input); }
+
     bool get_true_traps() const { return state.true_traps; }
     void set_true_traps(bool setting) { lc3_set_true_traps(state, setting); }
     bool get_interrupts() const { return state.interrupt_enabled; }
@@ -89,6 +99,8 @@ public:
 
 private:
     lc3_state state;
+    std::stringstream in;
+    std::stringstream out;
 };
 
 #endif
