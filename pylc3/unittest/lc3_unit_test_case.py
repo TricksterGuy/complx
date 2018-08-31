@@ -303,7 +303,7 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         self.assertTrue(self.state.halted or self.state.pc == self.break_address)
 
-    def assertRegister(self, register_number, value, points=0):
+    def assertRegister(self, register_number, value):
         """Asserts that a value at a label is a certain value.
 
         This exactly checks if state.memory[label] == value
@@ -311,23 +311,21 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             label: String - Label pointing at the address to check.
             value: Integer - Expected value.
-            points: Integer - Points to assign for this check.
         """
         addr = self.state.lookup(label)
         self.assertEquals(self.state.get_memory(addr), value, self._generateReplay())
 
-    def assertPc(self, label, value, points=0):
+    def assertPc(self, label, value):
         """Asserts that the PC is a certain value.
 
         This exactly checks if state.pc == value
 
         Args:
             value: Integer - Expected value.
-            points: Integer - Points to assign for this check.
         """
         self.assertEquals(self.state.pc, value, self._generateReplay())
 
-    def assertValue(self, label, value, points=0):
+    def assertValue(self, label, value):
         """Asserts that a value at a label is a certain value.
 
         This exactly checks if state.memory[label] == value
@@ -335,12 +333,11 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             label: String - Label pointing at the address to check.
             value: Integer - Expected value.
-            points: Integer - Points to assign for this check.
         """
         addr = self.state.lookup(label)
         self.assertEquals(self.state.get_memory(addr), value, self._generateReplay())
 
-    def assertPointer(self, label, value, points=0):
+    def assertPointer(self, label, value):
         """Asserts that a value at an address pointed to by label is a certain value.
 
         This exactly checks if state.memory[state.memory[label]] == value
@@ -348,12 +345,11 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             label: String - Label pointing at the address which in turn contains the address to check.
             value: Integer - Expected value.
-            points: Integer - Points to assign for this check.
         """
         addr = self.state.lookup(label)
         self.assertEquals(self.state.get_memory(self.state.get_memory(addr)), value, self._generateReplay())
         
-    def assertArray(self, label, arr, points=0):
+    def assertArray(self, label, arr):
         """Asserts that a sequence of values starting at the address pointed to by label are certain values.
 
         This exactly checks if:
@@ -365,7 +361,6 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             label: String - Label pointing at the address which in turn contains the first address to start checking.
             arr: Iterable of Integers - Expected values to check sequentially.
-            points: Integer - Points to assign for this check.
         """ 
         label_addr = self.state.lookup(label)
         start_addr = self.state.get_memory(label_addr)
@@ -374,7 +369,7 @@ class LC3UnitTestCase(unittest.TestCase):
             actual_arr.append(self.state.get_memory(addr))
         self.assertListEqual(arr, actual_arr, self._generateReplay())
 
-    def assertString(self, label, text, points=0):
+    def assertString(self, label, text):
         """Asserts that sequence of characters followed by a nul terminator starting at the address pointed to by label are certain values.
 
         This exactly checks if:
@@ -387,7 +382,6 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             label: String - Label pointing at the address which in turn contains the first address to start checking.
             text: String - Expected characters to check sequentially.
-            points: Integer - Points to assign for this check.
         """ 
         label_addr = self.state.lookup(label)
         start_addr = self.state.get_memory(label_addr)
@@ -399,12 +393,11 @@ class LC3UnitTestCase(unittest.TestCase):
         expected_str.append(0)
         self.assertListEqual(expected_str, actual_str, self._generateReplay())
     
-    def assertConsoleOutput(self, output, points=0):
+    def assertConsoleOutput(self, output):
         """Asserts that console output is a certain string.
 
         Args:
             input: String - Expected console output.
-            points: Integer - Points to assign for this check.
         """
         self.assertEquals(self.state.output, output, self._generateReplay())
 
