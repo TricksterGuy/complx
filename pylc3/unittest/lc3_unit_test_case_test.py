@@ -23,6 +23,24 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertRegister(0, 10)
         self.assertRegister(1, 20)
 
+    def testPC(self):
+        snippet = """
+        .orig x4000
+            LD R0, ADDR
+            JMP R0
+            ADDR .fill x5000
+        .end
+        .orig x5000
+            HALT
+        .end
+        """
+        self.loadCode(snippet)
+        self.setPc(0x4000)
+        self.runCode()
+        self.assertHalted()
+        # Halting decrements PC by 1.
+        self.assertPc(0x5000)
+
     def testValue(self):
         snippet = """
         .orig x3000
@@ -44,6 +62,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertValue("A", 2)
         self.assertValue("B", 3)
         self.assertValue("ANS", 5)
+
 
 
 

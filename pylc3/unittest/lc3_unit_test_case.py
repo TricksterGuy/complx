@@ -315,7 +315,7 @@ class LC3UnitTestCase(unittest.TestCase):
         assert register_number >= 0 and register_number < 8, 'Invalid register number'
         self.assertEqual(self.state.get_register(register_number), value, self._generateReplay())
 
-    def assertPc(self, label, value):
+    def assertPc(self, value):
         """Asserts that the PC is a certain value.
 
         This exactly checks if state.pc == value
