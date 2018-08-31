@@ -232,7 +232,7 @@ class LC3UnitTestCase(unittest.TestCase):
         self.preconditions.addPrecondition(PreconditionFlag.array, label, arr)
 
     def setString(self, label, text):
-        """Sets a sequence of characters followed by a nul terminator starting at the address pointed to by label.
+        """Sets a sequence of characters followed by a NUL terminator starting at the address pointed to by label.
 
         This exactly performs:
             state.memory[state.memory[label]] = text[0]
@@ -312,8 +312,8 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address to check.
             value: Integer - Expected value.
         """
-        addr = self.state.lookup(label)
-        self.assertEquals(self.state.get_memory(addr), value, self._generateReplay())
+        assert register_number >= 0 and register_number < 8, 'Invalid register number'
+        self.assertEqual(self.state.get_register(register_number), value, self._generateReplay())
 
     def assertPc(self, label, value):
         """Asserts that the PC is a certain value.
@@ -323,7 +323,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             value: Integer - Expected value.
         """
-        self.assertEquals(self.state.pc, value, self._generateReplay())
+        self.assertEqual(self.state.pc, value, self._generateReplay())
 
     def assertValue(self, label, value):
         """Asserts that a value at a label is a certain value.
@@ -335,7 +335,7 @@ class LC3UnitTestCase(unittest.TestCase):
             value: Integer - Expected value.
         """
         addr = self.state.lookup(label)
-        self.assertEquals(self.state.get_memory(addr), value, self._generateReplay())
+        self.assertEqual(self.state.get_memory(addr), value, self._generateReplay())
 
     def assertPointer(self, label, value):
         """Asserts that a value at an address pointed to by label is a certain value.
@@ -347,7 +347,7 @@ class LC3UnitTestCase(unittest.TestCase):
             value: Integer - Expected value.
         """
         addr = self.state.lookup(label)
-        self.assertEquals(self.state.get_memory(self.state.get_memory(addr)), value, self._generateReplay())
+        self.assertEqual(self.state.get_memory(self.state.get_memory(addr)), value, self._generateReplay())
         
     def assertArray(self, label, arr):
         """Asserts that a sequence of values starting at the address pointed to by label are certain values.
@@ -370,7 +370,7 @@ class LC3UnitTestCase(unittest.TestCase):
         self.assertListEqual(arr, actual_arr, self._generateReplay())
 
     def assertString(self, label, text):
-        """Asserts that sequence of characters followed by a nul terminator starting at the address pointed to by label are certain values.
+        """Asserts that sequence of characters followed by a NUL terminator starting at the address pointed to by label are certain values.
 
         This exactly checks if:
             state.memory[state.memory[label]] == text[0]
@@ -399,7 +399,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             input: String - Expected console output.
         """
-        self.assertEquals(self.state.output, output, self._generateReplay())
+        self.assertEqual(self.state.output, output, self._generateReplay())
 
     def _generateReplay(self):
         return "String to set up this test in complx: %s" % self.preconditions.encode()

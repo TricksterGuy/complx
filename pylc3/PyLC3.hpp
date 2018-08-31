@@ -18,6 +18,8 @@ public:
         @param testing_mode If we are using this state for testing.  Additional metrics are captured such as the stack frame.
     */
     bool load(const std::string& filename, bool testing_mode = false);
+    /** Test only */
+    bool loadCode(const std::string& lc3_code);
     /** @see lc3_run */
     void run(unsigned int num) { lc3_run(state, num); }
     /** @see lc3_step */
