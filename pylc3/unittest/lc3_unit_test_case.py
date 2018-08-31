@@ -248,10 +248,10 @@ class LC3UnitTestCase(unittest.TestCase):
         label_addr = self.state.lookup(label)
         start_addr = self.state.get_memory(label_addr)
         for addr, elem in enumerate(text, start_addr):
-            self.state.set_memory(addr, elem)
+            self.state.set_memory(addr, ord(elem))
         self.state.set_memory(start_addr + len(text), 0)
 
-        self.preconditions.addPrecondition(PreconditionFlag.string, label, text)
+        self.preconditions.addPrecondition(PreconditionFlag.string, label, [ord(char) for char in text])
     
     def setConsoleInput(self, input):
         """Sets console input for the test.
@@ -387,7 +387,8 @@ class LC3UnitTestCase(unittest.TestCase):
         start_addr = self.state.get_memory(label_addr)
         actual_str = []
         for addr, _ in enumerate(text, start_addr):
-            actual_str.append(self.state.get_memory(addr))
+            # TODO more error checking, character could be > 255 which throws an error.
+            actual_str.append(chr(self.state.get_memory(addr)))
         actual_str.append(self.state.get_memory(start_addr + len(text)))
         expected_str = list(text)
         expected_str.append(0)
