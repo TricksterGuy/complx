@@ -53,7 +53,10 @@ class MemoryFillStrategy(enum.Enum):
     completely_random_with_seed = 2
 
 class Preconditions(object):
-    """Represents the setup environment for a test case for replay."""
+    """Represents the setup environment for a test case for replay.
+
+    Generates base64 strings to replay the test in complx.
+    """
     def __init__(self):
         # Dict of PreconditionFlag to data.
         self._environment_data = dict()
@@ -95,13 +98,24 @@ class Preconditions(object):
 
 
 class LC3UnitTestCase(unittest.TestCase):
+    """LC3UnitTestCase class eases testing of LC3 code from within python.
 
+    The methods init, setXXX and callSubroutine will automatically log the state set
+    as preconditions. Later when the test runs and a assertion fails the state logged
+    by the preconditions will output a base64 encoded string to ease setting up the
+    test case in complx.
+
+    It is important to not touch the state attribute and set things on it since these
+    changes are not logged automatically and will result in the test environment being
+    different from here and running in complx.
+    """
     def setUp(self):
         self.state = pylc3.LC3State()
         self.break_address = None
         self.preconditions = Preconditions()
         self.longMessage = True
         self.enable_plugins = False
+        self.true_traps = False
 
     def init(self, strategy=MemoryFillStrategy.fill_with_value, value=0):
         """Initializes LC3 state memory.
@@ -133,9 +147,12 @@ class LC3UnitTestCase(unittest.TestCase):
     def setTrueTraps(self, setting):
         """Enables or disables True Traps.
 
+        This should be called before load.
+
         Args:
             setting: True to enable.
         """
+        self.true_traps = setting
         self.state.true_traps = setting
 
         self.preconditions.addEnvironment(PreconditionFlag.true_traps, setting)
@@ -304,10 +321,16 @@ class LC3UnitTestCase(unittest.TestCase):
         """Asserts that the LC3 has been halted normally.
 
         This is achieved by reaching a HALT statement, or code triggered a breakpoint at the break address
-        set by a previous call to callSubroutine.
+        set by a previous call to callSubroutine or if true_traps is set and the MCR register's 15 bit is set.
         """
-        self.assertTrue(self.state.halted or self.state.pc == self.break_address)
-
+        # Don't use self.state.halted here as that is set if a Malformed instruction is executed.
+        self.assertTrue((self.state.get_memory(self.state.pc) & 0xFFFF) == 0xF025 or
+                        self.state.pc == self.break_address or
+                        (self.true_traps and (state.get_memory(0xFFFE) >> 15 & 1) == 0),
+                        'State did not halt normally, this could indicate that the code did not reach a halt '
+                        'statement (due to executing a malformed instruction / data) or did not complete within '
+                        'the execution limit for this test\n' + self._generateReplay())
+ 
     def assertRegister(self, register_number, value):
         """Asserts that a value at a label is a certain value.
 
