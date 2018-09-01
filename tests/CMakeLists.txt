@@ -17,7 +17,6 @@ add_executable(
 target_link_libraries(
     lc3_test_suite
     lc3
-    ${wxWidgets_LIBRARIES}
     ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 
 add_dependencies(
@@ -46,7 +45,7 @@ if(ENABLE_COVERAGE)
         ${CMAKE_BINARY_DIR}/plugins/traps
         ${CMAKE_BINARY_DIR}/plugins/other)
 
-    set(COVERAGE_EXCLUDES 'boost/*' 'c++/*' 'tests/*' 'wx' 'wx/*')
+    set(COVERAGE_EXCLUDES 'boost/*' 'c++/*' 'tests/*')
 
     setup_target_for_coverage(
         NAME "lc3_test_coverage"
