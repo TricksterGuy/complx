@@ -39,16 +39,16 @@ public:
     /** @see lc3_prev_line */
     void previous_line() { lc3_prev_line(state); }
     /** @see lc3_mem_read */
-    short memory_read(unsigned short address) { return lc3_mem_read(state, address); }
+    int memory_read(unsigned short address) { return lc3_mem_read(state, address); }
     /** @see lc3_mem_write */
-    void memory_write(unsigned short address, short value) { lc3_mem_write(state, address, value); }
+    void memory_write(unsigned short address, int value) { lc3_mem_write(state, address, value); }
     /** @see lc3_sym_lookup */
     short lookup(const std::string symbol) { return lc3_sym_lookup(state, symbol); }
 
     /** Gets value at address, note that the difference between this and memory_read is that memory_read will trigger plugins and devices */
-    short get_memory(unsigned short address) const { return state.mem[address]; }
+    int get_memory(unsigned short address) const { return state.mem[address]; }
     /** Sets value at address, note that the difference between this and memory_write is that memory_write will trigger plugins and devices */
-    void set_memory(unsigned short address, short value) { state.mem[address] = value; }
+    void set_memory(unsigned short address, int value) { state.mem[address] = value; }
 
     /** @see lc3_add_break */
     bool add_breakpoint(unsigned short address) { return lc3_add_break(state, address); }
@@ -59,26 +59,26 @@ public:
     void seed(unsigned int seed) { srand(seed); }
 
     /** @see lc3_random */
-    unsigned short random() { return lc3_random(); }
+    unsigned int random() { return lc3_random(); }
 
-    short get_r0() const { return state.regs[0]; }
-    void set_r0(short r0) { state.regs[0] = r0; }
-    short get_r1() const { return state.regs[1]; }
-    void set_r1(short r1) { state.regs[1] = r1; }
-    short get_r2() const { return state.regs[2]; }
-    void set_r2(short r2) { state.regs[2] = r2; }
-    short get_r3() const { return state.regs[3]; }
-    void set_r3(short r3) { state.regs[3] = r3; }
-    short get_r4() const { return state.regs[4]; }
-    void set_r4(short r4) { state.regs[4] = r4; }
-    short get_r5() const { return state.regs[5]; }
-    void set_r5(short r5) { state.regs[5] = r5; }
-    short get_r6() const { return state.regs[6]; }
-    void set_r6(short r6) { state.regs[6] = r6; }
-    short get_r7() const { return state.regs[7]; }
-    void set_r7(short r7) { state.regs[7] = r7; }
-    short get_register(int reg_num) const { return reg_num >= 0 && reg_num <= 7 ? state.regs[reg_num] : -1; }
-    void set_register(int reg_num, short value) { if (reg_num >= 0 && reg_num <= 7) state.regs[reg_num] = value; }
+    int get_r0() const { return state.regs[0]; }
+    void set_r0(int r0) { state.regs[0] = r0; }
+    int get_r1() const { return state.regs[1]; }
+    void set_r1(int r1) { state.regs[1] = r1; }
+    int get_r2() const { return state.regs[2]; }
+    void set_r2(int r2) { state.regs[2] = r2; }
+    int get_r3() const { return state.regs[3]; }
+    void set_r3(int r3) { state.regs[3] = r3; }
+    int get_r4() const { return state.regs[4]; }
+    void set_r4(int r4) { state.regs[4] = r4; }
+    int get_r5() const { return state.regs[5]; }
+    void set_r5(int r5) { state.regs[5] = r5; }
+    int get_r6() const { return state.regs[6]; }
+    void set_r6(int r6) { state.regs[6] = r6; }
+    int get_r7() const { return state.regs[7]; }
+    void set_r7(int r7) { state.regs[7] = r7; }
+    int get_register(int reg_num) const { return reg_num >= 0 && reg_num <= 7 ? state.regs[reg_num] : -1; }
+    void set_register(int reg_num, int value) { if (reg_num >= 0 && reg_num <= 7) state.regs[reg_num] = value; }
     bool get_n() const { return state.n; }
     bool get_z() const { return state.z; }
     bool get_p() const { return state.p; }

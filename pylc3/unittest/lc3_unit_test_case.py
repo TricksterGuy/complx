@@ -13,7 +13,7 @@ import unittest
 DEFAULT_MAX_EXECUTIONS = 1000000
 
 
-class EnvironmentFlag(enum.Enum):
+class PreconditionFlag(enum.Enum):
     invalid = 0
     # True Traps Setting Flag.
     true_traps = 1
@@ -28,62 +28,66 @@ class EnvironmentFlag(enum.Enum):
     # Breakpoint address for Subroutine Testing.
     break_address = 6
 
+    # 7-16 reserved.
+
+    # Set a Register.
+    register = 17
+    # Set the PC.
+    pc = 18
+    # Set a value at a label.
+    value = 19
+    # Set a value at an address pointed to by label.
+    pointer = 20
+    # Sets a region of memory starting at the address pointed to by label.
+    array = 21
+    # Sets a string starting at the address pointed to by label.
+    string = 22
+    # Sets console input
+    input = 23
+    # Simulate a call to a subroutine (following lc-3 calling convention).
+    subroutine = 24
 
 class MemoryFillStrategy(enum.Enum):
     fill_with_value = 0
     random_fill_with_seed = 1
     completely_random_with_seed = 2
 
-
-class PreconditionFlag(enum.Enum):
-    invalid = 0
-    # Set a Register.
-    register = 1
-    # Set the PC.
-    pc = 2
-    # Set a value at a label.
-    value = 3
-    # Set a value at an address pointed to by label.
-    pointer = 4
-    # Sets a region of memory starting at the address pointed to by label.
-    array = 5
-    # Sets a string starting at the address pointed to by label.
-    string = 6
-    # Sets console input
-    input = 7
-    # Simulate a call to a subroutine (following lc-3 calling convention).
-    subroutine = 8
-
-
 class Preconditions(object):
     """Represents the setup environment for a test case for replay."""
     def __init__(self):
-        # Dict of EnvironmentFlag to data.
+        # Dict of PreconditionFlag to data.
         self._environment_data = dict()
         # List of Tuple (PreconditionFlag, string label, num_params, params)
         self._precondition_data = []
 
     def addPrecondition(self, type_id, label, data):
+        assert type_id.value > 15, 'Internal error, Precondition Flags are of id > 15'
         if isinstance(data, int):
             self._precondition_data.append((type_id.value, label, 1, [data]))
         else:
             self._precondition_data.append((type_id.value, label, len(data), data))
 
     def addEnvironment(self, type_id, data):
+        assert type_id.value <= 15, 'Internal error, Environment Precondition Flags are of id <= 15'
         self._environment_data[type_id.value] = data
 
     def _formBlob(self):
-        blob = None
-
         file = StringIO.StringIO()
-        for id, value in self._environment_data:
-            file.write(struct.pack('II', id, value))
+
+        for id, value in self._environment_data.items():
+            file.write(struct.pack('b', id))
+            file.write(struct.pack('i', value))
         for id, label, num_params, params in self._precondition_data:
-            file.write(struct.pack('I%ssI%dI' % (len(label)+1, num_params), id, label, num_params, *params))
+            file.write(struct.pack('b', id))
+            file.write(struct.pack('I', len(label)))
+            file.write(struct.pack('%ds' % len(label), label))
+            file.write(struct.pack('I', num_params))
+            params = [param & 0xFFFF for param in params]
+            file.write(struct.pack('%dH' % num_params, *params))
+
         blob = file.getvalue()
         file.close()
-            
-       
+
         return blob
     
     def encode(self):
@@ -114,8 +118,8 @@ class LC3UnitTestCase(unittest.TestCase):
             self.state.seed(value)
             self.state.init(True)
 
-        self.preconditions.addEnvironment(EnvironmentFlag.memory_strategy, strategy)
-        self.preconditions.addEnvironment(EnvironmentFlag.memory_strategy_value, value)
+        self.preconditions.addEnvironment(PreconditionFlag.memory_strategy, strategy.value)
+        self.preconditions.addEnvironment(PreconditionFlag.memory_strategy_value, value)
 
     def load(self, file):
         """Loads an assembly file.
@@ -133,7 +137,7 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         self.state.true_traps = setting
 
-        self.preconditions.addEnvironment(EnvironmentFlag.true_traps, setting)
+        self.preconditions.addEnvironment(PreconditionFlag.true_traps, setting)
 
     def setInterrupts(self, setting):
         """Enables or disables Interrupts.
@@ -143,7 +147,7 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         self.state.interupts = setting
 
-        self.preconditions.addEnvironment(EnvironmentFlag.interrupts, setting)
+        self.preconditions.addEnvironment(PreconditionFlag.interrupts, setting)
 
     def setPluginsEnabled(self, setting):
         """Enables or disables plugins.
@@ -155,7 +159,7 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         self.disable_plugins = setting
 
-        self.preconditions.addEnvironment(EnvironmentFlag.plugins, setting)
+        self.preconditions.addEnvironment(PreconditionFlag.plugins, setting)
 
     def setRegister(self, register_number, value):
         """Sets a Register.
@@ -181,7 +185,7 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         self.state.pc = value
 
-        self.preconditions.addPrecondition(PreconditionFlag.pc, "PC", value)
+        self.preconditions.addPrecondition(PreconditionFlag.pc, "", value)
 
     def setValue(self, label, value):
         """Sets a value at a label.
@@ -261,7 +265,7 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         self.state.input = input
 
-        self.preconditions.addPrecondition(PreconditionFlag.input, "IN", [ord(char) for char in input])
+        self.preconditions.addPrecondition(PreconditionFlag.input, "", [ord(char) for char in input])
 
     def callSubroutine(self, subroutine, params, r5=0xCAFE, r6=0xF000, r7=0x8000):
         """Sets the state to start executing a subroutine for the test.
@@ -284,7 +288,7 @@ class LC3UnitTestCase(unittest.TestCase):
         for addr, param in enumerate(params, self.state.r6):
             self.state.set_memory(addr, param)
 
-        self.preconditions.addEnvironment(EnvironmentFlag.break_address, r7)
+        self.preconditions.addEnvironment(PreconditionFlag.break_address, r7)
         self.preconditions.addPrecondition(PreconditionFlag.subroutine, subroutine, [r5, r6, r7] + params)
 
     def runCode(self, max_executions=DEFAULT_MAX_EXECUTIONS):
@@ -403,5 +407,5 @@ class LC3UnitTestCase(unittest.TestCase):
         self.assertEqual(self.state.output, output, self._generateReplay())
 
     def _generateReplay(self):
-        return "String to set up this test in complx: %s" % self.preconditions.encode()
+        return "String to set up this test in complx: %s" % repr(self.preconditions.encode())
 
