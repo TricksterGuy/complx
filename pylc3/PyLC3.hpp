@@ -21,7 +21,7 @@ public:
         @param filename Full path of the file to load.
         @param testing_mode If we are using this state for testing.  Additional metrics are captured such as the stack frame.
     */
-    bool load(const std::string& filename, bool testing_mode = false);
+    bool load(const std::string& filename, bool testing_mode = false, bool disable_plugins = false, bool process_debug_comments = true, bool multiple_errors = true, bool enable_warnings = false, bool warnings_as_errors = false);
     /** Test only */
     bool loadCode(const std::string& lc3_code);
     /** @see lc3_run */

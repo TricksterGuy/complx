@@ -101,6 +101,7 @@ class LC3UnitTestCase(unittest.TestCase):
         self.break_address = None
         self.preconditions = Preconditions()
         self.longMessage = True
+        self.enable_plugins = False
 
     def init(self, strategy=MemoryFillStrategy.fill_with_value, value=0):
         """Initializes LC3 state memory.
@@ -127,7 +128,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             file: String - Full path to the assembly file to load.
         """
-        self.state.load(file, True)
+        assert self.state.load(file, testing_mode=True, disable_plugins=not self.enable_plugins, process_debug_comments=False), ('Unable to load file %s' % file)
 
     def setTrueTraps(self, setting):
         """Enables or disables True Traps.
@@ -157,7 +158,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             setting: True to enable.
         """
-        self.disable_plugins = setting
+        self.enable_plugins = setting
 
         self.preconditions.addEnvironment(PreconditionFlag.plugins, setting)
 
