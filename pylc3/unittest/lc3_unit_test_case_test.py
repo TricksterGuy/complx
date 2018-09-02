@@ -24,6 +24,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         self.runCode()
         self.assertHalted()
+        self.assertNoWarnings()
         self.assertRegister(0, 10)
         self.assertRegister(1, 20)
 
@@ -46,6 +47,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         self.runCode()
         self.assertHalted()
+        self.assertNoWarnings()
         # Halting decrements PC by 1.
         self.assertPc(0x5000)
 
@@ -72,6 +74,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         self.runCode()
         self.assertHalted()
+        self.assertNoWarnings()
         self.assertValue("A", 2)
         self.assertValue("B", 3)
         self.assertValue("ANS", 5)
@@ -100,6 +103,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         self.runCode()
         self.assertHalted()
+        self.assertNoWarnings()
         self.assertPointer("A", 2)
         self.assertPointer("B", 3)
         self.assertPointer("ANS", 5)
@@ -133,6 +137,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         self.runCode()
         self.assertHalted()
+        self.assertNoWarnings()
         self.assertArray("ARR", [5, 3, 0, 666])
 
     def testString(self):
@@ -165,6 +170,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         self.runCode()
         self.assertHalted()
+        self.assertNoWarnings()
         self.assertString("STRING_LOC", "JELLO")
 
     def testConsoleIO(self):

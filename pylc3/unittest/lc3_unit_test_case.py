@@ -330,6 +330,10 @@ class LC3UnitTestCase(unittest.TestCase):
                         'State did not halt normally, this could indicate that the code did not reach a halt '
                         'statement (due to executing a malformed instruction / data) or did not complete within '
                         'the execution limit for this test\n' + self._generateReplay())
+
+    def assertNoWarnings(self):
+        """Asserts that no warnings were reported during execution of the code."""
+        self.assertFalse(self.state.warnings)
  
     def assertRegister(self, register_number, value):
         """Asserts that a value at a label is a certain value.
