@@ -69,8 +69,8 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.setValue("B", 3)
 
         # Sanity checks
-        self.assertEqual(self.state.lookup("A"), 0x3005)
-        self.assertEqual(self.state.get_memory(0x3005), 2)
+        self.assertEqual(self.lookup("A"), 0x3005)
+        self.assertEqual(self.readMem(0x3005), 2)
 
         self.runCode()
         self.assertHalted()
@@ -97,9 +97,9 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.setPointer("B", 3)
 
         # Sanity checks
-        self.assertEqual(self.state.lookup("A"), 0x3005)
-        self.assertEqual(self.state.get_memory(0x3005), 0x4000)
-        self.assertEqual(self.state.get_memory(0x4000), 2)
+        self.assertEqual(self.lookup("A"), 0x3005)
+        self.assertEqual(self.readMem(0x3005), 0x4000)
+        self.assertEqual(self.readMem(0x4000), 2)
 
         self.runCode()
         self.assertHalted()
@@ -127,13 +127,13 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.setArray("ARR", [5, 3, 1])
 
         # Sanity checks
-        self.assertEqual(self.state.lookup("ARR"), 0x3003)
-        self.assertEqual(self.state.get_memory(0x3003), 0x4000)
-        self.assertEqual(self.state.get_memory(0x3004), 0x4002)
-        self.assertEqual(self.state.get_memory(0x4000), 5)
-        self.assertEqual(self.state.get_memory(0x4001), 3)
-        self.assertEqual(self.state.get_memory(0x4002), 1)
-        self.assertEqual(self.state.get_memory(0x4003), 666)
+        self.assertEqual(self.lookup("ARR"), 0x3003)
+        self.assertEqual(self.readMem(0x3003), 0x4000)
+        self.assertEqual(self.readMem(0x3004), 0x4002)
+        self.assertEqual(self.readMem(0x4000), 5)
+        self.assertEqual(self.readMem(0x4001), 3)
+        self.assertEqual(self.readMem(0x4002), 1)
+        self.assertEqual(self.readMem(0x4003), 666)
 
         self.runCode()
         self.assertHalted()
@@ -158,15 +158,15 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.setString("STRING_LOC", "HELLO")
 
         # Sanity checks
-        self.assertEqual(self.state.lookup("STRING_LOC"), 0x3004)
-        self.assertEqual(self.state.lookup("STRING"), 0x3005)
-        self.assertEqual(self.state.get_memory(0x3004), 0x3005)
-        self.assertEqual(self.state.get_memory(0x3005), ord('H'))
-        self.assertEqual(self.state.get_memory(0x3006), ord('E'))
-        self.assertEqual(self.state.get_memory(0x3007), ord('L'))
-        self.assertEqual(self.state.get_memory(0x3008), ord('L'))
-        self.assertEqual(self.state.get_memory(0x3009), ord('O'))
-        self.assertEqual(self.state.get_memory(0x300A), 0)
+        self.assertEqual(self.lookup("STRING_LOC"), 0x3004)
+        self.assertEqual(self.lookup("STRING"), 0x3005)
+        self.assertEqual(self.readMem(0x3004), 0x3005)
+        self.assertEqual(self.readMem(0x3005), ord('H'))
+        self.assertEqual(self.readMem(0x3006), ord('E'))
+        self.assertEqual(self.readMem(0x3007), ord('L'))
+        self.assertEqual(self.readMem(0x3008), ord('L'))
+        self.assertEqual(self.readMem(0x3009), ord('O'))
+        self.assertEqual(self.readMem(0x300A), 0)
 
         self.runCode()
         self.assertHalted()
