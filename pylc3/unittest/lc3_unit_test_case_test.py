@@ -192,7 +192,36 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.setConsoleInput("ADB")
         self.runCode()
         self.assertHalted()
+        self.assertNoWarnings()
         self.assertConsoleOutput("BEC")
+
+    def testSubroutineCall(self):
+        snippet = """
+        .orig x3000
+            ; def return7():
+            ;     return 7
+            RETURN7
+                ADD R6, R6, -3
+                STR R5, R6, 0
+                STR R7, R6, 1
+                AND R5, R5, 0
+                ADD R5, R5, 7
+                STR R5, R6, 2
+                LDR R5, R6, 0
+                LDR R7, R6, 1
+                ADD R6, R6, 2
+                RET
+        .end
+        """
+        self.loadCode(snippet)
+        self.callSubroutine("RETURN7", params=[], r5=0xCAFE, r6=0xF000, r7=0x8000)
+        self.runCode()
+        self.assertReturned()
+        self.assertNoWarnings()
+        self.assertReturnValue(7)
+        self.assertRegistersUnchanged([5, 7])
+        self.assertStackManagedCorrectly(stack=0xEFFF, answer=7, return_address=0x8000, old_frame_pointer=0xCAFE)
+        
 
     def testReplayString(self):
         snippet = """
