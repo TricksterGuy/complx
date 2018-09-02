@@ -195,7 +195,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertNoWarnings()
         self.assertConsoleOutput("BEC")
 
-    def testSubroutineCall(self):
+    def testSubroutineCallBasic(self):
         snippet = """
         .orig x3000
             ; def return7():
@@ -215,13 +215,59 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         """
         self.loadCode(snippet)
         self.callSubroutine("RETURN7", params=[], r5=0xCAFE, r6=0xF000, r7=0x8000)
+
+        # Sanity checks
+        self.assertEqual(self.state.pc, 0x3000)
+        self.assertEqual(self.lookup("RETURN7"), 0x3000)
+        self.assertEqual(self.readReg(5, unsigned=True), 0xCAFE)
+        self.assertEqual(self.readReg(6, unsigned=True), 0xF000)
+        self.assertEqual(self.readReg(7, unsigned=True), 0x8000)
+
         self.runCode()
         self.assertReturned()
         self.assertNoWarnings()
         self.assertReturnValue(7)
         self.assertRegistersUnchanged([5, 7])
         self.assertStackManagedCorrectly(stack=0xEFFF, answer=7, return_address=0x8000, old_frame_pointer=0xCAFE)
-        
+
+    def testSubroutineCallWithParams(self):
+        snippet = """
+        .orig x4000
+            ; def MYADD(x, y, z):
+            ;     return x + y + z
+            MYADD
+                ADD R6, R6, -3
+                STR R5, R6, 0
+                STR R7, R6, 1
+                ADD R5, R6, -1
+                LDR R0, R5, 4
+                LDR R1, R5, 5
+                LDR R2, R5, 6
+                ADD R0, R0, R1
+                ADD R0, R0, R2
+                STR R0, R5, 3
+                LDR R5, R6, 0
+                LDR R7, R6, 1
+                ADD R6, R6, 2
+                RET
+        .end
+        """
+        self.loadCode(snippet)
+        self.callSubroutine("MYADD", params=[7, 81, 123], r5=0xCAFE, r6=0xF000, r7=0x8000)
+
+        # Sanity checks
+        self.assertEqual(self.state.pc, 0x4000)
+        self.assertEqual(self.lookup("MYADD"), 0x4000)
+        self.assertEqual(self.readReg(5, unsigned=True), 0xCAFE)
+        self.assertEqual(self.readReg(6, unsigned=True), 0xEFFD)
+        self.assertEqual(self.readReg(7, unsigned=True), 0x8000)
+
+        self.runCode()
+        self.assertReturned()
+        self.assertNoWarnings()
+        self.assertReturnValue(211)
+        self.assertRegistersUnchanged([5, 7])
+        self.assertStackManagedCorrectly(stack=0xEFFC, answer=211, return_address=0x8000, old_frame_pointer=0xCAFE)
 
     def testReplayString(self):
         snippet = """
