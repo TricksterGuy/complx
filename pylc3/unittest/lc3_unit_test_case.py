@@ -110,7 +110,7 @@ class LC3UnitTestCase(unittest.TestCase):
     different from here and running in complx.
     """
     def setUp(self):
-        self.state = pylc3.LC3State()
+        self.state = pylc3.LC3State(testing_mode=True)
         self.break_address = None
         self.preconditions = Preconditions()
         self.longMessage = True
@@ -142,7 +142,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             file: String - Full path to the assembly file to load.
         """
-        assert self.state.load(file, testing_mode=True, disable_plugins=not self.enable_plugins, process_debug_comments=False), ('Unable to load file %s' % file)
+        assert self.state.load(file, disable_plugins=not self.enable_plugins, process_debug_comments=False), ('Unable to load file %s' % file)
 
     def setTrueTraps(self, setting):
         """Enables or disables True Traps.

@@ -8,20 +8,31 @@
 class LC3State
 {
 public:
-    LC3State() 
+    /** Constructor
+      *
+      * @param testing_mode Collect extra metrics and disable stdin and stdout.
+      */
+    LC3State(bool testing_mode = false) : testing(testing_mode)
     { 
         lc3_init(state);
     };
-    /** @see lc3_init */
+    /** @see lc3_init 
+      *  @param randomize Enable randomizing of both memory and registers.
+      *  @param fill_value If randomize is false the value for every single memory address and register.
+      */
     void init(bool randomize = true, short fill_value = 0)
     {
         lc3_init(state, randomize, randomize, fill_value, fill_value);
     }
     /** @see lc3_assemble 
-        @param filename Full path of the file to load.
-        @param testing_mode If we are using this state for testing.  Additional metrics are captured such as the stack frame.
-    */
-    bool load(const std::string& filename, bool testing_mode = false, bool disable_plugins = false, bool process_debug_comments = true, bool multiple_errors = true, bool enable_warnings = false, bool warnings_as_errors = false);
+      * @param filename Full path of the file to load.
+      * @param disable_plugins True to disable lc3 plugins.
+      * @param process_debug_comments True to enable processing of @ statements in comments.
+      * @param multiple_errors Assembling doesn't end with the first error message.
+      * @param enable_warnings Enable assembler warnings.
+      * @param warnings_as_errors Treat assembler warnings as errors.
+      */
+    bool load(const std::string& filename, bool disable_plugins = false, bool process_debug_comments = true, bool multiple_errors = true, bool enable_warnings = false, bool warnings_as_errors = false);
     /** Test only */
     bool loadCode(const std::string& lc3_code);
     /** @see lc3_run */
@@ -86,21 +97,27 @@ public:
     void set_pc(unsigned short pc) { state.pc = pc; }
     bool has_halted() const { return state.halted; }
 
-    std::string get_input() const { return in.str(); }
-    void set_input(std::string input) { in.str(input); }
-
-    std::string get_output() const { return out.str(); }
-    void set_output(std::string input) { out.str(input); }
-
     bool get_true_traps() const { return state.true_traps; }
     void set_true_traps(bool setting) { lc3_set_true_traps(state, setting); }
     bool get_interrupts() const { return state.interrupt_enabled; }
     void set_interrupts(bool setting) { state.interrupt_enabled = setting; }
 
+    /** The following accessors are only meaningful if testing_mode was set */
+    std::string get_input() const { return in.str(); }
+    void set_input(std::string input) { in.str(input); }
+
+    std::string get_output() const { return out.str(); }
+    void set_output(std::string output) { out.str(output); }
+
+    std::string get_warnings() const { return warning.str(); }
+    void set_warnings(std::string warn_str) { warning.str(warn_str); }
+
 private:
     lc3_state state;
     std::stringstream in;
     std::stringstream out;
+    std::stringstream warning;
+    bool testing;
 };
 
 #endif
