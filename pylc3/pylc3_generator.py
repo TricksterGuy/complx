@@ -9,10 +9,10 @@ xml_generator_config = parser.xml_generator_configuration_t(
                                     xml_generator='castxml',
                                     compiler='gnu',
                                     compiler_path='/usr/bin/gcc',
-                                    cflags='-std=c++11 -I../liblc3 -I../lc3test')
+                                    cflags='-std=c++11 -I../liblc3')
 
 # List of all the C++ header of our library
-header_collection = ["PyLC3.hpp"]
+header_collection = ["PyLC3.hpp", "../liblc3/lc3_all.hpp"]
 
 # Parses the source files and creates a module_builder object
 builder = module_builder.module_builder_t(
@@ -20,8 +20,20 @@ builder = module_builder.module_builder_t(
                         xml_generator_path='/usr/bin/castxml',
                         xml_generator_config=xml_generator_config)
 
-# Automatically detect properties and associated getters/setters
+# Debugging
+#builder.print_declarations()
+
+# Whitelist exporting of stuff.
+builder.decls().exclude()
+
+lc3_state = builder.class_('LC3State')
+lc3_state.include()
+builder.class_("lc3_subroutine_call_info").include()
+builder.decl("::std::vector<lc3_subroutine_call_info, std::allocator<lc3_subroutine_call_info> >").include()
+
+# Don't export accessors
 builder.classes().add_properties(exclude_accessors=True)
+# Enclude protected and private methods.
 builder.calldefs(declarations.access_type_matcher_t('protected')).exclude()
 builder.calldefs(declarations.access_type_matcher_t('private')).exclude()
 

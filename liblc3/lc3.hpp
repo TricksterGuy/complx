@@ -388,6 +388,12 @@ typedef struct lc3_subroutine_call_info
     unsigned short address;
     unsigned short r6;
     std::vector<unsigned short> params;
+    // For availability in pylc3 equality operator must be defined.
+    bool operator==(const lc3_subroutine_call_info& other) const
+    {
+        return address == other.address && r6 == other.r6 && params == other.params;
+    }
+
 } lc3_subroutine_call_info;
 
 /** Record of stats per memory address */

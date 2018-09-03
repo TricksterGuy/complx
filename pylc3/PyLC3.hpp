@@ -12,7 +12,7 @@ public:
       *
       * @param testing_mode Collect extra metrics and disable stdin and stdout.
       */
-    LC3State(bool testing_mode = false) : testing(testing_mode)
+    explicit LC3State(bool testing_mode = false) : testing(testing_mode)
     { 
         lc3_init(state);
     };
@@ -54,7 +54,9 @@ public:
     /** @see lc3_mem_write */
     void memory_write(unsigned short address, int value) { lc3_mem_write(state, address, value); }
     /** @see lc3_sym_lookup */
-    short lookup(const std::string symbol) { return lc3_sym_lookup(state, symbol); }
+    int lookup(const std::string& symbol) { return lc3_sym_lookup(state, symbol); }
+    /** @see lc3_sym_rev_lookup */
+    const std::string reverse_lookup(unsigned short address) { return lc3_sym_rev_lookup(state, address); }
 
     /** Gets value at address, note that the difference between this and memory_read is that memory_read will trigger plugins and devices */
     int get_memory(unsigned short address) const { return state.mem[address]; }
@@ -65,6 +67,19 @@ public:
     bool add_breakpoint(unsigned short address) { return lc3_add_break(state, address); }
     /** @see lc3_remove_break */
     bool remove_breakpoint(unsigned short address) { return lc3_remove_break(state, address); }
+    /** Adds metadata for the subroutine specified */
+    bool add_subroutine_info(const std::string& subroutine, int num_params)
+    {
+        int addr = lookup(subroutine);
+        if (addr == -1) return false;
+        lc3_subroutine_info info;
+        info.address = lookup(subroutine);
+        info.name = subroutine;
+        info.num_params = num_params;
+        
+        state.subroutines[info.address] = info;
+        return true;
+    }
 
     /** @see srand */
     void seed(unsigned int seed) { srand(seed); }
@@ -111,6 +126,8 @@ public:
 
     std::string get_warnings() const { return warning.str(); }
     void set_warnings(std::string warn_str) { warning.str(warn_str); }
+
+    const std::vector<lc3_subroutine_call_info>& first_level_calls() const {return state.first_level_calls;}
 
 private:
     lc3_state state;

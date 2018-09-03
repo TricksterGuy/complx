@@ -123,11 +123,16 @@ class LC3UnitTestCase(unittest.TestCase):
         self.state = pylc3.LC3State(testing_mode=True)
         self.break_address = None
         self.preconditions = Preconditions()
+        # Makes unittest to append to failure message.
         self.longMessage = True
         self.enable_plugins = False
         self.true_traps = False
         # Registers values at the start of the test.
         self.registers = dict()
+        # Expected Subroutine calls made.  Set of Tuple of (subroutine, params)
+        self.expected_subroutines = set()
+        # Optional Subroutine calls.
+        self.optional_subroutines = set()
 
     def init(self, strategy=MemoryFillStrategy.fill_with_value, value=0):
         """Initializes LC3 state memory.
@@ -170,6 +175,21 @@ class LC3UnitTestCase(unittest.TestCase):
         addr = self.state.lookup(label)
         assert addr != -1, "Label %s was not found in the assembly code." % label
         return toShort(addr)
+
+    def reverse_lookup(self, address):
+        """Gets the label associated with address.
+
+        This will assert if no label found at address.
+
+        Args:
+            address: Integer - Memory address to search for label.
+
+        Returns:
+            The label associated with the address.
+        """
+        label = self.state.reverse_lookup(toShort(address))
+        assert label, "Address %x is not associated with a label." % address
+        return label
 
     def readMem(self, addr, unsigned=False):
         """Reads a value at a memory address.
@@ -375,8 +395,48 @@ class LC3UnitTestCase(unittest.TestCase):
         for addr, param in enumerate(params, self.state.r6):
             self.writeMem(addr, param)
 
+        self.state.add_subroutine_info(subroutine, len(params))
+
         self.preconditions.addEnvironment(PreconditionFlag.break_address, r7)
         self.preconditions.addPrecondition(PreconditionFlag.subroutine, subroutine, [r5, r6, r7] + params)
+
+    def expectSubroutineCall(self, subroutine, params, optional=False):
+        """Expects that a subroutine call was made with parameters.
+
+        Note that passing in the same (subroutine, params, optional) triplet is not supported. Nor is
+        passing in the same (subroutine, params) with both optional set and not set.
+
+        Args:
+            subroutine: String - Label pointing at the start of the subroutine.
+            params: List of Integer - Paramters to the subroutine.
+            optional: Mark this as a optional subroutine call, if this subroutine call is found it is not checked.
+        """
+        self.addSubroutineInfo(subroutine, len(params))
+
+        set_to_add = self.expected_subroutines
+        value = (subroutine, tuple(params))
+        if optional:
+            set_to_add = self.optional_subroutines
+
+        assert value not in set_to_add, 'Duplicate subroutine found %s, multiple copies of [subroutine, params] is not supported.' % value
+
+        set_to_add.add(value)
+
+        assert not (value in self.expected_subroutines and value in self.optional_subroutines), 'Subroutine %s found in both expected and optional subroutine calls.' % value
+
+
+    def addSubroutineInfo(self, subroutine, num_params):
+        """Adds metadata for a subroutine.
+
+        You shouldn't have to call this directly as it is called via callSubroutine and expectSubroutineCall.
+        Calling this is required if you want to check a call made to a subroutine that follows the lc3 calling convention.
+        The results are undefined if you call this multiple times with the same subroutine and different number of parameters.
+
+        Args:
+            subroutine: String - Label pointing at the start of the subroutine.
+            num_params: Integer - Number of paramters to the subroutine.
+        """
+        self.state.add_subroutine_info(subroutine, num_params)
 
     def runCode(self, max_executions=DEFAULT_MAX_EXECUTIONS):
         """Runs the program until it halts or max_executions instructions has been executed.
@@ -538,10 +598,10 @@ class LC3UnitTestCase(unittest.TestCase):
         current_values = {num: self.readReg(num) for num in registers}
         self.assertEqual(original_values, current_values)
         
-    def assertStackManagedCorrectly(self, stack, answer, return_address, old_frame_pointer):
+    def assertStackManaged(self, stack, answer, return_address, old_frame_pointer):
         """Asserts that the stack was managed correctly.
 
-        This mean that:
+        This means that:
             The stack_pointer (r6) was decremented by 1.
             The stack contents are [answer, return_address, old_frame_pointer]
         
@@ -555,6 +615,20 @@ class LC3UnitTestCase(unittest.TestCase):
         actual_stack = [self.readMem(self.state.r6 - i, unsigned=True) for i in xrange(3)]
         expected_stack = [toShort(answer), toShort(return_address), toShort(old_frame_pointer)]
         self.assertEqual(expected_stack, actual_stack, self._generateReplay())
+
+    def assertSubroutineCallsMade(self):
+        """Asserts that the expected subroutine calls were made with no unexpected ones made.
+
+        It is required to call expectSubroutineCall in order for this function to work.
+        """
+        actual_subroutines = set()
+        for call in self.state.first_level_calls:
+            actual_subroutines.add((self.reverse_lookup(call.address), tuple(call.params)))
+            
+        for optional in self.optional_subroutines:
+            actual_subroutines.remove(optional)
+
+        self.assertEqual(self.expected_subroutines, actual_subroutines)
 
     def _generateReplay(self):
         return "\nString to set up this test in complx: %s" % repr(self.preconditions.encode())
