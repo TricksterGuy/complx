@@ -506,6 +506,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.setTrueTraps(True)
         self.setInterrupts(True)
         self.setPluginsEnabled(True)
+        self.setStrictExecution(False)
         self.loadCode(snippet)
         self.setRegister(7, 0x4001)
         self.setPc(0x500)
@@ -523,8 +524,9 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
             '\x02\x01\x00\x00\x00'
             '\x03\x01\x00\x00\x00'
             '\x04\x00\x00\x00\x00'
-            '\x05\xff\xff\xff\xff'
-            '\x06\x00\x80\x00\x00'
+            '\x05\x00\x00\x00\x00'
+            '\x06\xff\xff\xff\xff'
+            '\x07\x00\x80\x00\x00'
             '\x11\x01\x00\x00\x007\x01\x00\x00\x00\x01@'
             '\x12\x00\x00\x00\x00\x01\x00\x00\x00\x00\x05'
             '\x13\x03\x00\x00\x00AHH\x01\x00\x00\x00\x07\x00'

@@ -25,20 +25,22 @@ def toShort(value):
 
 class PreconditionFlag(enum.Enum):
     invalid = 0
-    # True Traps Setting Flag.
+    # True Traps Setting Flag. Default OFF
     true_traps = 1
-    # Interrupts Setting Flag.
+    # Interrupts Setting Flag. Default OFF
     interrupts = 2
-    # Plugins Setting Flag.
+    # Plugins Setting Flag. Default ON
     plugins = 3
+    # Strict Execution Setting Flag. Default ON
+    strict_execution = 4
     # Strategy for Initialization of Memory (0: Fill with Value 1: Seeded Fill 2: Seeded Full Randomization).
-    memory_strategy = 4
+    memory_strategy = 5
     # Parameter for Memory Strategy.
-    memory_strategy_value = 5
+    memory_strategy_value = 6
     # Breakpoint address for Subroutine Testing.
-    break_address = 6
+    break_address = 7
 
-    # 7-16 reserved.
+    # 8-16 reserved.
 
     # Set a Register.
     register = 17
@@ -271,6 +273,18 @@ class LC3UnitTestCase(unittest.TestCase):
         self.enable_plugins = setting
 
         self.preconditions.addEnvironment(PreconditionFlag.plugins, setting)
+
+    def setStrictExecution(self, setting):
+        """Enables or disables strict execution mode.
+
+        Executing invalid instructions will trigger an exception and halt the lc3state causing the test to fail.
+
+        Args:
+            setting: True to enable.
+        """
+        self.state.strict_execution = setting
+
+        self.preconditions.addEnvironment(PreconditionFlag.strict_execution, setting)
 
     def setRegister(self, register_number, value):
         """Sets a Register.
