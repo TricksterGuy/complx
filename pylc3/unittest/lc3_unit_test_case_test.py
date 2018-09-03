@@ -229,6 +229,8 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertReturnValue(7)
         self.assertRegistersUnchanged([5, 7])
         self.assertStackManaged(stack=0xEFFF, answer=7, return_address=0x8000, old_frame_pointer=0xCAFE)
+        # Checks that no subroutines were called.
+        self.assertSubroutineCallsMade()
 
     def testSubroutineCallWithParams(self):
         snippet = """
@@ -268,6 +270,8 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertReturnValue(211)
         self.assertRegistersUnchanged([5, 7])
         self.assertStackManaged(stack=0xEFFC, answer=211, return_address=0x8000, old_frame_pointer=0xCAFE)
+        # Checks that no subroutines were called.
+        self.assertSubroutineCallsMade()
 
     def testSubroutineCallWithParamsAndCalls(self):
         # Psuedocode
@@ -376,6 +380,58 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertReturnValue(72)
         self.assertRegistersUnchanged([5, 7])
         self.assertStackManaged(stack=0xEFFC, answer=72, return_address=0x8000, old_frame_pointer=0xCAFE)
+        self.assertSubroutineCallsMade()
+
+    def testSubroutineCallWithOptionalNotTaken(self):
+        snippet = """
+        ;@plugin filename=lc3_multiply
+        .orig x3000
+            ; (x + 1) * (x + 7)
+            ; def compute_quadratic(x):
+            ;   return x * x + 8 * x + return7();
+            ;
+            ; def return7():
+            ;     return 7
+            COMPUTE_QUADRATIC
+                ADD R6, R6, -3
+                STR R5, R6, 0
+                STR R7, R6, 1
+                ADD R5, R6, -1
+                LDR R0, R5, 4
+                MUL R1, R0, R0
+                MUL R2, R0, 8
+                ADD R3, R1, R2
+                ADD R3, R3, 7
+                STR R3, R5, 3
+                LDR R5, R6, 0
+                LDR R7, R6, 1
+                ADD R6, R6, 2
+                RET
+                
+            RETURN7 
+                ADD R6, R6, -3
+                STR R5, R6, 0
+                STR R7, R6, 1
+                AND R5, R5, 0
+                ADD R5, R5, 7
+                STR R5, R6, 2
+                LDR R5, R6, 0
+                LDR R7, R6, 1
+                ADD R6, R6, 2
+                RET
+        .end
+        """
+        self.loadCode(snippet)
+        self.callSubroutine("COMPUTE_QUADRATIC", params=[3], r5=0xCAFE, r6=0xF000, r7=0x8000)
+        self.expectSubroutineCall("RETURN7", params=[], optional=True)
+
+        self.runCode()
+        self.assertReturned()
+        self.assertNoWarnings()
+        self.assertReturnValue(40)
+        self.assertRegistersUnchanged([5, 7])
+        self.assertStackManaged(stack=0xEFFE, answer=40, return_address=0x8000, old_frame_pointer=0xCAFE)
+        # We didn't call return7 but thats okay it was optional.
         self.assertSubroutineCallsMade()
 
     def testReplayString(self):

@@ -626,7 +626,7 @@ class LC3UnitTestCase(unittest.TestCase):
             actual_subroutines.add((self.reverse_lookup(call.address), tuple(call.params)))
             
         for optional in self.optional_subroutines:
-            actual_subroutines.remove(optional)
+            actual_subroutines.discard(optional)
 
         self.assertEqual(self.expected_subroutines, actual_subroutines)
 
