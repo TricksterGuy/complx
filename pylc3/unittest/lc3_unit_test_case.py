@@ -687,7 +687,7 @@ class LC3UnitTestCase(unittest.TestCase):
         """Asserts that the expected traps were called with no unexpected ones made.
 
         It is required to call expectTrapCall for this function to work. If it is
-        not then it will check for no traps to be called.
+        not then it will check for no traps called.
         """
         actual_traps = set()
         for call in self.state.first_level_traps:

@@ -396,6 +396,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.expectSubroutineCall("B", params=[3, 7])
         self.expectSubroutineCall("B", params=[5, 7])
         self.expectSubroutineCall("C", params=[3])
+        # Don't call expectTrapCall here since A doesn't directly use it. Only the first level calls are logged.
 
         self.runCode()
         self.assertReturned()
@@ -517,6 +518,64 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertStackManaged(stack=0xEFFE, answer=40, return_address=0x8000, old_frame_pointer=0xCAFE)
         self.assertSubroutineCallsMade()
         self.assertReadAnswersFromCalls()
+
+    def testParanoidSubroutineCall(self):
+        # They save all the registers.
+        snippet = """
+        .orig x4000
+            ; def MYADD(x, y, z):
+            ;     return x + y + z
+            MYADD
+                ADD R6, R6, -3
+                STR R5, R6, 0
+                STR R7, R6, 1
+                ADD R5, R6, -1
+                ADD R6, R6, -5
+                STR R0, R6, 0
+                STR R1, R6, 1
+                STR R2, R6, 2
+                STR R3, R6, 3
+                STR R4, R6, 4
+
+                LDR R0, R5, 4
+                LDR R1, R5, 5
+                LDR R2, R5, 6
+                ADD R0, R0, R1
+                ADD R0, R0, R2
+                STR R0, R5, 3
+                
+                LDR R0, R6, 0
+                LDR R1, R6, 1
+                LDR R2, R6, 2
+                LDR R3, R6, 3
+                LDR R4, R6, 4
+                ADD R6, R6, 5
+
+                LDR R5, R6, 0
+                LDR R7, R6, 1
+                ADD R6, R6, 2
+                RET
+        .end
+        """
+        self.loadCode(snippet)
+        self.callSubroutine("MYADD", params=[7, 81, 123], r5=0xCAFE, r6=0xF000, r7=0x8000)
+
+        # Sanity checks
+        self.assertEqual(self.state.pc, 0x4000)
+        self.assertEqual(self.lookup("MYADD"), 0x4000)
+        self.assertEqual(self.readReg(5, unsigned=True), 0xCAFE)
+        self.assertEqual(self.readReg(6, unsigned=True), 0xEFFD)
+        self.assertEqual(self.readReg(7, unsigned=True), 0x8000)
+
+        self.runCode()
+        self.assertReturned()
+        self.assertNoWarnings()
+        self.assertReturnValue(211)
+        # Then they should all be unchanged.
+        self.assertRegistersUnchanged([0, 1, 2, 3, 4, 5, 7])
+        self.assertStackManaged(stack=0xEFFC, answer=211, return_address=0x8000, old_frame_pointer=0xCAFE)
+        # Checks that no subroutines were called.
+        self.assertSubroutineCallsMade()
 
     def testReplayString(self):
         snippet = """
