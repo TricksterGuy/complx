@@ -131,10 +131,17 @@ class LC3UnitTestCase(unittest.TestCase):
         self.true_traps = False
         # Registers values at the start of the test.
         self.registers = dict()
-        # Expected Subroutine calls made.  Set of Tuple of (subroutine, params)
+        # Expected Subroutine calls made.  Set of Tuple of (subroutine, Tuple of params)
         self.expected_subroutines = set()
         # Optional Subroutine calls.
         self.optional_subroutines = set()
+        # Expected Trap calls made.  Set of Tuple of (vector, (Tuples of key value pairs of (register, param)) )
+        self.expected_traps = set()
+        # Optional Subroutine calls.
+        self.optional_traps = set()
+        # Trap specifications.  Dict of Vector to List of interested registers
+        self.trap_specifications = dict()
+
 
     def init(self, strategy=MemoryFillStrategy.fill_with_value, value=0):
         """Initializes LC3 state memory.
@@ -422,7 +429,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
         Args:
             subroutine: String - Label pointing at the start of the subroutine.
-            params: List of Integer - Paramters to the subroutine.
+            params: List of Integer - Parameters to the subroutine.
             optional: Mark this as a optional subroutine call, if this subroutine call is found it is not checked.
         """
         self.addSubroutineInfo(subroutine, len(params))
@@ -438,6 +445,37 @@ class LC3UnitTestCase(unittest.TestCase):
 
         assert not (value in self.expected_subroutines and value in self.optional_subroutines), 'Subroutine %s found in both expected and optional subroutine calls.' % value
 
+    def expectTrapCall(self, vector, params, optional=False):
+        """Expects that a trap was made with parameters in registers.
+
+        Note that passing in the same (vector, params, optional) triplet is not supported. Nor is
+        passing in the same (vector, params) with both optional set and not set.
+
+        It is undefined to call this with the same trap vector, but a different set of register parameters.
+
+        Do not call this function with vector = x25. It is assumed that HALT will be called and is checked for via assertHalted.
+
+        Args:
+            vector: Integer - Label pointing at the start of the subroutine.
+            params: Dict of Integer to Integer - Map of Register number to value.
+            optional: Mark this as a optional trap call, if this trap call is found it is not checked.
+        """
+        assert vector != 0x25, 'Method expectTrapCall called with vector=0x25, use assertHalted instead.'
+
+        if vector not in self.trap_specifications:
+            self.trap_specifications[vector] = params.keys()
+
+        set_to_add = self.expected_traps
+        value = (vector, tuple([(k, v) for k, v in params.items()]))
+
+        if optional:
+            set_to_add = self.optional_traps
+
+        assert value not in set_to_add, 'Duplicate trap found %s, multiple copies of [subroutine, params] is not supported.' % value
+
+        set_to_add.add(value)
+
+        assert not (value in self.expected_subroutines and value in self.optional_subroutines), 'Subroutine %s found in both expected and optional subroutine calls.' % value
 
     def addSubroutineInfo(self, subroutine, num_params):
         """Adds metadata for a subroutine.
@@ -633,7 +671,8 @@ class LC3UnitTestCase(unittest.TestCase):
     def assertSubroutineCallsMade(self):
         """Asserts that the expected subroutine calls were made with no unexpected ones made.
 
-        It is required to call expectSubroutineCall in order for this function to work.
+        It is required to call expectSubroutineCall in order for this function to work. If it is
+        not then it will check for no subroutines to be called.
         """
         actual_subroutines = set()
         for call in self.state.first_level_calls:
@@ -643,6 +682,22 @@ class LC3UnitTestCase(unittest.TestCase):
             actual_subroutines.discard(optional)
 
         self.assertEqual(self.expected_subroutines, actual_subroutines, self._generateReplay())
+
+    def assertTrapCallsMade(self):
+        """Asserts that the expected traps were called with no unexpected ones made.
+
+        It is required to call expectTrapCall for this function to work. If it is
+        not then it will check for no traps to be called.
+        """
+        actual_traps = set()
+        for call in self.state.first_level_traps:
+            params = tuple([(reg, param) for reg, param in enumerate(call.regs) if reg in self.trap_specifications[call.vector]])
+            actual_traps.add((call.vector, params))
+
+        for optional in self.optional_subroutines:
+            actual_traps.discard(optional)
+
+        self.assertEqual(self.expected_traps, actual_traps, self._generateReplay())
 
     def assertReadAnswersFromCalls(self):
         """Asserts that for each subroutine call made the answer was pulled from the stack.

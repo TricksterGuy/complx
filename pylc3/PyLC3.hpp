@@ -133,6 +133,7 @@ public:
     void set_warnings(std::string warn_str) { warning.str(warn_str); }
 
     const std::vector<lc3_subroutine_call_info>& first_level_calls() const {return state.first_level_calls;}
+    const std::vector<lc3_trap_call_info>& first_level_traps() const {return state.first_level_traps;}
 
 private:
     lc3_state state;

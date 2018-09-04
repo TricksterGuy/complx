@@ -29,8 +29,10 @@ builder.decls().exclude()
 lc3_state = builder.class_('LC3State')
 lc3_state.include()
 builder.class_("lc3_subroutine_call_info").include()
+builder.class_("lc3_trap_call_info").include()
 builder.class_("lc3_memory_stats").include()
 builder.decl("::std::vector<lc3_subroutine_call_info, std::allocator<lc3_subroutine_call_info> >").include()
+builder.decl("::std::vector<lc3_trap_call_info, std::allocator<lc3_trap_call_info> >").include()
 
 # Don't export accessors
 builder.classes().add_properties(exclude_accessors=True)

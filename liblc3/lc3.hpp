@@ -396,6 +396,20 @@ typedef struct lc3_subroutine_call_info
 
 } lc3_subroutine_call_info;
 
+/** Record of active trap call info for each trap called */
+typedef struct lc3_trap_call_info
+{
+    lc3_trap_call_info() : vector(0), regs(8) {}
+    unsigned char vector;
+    // This should be std::array<short, 8> but due to a bug with py++ it doesn't work.
+    std::vector<short> regs;
+    // For availability in pylc3.
+    bool operator==(const lc3_trap_call_info& other) const
+    {
+        return vector == other.vector && regs == other.regs;
+    }
+} lc3_trap_call_info;
+
 /** Record of stats per memory address */
 typedef struct lc3_memory_stats
 {
@@ -479,16 +493,16 @@ typedef struct lc3_state
 
     // Maximum undo stack size just here for people who like to infinite loop/recurse and don't want their computers to explode.
     unsigned int max_stack_size;
-    /* I did not use a stack since I can't remove from front if max stack size != 0
-       So treat this as a "stack" */
     std::deque<lc3_state_change> undo_stack;
 
     // Maximum call stack size just here for people who like to infinite loop/recurse and don't want their computers to explode.
     unsigned int max_call_stack_size;
     // Subroutine debugging info (again see note above)
     std::deque<lc3_subroutine_call> call_stack;
-    // First layer of calls for lc3 calling convention checker (In case of multi recursion)
+    // First layer of calls for testing student code. (In case of multi recursion).
     std::vector<lc3_subroutine_call_info> first_level_calls;
+    // First layer of trap calls (In case of multi recursion).
+    std::vector<lc3_trap_call_info> first_level_traps;
 
     // Warn limit map
     std::map<int, unsigned int> warn_stats;
@@ -516,7 +530,7 @@ typedef struct lc3_state
     unsigned long total_writes;
 
     // test_only mode
-    // The only effect is that it records the first level subroutine calls.
+    // The only effect is that it records the first level subroutine/trap calls.
     bool in_lc3test;
 } lc3_state;
 

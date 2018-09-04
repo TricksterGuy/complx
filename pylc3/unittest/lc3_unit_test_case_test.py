@@ -195,6 +195,29 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertNoWarnings()
         self.assertConsoleOutput("BEC")
 
+    def testTrapCall(self):
+        snippet = """
+        ;@plugin filename=lc3_udiv vector=x80
+        .orig x3000
+	        LD R0, A
+	        LD R1, B
+	        UDIV
+	        HALT
+            A .fill 2000
+            B .fill 8
+        .end
+        """
+        self.loadCode(snippet)
+
+        self.expectTrapCall(0x80, params={0: 2000, 1: 8})
+
+        self.runCode()
+
+        self.assertHalted()
+        self.assertNoWarnings()
+
+        self.assertTrapCallsMade()
+
     def testSubroutineCallBasic(self):
         snippet = """
         .orig x3000
