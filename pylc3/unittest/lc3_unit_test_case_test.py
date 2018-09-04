@@ -381,6 +381,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertRegistersUnchanged([5, 7])
         self.assertStackManaged(stack=0xEFFC, answer=72, return_address=0x8000, old_frame_pointer=0xCAFE)
         self.assertSubroutineCallsMade()
+        self.assertReadAnswersFromCalls()
 
     def testSubroutineCallWithOptionalNotTaken(self):
         snippet = """
@@ -433,6 +434,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertStackManaged(stack=0xEFFE, answer=40, return_address=0x8000, old_frame_pointer=0xCAFE)
         # We didn't call return7 but thats okay it was optional.
         self.assertSubroutineCallsMade()
+        self.assertReadAnswersFromCalls()
 
     def testSubroutineCallWithOptionalTaken(self):
         snippet = """
@@ -491,6 +493,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertRegistersUnchanged([5, 7])
         self.assertStackManaged(stack=0xEFFE, answer=40, return_address=0x8000, old_frame_pointer=0xCAFE)
         self.assertSubroutineCallsMade()
+        self.assertReadAnswersFromCalls()
 
     def testReplayString(self):
         snippet = """

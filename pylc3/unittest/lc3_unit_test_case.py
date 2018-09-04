@@ -642,7 +642,26 @@ class LC3UnitTestCase(unittest.TestCase):
         for optional in self.optional_subroutines:
             actual_subroutines.discard(optional)
 
-        self.assertEqual(self.expected_subroutines, actual_subroutines)
+        self.assertEqual(self.expected_subroutines, actual_subroutines, self._generateReplay())
+
+    def assertReadAnswersFromCalls(self):
+        """Asserts that for each subroutine call made the answer was pulled from the stack.
+
+        This asserts that students are following the calling conventions postcondition that the
+        answer is at the top of the stack and specifically they are pulling this value off the
+        stack and not assuming the answer is stored in a register.
+        """
+        actual_subroutines = set()
+        for call in self.state.first_level_calls:
+            actual_subroutines.add((self.reverse_lookup(call.address), call.r6))
+
+        did_not_read_answer_subroutines = set()
+        for subroutine_call in actual_subroutines:
+            stats = self.state.memory_ops(call.r6)
+            if stats.reads == 0:
+                did_not_read_answer_subroutines.add(subroutine_call)
+
+        self.assertFalse(did_not_read_answer_subroutines, self._generateReplay())
 
     def _generateReplay(self):
         return "\nString to set up this test in complx: %s" % repr(self.preconditions.encode())

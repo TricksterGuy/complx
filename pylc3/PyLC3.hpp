@@ -112,6 +112,9 @@ public:
     void set_pc(unsigned short pc) { state.pc = pc; }
     bool has_halted() const { return state.halted; }
 
+    /** see lc3_state.memory_ops */
+    const lc3_memory_stats& memory_ops(unsigned short address) { return state.memory_ops[address]; }
+
     bool get_true_traps() const { return state.true_traps; }
     void set_true_traps(bool setting) { lc3_set_true_traps(state, setting); }
     bool get_interrupts() const { return state.interrupt_enabled; }
