@@ -207,7 +207,7 @@ class Comp(cmd.Cmd):
             print 'Successfully set breakpoint at %s.' % params
 
     def do_break(self, arg):
-        """break addr[, cond[, times[, name]]] - Puts breakpoint at addr with condition cond, times number of hits before becoming inactive, and name name"""
+        """break addr[ cond[ times[ name]]] - Puts breakpoint at addr with condition cond, times number of hits before becoming inactive, and name name"""
         params = self.parse(arg, address, str, int, str, num_required=1, defaults=["1", -1, ""])
         if params is None:
             return
@@ -216,7 +216,7 @@ class Comp(cmd.Cmd):
             print 'Successfully set breakpoint with params %s.' % str(params)
 
     def do_watch(self, arg):
-        "watch target, condition[, times[, name]] - Sets a watchpoint on target with condition cond, times number of hits before becoming inactive, and name name."""
+        "watch target condition[ times[ name]] - Sets a watchpoint on target with condition cond, times number of hits before becoming inactive, and name name."""
         params = self.parse(arg, watch_point_target, str, int, str, num_required=2, defaults=[-1, ""])
         if params is None:
             return
@@ -236,8 +236,13 @@ class Comp(cmd.Cmd):
             print 'Successfully set watchpoint on %s with condition %s and times %d with name %s' % (target_str, condition, times, name)
 
     def do_blackbox(self, arg):
-        """blackbox addr[, name[, condition]] - Marks addr as a blackbox."""
-        pass
+        """blackbox addr[ condition[ name]] - Marks addr as a blackbox."""
+        params = self.parse(arg, address, str, int, num_required=1, defaults=["1", -1])
+        if params is None:
+            return
+
+        if not self.state.add_breakpoint(*params):
+            print 'Successfully set blackbox with params %s.' % str(params)
 
     def do_undostack(self, arg):
         """undostack num - Sets the undo stack length."""

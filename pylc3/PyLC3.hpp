@@ -85,6 +85,10 @@ public:
     bool add_watchpoint(bool is_reg, unsigned short data, const std::string& condition, int times = -1, const std::string& label = "") { return lc3_add_watch(state, is_reg, data, condition, label, times); }
     /** @see lc3_add_watch */
     bool add_watchpoint(const std::string& symbol, const std::string& condition, int times = -1, const std::string& label = "") { return lc3_add_watch(state, symbol, condition, label, times); }
+    /** @see lc3_add_watch */
+    bool add_blackbox(const std::string& symbol, const std::string& condition = "1", const std::string& label = "") { return lc3_add_blackbox(state, symbol, label, condition); }
+    /** @see lc3_add_watch */
+    bool add_blackbox(unsigned short addr, const std::string& condition = "1", const std::string& label = "") { return lc3_add_blackbox(state, addr, label, condition); }
     /** @see lc3_remove_break */
     bool remove_breakpoint(unsigned short address) { return lc3_remove_break(state, address); }
     /** @see lc3_remove_break */
