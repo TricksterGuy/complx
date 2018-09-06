@@ -36,6 +36,8 @@ public:
     /** Test only */
     bool loadCode(const std::string& lc3_code);
     /** @see lc3_run */
+    void run() { lc3_run(state); }
+    /** @see lc3_run */
     void run(unsigned int num) { lc3_run(state, num); }
     /** @see lc3_step */
     void step() { lc3_step(state); }
@@ -43,6 +45,8 @@ public:
     void back() { lc3_back(state); }
     /** @see lc3_rewind */
     void rewind() { lc3_rewind(state); }
+    /** @see lc3_rewind */
+    void rewind(unsigned int num) { lc3_rewind(state, num); }
     /** @see lc3_finish */
     void finish() { lc3_finish(state); }
     /** @see lc3_next_line */
@@ -63,6 +67,16 @@ public:
     /** Sets value at address, note that the difference between this and memory_write is that memory_write will trigger plugins and devices */
     void set_memory(unsigned short address, int value) { state.mem[address] = value; }
 
+    /** @see lc3_disassemble */
+    const std::string disassemble(unsigned short address, int level) 
+    { 
+        ///TODO remove disassemble's accessing of state.pc it should assume the address where it is located is the "pc"
+        unsigned short pc = state.pc;
+        state.pc = address + 1;
+        const std::string ret = lc3_disassemble(state, state.mem[address], level); 
+        state.pc = pc;
+        return ret;
+    }
     /** @see lc3_add_break */
     bool add_breakpoint(unsigned short address) { return lc3_add_break(state, address); }
     /** @see lc3_remove_break */

@@ -44,5 +44,10 @@ add_custom_command(
     TARGET pylc3 POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/pylc3/pylc3.so ${CMAKE_CURRENT_SOURCE_DIR}/unittest/pylc3.so
     COMMENT "Copying needed plugins for testing")
+add_custom_command(
+    TARGET pylc3 POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/pylc3/pylc3.so ${CMAKE_CURRENT_SOURCE_DIR}/cli/pylc3.so
+    COMMENT "Copying needed plugins for testing")
 
 add_test(NAME lc3_unit_test_case_test COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/unittest/lc3_unit_test_case_test.py)
+add_test(NAME comp_test COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/cli/comp_test.py)

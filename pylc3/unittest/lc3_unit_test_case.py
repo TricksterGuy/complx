@@ -614,9 +614,9 @@ class LC3UnitTestCase(unittest.TestCase):
         actual_str = []
         for addr, _ in enumerate(text, start_addr):
             # TODO more error checking, character could be > 255 which throws an error.
-            actual_str.append(chr(self.readMem(addr)))
+            actual_str.append(unichr(self.readMem(addr)))
         actual_str.append(self.readMem(start_addr + len(text)))
-        expected_str = list(text)
+        expected_str = list(unicode(text))
         expected_str.append(0)
         self.assertEqual(expected_str, actual_str, self._generateReplay())
     

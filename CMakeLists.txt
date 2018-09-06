@@ -8,7 +8,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 option(ENABLE_PLUGINS "Enable Official Plugins" ON)
 option(ENABLE_LC3EDIT "Build lc3edit" OFF)
-option(ENABLE_COMP "Build comp" OFF)
 option(ENABLE_COMPLX "Build complx" ON)
 option(ENABLE_DEV "Build dev version" OFF)
 option(ENABLE_TESTS "Enable testing" OFF)
@@ -151,9 +150,6 @@ if(ENABLE_LC3EDIT)
     add_subdirectory(lc3edit)
 endif(ENABLE_LC3EDIT)
 
-if(ENABLE_COMP)
-    add_subdirectory(comp)
-endif(ENABLE_COMP)
 
 if(ENABLE_COMPLX)
     add_subdirectory(complx)
