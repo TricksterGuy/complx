@@ -78,9 +78,17 @@ public:
         return ret;
     }
     /** @see lc3_add_break */
-    bool add_breakpoint(unsigned short address) { return lc3_add_break(state, address); }
+    bool add_breakpoint(unsigned short address, const std::string& condition = "1", int times = -1, const std::string& label = "") { return lc3_add_break(state, address, label, condition, times); }
+    /** @see lc3_add_break */
+    bool add_breakpoint(const std::string& symbol, const std::string& condition = "1", int times = -1, const std::string& label = "") { return lc3_add_break(state, symbol, label, condition, times); }
+    /** @see lc3_add_watch */
+    bool add_watchpoint(bool is_reg, unsigned short data, const std::string& condition, int times = -1, const std::string& label = "") { return lc3_add_watch(state, is_reg, data, condition, label, times); }
+    /** @see lc3_add_watch */
+    bool add_watchpoint(const std::string& symbol, const std::string& condition, int times = -1, const std::string& label = "") { return lc3_add_watch(state, symbol, condition, label, times); }
     /** @see lc3_remove_break */
     bool remove_breakpoint(unsigned short address) { return lc3_remove_break(state, address); }
+    /** @see lc3_remove_break */
+    bool remove_breakpoint(const std::string& symbol) { return lc3_remove_break(state, symbol); }
     /** Adds metadata for the subroutine specified */
     bool add_subroutine_info(const std::string& subroutine, int num_params)
     {

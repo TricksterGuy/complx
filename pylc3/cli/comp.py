@@ -1,5 +1,6 @@
 import cmd
 import inspect
+import shlex
 import pylc3
 
 def toShort(value):
@@ -13,6 +14,54 @@ def toShort(value):
     """
     return value & 0xFFFF
 
+def address(param):
+    """Converter function for lc3 addresses and symbols
+
+    If the string param begins with x it will interpret it as a hexadecimal address.
+    Otherwise it is treated as a label.
+
+    Args:
+        param: String - Value to try to convert.
+
+    Returns:
+        An Integer if the param is an address,
+        A string if the param is a label.
+
+    Raises:
+        ValueError if the string is not parseable as an address or label.
+    """
+    if param[0] == 'x':
+        try:
+            return toShort(int(param[1:], 16))
+        except ValueError:
+            pass
+    if param[0] >= '0' and param[0] <= '9':
+        raise ValueError('%s is not parseable as an address or label' % param)
+    return param
+
+def watch_point_target(param):
+    """Converter function for a watch point target param.
+
+    The target of a watchpoint can be a label, a register, or a memory address.
+
+    Args:
+        param: String - Value to try to convert.
+
+    Returns:
+        (True, reg_num) if param is a register.
+        (False, address) if param was an address.
+        (label,) A tuple with a string if param was a label.
+
+    Raises:
+        ValueError if the string is not parseable as an address or label.
+    """
+    if len(param) == 2 and (param[0] == 'R' or param[0] == 'r') and (param[1] >= '0' and param[1] <= '7'):
+        return (True, int(param[1]))
+    value = address(param)
+    if isinstance(value, int):
+        return (False, value)
+    return value
+
 class Comp(cmd.Cmd):
 
     def __init__(self, show_help=True):
@@ -22,22 +71,29 @@ class Comp(cmd.Cmd):
         self.prompt = '(comp) '
         self.intro = 'Welcome to the comp text interface.\n\n' + self.status_str()
         self.last_command_error = False
+        self.file = None
 
     def parse(self, arg, *types, **kwargs):
+        def error():
+            if self.show_help:
+                print 'Error in command. Usage below.\n'
+                caller_func = inspect.stack()[2][3]
+                caller = caller_func[3:]
+                self.do_help(caller)
+            self.last_command_error = True
+
         num_required = kwargs.get('num_required', len(types))
         defaults = kwargs.get('defaults', [])
+
 
         assert num_required <= len(types), 'Number of required arguments > argument types'
         assert num_required + len(defaults) == len(types) or len(defaults) == 0, 'Too many default values given'
 
-        args = arg.split()
+            
+        args = shlex.split(arg)
 
         if len(args) > len(types) or len(args) < num_required:
-            if self.show_help:
-                print 'Error in command. Usage below.\n'
-                caller = inspect.stack()[1][3]
-                self.do_help(caller[3:])
-            self.last_command_error = True
+            error()
             return None
 
         params = []
@@ -45,12 +101,7 @@ class Comp(cmd.Cmd):
             try:
                 params.append(types[i](arg))
             except (TypeError, ValueError):
-                print arg
-                if self.show_help:
-                    print 'Error in command. Usage below.\n'
-                    caller = inspect.stack()[1][3]
-                    self.do_help(caller[3:])
-                self.last_command_error = True
+                error()
                 return None
 
         for i in xrange(len(args), len(types)):
@@ -147,16 +198,42 @@ class Comp(cmd.Cmd):
 
     # Debugging
     def do_tempbreak(self, arg):
-        """tempbreak addr - Puts a temporary breakpoint at addr (this is equivalent to break addr, name, 1, 1)."""
-        pass
+        """tempbreak addr - Puts a temporary breakpoint at addr (this is equivalent to break addr "1" -1 name)."""
+        params = self.parse(arg, address)
+        if params is None:
+            return
+
+        if not self.state.add_breakpoint(*params):
+            print 'Successfully set breakpoint at %s.' % params
 
     def do_break(self, arg):
         """break addr[, cond[, times[, name]]] - Puts breakpoint at addr with condition cond, times number of hits before becoming inactive, and name name"""
-        pass
+        params = self.parse(arg, address, str, int, str, num_required=1, defaults=["1", -1, ""])
+        if params is None:
+            return
+
+        if not self.state.add_breakpoint(*params):
+            print 'Successfully set breakpoint with params %s.' % str(params)
 
     def do_watch(self, arg):
         "watch target, condition[, times[, name]] - Sets a watchpoint on target with condition cond, times number of hits before becoming inactive, and name name."""
-        pass
+        params = self.parse(arg, watch_point_target, str, int, str, num_required=2, defaults=[-1, ""])
+        if params is None:
+            return
+
+        target, condition, times, name = params
+
+        if len(target) == 1:
+            symbol, = target
+            target_str = symbol
+            failure = self.state.add_watchpoint(symbol, condition, times, name)
+        else:
+            is_reg, data = target
+            target_str = 'R%d' % data if is_reg else 'x%04x' % data
+            failure = self.state.add_watchpoint(is_reg, data, condition, times, name)
+
+        if not failure:
+            print 'Successfully set watchpoint on %s with condition %s and times %d with name %s' % (target_str, condition, times, name)
 
     def do_blackbox(self, arg):
         """blackbox addr[, name[, condition]] - Marks addr as a blackbox."""
@@ -216,24 +293,45 @@ class Comp(cmd.Cmd):
     # File
     def do_load(self, arg):
         """load filename - Reinitializes and loads filename."""
-        print arg
+        params = self.parse(arg, str)
+        if params is None:
+            return
+
+        self.state.init()
+        self.state.load(*params)
+        self.file, = params
+
+    def do_reload(self, arg):
+        """reload - Reinitializes and Reloads last file if there was a file already loaded."""
+        params = self.parse(arg)
+        if params is None:
+            return
+
+        if not self.file:
+            return
+
+        self.state.init()
+        self.state.load(self.file)
+
+    def do_loadover(self, arg):
+        """loadover filename - Loads filename over current state."""
         params = self.parse(arg, str)
         if params is None:
             return
 
         self.state.load(*params)
-
-    def do_reload(self, arg):
-        """reload - Reinitializes and Reloads last file if there was a file already loaded."""
-        pass
-
-    def do_loadover(self, arg):
-        """loadover filename - Loads filename over current state."""
-        pass
+        self.file, = params
 
     def do_reloadover(self, arg):
         """reloadover - Reloads last filename over current state."""
-        pass
+        params = self.parse(arg)
+        if params is None:
+            return
+
+        if not self.file:
+            return
+
+        self.state.load(self.file)
 
     def do_quit(self, arg):
         """quit - Exits the simulator."""
