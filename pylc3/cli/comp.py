@@ -408,7 +408,7 @@ class Comp(cmd.Cmd):
             return
 
         value, = params
-        self.state.true_traps, = True if value else False
+        self.state.true_traps, = bool(value)
         self.message('%s true traps.' % ('Set' if value else 'Reset'))
 
     def do_interrupts(self, arg):
@@ -418,23 +418,39 @@ class Comp(cmd.Cmd):
             return
 
         value, = params
-        self.state.interrupts, = True if value else False
+        self.state.interrupts, = bool(value)
         self.message('%s interrupts.' % ('Set' if value else 'Reset'))
 
     def do_strict_execution(self, arg):
         """strict_execution [bool] - Toggles strict_execution if no param given else true sets strict_execution false unsets strict_execution."""
-        params = self.parse(arg, int, num_required=0, defaults=[not self.state.interrupts])
+        params = self.parse(arg, int, num_required=0, defaults=[not self.state.strict_execution])
         if params is None:
             return
 
         value, = params
-        self.state.interrupts, = True if value else False
+        self.state.interrupts, = bool(value)
         self.message('%s strict execution.' % ('Set' if value else 'Reset'))
 
     # Display
     def do_list(self, arg):
-        """list addr[, level=1] - Displays memory addresses starting from start. If level is given affects the disassemble level (basic=0, normal=1, highlevel=2)"""
-        pass
+        """list addr[ end] - Displays memory addresses starting from start to end inclusive."""
+        def binary(data):
+            base = bin(data)[2:]
+            return '0' * (16 - len(base)) + base
+        params = self.parse(arg, address, address, num_required=1, defaults=[None])
+        if params is None:
+            return
+
+        start, end = params
+        if end is None:
+            end = start
+
+        for addr in xrange(start, end+1):
+            data = self.state.get_memory(addr)
+            symbol = self.state.reverse_lookup(addr)
+            instruction = self.state.disassemble(addr, 1)
+            comment = self.state.comment(addr).strip()
+            self.message('x%04x:\tx%04x\t%6d\t%s\t%s\t%s\t%s' % (addr, toShort(data), data, binary(toShort(data)), symbol, instruction, comment))
 
     # File
     def do_load(self, arg):

@@ -147,8 +147,15 @@ public:
     void set_pc(unsigned short pc) { state.pc = pc; }
     bool has_halted() const { return state.halted; }
 
-    /** see lc3_state.memory_ops */
+    /** @see lc3_state.memory_ops */
     const lc3_memory_stats& memory_ops(unsigned short address) { return state.memory_ops[address]; }
+    /** @see lc3_state.comments */
+    const std::string comment(unsigned short address) const 
+    {
+        if (state.comments.find(address) == state.comments.end())
+            return "";
+        return state.comments.at(address);
+    }
 
     unsigned int get_max_undo_stack_size() const { return state.max_stack_size; }
     void set_max_undo_stack_size(unsigned int size) { state.max_stack_size = size; }
