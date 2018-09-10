@@ -340,6 +340,10 @@ typedef struct lc3_breakpoint_info
     int hit_count;
     std::string label;
     std::string condition;
+    bool operator==(const lc3_breakpoint_info& other) const 
+    {
+        return addr == other.addr && condition == other.condition;
+    }
 } lc3_breakpoint_info;
 
 /** Record of stats for a watchpoint. */
@@ -352,6 +356,10 @@ typedef struct lc3_watchpoint_info
     int hit_count;
     std::string label;
     std::string condition;
+    bool operator==(const lc3_watchpoint_info& other) const
+    {
+        return is_reg == other.is_reg && data == other.data && condition == other.condition;
+    }
 } lc3_watchpoint_info;
 
 /** Record of stats for a blackbox. */
@@ -362,6 +370,10 @@ typedef struct lc3_blackbox_info
     int hit_count;
     std::string label;
     std::string condition;
+    bool operator==(const lc3_blackbox_info& other) const
+    {
+        return addr == other.addr && condition == other.condition;
+    }
 } lc3_blackbox_info;
 
 /** Record of subroutine information. */

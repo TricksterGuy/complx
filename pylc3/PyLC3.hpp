@@ -156,6 +156,10 @@ public:
             return "";
         return state.comments.at(address);
     }
+    const std::map<unsigned short, lc3_breakpoint_info>& get_breakpoints() const { return state.breakpoints; }
+    const std::map<unsigned short, lc3_blackbox_info>& get_blackboxes() const { return state.blackboxes; }
+    const std::map<unsigned short, lc3_watchpoint_info>& get_memory_watchpoints() const { return state.mem_watchpoints; }
+    const std::map<unsigned short, lc3_watchpoint_info>& get_register_watchpoints() const { return state.reg_watchpoints; }
 
     unsigned int get_max_undo_stack_size() const { return state.max_stack_size; }
     void set_max_undo_stack_size(unsigned int size) { state.max_stack_size = size; }

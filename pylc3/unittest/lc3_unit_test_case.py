@@ -496,7 +496,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             max_executions: Integer - Maximum number of instructions to execute.
         """
-        for id in xrange(8):
+        for id in range(8):
             self.registers[id] = self.state.get_register(id)
         self.state.run(max_executions)
 

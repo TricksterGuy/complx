@@ -1,3 +1,4 @@
+from terminaltables import SingleTable
 import cmd
 import enum
 import inspect
@@ -100,7 +101,7 @@ class Comp(cmd.Cmd):
     def parse(self, arg, *types, **kwargs):
         def error():
             if self.show_help:
-                print 'Error in command. Usage below.\n'
+                print('Error in command. Usage below.\n')
                 caller_func = inspect.stack()[2][3]
                 caller = caller_func[3:]
                 self.do_help(caller)
@@ -138,7 +139,7 @@ class Comp(cmd.Cmd):
         if stop:
             return stop
         if self.display_status:
-            print self.status_str()
+            print(self.status_str())
         self.display_status = True
 
     def status_str(self):
@@ -163,11 +164,11 @@ class Comp(cmd.Cmd):
                  pc, instr)
 
     def message(self, string):
-        print string
+        print(string)
         self.display_status = False
 
     def do_run(self, arg):
-        """run - Runs until the lc3 halts or 1000000 instructions were executed."""
+        """run - Runs until the lc3 halts."""
         params = self.parse(arg)
         if params is None:
             return
@@ -271,7 +272,7 @@ class Comp(cmd.Cmd):
 
     def do_blackbox(self, arg):
         """blackbox addr[ condition[ name]] - Marks addr as a blackbox."""
-        params = self.parse(arg, address, str, int, num_required=1, defaults=["1", -1])
+        params = self.parse(arg, address, str, str, num_required=1, defaults=["1", ""])
         if params is None:
             return
 
@@ -433,24 +434,124 @@ class Comp(cmd.Cmd):
 
     # Display
     def do_list(self, arg):
-        """list addr[ end] - Displays memory addresses starting from start to end inclusive."""
+        """list [addr[ end]] - Displays memory addresses starting from start to end inclusive. If end is not given then displays start. If neither given displays instructions around the PC."""
         def binary(data):
             base = bin(data)[2:]
             return '0' * (16 - len(base)) + base
-        params = self.parse(arg, address, address, num_required=1, defaults=[None])
+
+        params = self.parse(arg, address, address, num_required=0, defaults=[None, None])
         if params is None:
             return
 
         start, end = params
-        if end is None:
+        if start is None and end is None:
+            start = self.state.pc - 5
+            end = self.state.pc + 5
+        elif end is None:
             end = start
+        
+        table_data = [['Addr', 'Hex', 'Dec', 'Binary', 'Label', 'Instruction', 'Comment']]
 
         for addr in xrange(start, end+1):
             data = self.state.get_memory(addr)
             symbol = self.state.reverse_lookup(addr)
             instruction = self.state.disassemble(addr, 1)
             comment = self.state.comment(addr).strip()
-            self.message('x%04x:\tx%04x\t%6d\t%s\t%s\t%s\t%s' % (addr, toShort(data), data, binary(toShort(data)), symbol, instruction, comment))
+            table_data.append(['x%04x' % addr, 'x%04x' % toShort(data), data, binary(toShort(data)), symbol, instruction, comment])
+
+        table = SingleTable(table_data)
+        self.message(table.table)
+
+    def do_list_breakpoints(self, arg):
+        """list_breakpoints - Lists all breakpoints with detailed information."""
+        params = self.parse(arg)
+        if params is None:
+            return
+
+        if not self.state.breakpoints:
+            self.message('There are no breakpoints.')
+            return
+
+        table_data = [["Name", "Target", "Enabled", "Condition", "Max Hits", "Hits"]]
+
+        for entry in self.state.breakpoints:
+            addr, breakpoint = (entry.key(), entry.data())
+            
+            name = breakpoint.label
+            symbol = self.state.reverse_lookup(addr)
+            target = symbol if symbol else 'x%04x' % addr
+            enabled = str(breakpoint.enabled)
+            condition = breakpoint.condition
+            times = str(breakpoint.max_hits)
+            hits = str(breakpoint.hit_count)
+            table_data.append([name, target, enabled, condition, times, hits])
+        
+        table = SingleTable(table_data)
+        self.message(table.table)
+
+    def do_list_watchpoints(self, arg):
+        """list_watchpoints - Lists all watchpoints with detailed information."""
+        params = self.parse(arg)
+        if params is None:
+            return
+
+        if not self.state.memory_watchpoints and not self.state.register_watchpoints:
+            self.message('There are no watchpoints.')
+            return
+
+        table_data = [["Name", "Target", "Enabled", "Condition", "Max Hits", "Hits"]]
+
+        for entry in self.state.register_watchpoints:
+            reg, watchpoint = (entry.key(), entry.data())
+            
+            name = watchpoint.label
+            target = 'R%d' % reg
+            enabled = str(watchpoint.enabled)
+            condition = watchpoint.condition
+            times = str(watchpoint.max_hits)
+            hits = str(watchpoint.hit_count)
+            table_data.append([name, target, enabled, condition, times, hits])
+
+        for entry in self.state.memory_watchpoints:
+            addr, watchpoint = (entry.key(), entry.data())
+            
+            name = watchpoint.label
+            symbol = self.state.reverse_lookup(addr)
+            target = symbol if symbol else 'x%04x' % addr
+            enabled = str(watchpoint.enabled)
+            condition = watchpoint.condition
+            times = str(watchpoint.max_hits)
+            hits = str(watchpoint.hit_count)
+            table_data.append([name, target, enabled, condition, times, hits])
+        
+        table = SingleTable(table_data)
+        self.message(table.table)
+
+    def do_list_blackboxes(self, arg):
+        """list_blackboxes - Lists all blackboxes with detailed information."""
+        params = self.parse(arg)
+        if params is None:
+            return
+
+        if not self.state.blackboxes:
+            self.message('There are no blackboxes.')
+            return
+
+        table_data = [["Name", "Target", "Enabled", "Condition", "Hits"]]
+
+        for entry in self.state.blackboxes:
+            addr, blackbox = (entry.key(), entry.data())
+            
+            name = blackbox.label
+            symbol = self.state.reverse_lookup(addr)
+            target = symbol if symbol else 'x%04x' % addr
+            enabled = str(blackbox.enabled)
+            condition = blackbox.condition
+            hits = str(blackbox.hit_count)
+            table_data.append([name, target, enabled, condition, hits])
+        
+        table = SingleTable(table_data)
+        self.message(table.table)
 
     # File
     def do_load(self, arg):
