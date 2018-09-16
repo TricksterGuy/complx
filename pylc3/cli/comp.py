@@ -200,8 +200,8 @@ class Comp(cmd.Cmd):
 
         self.state.next_line(*params)
 
-    def do_prev(self, arg):
-        """prev [x=1] - If x is given goes back x lines (not stepping into any subroutines / traps) else back steps 1 line."""
+    def do_previous(self, arg):
+        """previous [x=1] - If x is given goes back x lines (not stepping into any subroutines / traps) else back steps 1 line."""
         params = self.parse(arg, int, num_required=0, defaults=[1])
         if params is None:
             return
