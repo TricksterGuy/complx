@@ -7,8 +7,6 @@ using namespace ExpressionEvaluator;
 
 static int lc3_get_symbol(const std::string& symbol, bool has_ref, int ref, int& error);
 
-// This is in no way thread safe. And this is not intended to be used with threads
-// I didn't want to ugly things up by passing an lc3_state* through the Expression stuff.
 static lc3_state* calc_state;
 
 int get_r0(bool hasref, int ref)

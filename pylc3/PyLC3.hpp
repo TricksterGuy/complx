@@ -36,23 +36,33 @@ public:
     /** Test only */
     bool loadCode(const std::string& lc3_code);
     /** @see lc3_run */
-    void run() { lc3_run(state); }
+    void run() { state.halted = 0 ; lc3_run(state); }
     /** @see lc3_run */
-    void run(unsigned int num) { lc3_run(state, num); }
+    void run(unsigned int num) { state.halted = 0 ; lc3_run(state, num); }
     /** @see lc3_step */
-    void step() { lc3_step(state); }
+    void step() { state.halted = 0 ; lc3_step(state); }
     /** @see lc3_back */
-    void back() { lc3_back(state); }
+    void back() { state.halted = 0 ; lc3_back(state); }
     /** @see lc3_rewind */
-    void rewind() { lc3_rewind(state); }
+    void rewind() { state.halted = 0 ; lc3_rewind(state); }
     /** @see lc3_rewind */
-    void rewind(unsigned int num) { lc3_rewind(state, num); }
+    void rewind(unsigned int num) { state.halted = 0 ; lc3_rewind(state, num); }
     /** @see lc3_finish */
-    void finish() { lc3_finish(state); }
+    void finish() { state.halted = 0 ; lc3_finish(state); }
     /** @see lc3_next_line */
-    void next_line() { lc3_next_line(state); }
+    void next_line(unsigned int num = 0) 
+    { 
+        state.halted = 0;
+        for (unsigned int i = 0; i < num; i++)
+            lc3_next_line(state);
+    }
     /** @see lc3_prev_line */
-    void previous_line() { lc3_prev_line(state); }
+    void previous_line(unsigned int num = 0)
+    {
+        state.halted = 0;
+        for (unsigned int i = 0; i < num; i++)
+            lc3_prev_line(state);
+    }
     /** @see lc3_mem_read */
     int memory_read(unsigned short address) { return lc3_mem_read(state, address); }
     /** @see lc3_mem_write */
@@ -61,6 +71,7 @@ public:
     int lookup(const std::string& symbol) { return lc3_sym_lookup(state, symbol); }
     /** @see lc3_sym_rev_lookup */
     const std::string reverse_lookup(unsigned short address) { return lc3_sym_rev_lookup(state, address); }
+    
 
     /** Gets value at address, note that the difference between this and memory_read is that memory_read will trigger plugins and devices */
     int get_memory(unsigned short address) const { return state.mem[address]; }

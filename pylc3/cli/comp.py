@@ -88,10 +88,11 @@ def set_target(param):
 
 class Comp(cmd.Cmd):
 
-    def __init__(self, show_help=True):
+    def __init__(self, lc3_state=None, show_help=True, disable_message=False):
         cmd.Cmd.__init__(self)
-        self.state = pylc3.LC3State()
-        self.show_help=show_help
+        self.state = pylc3.LC3State() if not lc3_state else lc3_state
+        self.show_help = show_help
+        self.disable_message = disable_message
         self.prompt = '(comp) '
         self.intro = 'Welcome to the comp text interface.\n\n' + self.status_str()
         # Display status after command completion
@@ -110,11 +111,9 @@ class Comp(cmd.Cmd):
         num_required = kwargs.get('num_required', len(types))
         defaults = kwargs.get('defaults', [])
 
-
         assert num_required <= len(types), 'Number of required arguments > argument types'
         assert num_required + len(defaults) == len(types) or len(defaults) == 0, 'Too many default values given'
 
-            
         args = shlex.split(arg)
 
         if len(args) > len(types) or len(args) < num_required:
@@ -164,7 +163,8 @@ class Comp(cmd.Cmd):
                  pc, instr)
 
     def message(self, string):
-        print(string)
+        if not self.disable_message:
+            print(string)
         self.display_status = False
 
     def do_run(self, arg):
@@ -175,6 +175,7 @@ class Comp(cmd.Cmd):
 
         self.state.run()
 
+    # Execute
     def do_step(self, arg):
         """step [x=1] - If x is given runs for that many instructions else steps 1 instruction."""
         params = self.parse(arg, int, num_required=0, defaults=[1])
@@ -197,8 +198,7 @@ class Comp(cmd.Cmd):
         if params is None:
             return
 
-        for _ in xrange(*params):
-            self.state.next_line()
+        self.state.next_line(*params)
 
     def do_prev(self, arg):
         """prev [x=1] - If x is given goes back x lines (not stepping into any subroutines / traps) else back steps 1 line."""
@@ -206,8 +206,7 @@ class Comp(cmd.Cmd):
         if params is None:
             return
 
-        for _ in xrange(*params):
-            self.state.previous_line()
+        self.state.previous_line(*params)
 
     def do_finish(self, arg):
         """finish - Steps out of the current subroutine/trap/interrupt."""
@@ -233,7 +232,7 @@ class Comp(cmd.Cmd):
             return
 
         if not self.state.add_breakpoint(*params):
-            self.message('Successfully set breakpoint at %s.' % params)
+            self.message('Successfully set breakpoint.')
         else:
             self.message('Failed to set breakpoint.')
 
@@ -244,7 +243,7 @@ class Comp(cmd.Cmd):
             return
 
         if not self.state.add_breakpoint(*params):
-            self.message('Successfully set breakpoint at %s with condition %s times %d and name %s.' % params)
+            self.message('Successfully set breakpoint.')
         else:
             self.message('Failed to set breakpoint.')
 
@@ -256,17 +255,15 @@ class Comp(cmd.Cmd):
 
         target, condition, times, name = params
 
-        if len(target) == 1:
-            symbol, = target
-            target_str = symbol
-            failure = self.state.add_watchpoint(symbol, condition, times, name)
-        else:
+        if isinstance(target, tuple):
             is_reg, data = target
-            target_str = 'R%d' % data if is_reg else 'x%04x' % data
             failure = self.state.add_watchpoint(is_reg, data, condition, times, name)
+        else:
+            failure = self.state.add_watchpoint(target, condition, times, name)
+
 
         if not failure:
-            self.message('Successfully set watchpoint on %s with condition %s and times %d with name %s.' % (target_str, condition, times, name))
+            self.message('Successfully set watchpoint.')
         else:
             self.message('Failed to set watchpoint.')
 
@@ -277,9 +274,9 @@ class Comp(cmd.Cmd):
             return
 
         if not self.state.add_blackbox(*params):
-            self.message('Successfully set blackbox with params %s.' % str(params))
+            self.message('Successfully set blackbox.')
         else:
-            self.message('Failed to set blackbox')
+            self.message('Failed to set blackbox.')
 
     def do_undo_stack_size(self, arg):
         """undo_stack_size [num=-1] - Sets the undo stack length. Default is maximum int."""
@@ -306,7 +303,7 @@ class Comp(cmd.Cmd):
             return
 
         if not self.state.remove_breakpoint(*params):
-            self.message('Successfully deleted breakpoint with param %s.' % params)
+            self.message('Successfully deleted breakpoint.')
         else:
             self.message('Failed to delete breakpoint.')
 
@@ -328,7 +325,7 @@ class Comp(cmd.Cmd):
             failure = self.state.remove_watchpoint(is_reg, data)
 
         if not failure:
-            self.message('Successfully deleted watchpoint on %s.' % (target_str))
+            self.message('Successfully deleted watchpoint.')
         else:
             self.message('Failed to delete watchpoint.')
 
@@ -339,7 +336,7 @@ class Comp(cmd.Cmd):
             return
 
         if not self.state.remove_blackbox(*params):
-            self.message('Successfully deleted blackbox with params %s.' % params)
+            self.message('Successfully deleted blackbox.')
         else:
             self.message('Failed to delete blackbox.')
 
@@ -369,21 +366,13 @@ class Comp(cmd.Cmd):
                 return
             self.state.set_memory(addr, value)
 
-    def do_fillmem(self, arg):
-        """fillmem value - Fills entire lc3 memory and registers with value."""
+    def do_fill_memory(self, arg):
+        """fill_memory value - Fills entire lc3 memory and registers with value."""
         params = self.parse(arg, int)
         if params is None:
             return
 
         self.state.init(False, *params)
-
-    def do_input(self, arg):
-        """input fname/cin - Sets source for console input."""
-        pass
-
-    def do_output(self, arg):
-        """output fname/cout - Sets source for console output."""
-        pass
 
     def do_reset(self, arg):
         """reset - Resets the lc3 state."""
@@ -403,7 +392,7 @@ class Comp(cmd.Cmd):
         self.state.init()
 
     def do_true_traps(self, arg):
-        """truetraps [bool] - Toggles true_traps if no param given else true sets true_traps false unsets true_traps."""
+        """true_traps [bool] - Toggles true_traps if no param given else true sets true_traps false unsets true_traps."""
         params = self.parse(arg, int, num_required=0, defaults=[not self.state.true_traps])
         if params is None:
             return
