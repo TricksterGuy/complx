@@ -40,6 +40,7 @@ builder.decl("::std::vector<lc3_trap_call_info, std::allocator<lc3_trap_call_inf
 builder.decl("::std::map<unsigned short, lc3_blackbox_info, std::less<unsigned short>, std::allocator<std::pair<const unsigned short, lc3_blackbox_info> > >").include()
 builder.decl("::std::map<unsigned short, lc3_breakpoint_info, std::less<unsigned short>, std::allocator<std::pair<const unsigned short, lc3_breakpoint_info> > >").include()
 builder.decl("::std::map<unsigned short, lc3_watchpoint_info, std::less<unsigned short>, std::allocator<std::pair<const unsigned short, lc3_watchpoint_info> > >").include()
+builder.decl("::std::map<unsigned short, lc3_memory_stats, std::less<unsigned short>, std::allocator<std::pair<const unsigned short, lc3_memory_stats> > >").include()
 
 
 

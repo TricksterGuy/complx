@@ -4,6 +4,7 @@ import unittest
 
 
 class CompTest(unittest.TestCase):
+
     def setUp(self):
         self.state = pylc3.LC3State()
         self.comp = comp.Comp(lc3_state=self.state, show_help=False, disable_message=True)

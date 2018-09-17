@@ -125,8 +125,6 @@ class LC3UnitTestCase(unittest.TestCase):
         self.state = pylc3.LC3State(testing_mode=True)
         self.break_address = None
         self.preconditions = Preconditions()
-        # Makes unittest to append to failure message.
-        self.longMessage = True
         self.enable_plugins = False
         self.true_traps = False
         # Registers values at the start of the test.
@@ -499,6 +497,7 @@ class LC3UnitTestCase(unittest.TestCase):
         for id in range(8):
             self.registers[id] = self.state.get_register(id)
         self.state.run(max_executions)
+        self.replay_msg = self._generateReplay()
 
     def assertShortEqual(self, expected, actual, msg=None):
         """Helper to assert if two 16 bit values are equal."""
@@ -510,9 +509,14 @@ class LC3UnitTestCase(unittest.TestCase):
         This is achieved by hitting the breakpoint set at r7 when callSubroutine was called.
         """
         assert self.break_address is not None, "self.assertReturned() should only be used when a previous call to self.callSubroutine() was made."
-        self.assertShortEqual(self.state.pc, self.break_address, 'Code did not return from subroutine correctly.'
-                        'This could indicate a malformed stack frame, or the return address was clobbered, or '
-                        'infinite recursion, or executing a malformed instruction / data\n' + self._generateReplay())
+        instruction = self.state.disassemble(self.state.pc, 1)
+        malformed = '*' in instruction
+        failure_msg = 'Code did not return from subroutine correctly.\n'
+        failure_msg += 'This was due to executing data which was interpreted to a malformed instruction.\n' if malformed else ''
+        failure_msg += 'This was probably due to an infinite loop in the code.\n' if not malformed else ''
+        failure_msg += 'This may indicate that your handling of the stack is incorrect or that R7 was clobbered.\n'
+        failure_msg += 'PC: x%04x\nInstruction last on: %s\n%s' % (self.state.pc, instruction, self.replay_msg)
+        self.assertShortEqual(self.state.pc, self.break_address, failure_msg)
 
     def assertHalted(self):
         """Asserts that the LC3 has been halted normally.
@@ -521,9 +525,12 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         assert self.break_address is None, "self.callSubroutine was previously used in this test, a call to assertReturned() should be made instead of assertHalted()."
         # Don't use self.state.halted here as that is set if a Malformed instruction is executed.
-        failure_msg = ('Code did not halt normally. This could indicate that the code did not reach a halt '
-                      'statement (due to executing a malformed instruction / data) or did not complete within '
-                      'the execution limit for this test\n' + self._generateReplay())
+        instruction = self.state.disassemble(self.state.pc, 1)
+        malformed = '*' in instruction
+        failure_msg = 'Code did not halt normally.\n'
+        failure_msg += 'This was due to executing data which was interpreted to a malformed instruction.\n' if malformed else ''
+        failure_msg += 'This was probably due to an infinite loop in the code.\n' if not malformed else ''
+        failure_msg += 'PC: x%04x\nInstruction last on: %s\n%s' % (self.state.pc, instruction, self.replay_msg)
         if self.true_traps:
             self.assertEqual(state.get_memory(0xFFFE) >> 15 & 1, 0, failure_msg)
         else:
@@ -531,7 +538,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
     def assertNoWarnings(self):
         """Asserts that no warnings were reported during execution of the code."""
-        self.assertFalse(self.state.warnings)
+        self.assertFalse(self.state.warnings, 'Code generated warnings shown below:\n----\n%s\n%s' % (self.state.warnings, self.replay_msg))
  
     def assertRegister(self, register_number, value):
         """Asserts that a value at a label is a certain value.
@@ -543,7 +550,9 @@ class LC3UnitTestCase(unittest.TestCase):
             value: Integer - Expected value.
         """
         assert register_number >= 0 and register_number < 8, 'Invalid register number'
-        self.assertShortEqual(self.readReg(register_number), value, self._generateReplay())
+        actual = self.readReg(register_number)
+        expected = value
+        self.assertShortEqual(expected, actual, 'R%d was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (register_number, expected, toShort(expected), actual, toShort(actual), self.replay_msg))
 
     def assertPc(self, value):
         """Asserts that the PC is a certain value.
@@ -553,7 +562,9 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             value: Integer - Expected value.
         """
-        self.assertShortEqual(self.state.pc, value, self._generateReplay())
+        actual = self.state.pc
+        expected = value
+        self.assertShortEqual(expected, actual, 'PC was expected to be x%04x but code produced x%04x\n%s' % (expected, actual, self.replay_msg))
 
     def assertValue(self, label, value):
         """Asserts that a value at a label is a certain value.
@@ -564,7 +575,9 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address to check.
             value: Integer - Expected value.
         """
-        self.assertShortEqual(self.readMem(self.lookup(label)), value, self._generateReplay())
+        actual = self.readMem(self.lookup(label))
+        expected = value
+        self.assertShortEqual(expected, actual, 'MEM[%s] was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (label, expected, toShort(expected), actual, toShort(actual), self.replay_msg))
 
     def assertPointer(self, label, value):
         """Asserts that a value at an address pointed to by label is a certain value.
@@ -575,7 +588,9 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address which in turn contains the address to check.
             value: Integer - Expected value.
         """
-        self.assertShortEqual(self.readMem(self.readMem(self.lookup(label))), value, self._generateReplay())
+        actual = self.readMem(self.readMem(self.lookup(label)))
+        expected = value
+        self.assertShortEqual(expected, actual, 'MEM[MEM[%s]] was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (label, expected, toShort(expected), actual, toShort(actual), self.replay_msg))
         
     def assertArray(self, label, arr):
         """Asserts that a sequence of values starting at the address pointed to by label are certain values.
@@ -594,7 +609,7 @@ class LC3UnitTestCase(unittest.TestCase):
         actual_arr = []
         for addr, _ in enumerate(arr, start_addr):
             actual_arr.append(self.readMem(addr))
-        self.assertEqual(arr, actual_arr, self._generateReplay())
+        self.assertEqual(arr, actual_arr, 'Sequence of values starting at MEM[%s] was expected to be %s but code produced %s\n%s' % (label, arr, actual_arr, self.replay_msg))
 
     def assertString(self, label, text):
         """Asserts that sequence of characters followed by a NUL terminator starting at the address pointed to by label are certain values.
@@ -613,12 +628,11 @@ class LC3UnitTestCase(unittest.TestCase):
         start_addr = self.readMem(self.lookup(label))
         actual_str = []
         for addr, _ in enumerate(text, start_addr):
-            # TODO more error checking, character could be > 255 which throws an error.
-            actual_str.append(unichr(self.readMem(addr)))
-        actual_str.append(self.readMem(start_addr + len(text)))
+            actual_str.append(unichr(self.readMem(addr, unsigned=True)))
+        actual_str.append(unichr(self.readMem(start_addr + len(text), unsigned=True)))
         expected_str = list(unicode(text))
-        expected_str.append(0)
-        self.assertEqual(expected_str, actual_str, self._generateReplay())
+        expected_str.append(u'\0')
+        self.assertEqual(expected_str, actual_str, 'String of characters starting at MEM[%s] was expected to be %s but code produced %s\n%s' % (label, repr(''.join(expected_str)), repr(''.join(actual_str)), self.replay_msg))
     
     def assertConsoleOutput(self, output):
         """Asserts that console output is a certain string.
@@ -626,7 +640,9 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             input: String - Expected console output.
         """
-        self.assertMultiLineEqual(self.state.output, output, self._generateReplay())
+        expected = output
+        actual = self.state.output
+        self.assertEqual(expected, actual, 'Console output was expected to be %s but code produced %s\n%s' % (repr(expected), repr(actual), self.replay_msg))
 
     def assertReturnValue(self, answer):
         """Asserts that the correct answer was returned.
@@ -636,7 +652,9 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             answer: Integer - Expected answer.
         """
-        self.assertShortEqual(self.readMem(self.state.r6), answer, self._generateReplay())
+        expected = answer
+        actual = self.readMem(self.state.r6)
+        self.assertShortEqual(expected, actual, 'Return value was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (expected, toShort(expected), actual, toShort(actual), self.replay_msg))
 
     def assertRegistersUnchanged(self, registers):
         """Asserts that registers value are the same as the beginning of execution.
@@ -648,25 +666,30 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         original_values = {num: self.registers[num] for num in registers}
         current_values = {num: self.readReg(num) for num in registers}
-        self.assertEqual(original_values, current_values)
+
+        changed_registers = ['R%d' % reg for reg in registers if original_values[reg] != current_values[reg]]
+        all_registers = ['R%d' % reg for reg in registers]
+        self.assertFalse(changed_registers, 'Expected %s to be unchanged after program/subroutine execution.\nThese registers have changed %s\n%s' % (all_registers, changed_registers, self.replay_msg))
         
-    def assertStackManaged(self, stack, answer, return_address, old_frame_pointer):
+    def assertStackManaged(self, stack, return_address, old_frame_pointer):
         """Asserts that the stack was managed correctly.
 
         This means that:
             The stack_pointer (r6) was decremented by 1.
-            The stack contents are [answer, return_address, old_frame_pointer]
+            The stack contents are [return_address, old_frame_pointer].
+            Answer location is checked via assertReturnValue.
         
         Args:
             stack: Integer - Expected stack location.
-            answer: Integer - Expected answer.
             return_address: Integer - Expected Return Address.
             old_frame_pointer: Integer - Expected Old Frame Pointer.
         """
-        self.assertShortEqual(self.state.r6, stack, self._generateReplay())
-        actual_stack = [self.readMem(self.state.r6 - i, unsigned=True) for i in xrange(3)]
-        expected_stack = [toShort(answer), toShort(return_address), toShort(old_frame_pointer)]
-        self.assertEqual(expected_stack, actual_stack, self._generateReplay())
+        actual_return_address = self.readMem(self.state.r6 - 1, unsigned=True)
+        actual_old_frame_ptr = self.readMem(self.state.r6 - 2, unsigned=True)
+
+        self.assertShortEqual(self.state.r6, stack, 'Calling convention not followed.\nExpected R6 to be decremented by exactly 1 after returning from subroutine it was decremented by: %d\n%s' % (toShort(self.state.r6) - (stack + 1), self.replay_msg))
+        self.assertEqual(return_address, actual_return_address, 'Expected return address x%04x not found on stack in correct location code produced x%04x\n%s' % (return_address, actual_return_address, self.replay_msg))
+        self.assertEqual(old_frame_pointer, actual_old_frame_ptr, 'Expected old frame pointer x%04x not found on stack in correct location code produced x%04x\n%s' % (old_frame_pointer, actual_old_frame_ptr, self.replay_msg))
 
     def assertSubroutineCallsMade(self):
         """Asserts that the expected subroutine calls were made with no unexpected ones made.
@@ -674,14 +697,29 @@ class LC3UnitTestCase(unittest.TestCase):
         It is required to call expectSubroutineCall in order for this function to work. If it is
         not then it will check for no subroutines to be called.
         """
+        def subroutine_list(subrs):
+            return ' '.join(['%s(%s)' % (name, ','.join(map(str, params))) for name, params in subrs])
+
         actual_subroutines = set()
         for call in self.state.first_level_calls:
             actual_subroutines.add((self.reverse_lookup(call.address), tuple(call.params)))
-            
-        for optional in self.optional_subroutines:
-            actual_subroutines.discard(optional)
 
-        self.assertEqual(self.expected_subroutines, actual_subroutines, self._generateReplay())
+        made_calls = self.expected_subroutines & actual_subroutines
+        missing_calls = self.expected_subroutines - actual_subroutines
+        optional_calls = self.optional_subroutines & actual_subroutines
+        unknown_calls = actual_subroutines - (self.expected_subroutines | self.optional_subroutines)
+
+        status_message = ''
+        status_message += 'Expected the following subroutine calls to be made: %s\n' % subroutine_list(self.expected_subroutines) if self.expected_subroutines else 'Expected no subroutines to have been called.\n'
+        status_message += 'Calls made correctly: %s\n' % (subroutine_list(made_calls) if made_calls else 'none')
+        status_message += 'Required calls missing: %s\n' % (subroutine_list(missing_calls) if missing_calls else 'none')
+        status_message += 'Accepted optional calls made: %s\n' % subroutine_list(optional_calls) if optional_calls else ''
+        status_message += 'Unknown subroutine calls made: %s\n' % subroutine_list(unknown_calls) if unknown_calls else ''
+        status_message += self.replay_msg
+
+        self.assertEqual(self.expected_subroutines, made_calls, status_message)
+        self.assertFalse(missing_calls, status_message)
+        self.assertFalse(unknown_calls, status_message)
 
     def assertTrapCallsMade(self):
         """Asserts that the expected traps were called with no unexpected ones made.
@@ -689,34 +727,38 @@ class LC3UnitTestCase(unittest.TestCase):
         It is required to call expectTrapCall for this function to work. If it is
         not then it will check for no traps called.
         """
+        # (vector, (Tuples of key value pairs of (register, param)) )
+        def trap_list(traps):
+            trap_strs = []
+            for trap in traps:
+                vector, params = trap
+                params_pairs = list(params)
+                trap_name = self.state.disassemble_data(0xF000 | vector, 1)
+                params = ', '.join(['R%d=(%d x%04x)' % (reg, value, toShort(value)) for reg, value in params_pairs])
+                trap_strs.append('%s(%s)' % (trap_name, params) if params else trap_name)
+            return ' '.join(trap_strs)
+
         actual_traps = set()
         for call in self.state.first_level_traps:
             params = tuple([(reg, param) for reg, param in enumerate(call.regs) if reg in self.trap_specifications[call.vector]])
             actual_traps.add((call.vector, params))
 
-        for optional in self.optional_subroutines:
-            actual_traps.discard(optional)
+        made_calls = self.expected_traps & actual_traps
+        missing_calls = self.expected_traps - actual_traps
+        optional_calls = self.optional_traps & actual_traps
+        unknown_calls = actual_traps - (self.expected_traps | self.optional_traps)
 
-        self.assertEqual(self.expected_traps, actual_traps, self._generateReplay())
+        status_message = ''
+        status_message += 'Expected the following traps to have been made: %s\n' % trap_list(self.expected_traps) if self.expected_traps else 'Expected no traps to have been called.\n'
+        status_message += 'Traps made correctly: %s\n' % (trap_list(made_calls) if made_calls else 'none')
+        status_message += 'Required traps missing: %s\n' % (trap_list(missing_calls) if missing_calls else 'none')
+        status_message += 'Accepted optional traps made: %s\n' % trap_list(optional_calls) if optional_calls else ''
+        status_message += 'Unknown traps made: %s\n' % trap_list(unknown_calls) if unknown_calls else ''
+        status_message += self.replay_msg
 
-    def assertReadAnswersFromCalls(self):
-        """Asserts that for each subroutine call made the answer was pulled from the stack.
-
-        This asserts that students are following the calling conventions postcondition that the
-        answer is at the top of the stack and specifically they are pulling this value off the
-        stack and not assuming the answer is stored in a register.
-        """
-        actual_subroutines = set()
-        for call in self.state.first_level_calls:
-            actual_subroutines.add((self.reverse_lookup(call.address), call.r6))
-
-        did_not_read_answer_subroutines = set()
-        for subroutine_call in actual_subroutines:
-            stats = self.state.memory_ops(call.r6)
-            if stats.reads == 0:
-                did_not_read_answer_subroutines.add(subroutine_call)
-
-        self.assertFalse(did_not_read_answer_subroutines, self._generateReplay())
+        self.assertEqual(self.expected_traps, made_calls, status_message)
+        self.assertFalse(missing_calls, status_message)
+        self.assertFalse(unknown_calls, status_message)
 
     def _generateReplay(self):
         return "\nString to set up this test in complx: %s" % repr(self.preconditions.encode())

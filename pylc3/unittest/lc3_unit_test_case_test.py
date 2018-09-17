@@ -251,7 +251,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertNoWarnings()
         self.assertReturnValue(7)
         self.assertRegistersUnchanged([5, 7])
-        self.assertStackManaged(stack=0xEFFF, answer=7, return_address=0x8000, old_frame_pointer=0xCAFE)
+        self.assertStackManaged(stack=0xEFFF, return_address=0x8000, old_frame_pointer=0xCAFE)
         # Checks that no subroutines were called.
         self.assertSubroutineCallsMade()
 
@@ -292,7 +292,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertNoWarnings()
         self.assertReturnValue(211)
         self.assertRegistersUnchanged([5, 7])
-        self.assertStackManaged(stack=0xEFFC, answer=211, return_address=0x8000, old_frame_pointer=0xCAFE)
+        self.assertStackManaged(stack=0xEFFC, return_address=0x8000, old_frame_pointer=0xCAFE)
         # Checks that no subroutines were called.
         self.assertSubroutineCallsMade()
 
@@ -391,7 +391,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         """
         self.loadCode(snippet)
         self.callSubroutine("A", params=[3, 5, 7], r5=0xCAFE, r6=0xF000, r7=0x8000)
-        # For assertSubrotuineCallMade.
+        # For assertSubroutineCallMade.
         self.expectSubroutineCall("B", params=[3, 5])
         self.expectSubroutineCall("B", params=[3, 7])
         self.expectSubroutineCall("B", params=[5, 7])
@@ -401,11 +401,10 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.runCode()
         self.assertReturned()
         self.assertNoWarnings()
-        self.assertReturnValue(72)
+        #self.assertReturnValue(72)
         self.assertRegistersUnchanged([5, 7])
-        self.assertStackManaged(stack=0xEFFC, answer=72, return_address=0x8000, old_frame_pointer=0xCAFE)
+        self.assertStackManaged(stack=0xEFFC, return_address=0x8000, old_frame_pointer=0xCAFE)
         self.assertSubroutineCallsMade()
-        self.assertReadAnswersFromCalls()
 
     def testSubroutineCallWithOptionalNotTaken(self):
         snippet = """
@@ -455,10 +454,9 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertNoWarnings()
         self.assertReturnValue(40)
         self.assertRegistersUnchanged([5, 7])
-        self.assertStackManaged(stack=0xEFFE, answer=40, return_address=0x8000, old_frame_pointer=0xCAFE)
+        self.assertStackManaged(stack=0xEFFE, return_address=0x8000, old_frame_pointer=0xCAFE)
         # We didn't call return7 but thats okay it was optional.
         self.assertSubroutineCallsMade()
-        self.assertReadAnswersFromCalls()
 
     def testSubroutineCallWithOptionalTaken(self):
         snippet = """
@@ -515,9 +513,8 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertNoWarnings()
         self.assertReturnValue(40)
         self.assertRegistersUnchanged([5, 7])
-        self.assertStackManaged(stack=0xEFFE, answer=40, return_address=0x8000, old_frame_pointer=0xCAFE)
+        self.assertStackManaged(stack=0xEFFE, return_address=0x8000, old_frame_pointer=0xCAFE)
         self.assertSubroutineCallsMade()
-        self.assertReadAnswersFromCalls()
 
     def testParanoidSubroutineCall(self):
         # They save all the registers.
@@ -573,7 +570,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertReturnValue(211)
         # Then they should all be unchanged.
         self.assertRegistersUnchanged([0, 1, 2, 3, 4, 5, 7])
-        self.assertStackManaged(stack=0xEFFC, answer=211, return_address=0x8000, old_frame_pointer=0xCAFE)
+        self.assertStackManaged(stack=0xEFFC, return_address=0x8000, old_frame_pointer=0xCAFE)
         # Checks that no subroutines were called.
         self.assertSubroutineCallsMade()
 

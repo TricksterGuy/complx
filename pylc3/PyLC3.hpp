@@ -88,6 +88,11 @@ public:
         state.pc = pc;
         return ret;
     }
+    /** @see lc3_disassemble */
+    const std::string disassemble_data(unsigned short data, int level) 
+    { 
+        return lc3_disassemble(state, data, level); 
+    }
     /** @see lc3_add_break */
     bool add_breakpoint(unsigned short address, const std::string& condition = "1", int times = -1, const std::string& label = "") { return lc3_add_break(state, address, label, condition, times); }
     /** @see lc3_add_break */
@@ -159,7 +164,7 @@ public:
     bool has_halted() const { return state.halted; }
 
     /** @see lc3_state.memory_ops */
-    const lc3_memory_stats& memory_ops(unsigned short address) { return state.memory_ops[address]; }
+    const std::map<unsigned short, lc3_memory_stats>& get_memory_ops() const { return state.memory_ops; }
     /** @see lc3_state.comments */
     const std::string comment(unsigned short address) const 
     {
