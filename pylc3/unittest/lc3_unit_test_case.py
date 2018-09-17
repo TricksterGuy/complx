@@ -538,7 +538,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
     def assertNoWarnings(self):
         """Asserts that no warnings were reported during execution of the code."""
-        self.assertFalse(self.state.warnings, 'Code generated warnings shown below:\n----\n%s\n%s' % (self.state.warnings, self.replay_msg))
+        self.assertFalse(self.state.warnings, 'Code generated warnings shown below:\n----\n%s%s' % (self.state.warnings, self.replay_msg))
  
     def assertRegister(self, register_number, value):
         """Asserts that a value at a label is a certain value.
