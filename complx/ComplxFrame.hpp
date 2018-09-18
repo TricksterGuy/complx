@@ -4,12 +4,14 @@
 #define STRINGIFY_TOKEN(S) #S
 
 #include <lc3_all.hpp>
+#include <memory>
 #include <vector>
+
+#include <wx/event.h>
+#include <wx/filename.h>
 #include <wx/grid.h>
 #include <wx/textctrl.h>
-#include <wx/event.h>
 #include <wx/window.h>
-#include <wx/filename.h>
 
 #include "ComplxFrameDecl.h"
 #include "LC3Console.hpp"
@@ -145,6 +147,7 @@ private:
 
     void SetupExecution(int run_mode, int runtime = -1);
     void DoLoadFile(const LoadingOptions& opts);
+    void PostInit();
     /** DetectSubroutine
       *
       * Attempts to detect if a subroutine is found in the loaded code

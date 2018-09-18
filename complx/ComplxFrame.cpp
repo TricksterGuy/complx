@@ -61,7 +61,8 @@ void PrintError(int error);
   *
   * Constructor
   */
-ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) : ComplxFrameDecl(NULL, wxID_ANY, opts.title, wxDefaultPosition, wxSize(opts.width, opts.height)), console(NULL), memoryView(NULL), base_title(opts.title)
+ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) :
+    ComplxFrameDecl(NULL, wxID_ANY, opts.title, wxDefaultPosition, wxSize(opts.width, opts.height)), console(NULL), memoryView(NULL), base_title(opts.title)
 {
     InitImages();
 
@@ -142,7 +143,7 @@ ComplxFrame::~ComplxFrame()
   */
 void ComplxFrame::OnIdle(wxIdleEvent& event)
 {
-    this->Disconnect(wxEVT_IDLE, wxIdleEventHandler(ComplxFrame::OnIdle));
+    Disconnect(wxEVT_IDLE, wxIdleEventHandler(ComplxFrame::OnIdle));
     UpdateRegisters();
     UpdateMemory();
 }
@@ -229,7 +230,6 @@ void ComplxFrame::OnReload(wxCommandEvent& event)
   */
 void ComplxFrame::DoLoadFile(const LoadingOptions& opts)
 {
-    static bool first = true;
     auto* config = wxConfigBase::Get();
 
     wxFileName filename(opts.file);
@@ -241,35 +241,7 @@ void ComplxFrame::DoLoadFile(const LoadingOptions& opts)
     lc3_init(state, randomize_registers, randomize_memory, fill_registers, fill_memory);
     state.pc = opts.pc;
 
-    if (console != NULL) delete console;
-    console = new LC3Console(this);
-
-    state.input = &console->inputStream;
-    state.reader = complx_reader;
-    state.peek = complx_peek;
-    state.writer = complx_writer;
-    // For keyboard interrupts
-    state.interrupt_test.push_back(complx_step);
-
-    console->Show();
-
-    int x, y;
-    GetScreenPosition(&x, &y);
-    if (first)
-    {
-        Move(x + console->GetSize().GetX() / 2, y);
-        console->Move(x - console->GetSize().GetX() / 2, y);
-        first = false;
-    }
-    else
-    {
-        console->Move(x - console->GetSize().GetX(), y);
-    }
-
-    state.max_stack_size = stack_size;
-    state.max_call_stack_size = call_stack_size;
-    // Fix for console stealing focus.
-    SetFocus();
+    PostInit();
 
     // Now the actual loading
     if (opts.file.empty())
@@ -402,6 +374,95 @@ merge:
 
     // Save in reload options
     reload_options = opts;
+
+    // Update timestamps
+    wxFileName file_loaded(reload_options.file);
+    reload_options.file_modification_time = file_loaded.GetModificationTime();
+    if (!reload_options.tests.empty())
+    {
+        wxFileName tests_loaded(reload_options.tests);
+        reload_options.tests_modification_time = tests_loaded.GetModificationTime();
+    }
+}
+
+/** PostInit
+  *
+  * Called after initializing.
+  */
+void ComplxFrame::PostInit()
+{
+    static bool first = true;
+    if (console != NULL) delete console;
+    console = new LC3Console(this);
+
+    state.input = &console->inputStream;
+    state.reader = complx_reader;
+    state.peek = complx_peek;
+    state.writer = complx_writer;
+    // For keyboard interrupts
+    state.interrupt_test.push_back(complx_step);
+
+    console->Show();
+
+    int x, y;
+    GetScreenPosition(&x, &y);
+    if (first)
+    {
+        Move(x + console->GetSize().GetX() / 2, y);
+        console->Move(x - console->GetSize().GetX() / 2, y);
+        first = false;
+    }
+    else
+    {
+        console->Move(x - console->GetSize().GetX(), y);
+    }
+
+    state.max_stack_size = stack_size;
+    state.max_call_stack_size = call_stack_size;
+    // Fix for console stealing focus.
+    SetFocus();
+}
+
+void ComplxFrame::OnActivate(wxActivateEvent& event)
+{
+    bool reload_asm = false;
+    bool reload_tests = false;
+    /*if (!reload_options.tests.empty())
+    {
+        wxFileName tests_file(reload_options.tests);
+        if (tests_file.GetModificationTime().IsLaterThan(reload_options.tests_modification_time))
+        {
+            // To prevent multiple occurrences
+            reload_options.tests_modification_time = tests_file.GetModificationTime();
+            int answer = wxMessageBox(wxString::Format("%s has been modified.\n"
+                                                       "Do you wish to reload it?\n"
+                                                       "(Note simulation will be reset and breakpoints "
+                                                       "not present in code will not be reloaded.)", tests_file.GetFullName()),
+                                      "Reload test xml file?", wxOK | wxOK_DEFAULT | wxCANCEL);
+            reload_tests = answer == wxID_OK;
+        }
+    }*/
+    if (!reload_options.file.empty())
+    {
+        wxFileName asm_file(reload_options.file);
+        if (asm_file.GetModificationTime().IsLaterThan(reload_options.file_modification_time))
+        {
+            // To prevent multiple occurrences
+            reload_options.file_modification_time = asm_file.GetModificationTime();
+            if (!reload_tests)
+            {
+                int answer = wxMessageBox(wxString::Format("%s has been modified.\n"
+                                                           "Do you wish to reload it?\n"
+                                                           "(Note simulation will be reset and breakpoints "
+                                                           "not present in code will not be reloaded.)", asm_file.GetFullName()),
+                                          "Reload asm file?", wxOK | wxOK_DEFAULT | wxCANCEL);
+                reload_asm = answer == wxOK;
+            }
+        }
+    }
+
+    if (reload_asm)
+        DoLoadFile(reload_options);
 }
 
 /** OnQuit

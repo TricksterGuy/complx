@@ -135,6 +135,14 @@ LC3Console::~LC3Console()
     std::cout.rdbuf(oldcout);
 }
 
+void LC3Console::OnClose(wxCloseEvent& event)
+{
+    if (event.CanVeto())
+        event.Veto();
+    else
+        Destroy();
+}
+
 ///** OnChar
 //  *
 //  * Called when the user types a character.  Adds it to the buffer

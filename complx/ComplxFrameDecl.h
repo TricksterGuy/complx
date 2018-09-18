@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Jan  1 2018)
+// C++ code generated with wxFormBuilder (version Jan 23 2018)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -135,6 +135,7 @@ class ComplxFrameDecl : public wxFrame
 		wxStatusBar* statusBar;
 		
 		// Virtual event handlers, overide them in your derived class
+		virtual void OnActivate( wxActivateEvent& event ) = 0;
 		virtual void OnIdle( wxIdleEvent& event ) = 0;
 		virtual void OnLoad( wxCommandEvent& event ) = 0;
 		virtual void OnReload( wxCommandEvent& event ) = 0;

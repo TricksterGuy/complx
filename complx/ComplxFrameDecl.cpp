@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Jan  1 2018)
+// C++ code generated with wxFormBuilder (version Jan 23 2018)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -612,6 +612,7 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	this->Centre( wxBOTH );
 	
 	// Connect Events
+	this->Connect( wxEVT_ACTIVATE, wxActivateEventHandler( ComplxFrameDecl::OnActivate ) );
 	this->Connect( wxEVT_IDLE, wxIdleEventHandler( ComplxFrameDecl::OnIdle ) );
 	this->Connect( menuFileLoad->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnLoad ) );
 	this->Connect( menuFileReload->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReload ) );
@@ -711,6 +712,7 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 ComplxFrameDecl::~ComplxFrameDecl()
 {
 	// Disconnect Events
+	this->Disconnect( wxEVT_ACTIVATE, wxActivateEventHandler( ComplxFrameDecl::OnActivate ) );
 	this->Disconnect( wxEVT_IDLE, wxIdleEventHandler( ComplxFrameDecl::OnIdle ) );
 	this->Disconnect( ID_LOAD, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnLoad ) );
 	this->Disconnect( ID_RELOAD, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReload ) );
