@@ -37,15 +37,9 @@ set(SRC_COMPLX
     MemoryViewFrameDecl.cpp
     RunForDialog.cpp
     RunForDialogDecl.cpp
-    #RunTestDialog.cpp
-    #RunTestDialogDecl.cpp
-    SetupTestDialog.cpp
-    SetupTestDialogDecl.cpp
     WatchpointDialog.cpp
     WatchpointDialogDecl.cpp
     icon32.xpm
-
-    ../lc3test/XmlTestParser.cpp
 )
 
 add_executable(

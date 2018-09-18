@@ -30,7 +30,6 @@
 #include "WatchpointDialog.hpp"
 #include "AddressDialog.hpp"
 #include "RunForDialog.hpp"
-#include "SetupTestDialog.hpp"
 #include "LC3RunThread.hpp"
 #include "version.h"
 
@@ -1136,97 +1135,6 @@ void ComplxFrame::OnCallStack(wxCommandEvent& event)
     }
 
     delete infos;
-}
-
-void ComplxFrame::OnSetupTest(wxCommandEvent& event)
-{
-    if (Running()) return;
-
-    if (reload_options.file.empty())
-        OnLoad(event);
-
-    if (reload_options.file.empty())
-    {
-        wxMessageBox("ERROR! An assembly file must be loaded to perform this operation", "Error");
-        return;
-    }
-
-    wxFileDialog* filedlg = new wxFileDialog(NULL, _("Load .xml file"), wxEmptyString, wxEmptyString, _("LC-3 Test Files (*.xml)|*.xml"), wxFD_OPEN|wxFD_FILE_MUST_EXIST|wxFD_CHANGE_DIR);
-    if (filedlg->ShowModal() != wxID_OK)
-    {
-        delete filedlg;
-        return;
-    }
-    std::string filename = filedlg->GetPath().ToStdString();
-    delete filedlg;
-
-    SetupTestDialog* dialog = new SetupTestDialog(filename, this);
-    lc3_test test;
-    if (!dialog->IsValid() || dialog->ShowModal() != wxID_OK || !dialog->GetSelectedTest(test))
-    {
-        delete dialog;
-        return;
-    }
-
-    try
-    {
-        std::stringstream input;
-        lc3_init_test_case(state, reload_options.file, test, -1, false);
-        PostInit();
-        lc3_setup_test_case(state, test, input);
-        console->SetInput(input.str());
-        reload_options.tests = filename;
-    }
-    catch (const char* ex)
-    {
-        wxMessageBox(ex, "Error");
-    }
-
-    delete dialog;
-
-    UpdateMemory();
-    UpdateRegisters();
-    UpdateStatus();
-}
-
-void ComplxFrame::OnSwitchTest(wxCommandEvent& event)
-{
-    if (Running()) return;
-
-    if (reload_options.file.empty() || reload_options.tests.empty())
-    {
-        OnSetupTest(event);
-        return;
-    }
-
-    std::string filename = reload_options.tests;
-    SetupTestDialog* dialog = new SetupTestDialog(filename, this);
-    lc3_test test;
-    if (!dialog->IsValid() || dialog->ShowModal() != wxID_OK || !dialog->GetSelectedTest(test))
-    {
-        delete dialog;
-        return;
-    }
-
-    try
-    {
-        std::stringstream input;
-        lc3_init_test_case(state, reload_options.file, test, -1, false);
-        PostInit();
-        lc3_setup_test_case(state, test, input);
-        console->SetInput(input.str());
-        reload_options.tests = filename;
-    }
-    catch (const char* ex)
-    {
-        wxMessageBox(ex, "Error");
-    }
-
-    delete dialog;
-
-    UpdateMemory();
-    UpdateRegisters();
-    UpdateStatus();
 }
 
 /** OnSubroutineCall

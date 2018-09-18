@@ -40,8 +40,6 @@ class AdvancedLoadDialogDecl : public wxDialog
 		wxPanel* m_panel2;
 		wxStaticText* m_staticText1;
 		wxFilePickerCtrl* assemblyFile;
-		wxStaticText* m_staticText2;
-		wxFilePickerCtrl* xmlFile;
 		wxStaticText* m_staticText6;
 		wxTextCtrl* consoleInput;
 		wxStaticText* m_staticText0;

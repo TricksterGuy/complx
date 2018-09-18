@@ -1,6 +1,7 @@
 #include "lc3_execute.hpp"
 #include "lc3_plugin.hpp"
 #include "lc3_runner.hpp"
+#include <algorithm>
 #include <cstdlib>
 
 const char* WARNING_MESSAGES[LC3_WARNINGS] =
@@ -220,8 +221,6 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
                     call_info.r6 = state.regs[0x6];
                     if (state.subroutines.find(state.pc) != state.subroutines.end())
                         num_params = state.subroutines[state.pc].num_params;
-                    else
-                        fprintf(stderr, "Subroutine at x%04x number params not given, test results may be incorrect!\n", state.pc);
                     for (unsigned int i = 0; i < num_params; i++)
                         call_info.params.push_back(state.mem[call_info.r6 + i]);
 
@@ -464,6 +463,19 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
 
 void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
 {
+    // If not within an interrupt.
+    if (state.privilege)
+    {
+        if (state.call_stack.empty() && state.in_lc3test && trap.vector != TRAP_HALT)
+        {
+            lc3_trap_call_info call_info;
+            call_info.vector = trap.vector;
+            for (unsigned int i = 0; i < 8; i++)
+                call_info.regs[i] = state.regs[i];
+            state.first_level_traps.push_back(call_info);
+        }
+    }
+
     // Declarations
     unsigned short r0 = state.regs[0];
     bool kernel_mode = (state.pc >= 0x200 && state.pc < 0x3000) || (state.privilege == 0);
