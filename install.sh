@@ -23,7 +23,7 @@ echo >&2 "Installing CMake"
 apt-get install -y cmake > /dev/null
 echo >&2 "Installing Boost Tests"
 apt-get install -y libboost-test-dev > /dev/null
-echo >&2 "Install Boost Python"
+echo >&2 "Installing Boost Python"
 apt-get install -y libboost-python-dev > /dev/null
 echo >&2 "Installing Glib 2.0"
 apt-get install -y libglib2.0-dev > /dev/null
