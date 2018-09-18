@@ -40,6 +40,8 @@ target_link_libraries(
 set_target_properties(pylc3 PROPERTIES SUFFIX .so)
 set_target_properties(pylc3 PROPERTIES PREFIX "")
 
+install(TARGETS pylc3 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
 add_custom_command(
     TARGET pylc3 POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/pylc3/pylc3.so ${CMAKE_CURRENT_SOURCE_DIR}/unittest/pylc3.so
