@@ -1,6 +1,7 @@
 import lc3_unit_test_case
 import unittest
-
+import xmlrunner
+import six
 
 class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
@@ -431,8 +432,8 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
                 LDR R7, R6, 1
                 ADD R6, R6, 2
                 RET
-                
-            RETURN7 
+
+            RETURN7
                 ADD R6, R6, -3
                 STR R5, R6, 0
                 STR R7, R6, 1
@@ -490,8 +491,8 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
                 LDR R7, R6, 1
                 ADD R6, R6, 2
                 RET
-                
-            RETURN7 
+
+            RETURN7
                 ADD R6, R6, -3
                 STR R5, R6, 0
                 STR R7, R6, 1
@@ -540,7 +541,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
                 ADD R0, R0, R1
                 ADD R0, R0, R2
                 STR R0, R5, 3
-                
+
                 LDR R0, R6, 0
                 LDR R1, R6, 1
                 LDR R2, R6, 2
@@ -601,23 +602,30 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         blob = self.preconditions._formBlob()
 
-        self.assertEqual(blob,
-            '\x01\x01\x00\x00\x00'
-            '\x02\x01\x00\x00\x00'
-            '\x03\x01\x00\x00\x00'
-            '\x04\x00\x00\x00\x00'
-            '\x05\x00\x00\x00\x00'
-            '\x06\xff\xff\xff\xff'
-            '\x07\x00\x80\x00\x00'
-            '\x11\x01\x00\x00\x007\x01\x00\x00\x00\x01@'
-            '\x12\x00\x00\x00\x00\x01\x00\x00\x00\x00\x05'
-            '\x13\x03\x00\x00\x00AHH\x01\x00\x00\x00\x07\x00'
-            '\x14\x04\x00\x00\x00BLAH\x01\x00\x00\x00\xa6\x02'
-            '\x15\x06\x00\x00\x00CAWCAW\x05\x00\x00\x00\x05\x00\x02\x00\t\x00\x000\xff\xff'
-            '\x16\x04\x00\x00\x00PAPA\x04\x00\x00\x00M\x00A\x00M\x00A\x00'
-            '\x17\x00\x00\x00\x00\x06\x00\x00\x00R\x00A\x00H\x00R\x00A\x00H\x00'
-            '\x18\x04\x00\x00\x00TATA\x06\x00\x00\x00\x05\x00\x04@\x00\x80\x02\x00\x05\x00\x07\x00')
+        expected_blob = six.b('\x01\x01\x00\x00\x00' \
+                    '\x02\x01\x00\x00\x00' \
+                    '\x03\x01\x00\x00\x00' \
+                    '\x04\x00\x00\x00\x00' \
+                    '\x05\x00\x00\x00\x00' \
+                    '\x06\xff\xff\xff\xff' \
+                    '\x07\x00\x80\x00\x00' \
+                    '\x11\x01\x00\x00\x007\x01\x00\x00\x00\x01@' \
+                    '\x12\x00\x00\x00\x00\x01\x00\x00\x00\x00\x05' \
+                    '\x13\x03\x00\x00\x00AHH\x01\x00\x00\x00\x07\x00' \
+                    '\x14\x04\x00\x00\x00BLAH\x01\x00\x00\x00\xa6\x02' \
+                    '\x15\x06\x00\x00\x00CAWCAW\x05\x00\x00\x00\x05\x00\x02\x00\t\x00\x000\xff\xff' \
+                    '\x16\x04\x00\x00\x00PAPA\x04\x00\x00\x00M\x00A\x00M\x00A\x00' \
+                    '\x17\x00\x00\x00\x00\x06\x00\x00\x00R\x00A\x00H\x00R\x00A\x00H\x00' \
+                    '\x18\x04\x00\x00\x00TATA\x06\x00\x00\x00\x05\x00\x04@\x00\x80\x02\x00\x05\x00\x07\x00')
+
+        with open('expected.dat', 'wb') as f:
+            f.write(expected_blob)
+
+        with open('actual.dat', 'wb') as f:
+            f.write(blob)
+
+        self.assertEqual(blob, expected_blob)
 
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
