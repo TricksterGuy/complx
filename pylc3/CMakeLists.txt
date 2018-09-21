@@ -40,7 +40,12 @@ target_link_libraries(
 set_target_properties(pylc3 PROPERTIES SUFFIX .so)
 set_target_properties(pylc3 PROPERTIES PREFIX "")
 
-install(TARGETS pylc3 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
+if(SKBUILD)
+    python_extension_module(pylc3)
+    install(TARGETS pylc3 LIBRARY DESTINATION _pylc3)
+else(SKBUILD)
+    install(TARGETS pylc3 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
+endif(SKBUILD)
 
 add_custom_command(
     TARGET pylc3 POST_BUILD
