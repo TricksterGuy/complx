@@ -8,7 +8,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 option(ENABLE_PLUGINS "Enable Official Plugins" ON)
 option(ENABLE_LC3EDIT "Build lc3edit" OFF)
-option(ENABLE_COMPLX "Build complx" ON)
+option(ENABLE_AS2OBJ "Build as2obj" OFF)
+option(ENABLE_LC3RUNNER "Build lc3runner" OFF)
+option(ENABLE_COMPLX "Build complx" OFF)
 option(ENABLE_DEV "Build dev version" OFF)
 option(ENABLE_TESTS "Enable testing" OFF)
 option(ENABLE_COVERAGE "Enable testing coverage" OFF)
@@ -118,29 +120,35 @@ add_library(
     ${SRC_LOGGING}
 )
 
-add_executable(
-    as2obj
-    ${SRC_AS2OBJ}
-)
+if(ENABLE_AS2OBJ)
+    add_executable(
+        as2obj
+        ${SRC_AS2OBJ}
+    )
 
-target_link_libraries(
-    as2obj
-    lc3
-)
+    target_link_libraries(
+        as2obj
+        lc3
+    )
 
-add_executable(
-    lc3runner
-    ${SRC_LC3RUNNER}
-)
+    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/as2obj DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif(ENABLE_AS2OBJ)
 
-target_link_libraries(
-    lc3runner
-    lc3
-)
+if(ENABLE_LC3RUNNER)
+    add_executable(
+        lc3runner
+        ${SRC_LC3RUNNER}
+    )
+
+    target_link_libraries(
+        lc3runner
+        lc3
+    )
+
+    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/lc3runner DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif(ENABLE_LC3RUNNER)
 
 install(TARGETS lc3 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/as2obj DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/lc3runner DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 if(ENABLE_PLUGINS)
     add_subdirectory(plugins)
@@ -149,7 +157,6 @@ endif(ENABLE_PLUGINS)
 if(ENABLE_LC3EDIT)
     add_subdirectory(lc3edit)
 endif(ENABLE_LC3EDIT)
-
 
 if(ENABLE_COMPLX)
     add_subdirectory(complx)
