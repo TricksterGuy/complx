@@ -4,17 +4,17 @@ cmake_policy(SET CMP0042 NEW)
 project(complx-tools)
 
 # Add code coverage stuff.
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 option(ENABLE_PLUGINS "Enable Official Plugins" ON)
 option(ENABLE_LC3EDIT "Build lc3edit" OFF)
-option(ENABLE_AS2OBJ "Build as2obj" OFF)
-option(ENABLE_LC3RUNNER "Build lc3runner" OFF)
-option(ENABLE_COMPLX "Build complx" OFF)
+option(ENABLE_AS2OBJ "Build as2obj" ON)
+option(ENABLE_LC3RUNNER "Build lc3runner" ON)
+option(ENABLE_COMPLX "Build complx" ON)
 option(ENABLE_DEV "Build dev version" OFF)
 option(ENABLE_TESTS "Enable testing" OFF)
 option(ENABLE_COVERAGE "Enable testing coverage" OFF)
-option(ENABLE_PYLC3 "Enable python bindings to liblc3" ON)
+option(ENABLE_PYLC3 "Enable python bindings to liblc3" OFF)
 
 if(ENABLE_TESTS)
     enable_testing()
@@ -117,6 +117,7 @@ target_link_libraries(
 
 add_library(
     logger
+    SHARED
     ${SRC_LOGGING}
 )
 
