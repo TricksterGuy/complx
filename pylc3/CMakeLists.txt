@@ -12,7 +12,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${PYTHON_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIR})
 
-set(CASTXML_PATH "/usr/bin/castxml")
+set(CASTXML_PATH "/usr/bin/castxml" CACHE STRING "where to find the castXML executable")
 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PyLC3Gen.cpp ${CMAKE_CURRENT_SOURCE_DIR}/exposed_decl.pypp.txt ${CMAKE_CURRENT_SOURCE_DIR}/named_tuple.py
