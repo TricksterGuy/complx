@@ -1,2 +1,2 @@
-pygccxml==1.9.1
-pyplusplus==1.8.1
+pygccxml
+pyplusplus
