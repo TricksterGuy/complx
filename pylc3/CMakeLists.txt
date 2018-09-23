@@ -49,23 +49,23 @@ if(SKBUILD)
     python_extension_module(pylc3)
 
     install(TARGETS pylc3 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/unittest DESTINATION pyLC3/)
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/unittests DESTINATION pyLC3/)
     install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/cli DESTINATION pyLC3/)
 
-    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/unittest/lc3_unit_test_case_test.py DESTINATION tests/)
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/unittests/lc3_unit_test_case_test.py DESTINATION tests/)
     install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cli/comp_test.py DESTINATION tests/)
 else(SKBUILD)
     install(TARGETS pylc3 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
     add_custom_command(
         TARGET pylc3 POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/pylc3/pylc3.so ${CMAKE_CURRENT_SOURCE_DIR}/unittest/pylc3.so
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/pylc3/pylc3.so ${CMAKE_CURRENT_SOURCE_DIR}/unittests/pylc3.so
         COMMENT "Copying needed plugins for testing")
     add_custom_command(
         TARGET pylc3 POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/pylc3/pylc3.so ${CMAKE_CURRENT_SOURCE_DIR}/cli/pylc3.so
         COMMENT "Copying needed plugins for testing")
 
-    add_test(NAME lc3_unit_test_case_test COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/unittest/lc3_unit_test_case_test.py)
+    add_test(NAME lc3_unit_test_case_test COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/unittests/lc3_unit_test_case_test.py)
     add_test(NAME comp_test COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/cli/comp_test.py)
 endif(SKBUILD)
