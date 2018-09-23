@@ -9,7 +9,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 option(ENABLE_PLUGINS "Enable Official Plugins" ON)
 option(ENABLE_LC3EDIT "Build lc3edit" OFF)
 option(ENABLE_AS2OBJ "Build as2obj" ON)
-option(ENABLE_LC3RUNNER "Build lc3runner" ON)
 option(ENABLE_COMPLX "Build complx" ON)
 option(ENABLE_DEV "Build dev version" OFF)
 option(ENABLE_TESTS "Enable testing" OFF)
@@ -99,10 +98,6 @@ set(SRC_AS2OBJ
     as2obj/main.cpp
 )
 
-set(SRC_LC3RUNNER
-    lc3runner/main.cpp
-)
-
 add_library(
     lc3
     SHARED
@@ -134,20 +129,6 @@ if(ENABLE_AS2OBJ)
 
     install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/as2obj DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif(ENABLE_AS2OBJ)
-
-if(ENABLE_LC3RUNNER)
-    add_executable(
-        lc3runner
-        ${SRC_LC3RUNNER}
-    )
-
-    target_link_libraries(
-        lc3runner
-        lc3
-    )
-
-    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/lc3runner DESTINATION ${CMAKE_INSTALL_BINDIR})
-endif(ENABLE_LC3RUNNER)
 
 install(TARGETS lc3 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
 

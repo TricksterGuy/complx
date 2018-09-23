@@ -17,7 +17,7 @@ before_install:
 
 script:
   - mkdir build && cd build
-  - cmake -DENABLE_TESTS=ON -DENABLE_PYLC3=ON -DENABLE_COMPLX=OFF -DENABLE_AS2OBJ=OFF -DENABLE_LC3RUNNER=OFF ..
+  - cmake -DENABLE_TESTS=ON -DENABLE_PYLC3=ON -DENABLE_COMPLX=OFF -DENABLE_AS2OBJ=OFF ..
   - make
   - sudo make install
   - sudo ldconfig
