@@ -12,6 +12,8 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y libboost-test-dev castxml python-pip libpython-dev libboost-python-dev
   - sudo pip install wheel setuptools unittest2 pygccxml pyplusplus terminaltables
+  - sudo pip install -r pylc3/requirements.txt
+  - sudo pip install -r pylc3/requirements-build.txt
 
 script:
   - mkdir build && cd build
