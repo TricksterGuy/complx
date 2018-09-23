@@ -1,6 +1,5 @@
 import lc3_unit_test_case
 import unittest
-import xmlrunner
 import six
 
 class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
@@ -618,14 +617,8 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
                     '\x17\x00\x00\x00\x00\x06\x00\x00\x00R\x00A\x00H\x00R\x00A\x00H\x00' \
                     '\x18\x04\x00\x00\x00TATA\x06\x00\x00\x00\x05\x00\x04@\x00\x80\x02\x00\x05\x00\x07\x00')
 
-        with open('expected.dat', 'wb') as f:
-            f.write(expected_blob)
-
-        with open('actual.dat', 'wb') as f:
-            f.write(blob)
-
         self.assertEqual(blob, expected_blob)
 
 
 if __name__ == '__main__':
-    unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
+    unittest.main()
