@@ -46,7 +46,7 @@ if(SKBUILD)
     find_package(PythonExtensions REQUIRED)
     python_extension_module(pylc3)
 
-    install(TARGETS pylc3 LIBRARY DESTINATION pyLC3)
+    install(TARGETS pylc3 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
     install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/unittest DESTINATION pyLC3/)
     install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/cli DESTINATION pyLC3/)
 
