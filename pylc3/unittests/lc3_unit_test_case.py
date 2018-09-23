@@ -5,7 +5,7 @@
 import base64
 import enum
 import pylc3
-import StringIO
+import six
 import struct
 import unittest
 
@@ -87,24 +87,26 @@ class Preconditions(object):
         self._environment_data[type_id.value] = data
 
     def _formBlob(self):
-        file = StringIO.StringIO()
+        file = six.BytesIO()
 
         for id, value in self._environment_data.items():
-            file.write(struct.pack('b', id))
-            file.write(struct.pack('i', value))
+            file.write(struct.pack('=b', id))
+            file.write(struct.pack('=i', value))
         for id, label, num_params, params in self._precondition_data:
-            file.write(struct.pack('b', id))
-            file.write(struct.pack('I', len(label)))
-            file.write(struct.pack('%ds' % len(label), label))
-            file.write(struct.pack('I', num_params))
+            label = six.b(label)
+
+            file.write(struct.pack('=b', id))
+            file.write(struct.pack('=I', len(label)))
+            file.write(struct.pack('=%ds' % len(label), label))
+            file.write(struct.pack('=I', num_params))
             params = [param & 0xFFFF for param in params]
-            file.write(struct.pack('%dH' % num_params, *params))
+            file.write(struct.pack('=%dH' % num_params, *params))
 
         blob = file.getvalue()
         file.close()
 
         return blob
-    
+
     def encode(self):
         return base64.encodestring(self._formBlob())
 
@@ -208,7 +210,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Returns:
             The value stored at that address.
         """
-        value = self.state.get_memory(toShort(addr)) 
+        value = self.state.get_memory(toShort(addr))
         return value if not unsigned else toShort(value)
 
     def writeMem(self, addr, value):
@@ -231,7 +233,7 @@ class LC3UnitTestCase(unittest.TestCase):
             The value stored at that address.
         """
         assert reg >= 0 and reg < 8, 'Invalid register number'
-        value = self.state.get_register(reg) 
+        value = self.state.get_register(reg)
         return value if not unsigned else toShort(value)
 
     def writeReg(self, addr, value):
@@ -242,7 +244,7 @@ class LC3UnitTestCase(unittest.TestCase):
             value: Integer - Value to write.
         """
         assert reg >= 0 and reg < 8, 'Invalid register number'
-        self.state.set_register(toShort(addr), value)        
+        self.state.set_register(toShort(addr), value)
 
     def setTrueTraps(self, setting):
         """Enables or disables True Traps.
@@ -302,7 +304,7 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         assert register_number >= 0 and register_number < 8, 'Invalid register number'
         self.state.set_register(register_number, value)
-        
+
         self.preconditions.addPrecondition(PreconditionFlag.register, str(register_number), value)
 
     def setPc(self, value):
@@ -329,7 +331,7 @@ class LC3UnitTestCase(unittest.TestCase):
         self.writeMem(self.lookup(label), value)
 
         self.preconditions.addPrecondition(PreconditionFlag.value, label, value)
-        
+
     def setPointer(self, label, value):
         """Sets a value at an address pointed to by label
 
@@ -342,7 +344,7 @@ class LC3UnitTestCase(unittest.TestCase):
         self.writeMem(self.readMem(self.lookup(label)), value)
 
         self.preconditions.addPrecondition(PreconditionFlag.pointer, label, value)
-        
+
     def setArray(self, label, arr):
         """Sets a sequence of values starting at the address pointed to by label.
 
@@ -355,7 +357,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             label: String - Label pointing at the address which in turn contains the first address to set.
             arr: Iterable of Integers - Values to write sequentially in memory.
-        """ 
+        """
         start_addr = self.readMem(self.lookup(label))
         for addr, elem in enumerate(arr, start_addr):
             self.writeMem(addr, elem)
@@ -375,14 +377,14 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             label: String - Label pointing at the address which in turn contains the address to set.
             value: String - String to write in memory.
-        """ 
+        """
         start_addr = self.readMem(self.lookup(label))
         for addr, elem in enumerate(text, start_addr):
             self.writeMem(addr, ord(elem))
         self.writeMem(start_addr + len(text), 0)
 
         self.preconditions.addPrecondition(PreconditionFlag.string, label, [ord(char) for char in text])
-    
+
     def setConsoleInput(self, input):
         """Sets console input for the test.
 
@@ -539,7 +541,7 @@ class LC3UnitTestCase(unittest.TestCase):
     def assertNoWarnings(self):
         """Asserts that no warnings were reported during execution of the code."""
         self.assertFalse(self.state.warnings, 'Code generated warnings shown below:\n----\n%s%s' % (self.state.warnings, self.replay_msg))
- 
+
     def assertRegister(self, register_number, value):
         """Asserts that a value at a label is a certain value.
 
@@ -591,7 +593,7 @@ class LC3UnitTestCase(unittest.TestCase):
         actual = self.readMem(self.readMem(self.lookup(label)))
         expected = value
         self.assertShortEqual(expected, actual, 'MEM[MEM[%s]] was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (label, expected, toShort(expected), actual, toShort(actual), self.replay_msg))
-        
+
     def assertArray(self, label, arr):
         """Asserts that a sequence of values starting at the address pointed to by label are certain values.
 
@@ -604,7 +606,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             label: String - Label pointing at the address which in turn contains the first address to start checking.
             arr: Iterable of Integers - Expected values to check sequentially.
-        """ 
+        """
         start_addr = self.readMem(self.lookup(label))
         actual_arr = []
         for addr, _ in enumerate(arr, start_addr):
@@ -624,16 +626,16 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             label: String - Label pointing at the address which in turn contains the first address to start checking.
             text: String - Expected characters to check sequentially.
-        """ 
+        """
         start_addr = self.readMem(self.lookup(label))
         actual_str = []
         for addr, _ in enumerate(text, start_addr):
-            actual_str.append(unichr(self.readMem(addr, unsigned=True)))
-        actual_str.append(unichr(self.readMem(start_addr + len(text), unsigned=True)))
-        expected_str = list(unicode(text))
+            actual_str.append(six.unichr(self.readMem(addr, unsigned=True)))
+        actual_str.append(six.unichr(self.readMem(start_addr + len(text), unsigned=True)))
+        expected_str = list(six.u(text))
         expected_str.append(u'\0')
         self.assertEqual(expected_str, actual_str, 'String of characters starting at MEM[%s] was expected to be %s but code produced %s\n%s' % (label, repr(''.join(expected_str)), repr(''.join(actual_str)), self.replay_msg))
-    
+
     def assertConsoleOutput(self, output):
         """Asserts that console output is a certain string.
 
@@ -670,7 +672,7 @@ class LC3UnitTestCase(unittest.TestCase):
         changed_registers = ['R%d' % reg for reg in registers if original_values[reg] != current_values[reg]]
         all_registers = ['R%d' % reg for reg in registers]
         self.assertFalse(changed_registers, 'Expected %s to be unchanged after program/subroutine execution.\nThese registers have changed %s\n%s' % (all_registers, changed_registers, self.replay_msg))
-        
+
     def assertStackManaged(self, stack, return_address, old_frame_pointer):
         """Asserts that the stack was managed correctly.
 
@@ -678,7 +680,7 @@ class LC3UnitTestCase(unittest.TestCase):
             The stack_pointer (r6) was decremented by 1.
             The stack contents are [return_address, old_frame_pointer].
             Answer location is checked via assertReturnValue.
-        
+
         Args:
             stack: Integer - Expected stack location.
             return_address: Integer - Expected Return Address.
@@ -762,4 +764,3 @@ class LC3UnitTestCase(unittest.TestCase):
 
     def _generateReplay(self):
         return "\nString to set up this test in complx: %s" % repr(self.preconditions.encode())
-

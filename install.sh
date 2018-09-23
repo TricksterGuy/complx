@@ -23,8 +23,15 @@ echo >&2 "Installing CMake"
 apt-get install -y cmake > /dev/null
 echo >&2 "Installing Boost Tests"
 apt-get install -y libboost-test-dev > /dev/null
+echo >&2 "Installing Boost Python"
+apt-get install -y libboost-python-dev > /dev/null
 echo >&2 "Installing Glib 2.0"
 apt-get install -y libglib2.0-dev > /dev/null
+echo >&2 "Installing castxml"
+apt-get install -y castxml > /dev/null
+echo >&2 "Installing required Python libraries"
+apt-get install -y python-pip > /dev/null
+pip install -r pylc3/requirements-build.txt > /dev/null
 echo >&2 "Creating build directory"
 mkdir -p build
 cd build

@@ -2,10 +2,15 @@
 from pygccxml import parser
 from pygccxml import declarations
 from pyplusplus import module_builder
+import sys
+
+generator_path = '/usr/bin/castxml'
+if len(sys.argv) > 1:
+    generator_path = sys.argv[1]
 
 # Create configuration for CastXML
 xml_generator_config = parser.xml_generator_configuration_t(
-                                    xml_generator_path='/usr/bin/castxml',
+                                    xml_generator_path=generator_path,
                                     xml_generator='castxml',
                                     compiler='gnu',
                                     compiler_path='/usr/bin/gcc',
