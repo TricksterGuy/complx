@@ -3,7 +3,7 @@ option(ENABLE_COLORLCD "Enable the Color LCD Plugin" ON)
 option(ENABLE_PINGER "Enable the Pinger Plugin" ON)
 include_directories(${complx-tools_SOURCE_DIR}/liblc3)
 
-if(ENABLE_BWLCD)
+if(ENABLE_BWLCD AND ENABLE_COMPLX)
 
 set(SRC_BWLCD
     bwlcd/bwlcd.cpp
@@ -24,9 +24,9 @@ target_link_libraries(
 
 install(TARGETS lc3_bwlcd LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-endif(ENABLE_BWLCD)
+endif(ENABLE_BWLCD AND ENABLE_COMPLX)
 
-if(ENABLE_COLORLCD)
+if(ENABLE_COLORLCD AND ENABLE_COMPLX)
 
 set(SRC_COLORLCD
     colorlcd/colorlcd.cpp
@@ -47,7 +47,7 @@ target_link_libraries(
 
 install(TARGETS lc3_colorlcd LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-endif (ENABLE_COLORLCD)
+endif (ENABLE_COLORLCD AND ENABLE_COMPLX)
 
 if(ENABLE_PINGER)
 
@@ -70,5 +70,3 @@ target_link_libraries(
 install(TARGETS lc3_pinger LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 endif (ENABLE_PINGER)
-
-
