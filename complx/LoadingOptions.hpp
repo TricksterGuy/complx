@@ -17,6 +17,10 @@ struct LoadingOptions
 {
     /** File to load. */
     std::string file;
+    /** Last modification time for the file */
+    wxDateTime file_modification_time = wxInvalidDateTime;
+    /** Replay string */
+    std::string replay_string;
     /** Console input. */
     std::string console_input;
     /** How to initialize registers. */

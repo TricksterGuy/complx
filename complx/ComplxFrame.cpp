@@ -378,11 +378,6 @@ merge:
     // Update timestamps
     wxFileName file_loaded(reload_options.file);
     reload_options.file_modification_time = file_loaded.GetModificationTime();
-    if (!reload_options.tests.empty())
-    {
-        wxFileName tests_loaded(reload_options.tests);
-        reload_options.tests_modification_time = tests_loaded.GetModificationTime();
-    }
 }
 
 /** PostInit

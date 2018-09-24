@@ -8,21 +8,44 @@ endif(CMAKE_HOST_UNIX)
 
 add_definitions(-DPLUGIN_INSTALL_PREFIX=${CMAKE_BINARY_DIR})
 
-file(GLOB SRC_TESTS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
+set(SRC_TESTS
+    lc3_assemble_test.cpp
+    lc3_basic_test.cpp
+    lc3_parser_test.cpp
+    lc3_plugin_test.cpp
+)
+
+if(ENABLE_REPLAY)
+    include_directories(../replay)
+    set(SRC_TESTS
+        ${SRC_TESTS}
+        lc3_replay_test.cpp
+    )
+endif(ENABLE_REPLAY)
 
 add_executable(
     lc3_test_suite
-    ${SRC_TESTS})
+    ${SRC_TESTS}
+)
 
 target_link_libraries(
     lc3_test_suite
     lc3
-    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+)
+
+if(ENABLE_REPLAY)
+    target_link_libraries(
+        lc3_test_suite
+        lc3_replay
+    )
+endif(ENABLE_REPLAY)
 
 add_dependencies(
     lc3_test_suite
     lc3_multiply
-    lc3_udiv)
+    lc3_udiv
+)
 
 add_custom_command(
     TARGET lc3_test_suite POST_BUILD

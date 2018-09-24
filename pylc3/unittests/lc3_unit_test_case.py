@@ -40,7 +40,8 @@ class PreconditionFlag(enum.Enum):
     # Breakpoint address for Subroutine Testing.
     break_address = 7
 
-    # 8-16 reserved.
+    # 8-15 reserved.
+    end_of_environment = 16
 
     # Set a Register.
     register = 17
@@ -58,6 +59,8 @@ class PreconditionFlag(enum.Enum):
     input = 23
     # Simulate a call to a subroutine (following lc-3 calling convention).
     subroutine = 24
+
+    end_of_preconditions = 0xff
 
 class MemoryFillStrategy(enum.Enum):
     fill_with_value = 0
@@ -90,17 +93,21 @@ class Preconditions(object):
         file = six.BytesIO()
 
         for id, value in self._environment_data.items():
-            file.write(struct.pack('=b', id))
+            file.write(struct.pack('=B', id))
             file.write(struct.pack('=i', value))
+        file.write(struct.pack('=B', 16))
+
         for id, label, num_params, params in self._precondition_data:
             label = six.b(label)
 
-            file.write(struct.pack('=b', id))
+            file.write(struct.pack('=B', id))
             file.write(struct.pack('=I', len(label)))
             file.write(struct.pack('=%ds' % len(label), label))
             file.write(struct.pack('=I', num_params))
             params = [param & 0xFFFF for param in params]
             file.write(struct.pack('=%dH' % num_params, *params))
+
+        file.write(struct.pack('=B', 0xff))
 
         blob = file.getvalue()
         file.close()
@@ -108,7 +115,7 @@ class Preconditions(object):
         return blob
 
     def encode(self):
-        return base64.encodestring(self._formBlob())
+        return base64.b64encode(self._formBlob())
 
 
 class LC3UnitTestCase(unittest.TestCase):

@@ -590,34 +590,40 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.setPluginsEnabled(True)
         self.setStrictExecution(False)
         self.loadCode(snippet)
-        self.setRegister(7, 0x4001)
+        self.setRegister(4, 0x4001)
         self.setPc(0x500)
         self.setValue("AHH", 7)
         self.setPointer("BLAH", 678)
         self.setArray("CAWCAW", [5, 2, 9, 0x3000, 0xFFFF])
         self.setString("PAPA", "MAMA")
         self.setConsoleInput("RAHRAH")
-        self.callSubroutine("TATA", [2, 5, 7], r5=5, r6=0x4004, r7=0x8000)
+        self.callSubroutine("TATA", [2, 5, 7], r5=5, r6=0x4040, r7=0x8000)
 
         blob = self.preconditions._formBlob()
 
-        expected_blob = six.b('\x01\x01\x00\x00\x00' \
-                    '\x02\x01\x00\x00\x00' \
-                    '\x03\x01\x00\x00\x00' \
-                    '\x04\x00\x00\x00\x00' \
-                    '\x05\x00\x00\x00\x00' \
-                    '\x06\xff\xff\xff\xff' \
-                    '\x07\x00\x80\x00\x00' \
-                    '\x11\x01\x00\x00\x007\x01\x00\x00\x00\x01@' \
-                    '\x12\x00\x00\x00\x00\x01\x00\x00\x00\x00\x05' \
-                    '\x13\x03\x00\x00\x00AHH\x01\x00\x00\x00\x07\x00' \
-                    '\x14\x04\x00\x00\x00BLAH\x01\x00\x00\x00\xa6\x02' \
-                    '\x15\x06\x00\x00\x00CAWCAW\x05\x00\x00\x00\x05\x00\x02\x00\t\x00\x000\xff\xff' \
-                    '\x16\x04\x00\x00\x00PAPA\x04\x00\x00\x00M\x00A\x00M\x00A\x00' \
-                    '\x17\x00\x00\x00\x00\x06\x00\x00\x00R\x00A\x00H\x00R\x00A\x00H\x00' \
-                    '\x18\x04\x00\x00\x00TATA\x06\x00\x00\x00\x05\x00\x04@\x00\x80\x02\x00\x05\x00\x07\x00')
+        expected_blob = six.b(
+                    '\x01\x01\x00\x00\x00'
+                    '\x02\x01\x00\x00\x00'
+                    '\x03\x01\x00\x00\x00'
+                    '\x04\x00\x00\x00\x00'
+                    '\x05\x00\x00\x00\x00'
+                    '\x06\xff\xff\xff\xff'
+                    '\x07\x00\x80\x00\x00'
+                    '\x10'
+
+                    '\x11\x01\x00\x00\x004\x01\x00\x00\x00\x01@'
+                    '\x12\x00\x00\x00\x00\x01\x00\x00\x00\x00\x05'
+                    '\x13\x03\x00\x00\x00AHH\x01\x00\x00\x00\x07\x00'
+                    '\x14\x04\x00\x00\x00BLAH\x01\x00\x00\x00\xa6\x02'
+                    '\x15\x06\x00\x00\x00CAWCAW\x05\x00\x00\x00\x05\x00\x02\x00\t\x00\x000\xff\xff'
+                    '\x16\x04\x00\x00\x00PAPA\x04\x00\x00\x00M\x00A\x00M\x00A\x00'
+                    '\x17\x00\x00\x00\x00\x06\x00\x00\x00R\x00A\x00H\x00R\x00A\x00H\x00'
+                    '\x18\x04\x00\x00\x00TATA\x06\x00\x00\x00\x05\x00@@\x00\x80\x02\x00\x05\x00\x07\x00'
+                    '\xff')
 
         self.assertEqual(blob, expected_blob)
+
+        print self.preconditions.encode()
 
 
 if __name__ == '__main__':
