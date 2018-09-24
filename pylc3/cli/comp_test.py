@@ -1,5 +1,5 @@
 import comp
-import pylc3
+from .. import pylc3
 import unittest
 
 
