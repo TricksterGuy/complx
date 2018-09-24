@@ -2,6 +2,6 @@
 #define VERSION_H
 
 namespace Version {
-	static const char FULLVERSION_STRING[] = "4.16.6";
+	static const char FULLVERSION_STRING[] = "4.17.0";
 }
 #endif
