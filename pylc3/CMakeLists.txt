@@ -62,6 +62,6 @@ else(SKBUILD)
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/pylc3/pylc3.so ${CMAKE_CURRENT_SOURCE_DIR}/pylc3.so
         COMMENT "Copying needed plugins for testing")
 
-    add_test(NAME lc3_unit_test_case_test COMMAND ${PYTHON_EXECUTABLE} -m unittests.lc3_unit_test_case_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-    add_test(NAME comp_test COMMAND ${PYTHON_EXECUTABLE} -m cli.comp_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    add_test(NAME lc3_unit_test_case_test COMMAND ${PYTHON_EXECUTABLE} -m .unittests.lc3_unit_test_case_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    add_test(NAME comp_test COMMAND ${PYTHON_EXECUTABLE} -m .cli.comp_test WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endif(SKBUILD)
