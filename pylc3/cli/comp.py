@@ -438,7 +438,7 @@ class Comp(cmd.Cmd):
             end = self.state.pc + 5
         elif end is None:
             end = start
-        
+
         table_data = [['Addr', 'Hex', 'Dec', 'Binary', 'Label', 'Instruction', 'Comment']]
 
         for addr in xrange(start, end+1):
@@ -465,7 +465,7 @@ class Comp(cmd.Cmd):
 
         for entry in self.state.breakpoints:
             addr, breakpoint = (entry.key(), entry.data())
-            
+
             name = breakpoint.label
             symbol = self.state.reverse_lookup(addr)
             target = symbol if symbol else 'x%04x' % addr
@@ -474,7 +474,7 @@ class Comp(cmd.Cmd):
             times = str(breakpoint.max_hits)
             hits = str(breakpoint.hit_count)
             table_data.append([name, target, enabled, condition, times, hits])
-        
+
         table = SingleTable(table_data)
         self.message(table.table)
 
@@ -492,7 +492,7 @@ class Comp(cmd.Cmd):
 
         for entry in self.state.register_watchpoints:
             reg, watchpoint = (entry.key(), entry.data())
-            
+
             name = watchpoint.label
             target = 'R%d' % reg
             enabled = str(watchpoint.enabled)
@@ -503,7 +503,7 @@ class Comp(cmd.Cmd):
 
         for entry in self.state.memory_watchpoints:
             addr, watchpoint = (entry.key(), entry.data())
-            
+
             name = watchpoint.label
             symbol = self.state.reverse_lookup(addr)
             target = symbol if symbol else 'x%04x' % addr
@@ -512,7 +512,7 @@ class Comp(cmd.Cmd):
             times = str(watchpoint.max_hits)
             hits = str(watchpoint.hit_count)
             table_data.append([name, target, enabled, condition, times, hits])
-        
+
         table = SingleTable(table_data)
         self.message(table.table)
 
@@ -530,7 +530,7 @@ class Comp(cmd.Cmd):
 
         for entry in self.state.blackboxes:
             addr, blackbox = (entry.key(), entry.data())
-            
+
             name = blackbox.label
             symbol = self.state.reverse_lookup(addr)
             target = symbol if symbol else 'x%04x' % addr
@@ -538,7 +538,7 @@ class Comp(cmd.Cmd):
             condition = blackbox.condition
             hits = str(blackbox.hit_count)
             table_data.append([name, target, enabled, condition, hits])
-        
+
         table = SingleTable(table_data)
         self.message(table.table)
 
@@ -596,6 +596,38 @@ class Comp(cmd.Cmd):
             self.message('Unable to load file %s.' % params)
             return
         self.message('Successfully loaded file %s.' % params)
+
+    def do_setup_replay(self, arg):
+        """setup_replay filename replay_str - Reloads current file with a replay string."""
+        params = self.parse(arg, str, str)
+        if params is None:
+            return
+
+        filename, replay_str = params
+        out = self.state.setup_replay(filename, replay_str)
+
+        if out:
+            self.message(out)
+        else:
+            self.message('Successfuly set up test replay.')
+            self.file = filename
+
+    def do_resetup_replay(self, arg):
+        """resetup_replay replay_str - Reloads current file with a replay string."""
+        if not self.file:
+            self.message('A file must currently be loaded to use this command.')
+            return
+
+        params = self.parse(arg, str)
+        if params is None:
+            return
+
+        out = self.state.setup_replay(self.file, *params)
+
+        if out:
+            self.message(out)
+        else:
+            self.message('Successfuly set up test replay.')
 
     def do_quit(self, arg):
         """quit - Exits the simulator."""

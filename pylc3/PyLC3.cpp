@@ -69,3 +69,29 @@ bool LC3State::loadCode(const std::string& code)
     }
     return true;
 }
+
+#ifdef HAVE_LC3_REPLAY
+#include <lc3_replay.hpp>
+void LC3State::setup_replay(const std::string& file, const std::string& replay_str)
+{
+    try
+    {
+        lc3_setup_replay(state, file, replay_str, in);
+        state.input = &in;
+        return ""
+    }
+    catch(std::string err)
+    {
+        return err;
+    }
+    catch(const char* str)
+    {
+        return err;
+    }
+}
+#else
+std::string LC3State::setup_replay(const std::string& file, const std::string& replay_str)
+{
+    return "NOT IMPLEMENTED";
+}
+#endif

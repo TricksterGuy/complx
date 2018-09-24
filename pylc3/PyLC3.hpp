@@ -13,10 +13,10 @@ public:
       * @param testing_mode Collect extra metrics and disable stdin and stdout.
       */
     explicit LC3State(bool testing_mode = false) : testing(testing_mode)
-    { 
+    {
         lc3_init(state);
     };
-    /** @see lc3_init 
+    /** @see lc3_init
       *  @param randomize Enable randomizing of both memory and registers.
       *  @param fill_value If randomize is false the value for every single memory address and register.
       */
@@ -24,7 +24,7 @@ public:
     {
         lc3_init(state, randomize, randomize, fill_value, fill_value);
     }
-    /** @see lc3_assemble 
+    /** @see lc3_assemble
       * @param filename Full path of the file to load.
       * @param disable_plugins True to disable lc3 plugins.
       * @param process_debug_comments True to enable processing of @ statements in comments.
@@ -50,8 +50,8 @@ public:
     /** @see lc3_finish */
     void finish() { state.halted = 0 ; lc3_finish(state); }
     /** @see lc3_next_line */
-    void next_line(unsigned int num = 0) 
-    { 
+    void next_line(unsigned int num = 0)
+    {
         state.halted = 0;
         for (unsigned int i = 0; i < num; i++)
             lc3_next_line(state);
@@ -71,7 +71,7 @@ public:
     int lookup(const std::string& symbol) { return lc3_sym_lookup(state, symbol); }
     /** @see lc3_sym_rev_lookup */
     const std::string reverse_lookup(unsigned short address) { return lc3_sym_rev_lookup(state, address); }
-    
+
 
     /** Gets value at address, note that the difference between this and memory_read is that memory_read will trigger plugins and devices */
     int get_memory(unsigned short address) const { return state.mem[address]; }
@@ -79,19 +79,19 @@ public:
     void set_memory(unsigned short address, int value) { state.mem[address] = value; }
 
     /** @see lc3_disassemble */
-    const std::string disassemble(unsigned short address, int level) 
-    { 
+    const std::string disassemble(unsigned short address, int level)
+    {
         ///TODO remove disassemble's accessing of state.pc it should assume the address where it is located is the "pc"
         unsigned short pc = state.pc;
         state.pc = address + 1;
-        const std::string ret = lc3_disassemble(state, state.mem[address], level); 
+        const std::string ret = lc3_disassemble(state, state.mem[address], level);
         state.pc = pc;
         return ret;
     }
     /** @see lc3_disassemble */
-    const std::string disassemble_data(unsigned short data, int level) 
-    { 
-        return lc3_disassemble(state, data, level); 
+    const std::string disassemble_data(unsigned short data, int level)
+    {
+        return lc3_disassemble(state, data, level);
     }
     /** @see lc3_add_break */
     bool add_breakpoint(unsigned short address, const std::string& condition = "1", int times = -1, const std::string& label = "") { return lc3_add_break(state, address, label, condition, times); }
@@ -127,7 +127,7 @@ public:
         info.address = lookup(subroutine);
         info.name = subroutine;
         info.num_params = num_params;
-        
+
         state.subroutines[info.address] = info;
         return true;
     }
@@ -166,7 +166,7 @@ public:
     /** @see lc3_state.memory_ops */
     const std::map<unsigned short, lc3_memory_stats>& get_memory_ops() const { return state.memory_ops; }
     /** @see lc3_state.comments */
-    const std::string comment(unsigned short address) const 
+    const std::string comment(unsigned short address) const
     {
         if (state.comments.find(address) == state.comments.end())
             return "";
@@ -189,6 +189,8 @@ public:
     void set_interrupts(bool setting) { state.interrupt_enabled = setting; }
     bool get_strict_execution() const { return state.strict_execution; }
     void set_strict_execution(bool setting) { state.strict_execution = setting; }
+
+    std::string setup_replay(const std::string& file, const std::string& replay_str);
 
     /** The following accessors are only meaningful if testing_mode was set */
     std::string get_input() const { return in.str(); }
