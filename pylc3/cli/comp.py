@@ -3,7 +3,7 @@ import cmd
 import enum
 import inspect
 import shlex
-import pylc3
+from .. import pylc3
 
 def toShort(value):
     """Converts a value into a 16 bit unsigned short.
