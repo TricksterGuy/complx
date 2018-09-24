@@ -4,7 +4,7 @@
 """
 import base64
 import enum
-import pylc3
+from .. import pylc3
 import six
 import struct
 import unittest
