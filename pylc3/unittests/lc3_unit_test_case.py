@@ -59,6 +59,8 @@ class PreconditionFlag(enum.Enum):
     input = 23
     # Simulate a call to a subroutine (following lc-3 calling convention).
     subroutine = 24
+    # Directly set an address to a value.
+    direct_set = 25
 
     end_of_preconditions = 0xff
 
@@ -177,7 +179,7 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         assert self.state.load(file, disable_plugins=not self.enable_plugins, process_debug_comments=False), ('Unable to load file %s' % file)
 
-    def lookup(self, label):
+    def _lookup(self, label):
         """Gets the address of a label by looking it up in the symbol table.
 
         This will assert if the label is not found.
@@ -192,7 +194,7 @@ class LC3UnitTestCase(unittest.TestCase):
         assert addr != -1, "Label %s was not found in the assembly code." % label
         return toShort(addr)
 
-    def reverse_lookup(self, address):
+    def _reverse_lookup(self, address):
         """Gets the label associated with address.
 
         This will assert if no label found at address.
@@ -207,7 +209,7 @@ class LC3UnitTestCase(unittest.TestCase):
         assert label, "Address %x is not associated with a label." % address
         return label
 
-    def readMem(self, addr, unsigned=False):
+    def _readMem(self, addr, unsigned=False):
         """Reads a value at a memory address.
 
         Args:
@@ -220,7 +222,7 @@ class LC3UnitTestCase(unittest.TestCase):
         value = self.state.get_memory(toShort(addr))
         return value if not unsigned else toShort(value)
 
-    def writeMem(self, addr, value):
+    def _writeMem(self, addr, value):
         """Write a value to a memory address.
 
         Args:
@@ -229,7 +231,7 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         self.state.set_memory(toShort(addr), value)
 
-    def readReg(self, reg, unsigned=False):
+    def _readReg(self, reg, unsigned=False):
         """Reads a value in a register.
 
         Args:
@@ -243,7 +245,7 @@ class LC3UnitTestCase(unittest.TestCase):
         value = self.state.get_register(reg)
         return value if not unsigned else toShort(value)
 
-    def writeReg(self, addr, value):
+    def _writeReg(self, addr, value):
         """Write a value to a register.
 
         Args:
@@ -335,9 +337,24 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address to set.
             value: Integer - Value to write at that address
         """
-        self.writeMem(self.lookup(label), value)
+        self._writeMem(self._lookup(label), value)
 
         self.preconditions.addPrecondition(PreconditionFlag.value, label, value)
+
+    def setAddress(self, address, value):
+        """Sets a value at an address.
+
+        This exactly performs state.memory[address] = value.
+        This is different from setValue as it doesn't require a label to be present in the assembly code.
+
+        Args:
+            address: Short - Address to set.
+            value: Integer - Value to write at that address
+        """
+        address = toShort(address)
+        self._writeMem(address, value)
+
+        self.preconditions.addPrecondition(PreconditionFlag.direct_set, '%04x' % address, value)
 
     def setPointer(self, label, value):
         """Sets a value at an address pointed to by label
@@ -348,7 +365,7 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address which in turn contains the address to set.
             value: Integer - Value to write at that address.
         """
-        self.writeMem(self.readMem(self.lookup(label)), value)
+        self._writeMem(self._readMem(self._lookup(label)), value)
 
         self.preconditions.addPrecondition(PreconditionFlag.pointer, label, value)
 
@@ -365,9 +382,9 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address which in turn contains the first address to set.
             arr: Iterable of Integers - Values to write sequentially in memory.
         """
-        start_addr = self.readMem(self.lookup(label))
+        start_addr = self._readMem(self._lookup(label))
         for addr, elem in enumerate(arr, start_addr):
-            self.writeMem(addr, elem)
+            self._writeMem(addr, elem)
 
         self.preconditions.addPrecondition(PreconditionFlag.array, label, arr)
 
@@ -385,10 +402,10 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address which in turn contains the address to set.
             value: String - String to write in memory.
         """
-        start_addr = self.readMem(self.lookup(label))
+        start_addr = self._readMem(self._lookup(label))
         for addr, elem in enumerate(text, start_addr):
-            self.writeMem(addr, ord(elem))
-        self.writeMem(start_addr + len(text), 0)
+            self._writeMem(addr, ord(elem))
+        self._writeMem(start_addr + len(text), 0)
 
         self.preconditions.addPrecondition(PreconditionFlag.string, label, [ord(char) for char in text])
 
@@ -414,14 +431,14 @@ class LC3UnitTestCase(unittest.TestCase):
             r6: Integer - Dummy value to store in r6 (stack pointer) for the test.
             r7: Integer - Dummy value to store in r7 (return address) for the test.
         """
-        self.state.pc = self.lookup(subroutine)
+        self.state.pc = self._lookup(subroutine)
         self.state.r5 = r5
         self.state.r6 = r6 - len(params)
         self.state.r7 = r7
         self.break_address = r7
         self.state.add_breakpoint(r7)
         for addr, param in enumerate(params, self.state.r6):
-            self.writeMem(addr, param)
+            self._writeMem(addr, param)
 
         self.state.add_subroutine_info(subroutine, len(params))
 
@@ -484,7 +501,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
         assert not (value in self.expected_subroutines and value in self.optional_subroutines), 'Subroutine %s found in both expected and optional subroutine calls.' % value
 
-    def addSubroutineInfo(self, subroutine, num_params):
+    def _addSubroutineInfo(self, subroutine, num_params):
         """Adds metadata for a subroutine.
 
         You shouldn't have to call this directly as it is called via callSubroutine and expectSubroutineCall.
@@ -559,7 +576,7 @@ class LC3UnitTestCase(unittest.TestCase):
             value: Integer - Expected value.
         """
         assert register_number >= 0 and register_number < 8, 'Invalid register number'
-        actual = self.readReg(register_number)
+        actual = self._readReg(register_number)
         expected = value
         self.assertShortEqual(expected, actual, 'R%d was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (register_number, expected, toShort(expected), actual, toShort(actual), self.replay_msg))
 
@@ -584,9 +601,24 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address to check.
             value: Integer - Expected value.
         """
-        actual = self.readMem(self.lookup(label))
+        actual = self._readMem(self._lookup(label))
         expected = value
         self.assertShortEqual(expected, actual, 'MEM[%s] was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (label, expected, toShort(expected), actual, toShort(actual), self.replay_msg))
+
+    def assertAddress(self, address, value):
+        """Asserts that a value at an address is a certain value.
+
+        This exactly checks if state.memory[address] == value
+        This is different from assertAddress as it doesn't require a label in the assembly code.
+
+        Args:
+            address: Short - Address to check.
+            value: Integer - Expected value.
+        """
+        address = toShort(address)
+        actual = self._readMem(address)
+        expected = value
+        self.assertShortEqual(expected, actual, 'MEM[x%04x] was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (address, expected, toShort(expected), actual, toShort(actual), self.replay_msg))
 
     def assertPointer(self, label, value):
         """Asserts that a value at an address pointed to by label is a certain value.
@@ -597,7 +629,7 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address which in turn contains the address to check.
             value: Integer - Expected value.
         """
-        actual = self.readMem(self.readMem(self.lookup(label)))
+        actual = self._readMem(self._readMem(self._lookup(label)))
         expected = value
         self.assertShortEqual(expected, actual, 'MEM[MEM[%s]] was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (label, expected, toShort(expected), actual, toShort(actual), self.replay_msg))
 
@@ -614,10 +646,10 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address which in turn contains the first address to start checking.
             arr: Iterable of Integers - Expected values to check sequentially.
         """
-        start_addr = self.readMem(self.lookup(label))
+        start_addr = self._readMem(self._lookup(label))
         actual_arr = []
         for addr, _ in enumerate(arr, start_addr):
-            actual_arr.append(self.readMem(addr))
+            actual_arr.append(self._readMem(addr))
         self.assertEqual(arr, actual_arr, 'Sequence of values starting at MEM[%s] was expected to be %s but code produced %s\n%s' % (label, arr, actual_arr, self.replay_msg))
 
     def assertString(self, label, text):
@@ -634,11 +666,11 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address which in turn contains the first address to start checking.
             text: String - Expected characters to check sequentially.
         """
-        start_addr = self.readMem(self.lookup(label))
+        start_addr = self._readMem(self._lookup(label))
         actual_str = []
         for addr, _ in enumerate(text, start_addr):
-            actual_str.append(six.unichr(self.readMem(addr, unsigned=True)))
-        actual_str.append(six.unichr(self.readMem(start_addr + len(text), unsigned=True)))
+            actual_str.append(six.unichr(self._readMem(addr, unsigned=True)))
+        actual_str.append(six.unichr(self._readMem(start_addr + len(text), unsigned=True)))
         expected_str = list(six.u(text))
         expected_str.append(u'\0')
         self.assertEqual(expected_str, actual_str, 'String of characters starting at MEM[%s] was expected to be %s but code produced %s\n%s' % (label, repr(''.join(expected_str)), repr(''.join(actual_str)), self.replay_msg))
@@ -662,7 +694,7 @@ class LC3UnitTestCase(unittest.TestCase):
             answer: Integer - Expected answer.
         """
         expected = answer
-        actual = self.readMem(self.state.r6)
+        actual = self._readMem(self.state.r6)
         self.assertShortEqual(expected, actual, 'Return value was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (expected, toShort(expected), actual, toShort(actual), self.replay_msg))
 
     def assertRegistersUnchanged(self, registers):
@@ -674,7 +706,7 @@ class LC3UnitTestCase(unittest.TestCase):
             registers: List(Integer) - Register numbers's to check.
         """
         original_values = {num: self.registers[num] for num in registers}
-        current_values = {num: self.readReg(num) for num in registers}
+        current_values = {num: self._readReg(num) for num in registers}
 
         changed_registers = ['R%d' % reg for reg in registers if original_values[reg] != current_values[reg]]
         all_registers = ['R%d' % reg for reg in registers]
@@ -693,8 +725,8 @@ class LC3UnitTestCase(unittest.TestCase):
             return_address: Integer - Expected Return Address.
             old_frame_pointer: Integer - Expected Old Frame Pointer.
         """
-        actual_return_address = self.readMem(self.state.r6 - 1, unsigned=True)
-        actual_old_frame_ptr = self.readMem(self.state.r6 - 2, unsigned=True)
+        actual_return_address = self._readMem(self.state.r6 - 1, unsigned=True)
+        actual_old_frame_ptr = self._readMem(self.state.r6 - 2, unsigned=True)
 
         self.assertShortEqual(self.state.r6, stack, 'Calling convention not followed.\nExpected R6 to be decremented by exactly 1 after returning from subroutine it was decremented by: %d\n%s' % (toShort(self.state.r6) - (stack + 1), self.replay_msg))
         self.assertEqual(return_address, actual_return_address, 'Expected return address x%04x not found on stack in correct location code produced x%04x\n%s' % (return_address, actual_return_address, self.replay_msg))
@@ -711,7 +743,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
         actual_subroutines = set()
         for call in self.state.first_level_calls:
-            actual_subroutines.add((self.reverse_lookup(call.address), tuple(call.params)))
+            actual_subroutines.add((self._reverse_lookup(call.address), tuple(call.params)))
 
         made_calls = self.expected_subroutines & actual_subroutines
         missing_calls = self.expected_subroutines - actual_subroutines

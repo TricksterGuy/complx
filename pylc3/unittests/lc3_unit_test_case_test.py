@@ -2,9 +2,13 @@ import lc3_unit_test_case
 import unittest
 import six
 
+
+# Note this file is not to be used as a template for writing student tests.
+
 class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
     def loadCode(self, snippet):
+        # This function is test only, Only use loadAsmFile for student code.
         self.state.loadCode(snippet)
 
     def testRegister(self):
@@ -78,6 +82,34 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertValue("A", 2)
         self.assertValue("B", 3)
         self.assertValue("ANS", 5)
+
+    def testAddress(self):
+        snippet = """
+        .orig x3000
+            LD R0, A
+            LD R1, B
+            ADD R2, R1, R0
+            ST R2, ANS
+            HALT
+            A .blkw 1
+            B .blkw 1
+            ANS .blkw 1
+        .end
+        """
+        self.loadCode(snippet)
+        self.setAddress(0x3005, 2)
+        self.setAddress(0x3006, 3)
+
+        # Sanity checks
+        self.assertEqual(self.lookup("A"), 0x3005)
+        self.assertEqual(self.readMem(0x3005), 2)
+
+        self.runCode()
+        self.assertHalted()
+        self.assertNoWarnings()
+        self.assertAddress(0x3005, 2)
+        self.assertAddress(0x3006, 3)
+        self.assertAddress(0x3007, 5)
 
     def testPointer(self):
         snippet = """
