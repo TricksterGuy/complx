@@ -1,7 +1,23 @@
 """Module defining the lc3 unit test case class and utilities.
 
+The main class is LC3UnitTestCase and is indeeded to be used as a base for a python unit test on student code.
 
+The class keeps track of the preconditions and environment set on the LC3State before the code is ran.
+Then when things are checked on the LC3State if any assertion fails a replay string is generated so students,
+can emulate the environment in comp and complx.
+
+It is required to only call methods of this class prefixed with set, expect, and assert and not to access
+any methods of the underlying LC3State to do assertions.  The assertions provided by the LC3UnitTestCase class
+will produce the replay string upon the assertion failing.
+
+The replay strings produced are only populated with data from calling the methods of this class only.  If any
+modifications to the LC3State object are done directly and not through the LC3UnitTestCase class will not be
+recorded leading to a frustrating debugging experinence.
+
+To see an example of an LC3UnitTestCase please see
+https://gist.github.com/TricksterGuy/f1e9e1c73dff231febe6d102345481e6
 """
+# TODO make a sample test and get it checked into the demos folder.
 import base64
 import enum
 from .. import pylc3
@@ -123,14 +139,17 @@ class Preconditions(object):
 class LC3UnitTestCase(unittest.TestCase):
     """LC3UnitTestCase class eases testing of LC3 code from within python.
 
-    The methods init, setXXX and callSubroutine will automatically log the state set
-    as preconditions. Later when the test runs and a assertion fails the state logged
-    by the preconditions will output a base64 encoded string to ease setting up the
-    test case in complx.
+    The methods init, setXXX, expectXXX and callSubroutine will automatically log the
+    state set as preconditions. Later when the test runs and a assertion fails the state
+    logged by the preconditions will output a base64 encoded string to ease setting up
+    the test case in complx and comp.
 
     It is important to not touch the state attribute and set things on it since these
     changes are not logged automatically and will result in the test environment being
-    different from here and running in complx.
+    different from here and running in complx and comp.
+
+    It is also important not use unittest.TestCase assertion methods since these do not
+    produce the replay string upon failure.
     """
     def setUp(self):
         self.state = pylc3.LC3State(testing_mode=True)

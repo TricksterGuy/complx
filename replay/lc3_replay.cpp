@@ -46,6 +46,8 @@ enum PreconditionFlag
     INPUT = 23,
     // Simulate a call to a subroutine (following lc-3 calling convention).
     SUBROUTINE = 24,
+    // Set an address to a value
+    DIRECT_SET = 25,
 
     END_OF_INPUT = 0xFF,
 };
@@ -210,6 +212,7 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
             case STRING:
             case INPUT:
             case SUBROUTINE:
+            case DIRECT_SET:
                 bstream >> label;
                 bstream >> params;
                 break;
@@ -233,7 +236,16 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
                     error << "Symbol " << label << " not found, perhaps you don't have the correct file loaded?";
                     throw error.str();
                 }
-                address = (short) address_calc;
+                address = (unsigned short) address_calc;
+                break;
+            case DIRECT_SET:
+                address_calc = strtoul(label.c_str(), nullptr, 16);
+                if (address_calc > 0x10000 || address_calc < 0)
+                {
+                    error << "Address " << label << " not inside range for an address.";
+                    throw error.str();
+                }
+                address = (unsigned short) address_calc;
                 break;
         }
 
@@ -268,6 +280,9 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
                 state.regs[7] = params[2];
                 for (unsigned int i = 3; i < params.size(); i++)
                     state.mem[static_cast<unsigned short>(state.regs[6] + (i - 3))] = params[i];
+                break;
+            case DIRECT_SET:
+                state.mem[address] = params[0];
                 break;
         }
     }
