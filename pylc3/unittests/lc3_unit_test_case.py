@@ -456,7 +456,7 @@ class LC3UnitTestCase(unittest.TestCase):
             params: List of Integer - Parameters to the subroutine.
             optional: Mark this as a optional subroutine call, if this subroutine call is found it is not checked.
         """
-        self.addSubroutineInfo(subroutine, len(params))
+        self._addSubroutineInfo(subroutine, len(params))
 
         set_to_add = self.expected_subroutines
         value = (subroutine, tuple(params))

@@ -73,8 +73,8 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.setValue("B", 3)
 
         # Sanity checks
-        self.assertEqual(self.lookup("A"), 0x3005)
-        self.assertEqual(self.readMem(0x3005), 2)
+        self.assertEqual(self._lookup("A"), 0x3005)
+        self.assertEqual(self._readMem(0x3005), 2)
 
         self.runCode()
         self.assertHalted()
@@ -101,8 +101,8 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.setAddress(0x3006, 3)
 
         # Sanity checks
-        self.assertEqual(self.lookup("A"), 0x3005)
-        self.assertEqual(self.readMem(0x3005), 2)
+        self.assertEqual(self._lookup("A"), 0x3005)
+        self.assertEqual(self._readMem(0x3005), 2)
 
         self.runCode()
         self.assertHalted()
@@ -129,9 +129,9 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.setPointer("B", 3)
 
         # Sanity checks
-        self.assertEqual(self.lookup("A"), 0x3005)
-        self.assertEqual(self.readMem(0x3005), 0x4000)
-        self.assertEqual(self.readMem(0x4000), 2)
+        self.assertEqual(self._lookup("A"), 0x3005)
+        self.assertEqual(self._readMem(0x3005), 0x4000)
+        self.assertEqual(self._readMem(0x4000), 2)
 
         self.runCode()
         self.assertHalted()
@@ -159,13 +159,13 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.setArray("ARR", [5, 3, 1])
 
         # Sanity checks
-        self.assertEqual(self.lookup("ARR"), 0x3003)
-        self.assertEqual(self.readMem(0x3003), 0x4000)
-        self.assertEqual(self.readMem(0x3004), 0x4002)
-        self.assertEqual(self.readMem(0x4000), 5)
-        self.assertEqual(self.readMem(0x4001), 3)
-        self.assertEqual(self.readMem(0x4002), 1)
-        self.assertEqual(self.readMem(0x4003), 666)
+        self.assertEqual(self._lookup("ARR"), 0x3003)
+        self.assertEqual(self._readMem(0x3003), 0x4000)
+        self.assertEqual(self._readMem(0x3004), 0x4002)
+        self.assertEqual(self._readMem(0x4000), 5)
+        self.assertEqual(self._readMem(0x4001), 3)
+        self.assertEqual(self._readMem(0x4002), 1)
+        self.assertEqual(self._readMem(0x4003), 666)
 
         self.runCode()
         self.assertHalted()
@@ -190,15 +190,15 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.setString("STRING_LOC", "HELLO")
 
         # Sanity checks
-        self.assertEqual(self.lookup("STRING_LOC"), 0x3004)
-        self.assertEqual(self.lookup("STRING"), 0x3005)
-        self.assertEqual(self.readMem(0x3004), 0x3005)
-        self.assertEqual(self.readMem(0x3005), ord('H'))
-        self.assertEqual(self.readMem(0x3006), ord('E'))
-        self.assertEqual(self.readMem(0x3007), ord('L'))
-        self.assertEqual(self.readMem(0x3008), ord('L'))
-        self.assertEqual(self.readMem(0x3009), ord('O'))
-        self.assertEqual(self.readMem(0x300A), 0)
+        self.assertEqual(self._lookup("STRING_LOC"), 0x3004)
+        self.assertEqual(self._lookup("STRING"), 0x3005)
+        self.assertEqual(self._readMem(0x3004), 0x3005)
+        self.assertEqual(self._readMem(0x3005), ord('H'))
+        self.assertEqual(self._readMem(0x3006), ord('E'))
+        self.assertEqual(self._readMem(0x3007), ord('L'))
+        self.assertEqual(self._readMem(0x3008), ord('L'))
+        self.assertEqual(self._readMem(0x3009), ord('O'))
+        self.assertEqual(self._readMem(0x300A), 0)
 
         self.runCode()
         self.assertHalted()
@@ -273,10 +273,10 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         # Sanity checks
         self.assertEqual(self.state.pc, 0x3000)
-        self.assertEqual(self.lookup("RETURN7"), 0x3000)
-        self.assertEqual(self.readReg(5, unsigned=True), 0xCAFE)
-        self.assertEqual(self.readReg(6, unsigned=True), 0xF000)
-        self.assertEqual(self.readReg(7, unsigned=True), 0x8000)
+        self.assertEqual(self._lookup("RETURN7"), 0x3000)
+        self.assertEqual(self._readReg(5, unsigned=True), 0xCAFE)
+        self.assertEqual(self._readReg(6, unsigned=True), 0xF000)
+        self.assertEqual(self._readReg(7, unsigned=True), 0x8000)
 
         self.runCode()
         self.assertReturned()
@@ -314,10 +314,10 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         # Sanity checks
         self.assertEqual(self.state.pc, 0x4000)
-        self.assertEqual(self.lookup("MYADD"), 0x4000)
-        self.assertEqual(self.readReg(5, unsigned=True), 0xCAFE)
-        self.assertEqual(self.readReg(6, unsigned=True), 0xEFFD)
-        self.assertEqual(self.readReg(7, unsigned=True), 0x8000)
+        self.assertEqual(self._lookup("MYADD"), 0x4000)
+        self.assertEqual(self._readReg(5, unsigned=True), 0xCAFE)
+        self.assertEqual(self._readReg(6, unsigned=True), 0xEFFD)
+        self.assertEqual(self._readReg(7, unsigned=True), 0x8000)
 
         self.runCode()
         self.assertReturned()
@@ -591,10 +591,10 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         # Sanity checks
         self.assertEqual(self.state.pc, 0x4000)
-        self.assertEqual(self.lookup("MYADD"), 0x4000)
-        self.assertEqual(self.readReg(5, unsigned=True), 0xCAFE)
-        self.assertEqual(self.readReg(6, unsigned=True), 0xEFFD)
-        self.assertEqual(self.readReg(7, unsigned=True), 0x8000)
+        self.assertEqual(self._lookup("MYADD"), 0x4000)
+        self.assertEqual(self._readReg(5, unsigned=True), 0xCAFE)
+        self.assertEqual(self._readReg(6, unsigned=True), 0xEFFD)
+        self.assertEqual(self._readReg(7, unsigned=True), 0x8000)
 
         self.runCode()
         self.assertReturned()
@@ -630,6 +630,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.setString("PAPA", "MAMA")
         self.setConsoleInput("RAHRAH")
         self.callSubroutine("TATA", [2, 5, 7], r5=5, r6=0x4040, r7=0x8000)
+        self.setAddress(0x8000, 33)
 
         blob = self.preconditions._formBlob()
 
@@ -651,11 +652,12 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
                     '\x16\x04\x00\x00\x00PAPA\x04\x00\x00\x00M\x00A\x00M\x00A\x00'
                     '\x17\x00\x00\x00\x00\x06\x00\x00\x00R\x00A\x00H\x00R\x00A\x00H\x00'
                     '\x18\x04\x00\x00\x00TATA\x06\x00\x00\x00\x05\x00@@\x00\x80\x02\x00\x05\x00\x07\x00'
+                    '\x19\x04\x00\x00\x008000\x01\x00\x00\x00!\x00'
                     '\xff')
 
         self.assertEqual(blob, expected_blob)
 
-        print self.preconditions.encode()
+        #print self.preconditions.encode()
 
 
 if __name__ == '__main__':
