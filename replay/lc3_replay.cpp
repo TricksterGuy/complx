@@ -5,6 +5,7 @@
 #include <boost/archive/iterators/remove_whitespace.hpp>
 #include <algorithm>
 #include <sstream>
+#include <iomanip>
 #include "lc3_replay.hpp"
 #include "BinaryStreamReader.hpp"
 
@@ -117,21 +118,7 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
         if (id == END_OF_ENVIRONMENT)
             break;
 
-        switch (id)
-        {
-            case TRUE_TRAPS:
-            case INTERRUPTS:
-            case PLUGINS:
-            case STRICT_EXECUTION:
-            case MEMORY_STRATEGY:
-            case MEMORY_STRATEGY_VALUE:
-            case BREAK_ADDRESS:
-                bstream >> value;
-                break;
-            default:
-                error << "Unknown tag found id: " << ((int)id);
-                throw error.str();
-        }
+        bstream >> value;
 
         switch (id)
         {
@@ -156,7 +143,9 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
             case BREAK_ADDRESS:
                 break_address = value;
                 break;
-
+            default:
+                error << "Unknown tag found id: " << ((int)id);
+                throw error.str();
         }
     }
 
@@ -202,24 +191,8 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
         if (id == END_OF_INPUT)
             break;
 
-        switch (id)
-        {
-            case REGISTER:
-            case PC:
-            case VALUE:
-            case POINTER:
-            case ARRAY:
-            case STRING:
-            case INPUT:
-            case SUBROUTINE:
-            case DIRECT_SET:
-                bstream >> label;
-                bstream >> params;
-                break;
-            default:
-                error << "Unknown tag found id: " << ((int)id);
-                throw error.str();
-        }
+        bstream >> label;
+        bstream >> params;
 
         unsigned short address;
         int address_calc;
@@ -284,7 +257,137 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
             case DIRECT_SET:
                 state.mem[address] = params[0];
                 break;
+            default:
+                error << "Unknown tag found id: " << ((int)id);
+                throw error.str();
         }
     }
 }
 
+std::string lc3_describe_replay(const std::string& replay_string)
+{
+    std::string decoded = base64_decode(replay_string);
+    if (decoded.empty())
+        throw "Failed to parse replay string: " + replay_string;
+
+    std::istringstream stream(decoded);
+    BinaryStreamReader bstream(stream);
+    std::stringstream description;
+
+    std::stringstream error;
+
+    while (bstream.Ok())
+    {
+        unsigned char id;
+        unsigned int value;
+
+        bstream >> id;
+
+        if (id == END_OF_ENVIRONMENT)
+            break;
+
+        bstream >> value;
+
+        switch (id)
+        {
+            case TRUE_TRAPS:
+                description << "true_traps: " << (value ? "on" : "off") << std::endl;
+                break;
+            case INTERRUPTS:
+                description << "interrupts: " << (value ? "on" : "off") << std::endl;
+                break;
+            case PLUGINS:
+                description << "plugins: " << (value ? "on" : "off") << std::endl;
+                break;
+            case STRICT_EXECUTION:
+                description << "strict_execution: " << (value ? "on" : "off") << std::endl;
+                break;
+            case MEMORY_STRATEGY:
+                description << "memory_strategy: " << ((value == 0) ? "fill_with_value" : ((value == 1) ? "random_fill_with_seed" : "completely_random_with_seed")) << std::endl;
+                break;
+            case MEMORY_STRATEGY_VALUE:
+                description << "memory_strategy_value: " << value << std::endl;
+                break;
+            case BREAK_ADDRESS:
+                description << "breakpoint: x" << std::hex << std::setw(4) << std::setfill('0') << value << std::endl;
+                break;
+            default:
+                error << "Unknown tag found id: " << ((int)id);
+                throw error.str();
+        }
+    }
+
+    while (bstream.Ok())
+    {
+        unsigned char id;
+
+        std::string label;
+        std::vector<short> params;
+
+        bstream >> id;
+
+        if (id == END_OF_INPUT)
+            break;
+
+        bstream >> label;
+        bstream >> params;
+
+        switch (id)
+        {
+            case REGISTER:
+                description << "R" << label << " = (" << std::dec << params[0] << " x" << std::hex << std::setw(4) << std::setfill('0') << params[0] << ")" << std::endl;
+                break;
+            case PC:
+                description << "PC = x" << std::hex << std::setw(4) << std::setfill('0') << params[0] << std::endl;
+                break;
+            case VALUE:
+                description << "MEM[" << label << "] = (" << std::dec << params[0] << " x" << std::hex << std::setw(4) << std::setfill('0') << params[0] << ")" << std::endl;
+                break;
+            case POINTER:
+                description << "MEM[MEM[" << label << "]] = (" << std::dec << params[0] << " x" << std::hex << std::setw(4) << std::setfill('0') << params[0] << ")" << std::endl;
+                break;
+            case STRING:
+                description << "String at MEM[" << label << "] = ";
+                for (const auto& param : params)
+                    description << (char)param;
+                description << std::endl;
+                break;
+            case ARRAY:
+                description << "Array at MEM[" << label << "] = ";
+                for (unsigned int i = 0; i < params.size(); i++)
+                {
+                    description << "(" << std::dec << params[i] << " x" << std::hex << std::setw(4) << std::setfill('0') << params[i] << ")";
+                    if (i != params.size() - 1)
+                        description << ",";
+                }
+                description << std::endl;
+                break;
+            case INPUT:
+                description << "Console Input ";
+                for (const auto& param : params)
+                    description << (char)param;
+                description << std::endl;
+                break;
+            case SUBROUTINE:
+                description << "Call Subroutine " << label << " params: ";
+                for (unsigned int i = 3; i < params.size(); i++)
+                {
+                    description << "(" << std::dec << params[i] << " x" << std::hex << std::setw(4) << std::setfill('0') << params[i] << ")";
+                    if (i != params.size() - 1)
+                        description << ",";
+                }
+                description << " R5 = x" << std::hex << std::setw(4) << std::setfill('0') << params[0] << " ";
+                description << "R6 = x" << std::hex << std::setw(4) << std::setfill('0') << params[1] << " ";
+                description << "R7 = x" << std::hex << std::setw(4) << std::setfill('0') << params[2] << std::endl;
+                break;
+            case DIRECT_SET:
+                description << "MEM[x" << label << "] = (" << std::dec << params[0] << " x" << std::hex << std::setw(4) << std::setfill('0') << params[0] << ")" << std::endl;
+                break;
+            default:
+                error << "Unknown tag found id: " << ((int)id);
+                throw error.str();
+        }
+    }
+
+    return description.str();
+}

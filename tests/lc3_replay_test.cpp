@@ -6,7 +6,35 @@
 
 #include "lc3_replay.hpp"
 
+void split(const std::string& s, char delimiter, std::vector<std::string>& tokens)
+{
+    std::stringstream ss(s);
+    std::string item;
+    while(std::getline(ss, item, delimiter))
+        tokens.push_back(item);
+}
+
 void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& replay_string, std::stringstream& newinput);
+
+const std::string REPLAY_STRING = "AQEAAAACAQAAAAMBAAAABAAAAAAFAAAAAAb/////BwCAAAAQEQEAAAA0AQAAAAFAEgAAAAABAAAAAAUTAwAAAEFISAEAAAAHABQEAAAAQkxBSAEAAACmAhUGAAAAQ0FXQ0FXBQAAAAUAAgAJAAAw//8WBAAAAFBBUEEEAAAATQBBAE0AQQAXAAAAAAYAAABSAEEASABSAEEASAAYBAAAAFRBVEEGAAAABQBAQACAAgAFAAcA/w==";
+
+const std::vector<std::string> REPLAY_DESCRIPTIONS = {
+"true_traps: on",
+"interrupts: on",
+"plugins: on",
+"strict_execution: off",
+"memory_strategy: fill_with_value",
+"memory_strategy_value: 4294967295",
+"breakpoint: x8000",
+"R4 = (16385 x4001)",
+"PC = x0500",
+"MEM[AHH] = (7 x0007)",
+"MEM[MEM[BLAH]] = (678 x02a6)",
+"Array at MEM[CAWCAW] = (5 x0005),(2 x0002),(9 x0009),(12288 x3000),(-1 xffff)",
+"String at MEM[PAPA] = MAMA",
+"Console Input RAHRAH",
+"Call Subroutine TATA params: (2 x0002),(5 x0005),(7 x0007) R5 = x0005 R6 = x4040 R7 = x8000",
+};
 
 struct LC3ReplayTest
 {
@@ -21,8 +49,6 @@ struct LC3ReplayTest
 
 BOOST_FIXTURE_TEST_CASE(ReplayTest, LC3ReplayTest)
 {
-    const std::string replay_str = "AQEAAAACAQAAAAMBAAAABAAAAAAFAAAAAAb/////BwCAAAAQEQEAAAA0AQAAAAFAEgAAAAABAAAAAAUTAwAAAEFISAEAAAAHABQEAAAAQkxBSAEAAACmAhUGAAAAQ0FXQ0FXBQAAAAUAAgAJAAAw//8WBAAAAFBBUEEEAAAATQBBAE0AQQAXAAAAAAYAAABSAEEASABSAEEASAAYBAAAAFRBVEEGAAAABQBAQACAAgAFAAcA/w==";
-
     const std::string asm_file =
     ".orig x3000\n"
     "   AHH .blkw 1\n"
@@ -34,7 +60,7 @@ BOOST_FIXTURE_TEST_CASE(ReplayTest, LC3ReplayTest)
 
     std::stringstream file(asm_file);
     std::stringstream input;
-    lc3_setup_replay(state, file, replay_str, input);
+    lc3_setup_replay(state, file, REPLAY_STRING, input);
 
     BOOST_CHECK_EQUAL(state.regs[4], 0x4001);
 
@@ -72,5 +98,17 @@ BOOST_FIXTURE_TEST_CASE(ReplayTest, LC3ReplayTest)
     BOOST_CHECK(state.interrupt_enabled);
     BOOST_CHECK(!state.strict_execution);
     BOOST_CHECK_EQUAL(state.mem[0x3010], -1);
+
+}
+
+BOOST_FIXTURE_TEST_CASE(DescribeReplayTest, LC3ReplayTest)
+{
+    std::string output = lc3_describe_replay(REPLAY_STRING);
+    std::vector<std::string> lines;
+    split(output, '\n', lines);
+
+    for (unsigned int i = 0; i < lines.size(); i++)
+        BOOST_CHECK_EQUAL(lines[i], REPLAY_DESCRIPTIONS[i]);
+
 
 }
