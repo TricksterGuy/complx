@@ -180,6 +180,7 @@ class ComplxFrameDecl : public wxFrame
 		virtual void OnWatchpoint( wxCommandEvent& event ) = 0;
 		virtual void OnAdvancedBreakpoint( wxCommandEvent& event ) = 0;
 		virtual void OnBlackbox( wxCommandEvent& event ) = 0;
+		virtual void OnSetupReplayString( wxCommandEvent& event ) = 0;
 		virtual void OnReloadReplayString( wxCommandEvent& event ) = 0;
 		virtual void OnDescribeReplayString( wxCommandEvent& event ) = 0;
 		virtual void OnDocs( wxCommandEvent& event ) = 0;

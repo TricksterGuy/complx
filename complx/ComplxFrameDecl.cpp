@@ -670,6 +670,7 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	this->Connect( menuDebugWatchpoint->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnWatchpoint ) );
 	this->Connect( menuDebugAdvanced->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnAdvancedBreakpoint ) );
 	this->Connect( menuDebugBlackbox->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnBlackbox ) );
+	this->Connect( menuTestSetupReplayString->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnSetupReplayString ) );
 	this->Connect( menuTestReloadReplayString->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReloadReplayString ) );
 	this->Connect( menuTestDescribeReplayString->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDescribeReplayString ) );
 	this->Connect( menuHelpDocs->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDocs ) );
@@ -772,6 +773,7 @@ ComplxFrameDecl::~ComplxFrameDecl()
 	this->Disconnect( ID_ADD_WATCHPOINT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnWatchpoint ) );
 	this->Disconnect( ID_ADVANCED_BREAKPOINT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnAdvancedBreakpoint ) );
 	this->Disconnect( ID_ADD_BLACKBOX, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnBlackbox ) );
+	this->Disconnect( ID_SETUP_REPLAY_STRING, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnSetupReplayString ) );
 	this->Disconnect( ID_RELOAD_REPLAY_STRING, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReloadReplayString ) );
 	this->Disconnect( ID_DESCRIBE_REPLAY_STRING, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDescribeReplayString ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDocs ) );
