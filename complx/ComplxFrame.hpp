@@ -106,6 +106,13 @@ public:
     void OnAdvancedBreakpoint(wxCommandEvent& event) override;
     void OnBlackbox(wxCommandEvent& event) override;
 
+    // Test menu event handlers
+	void OnSetupReplayString(wxCommandEvent& event) override;
+	void OnReloadReplayString(wxCommandEvent& event) override;
+	void OnDescribeReplayString(wxCommandEvent& event) override;
+	std::string DoAskForReplayString();
+	void DoSetupReplayString(const std::string& replay_string);
+
     // Help menu event handlers
     void OnDocs(wxCommandEvent& event) override;
     void OnISA(wxCommandEvent& event) override;
@@ -153,7 +160,7 @@ private:
       * Attempts to detect if a subroutine is found in the loaded code
       * The way this function works is it will try to find a RET, JSR, or JSRR instruction.
       * We do not look at trap instructions since they are black boxed anyway if true traps are disabled,
-      * however if a custom trap is written then it will of course have a RETY statement.
+      * however if a custom trap is written then it will of course have a RET statement.
       * The usage of this function is for enabling or disabling the Next/Prev Line and Finish control buttons.
       * @param ranges Code ranges the file that was loaded touches
       * @return True if a subroutine was detected false otherwise

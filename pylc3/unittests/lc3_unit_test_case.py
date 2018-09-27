@@ -179,7 +179,7 @@ class LC3UnitTestCase(unittest.TestCase):
             value: Param for Memory Fill Strategy, either a fill value or random seed.
         """
         if strategy == MemoryFillStrategy.fill_with_value:
-            self.state.init(False, value)
+            self.state.init(False, toShort(value))
         elif strategy == MemoryFillStrategy.random_fill_with_seed:
             self.state.seed(value)
             self.state.init(False, self.state.random())

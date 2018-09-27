@@ -1,5 +1,10 @@
 #include "PyLC3.hpp"
 
+#ifdef ENABLE_LC3_REPLAY
+#include <lc3_replay.hpp>
+#endif
+
+
 bool LC3State::load(const std::string& filename, bool disable_plugins, bool process_debug_comments, bool multiple_errors, bool enable_warnings, bool warnings_as_errors)
 {
     try
@@ -70,28 +75,44 @@ bool LC3State::loadCode(const std::string& code)
     return true;
 }
 
-#ifdef HAVE_LC3_REPLAY
-#include <lc3_replay.hpp>
-void LC3State::setup_replay(const std::string& file, const std::string& replay_str)
+std::string LC3State::setup_replay(const std::string& file, const std::string& replay_str)
 {
+#ifdef ENABLE_LC3_REPLAY
     try
     {
         lc3_setup_replay(state, file, replay_str, in);
         state.input = &in;
-        return ""
+        return "";
     }
-    catch(std::string err)
+    catch (std::string err)
     {
         return err;
     }
-    catch(const char* str)
+    catch (const char* err)
     {
         return err;
     }
-}
 #else
-std::string LC3State::setup_replay(const std::string& file, const std::string& replay_str)
-{
     return "NOT IMPLEMENTED";
-}
 #endif
+}
+
+std::string LC3State::describe_replay(const std::string& replay_str)
+{
+#ifdef ENABLE_LC3_REPLAY
+    try
+    {
+        return lc3_describe_replay(replay_str);
+    }
+    catch (std::string err)
+    {
+        return "";
+    }
+    catch (const char* err)
+    {
+        return "";
+    }
+#else
+    return "";
+#endif
+}

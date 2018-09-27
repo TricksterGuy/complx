@@ -11,6 +11,10 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         # This function is test only, Only use loadAsmFile for student code.
         self.state.loadCode(snippet)
 
+    def testInit(self):
+        self.init(lc3_unit_test_case.MemoryFillStrategy.fill_with_value, 0x8000)
+        self.assertEqual(self._readMem(0x3005) & 0xFFFF, 0x8000)
+
     def testRegister(self):
         snippet = """
         .orig x3000

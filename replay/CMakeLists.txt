@@ -17,5 +17,7 @@ add_library(
 target_link_libraries(
     lc3_replay
     lc3
+    ${Boost_LIBRARIES}
 )
 
+set_property(TARGET lc3_replay PROPERTY POSITION_INDEPENDENT_CODE ON)

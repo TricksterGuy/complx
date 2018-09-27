@@ -26,6 +26,7 @@ const std::vector<std::string> REPLAY_DESCRIPTIONS = {
 "memory_strategy: fill_with_value",
 "memory_strategy_value: 4294967295",
 "breakpoint: x8000",
+"",
 "R4 = (16385 x4001)",
 "PC = x0500",
 "MEM[AHH] = (7 x0007)",

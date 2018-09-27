@@ -79,7 +79,7 @@ std::string base64_decode(const std::string& str)
     }
 }
 
-void lc3_setup_replay(lc3_state& state, std::string& filename, const std::string& replay_string, std::stringstream& newinput)
+void lc3_setup_replay(lc3_state& state, const std::string& filename, const std::string& replay_string, std::stringstream& newinput)
 {
 
     std::ifstream file(filename.c_str());
@@ -97,6 +97,8 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
 
     std::istringstream stream(decoded);
     BinaryStreamReader bstream(stream);
+    bstream.SetMaxStringSize(65536);
+    bstream.SetMaxVectorSize(65536);
 
     char memory_strategy = 0;
     unsigned int memory_strategy_value = 0;
@@ -114,11 +116,15 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
         unsigned int value;
 
         bstream >> id;
+        if (!bstream.Ok())
+            throw "Error reading replay string.";
 
         if (id == END_OF_ENVIRONMENT)
             break;
 
         bstream >> value;
+        if (!bstream.Ok())
+            throw "Error reading replay string.";
 
         switch (id)
         {
@@ -187,12 +193,18 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
         std::vector<short> params;
 
         bstream >> id;
+        if (!bstream.Ok())
+            throw "Error reading replay string.";
 
         if (id == END_OF_INPUT)
             break;
 
         bstream >> label;
+        if (!bstream.Ok())
+            throw "Error reading replay string.";
         bstream >> params;
+        if (!bstream.Ok())
+            throw "Error reading replay string.";
 
         unsigned short address;
         int address_calc;
@@ -220,6 +232,8 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
                 }
                 address = (unsigned short) address_calc;
                 break;
+            default:
+                address = 0;
         }
 
         switch (id)
@@ -316,6 +330,8 @@ std::string lc3_describe_replay(const std::string& replay_string)
                 throw error.str();
         }
     }
+
+    description << "\n";
 
     while (bstream.Ok())
     {

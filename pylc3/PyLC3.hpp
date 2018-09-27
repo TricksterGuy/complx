@@ -20,7 +20,7 @@ public:
       *  @param randomize Enable randomizing of both memory and registers.
       *  @param fill_value If randomize is false the value for every single memory address and register.
       */
-    void init(bool randomize = true, short fill_value = 0)
+    void init(bool randomize = true, int fill_value = 0)
     {
         lc3_init(state, randomize, randomize, fill_value, fill_value);
     }
@@ -136,7 +136,7 @@ public:
     void seed(unsigned int seed) { srand(seed); }
 
     /** @see lc3_random */
-    unsigned int random() { return lc3_random(); }
+    short random() { return lc3_random(); }
 
     int get_r0() const { return state.regs[0]; }
     void set_r0(int r0) { state.regs[0] = r0; }
@@ -191,6 +191,7 @@ public:
     void set_strict_execution(bool setting) { state.strict_execution = setting; }
 
     std::string setup_replay(const std::string& file, const std::string& replay_str);
+    std::string describe_replay(const std::string& replay_str);
 
     /** The following accessors are only meaningful if testing_mode was set */
     std::string get_input() const { return in.str(); }

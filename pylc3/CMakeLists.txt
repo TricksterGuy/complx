@@ -41,6 +41,15 @@ target_link_libraries(
     ${PYTHON_LIBRARIES}
 )
 
+if (ENABLE_REPLAY)
+add_definitions(-DENABLE_LC3_REPLAY)
+include_directories("../replay")
+target_link_libraries(
+    pylc3
+    lc3_replay
+)
+endif(ENABLE_REPLAY)
+
 set_target_properties(pylc3 PROPERTIES SUFFIX .so)
 set_target_properties(pylc3 PROPERTIES PREFIX "")
 

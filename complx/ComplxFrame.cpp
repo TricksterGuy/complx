@@ -33,6 +33,10 @@
 #include "LC3RunThread.hpp"
 #include "version.h"
 
+#ifdef ENABLE_LC3_REPLAY
+#include <lc3_replay.hpp>
+#endif
+
 lc3_state state;
 
 extern ComplxFrame* complxframe;
@@ -203,6 +207,8 @@ void ComplxFrame::OnAdvancedLoad(wxCommandEvent& event)
         }
         reload_options = options;
         DoLoadFile(reload_options);
+        if (!reload_options.replay_string.empty())
+            DoSetupReplayString(reload_options.replay_string);
     }
     delete dialog;
 }
@@ -1322,6 +1328,121 @@ void ComplxFrame::OnDestroyView(wxCloseEvent& event)
     frame->Destroy();
 }
 
+void ComplxFrame::OnSetupReplayString(wxCommandEvent& event)
+{
+#ifdef ENABLE_LC3_REPLAY
+    if (Running())
+        return;
+
+    if (reload_options.file.empty())
+        OnLoad(event);
+
+    if (reload_options.file.empty())
+    {
+        wxMessageBox("An assembly file must be loaded to perform this operation", "Error");
+        return;
+    }
+
+    std::string replay_str = DoAskForReplayString();
+
+    if (replay_str.empty())
+        return;
+
+    DoSetupReplayString(replay_str);
+#else
+    wxMessageBox("Support for this menu function was not enabled.", "Error");
+#endif
+}
+void ComplxFrame::OnReloadReplayString(wxCommandEvent& event)
+{
+#ifdef ENABLE_LC3_REPLAY
+    if (reload_options.replay_string.empty() || reload_options.file.empty())
+    {
+        OnSetupReplayString(event);
+        return;
+    }
+
+    DoSetupReplayString(reload_options.replay_string);
+#else
+    wxMessageBox("Support for this menu function was not enabled.", "Error");
+#endif
+}
+void ComplxFrame::OnDescribeReplayString(wxCommandEvent& event)
+{
+#ifdef ENABLE_LC3_REPLAY
+    std::string replay_str = reload_options.replay_string;
+    if (replay_str.empty())
+    {
+        replay_str = DoAskForReplayString();
+
+        if (replay_str.empty())
+        {
+            wxMessageBox("No replay string given.", "Error");
+            return;
+        }
+    }
+
+    try
+    {
+        std::string description = lc3_describe_replay(replay_str);
+        wxMessageBox(description);
+    }
+    catch (std::string err)
+    {
+        wxMessageBox(err.c_str(), "Error");
+        return;
+    }
+    catch (const char* err)
+    {
+        wxMessageBox(err, "Error");
+        return;
+    }
+#else
+    wxMessageBox("Support for this menu function was not enabled.", "Error");
+#endif
+}
+
+std::string ComplxFrame::DoAskForReplayString()
+{
+#ifdef ENABLE_LC3_REPLAY
+    wxString replay = wxGetTextFromUser("Enter Replay String", "Testing");
+    if (replay.IsEmpty())
+    {
+        wxMessageBox("No replay string given", "Error");
+        return "";
+    }
+    return replay.ToStdString();
+#else
+    return "";
+#endif
+}
+
+void ComplxFrame::DoSetupReplayString(const std::string& replay_string)
+{
+#ifdef ENABLE_LC3_REPLAY
+    try
+    {
+        std::stringstream input;
+        lc3_setup_replay(state, reload_options.file, replay_string, input);
+        console->SetInput(input.str());
+        reload_options.replay_string = replay_string;
+        UpdateRegisters();
+        UpdateMemory();
+        UpdateStatus();
+    }
+    catch (std::string err)
+    {
+        wxMessageBox(err.c_str(), "Error");
+        return;
+    }
+    catch (const char* err)
+    {
+        wxMessageBox(err, "Error");
+        return;
+    }
+#endif
+}
+
 /** OnAbout
   *
   * Displays information about this program
@@ -1332,7 +1453,7 @@ void ComplxFrame::OnAbout(wxCommandEvent& event)
     aboutInfo.SetName("Complx");
     aboutInfo.SetVersion(Version::FULLVERSION_STRING);
     aboutInfo.SetDescription(_("LC-3 Simulator\nBug reports, thanks, and feature requests should be sent to Brandon.\nbwhitehead0308@gmail.com"));
-    aboutInfo.SetCopyright("(C) 2010-2016");
+    aboutInfo.SetCopyright("(C) 2010-2018");
     aboutInfo.AddDeveloper("Brandon Whitehead bwhitehead0308@gmail.com");
     aboutInfo.SetIcon(wxIcon(icon64_xpm));
 
@@ -1485,22 +1606,22 @@ void PrintError(int error)
     switch(error)
     {
     case 1:
-        msg = _("ERROR! Error evaluating expression: Unbalanced parenthesis");
+        msg = _("Error evaluating expression: Unbalanced parenthesis");
         break;
     case 2:
-        msg = _("ERROR! Error evaluating expression: Invalid Operator");
+        msg = _("Error evaluating expression: Invalid Operator");
         break;
     case 3:
-        msg = _("ERROR! Error evaluating expression: Invalid operand");
+        msg = _("Error evaluating expression: Invalid operand");
         break;
     case 4:
-        msg = _("ERROR! Error evaluating expression: Malformed reference");
+        msg = _("Error evaluating expression: Malformed reference");
         break;
     case 5:
-        msg = _("ERROR! Error evaluating expression: Undefined symbol");
+        msg = _("Error evaluating expression: Undefined symbol");
         break;
     default:
-        msg = _("ERROR! Error evaluating expression.");
+        msg = _("Error evaluating expression.");
         break;
     }
 

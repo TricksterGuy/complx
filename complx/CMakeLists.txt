@@ -47,12 +47,23 @@ add_executable(
     ${SRC_COMPLX}
 )
 
+if (ENABLE_REPLAY)
+    add_definitions(-DENABLE_LC3_REPLAY)
+    include_directories("../replay")
+    target_link_libraries(
+        complx
+        lc3_replay
+    )
+endif (ENABLE_REPLAY)
+
 target_link_libraries(
     complx
     lc3
     ${wxWidgets_LIBRARIES}
     ${GLIB2_LIBRARIES}
 )
+
+
 
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/complx DESTINATION ${CMAKE_INSTALL_BINDIR})
 

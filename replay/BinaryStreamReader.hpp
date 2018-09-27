@@ -2,6 +2,7 @@
 #define BINARY_STREAM_READER_HPP
 
 #include <cstdint>
+#include <ios>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -28,6 +29,11 @@ public:
     void SetWidth(uint32_t _width) { width = _width; }
     uint32_t Flags() const { return flags; }
     uint32_t Width() const { return width; }
+    void SetMaxStringSize(uint32_t size) { max_string_size = size; }
+    uint32_t GetMaxStringSize() const { return max_string_size; }
+    void SetMaxVectorSize(uint32_t size) { max_vector_size = size; }
+    uint32_t GetMaxVectorSize() const { return max_vector_size; }
+    void SetInternalStreamState(std::ios_base::iostate state) { stream.setstate(state); }
     bool Ok() const { return !stream.fail(); }
     enum
     {
@@ -43,6 +49,8 @@ private:
     std::istream& stream;
     uint32_t flags;
     uint32_t width;
+    uint32_t max_string_size = -1;
+    uint32_t max_vector_size = -1;
 };
 
 template<typename VecType>
@@ -54,6 +62,12 @@ BinaryStreamReader& operator>>(BinaryStreamReader& cs, std::vector<VecType>& vec
         cs >> size;
     else
         size = vec.size();
+
+    if (size > cs.GetMaxVectorSize())
+    {
+        cs.SetInternalStreamState(std::ios_base::failbit);
+        return cs;
+    }
 
     vec.resize(size);
     VecType el;

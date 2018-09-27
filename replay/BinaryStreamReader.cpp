@@ -71,6 +71,12 @@ BinaryStreamReader& BinaryStreamReader::operator>>(std::string& val)
     if ((flags & BinaryStreamReader::READ_STRING_SIZES) && width == 0)
         (*this) >> effSize;
 
+    if (effSize > max_string_size)
+    {
+        stream.setstate(std::ios_base::failbit);
+        return *this;
+    }
+
     char data[effSize];
     stream.read(data, effSize);
     val.assign(data, effSize);
