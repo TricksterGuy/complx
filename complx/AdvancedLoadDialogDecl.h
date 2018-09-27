@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Jan  1 2018)
+// C++ code generated with wxFormBuilder (version Jan 23 2018)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -40,6 +40,8 @@ class AdvancedLoadDialogDecl : public wxDialog
 		wxPanel* m_panel2;
 		wxStaticText* m_staticText1;
 		wxFilePickerCtrl* assemblyFile;
+		wxStaticText* m_staticText9;
+		wxTextCtrl* replayString;
 		wxStaticText* m_staticText6;
 		wxTextCtrl* consoleInput;
 		wxStaticText* m_staticText0;
@@ -66,7 +68,7 @@ class AdvancedLoadDialogDecl : public wxDialog
 	
 	public:
 		
-		AdvancedLoadDialogDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Advanced Load"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 499,393 ), long style = wxDEFAULT_DIALOG_STYLE ); 
+		AdvancedLoadDialogDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Advanced Load"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 540,420 ), long style = wxDEFAULT_DIALOG_STYLE ); 
 		~AdvancedLoadDialogDecl();
 	
 };

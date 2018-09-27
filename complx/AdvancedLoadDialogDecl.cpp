@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Jan  1 2018)
+// C++ code generated with wxFormBuilder (version Jan 23 2018)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -37,9 +37,18 @@ AdvancedLoadDialogDecl::AdvancedLoadDialogDecl( wxWindow* parent, wxWindowID id,
 	
 	fgSizer1->Add( assemblyFile, 1, wxEXPAND|wxTOP|wxBOTTOM|wxRIGHT, 5 );
 	
+	m_staticText9 = new wxStaticText( m_panel2, wxID_ANY, _("Replay String:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText9->Wrap( -1 );
+	fgSizer1->Add( m_staticText9, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+	
+	replayString = new wxTextCtrl( m_panel2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	replayString->SetToolTip( _("Replay string.  Note that setting this may override other settings.") );
+	
+	fgSizer1->Add( replayString, 1, wxEXPAND|wxTOP|wxBOTTOM|wxRIGHT, 5 );
+	
 	m_staticText6 = new wxStaticText( m_panel2, wxID_ANY, _("Console Input:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText6->Wrap( -1 );
-	fgSizer1->Add( m_staticText6, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+	fgSizer1->Add( m_staticText6, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 	
 	consoleInput = new wxTextCtrl( m_panel2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	consoleInput->SetToolTip( _("Input present in LC3 console when program is loaded") );
@@ -106,7 +115,7 @@ AdvancedLoadDialogDecl::AdvancedLoadDialogDecl( wxWindow* parent, wxWindowID id,
 	trueTraps = new wxCheckBox( m_panel2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	trueTraps->SetToolTip( _("Enable executing of trap handler routines in asssembly instead of C.  (This is automatically determined by your assembly code).") );
 	
-	fgSizer1->Add( trueTraps, 0, wxEXPAND|wxTOP|wxBOTTOM|wxRIGHT, 5 );
+	fgSizer1->Add( trueTraps, 0, wxTOP|wxBOTTOM|wxRIGHT|wxALIGN_CENTER_VERTICAL, 5 );
 	
 	m_staticText8 = new wxStaticText( m_panel2, wxID_ANY, _("Interrupts?"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText8->Wrap( -1 );
@@ -115,17 +124,17 @@ AdvancedLoadDialogDecl::AdvancedLoadDialogDecl( wxWindow* parent, wxWindowID id,
 	interrupts = new wxCheckBox( m_panel2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	interrupts->SetToolTip( _("Enable processing of lc3 interrupts.  This is automatically configued based on your assembly code.") );
 	
-	fgSizer1->Add( interrupts, 0, wxTOP|wxBOTTOM|wxRIGHT, 5 );
+	fgSizer1->Add( interrupts, 0, wxTOP|wxBOTTOM|wxRIGHT|wxALIGN_CENTER_VERTICAL, 5 );
 	
-	m_staticText81 = new wxStaticText( m_panel2, wxID_ANY, _("Strict Execution"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText81 = new wxStaticText( m_panel2, wxID_ANY, _("Strict Execution?"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText81->Wrap( -1 );
 	fgSizer1->Add( m_staticText81, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 	
 	strictExecution = new wxCheckBox( m_panel2, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	strictExecution->SetValue(true); 
-	strictExecution->SetToolTip( _("Enables strict execution mode.") );
+	strictExecution->SetToolTip( _("Enables strict execution mode. Instructions that are malformed will immediately halt the simulator.") );
 	
-	fgSizer1->Add( strictExecution, 0, wxTOP|wxBOTTOM|wxRIGHT, 5 );
+	fgSizer1->Add( strictExecution, 0, wxTOP|wxBOTTOM|wxRIGHT|wxALIGN_CENTER_VERTICAL, 5 );
 	
 	
 	bSizer7->Add( fgSizer1, 1, wxEXPAND, 5 );

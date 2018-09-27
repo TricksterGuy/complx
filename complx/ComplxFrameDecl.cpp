@@ -17,7 +17,7 @@ class wxFBContextSensitiveHelpSetter
 public:
 wxFBContextSensitiveHelpSetter()
 {
-wxSimpleHelpProvider* help = new wxSimpleHelpProvider();
+wxHelpControllerHelpProvider* help = new wxSimpleHelpProvider();
 wxHelpProvider* old = wxHelpProvider::Set( help );
 if (old != 0){
 delete old;
@@ -226,6 +226,21 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuDebug->Append( menuDebugBlackbox );
 	
 	menu->Append( menuDebug, _("Debug") ); 
+	
+	menuTest = new wxMenu();
+	wxMenuItem* menuTestSetupReplayString;
+	menuTestSetupReplayString = new wxMenuItem( menuTest, ID_SETUP_REPLAY_STRING, wxString( _("&Setup Replay String...") ) + wxT('\t') + wxT("Ctrl+T"), _("Loads a replay string from the pylc3 unit test framework."), wxITEM_NORMAL );
+	menuTest->Append( menuTestSetupReplayString );
+	
+	wxMenuItem* menuTestReloadReplayString;
+	menuTestReloadReplayString = new wxMenuItem( menuTest, ID_RELOAD_REPLAY_STRING, wxString( _("&Reload Replay String") ) + wxT('\t') + wxT("Ctrl+Alt+T"), _("Reloads a replay string from the pylc3 unit test framework."), wxITEM_NORMAL );
+	menuTest->Append( menuTestReloadReplayString );
+	
+	wxMenuItem* menuTestDescribeReplayString;
+	menuTestDescribeReplayString = new wxMenuItem( menuTest, ID_DESCRIBE_REPLAY_STRING, wxString( _("&Describe Replay String") ) + wxT('\t') + wxT("Ctrl+D"), _("Pops a dialog explaining the current replay string."), wxITEM_NORMAL );
+	menuTest->Append( menuTestDescribeReplayString );
+	
+	menu->Append( menuTest, _("Test") ); 
 	
 	menuHelp = new wxMenu();
 	wxMenuItem* menuHelpDocs;
@@ -655,6 +670,8 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	this->Connect( menuDebugWatchpoint->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnWatchpoint ) );
 	this->Connect( menuDebugAdvanced->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnAdvancedBreakpoint ) );
 	this->Connect( menuDebugBlackbox->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnBlackbox ) );
+	this->Connect( menuTestReloadReplayString->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReloadReplayString ) );
+	this->Connect( menuTestDescribeReplayString->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDescribeReplayString ) );
 	this->Connect( menuHelpDocs->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDocs ) );
 	this->Connect( menuHelpISA->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnISA ) );
 	this->Connect( menuHelpChangeLog->GetId(), wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnChangeLog ) );
@@ -755,6 +772,8 @@ ComplxFrameDecl::~ComplxFrameDecl()
 	this->Disconnect( ID_ADD_WATCHPOINT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnWatchpoint ) );
 	this->Disconnect( ID_ADVANCED_BREAKPOINT, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnAdvancedBreakpoint ) );
 	this->Disconnect( ID_ADD_BLACKBOX, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnBlackbox ) );
+	this->Disconnect( ID_RELOAD_REPLAY_STRING, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReloadReplayString ) );
+	this->Disconnect( ID_DESCRIBE_REPLAY_STRING, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDescribeReplayString ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDocs ) );
 	this->Disconnect( wxID_ANY, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnISA ) );
 	this->Disconnect( ID_CHANGE_LOG, wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnChangeLog ) );

@@ -84,6 +84,9 @@ class ComplxFrameDecl : public wxFrame
 			ID_ADD_WATCHPOINT,
 			ID_ADVANCED_BREAKPOINT,
 			ID_ADD_BLACKBOX,
+			ID_SETUP_REPLAY_STRING,
+			ID_RELOAD_REPLAY_STRING,
+			ID_DESCRIBE_REPLAY_STRING,
 			ID_CHANGE_LOG,
 			ID_CREATE_BUG_REPORT,
 			ID_FIRST_TIME_MESSAGE,
@@ -111,6 +114,7 @@ class ComplxFrameDecl : public wxFrame
 		wxMenuItem* menuStateInterrupts;
 		wxMenuItem* menuStateStrictExecution;
 		wxMenu* menuDebug;
+		wxMenu* menuTest;
 		wxMenu* menuHelp;
 		wxPanel* mainPanel;
 		MemoryGrid* memory;
@@ -176,6 +180,8 @@ class ComplxFrameDecl : public wxFrame
 		virtual void OnWatchpoint( wxCommandEvent& event ) = 0;
 		virtual void OnAdvancedBreakpoint( wxCommandEvent& event ) = 0;
 		virtual void OnBlackbox( wxCommandEvent& event ) = 0;
+		virtual void OnReloadReplayString( wxCommandEvent& event ) = 0;
+		virtual void OnDescribeReplayString( wxCommandEvent& event ) = 0;
 		virtual void OnDocs( wxCommandEvent& event ) = 0;
 		virtual void OnISA( wxCommandEvent& event ) = 0;
 		virtual void OnChangeLog( wxCommandEvent& event ) = 0;
