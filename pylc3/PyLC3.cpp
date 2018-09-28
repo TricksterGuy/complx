@@ -5,7 +5,7 @@
 #endif
 
 
-bool LC3State::load(const std::string& filename, bool disable_plugins, bool process_debug_comments, bool multiple_errors, bool enable_warnings, bool warnings_as_errors)
+std::string LC3State::load(const std::string& filename, bool disable_plugins, bool process_debug_comments, bool multiple_errors, bool enable_warnings, bool warnings_as_errors)
 {
     try
     {
@@ -36,10 +36,16 @@ bool LC3State::load(const std::string& filename, bool disable_plugins, bool proc
     }
     catch (LC3AssembleException e)
     {
-        fprintf(stderr, "%s", e.what().c_str());
-        return false;
+        return e.what();
     }
-    return true;
+    catch (std::vector<LC3AssembleException> errs)
+    {
+        std::stringstream error;
+        for (const auto& ex : errs)
+            error << ex.what() << std::endl;
+        return error.str();
+    }
+    return "";
 }
 
 bool LC3State::loadCode(const std::string& code)
@@ -70,6 +76,12 @@ bool LC3State::loadCode(const std::string& code)
     catch (LC3AssembleException e)
     {
         fprintf(stderr, "%s", e.what().c_str());
+        return false;
+    }
+    catch (std::vector<LC3AssembleException> e)
+    {
+        for (unsigned int i = 0; i < e.size(); i++)
+            fprintf(stderr, "%s\n", e[i].what().c_str());
         return false;
     }
     return true;

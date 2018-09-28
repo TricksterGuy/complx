@@ -32,7 +32,7 @@ public:
       * @param enable_warnings Enable assembler warnings.
       * @param warnings_as_errors Treat assembler warnings as errors.
       */
-    bool load(const std::string& filename, bool disable_plugins = false, bool process_debug_comments = true, bool multiple_errors = true, bool enable_warnings = false, bool warnings_as_errors = false);
+    std::string load(const std::string& filename, bool disable_plugins = false, bool process_debug_comments = true, bool multiple_errors = true, bool enable_warnings = false, bool warnings_as_errors = false);
     /** Test only */
     bool loadCode(const std::string& lc3_code);
     /** @see lc3_run */

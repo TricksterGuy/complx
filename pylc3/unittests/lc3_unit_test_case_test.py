@@ -1,6 +1,7 @@
 import lc3_unit_test_case
 import unittest
 import six
+import os
 
 
 # Note this file is not to be used as a template for writing student tests.
@@ -14,6 +15,24 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
     def testInit(self):
         self.init(lc3_unit_test_case.MemoryFillStrategy.fill_with_value, 0x8000)
         self.assertEqual(self._readMem(0x3005) & 0xFFFF, 0x8000)
+
+    def testLoadFailed(self):
+        snippet = """
+        .orig x3000
+            AND R1, R1, 0
+            ADD R1, R1 R0
+            ADD R1, R1, R1
+            HALT
+        .end
+        """
+        text_file = open("syntax_error.asm", "w")
+        text_file.write(snippet)
+        text_file.close()
+
+        #with self.assertRaises(AssertionError):
+        self.loadAsmFile("syntax_error.asm")
+
+        os.remove("syntax_error.asm")
 
     def testRegister(self):
         snippet = """

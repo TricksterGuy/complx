@@ -193,10 +193,13 @@ class LC3UnitTestCase(unittest.TestCase):
     def loadAsmFile(self, file):
         """Loads an assembly file.
 
+        Will assert if the file failed to assemble.
+
         Args:
             file: String - Full path to the assembly file to load.
         """
-        assert self.state.load(file, disable_plugins=not self.enable_plugins, process_debug_comments=False), ('Unable to load file %s' % file)
+        status = self.state.load(file, disable_plugins=not self.enable_plugins, process_debug_comments=False)
+        assert not status, ('Unable to load file %s\nReason: %s' % (file, status))
 
     def _lookup(self, label):
         """Gets the address of a label by looking it up in the symbol table.
