@@ -29,8 +29,8 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         text_file.write(snippet)
         text_file.close()
 
-        #with self.assertRaises(AssertionError):
-        self.loadAsmFile("syntax_error.asm")
+        with self.assertRaises(AssertionError):
+            self.loadAsmFile("syntax_error.asm")
 
         os.remove("syntax_error.asm")
 
