@@ -7,7 +7,7 @@ You make comments in your assembly code and when complx loads your file breakpoi
 
 Breakpoints
 ===========
-;@break address=addresss/symbol name=label condition=1 times=-1
+;@break address=address/symbol name=label condition=1 times=-1
 
 You may omit one of the parameters if you don't need it defaults are shown these may also appear in any order.
 
