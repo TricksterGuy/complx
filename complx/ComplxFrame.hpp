@@ -105,6 +105,7 @@ public:
     void OnWatchpoint(wxCommandEvent& event) override;
     void OnAdvancedBreakpoint(wxCommandEvent& event) override;
     void OnBlackbox(wxCommandEvent& event) override;
+    void OnTraceFile(wxCommandEvent& event) override;
 
     // Test menu event handlers
 	void OnSetupReplayString(wxCommandEvent& event) override;

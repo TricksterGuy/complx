@@ -9,6 +9,40 @@
 #include <cstdlib>
 #include <dlfcn.h>
 
+
+void lc3_trace(lc3_state& state)
+{
+    char buf[128];
+    std::ostream& stream = *state.trace;
+
+    snprintf(buf, 128, "PC x%04x\n", state.pc);
+    stream << buf;
+
+    snprintf(buf, 128, "instr: %s", lc3_disassemble(state, state.mem[state.pc], 1).c_str());
+    stream << buf;
+
+    snprintf(buf, 128, " (%04x)\n", static_cast<unsigned short>(state.mem[state.pc]));
+    stream << buf;
+
+    snprintf(buf, 128, "R0 %6d|x%04x\tR1 %6d|x%04x\tR2 %6d|x%04x\tR3 %6d|x%04x\n",
+             state.regs[0], static_cast<unsigned short>(state.regs[0]),
+             state.regs[1], static_cast<unsigned short>(state.regs[1]),
+             state.regs[2], static_cast<unsigned short>(state.regs[2]),
+             state.regs[3], static_cast<unsigned short>(state.regs[3]));
+    stream << buf;
+
+
+    snprintf(buf, 128, "R4 %6d|x%04x\tR5 %6d|x%04x\tR6 %6d|x%04x\tR7 %6d|x%04x\n",
+             state.regs[4], static_cast<unsigned short>(state.regs[4]),
+             state.regs[5], static_cast<unsigned short>(state.regs[5]),
+             state.regs[6], static_cast<unsigned short>(state.regs[6]),
+             state.regs[7], static_cast<unsigned short>(state.regs[7]));
+    stream << buf;
+
+    snprintf(buf, 128, "CC: %s\n\n", (state.n ? "N" : (state.z ? "Z" : "P")));
+    stream << buf;
+}
+
 void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory, short register_fill_value, short memory_fill_value)
 {
     // Set Registers
@@ -108,6 +142,8 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     state.total_reads = 0;
     state.total_writes = 0;
 
+    state.trace.reset();
+
     state.in_lc3test = false;
 }
 
@@ -168,6 +204,10 @@ void lc3_step(lc3_state& state)
 {
     // If we are halted then don't step.
     if (state.halted) return;
+
+    if (state.trace)
+        lc3_trace(state);
+
     // Tick all plugins
     lc3_tick_plugins(state);
     // Fetch Instruction

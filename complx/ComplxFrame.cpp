@@ -998,6 +998,30 @@ void ComplxFrame::OnBlackbox(wxCommandEvent& event)
     memory->OnBlackbox(event);
 }
 
+void ComplxFrame::OnTraceFile(wxCommandEvent& event)
+{
+    wxString file = wxFileSelector("Save trace file (note these files can potentially be huge)", wxEmptyString, wxEmptyString, wxEmptyString, "Trace files (*.trace)|*.trace", wxFD_OVERWRITE_PROMPT | wxFD_SAVE);
+    if (file.empty())
+        return;
+
+    wxFileName filename(file);
+    filename.SetExt("trace");
+
+    std::string full_path = filename.GetFullPath().ToStdString();
+
+    state.trace.reset(new std::ofstream(full_path.c_str()));
+
+    if (state.trace->good())
+    {
+        wxMessageBox(wxString::Format("Trace file set to %s", full_path), "Trace file set successfully");
+    }
+    else
+    {
+        state.trace.reset();
+        wxMessageBox(wxString::Format("Trace file could not be set to %s", full_path), "Failed to set trace file");
+    }
+}
+
 /** OnBreakAndWatchpoints
   *
   * Called when the user wants to display all breakpoints.

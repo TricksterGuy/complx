@@ -5,6 +5,7 @@
 #include <fstream>
 #include <deque>
 #include <map>
+#include <memory>
 #include <list>
 #include <vector>
 #include <cstdlib>
@@ -340,7 +341,7 @@ typedef struct lc3_breakpoint_info
     int hit_count;
     std::string label;
     std::string condition;
-    bool operator==(const lc3_breakpoint_info& other) const 
+    bool operator==(const lc3_breakpoint_info& other) const
     {
         return addr == other.addr && condition == other.condition;
     }
@@ -407,6 +408,14 @@ typedef struct lc3_subroutine_call_info
     }
 
 } lc3_subroutine_call_info;
+
+/** Record of a mocked subroutine call with return information */
+typedef struct lc3_mock_subroutine_call_info
+{
+    unsigned short address;
+    std::vector<unsigned short> params;
+    short answer;
+} lc3_mock_subroutine_call_info;
 
 /** Record of active trap call info for each trap called */
 typedef struct lc3_trap_call_info
@@ -540,6 +549,9 @@ typedef struct lc3_state
     std::map<unsigned short, lc3_memory_stats> memory_ops;
     unsigned long total_reads;
     unsigned long total_writes;
+
+    // Trace logging
+    std::unique_ptr<std::ostream> trace;
 
     // test_only mode
     // The only effect is that it records the first level subroutine/trap calls.
