@@ -99,7 +99,7 @@ std::string LC3AssembleException::what() const throw()
             snprintf(what_str, 1023, "Found signed number expecting unsigned number on line %d: %s", lineno, params[0].c_str());
             break;
         case INVALID_BYTES:
-            snprintf(what_str, 1023, "Invalid bytes found in code on line %d: %c(%02hhx)", lineno, params[0][0], params[0][0]);
+            snprintf(what_str, 1023, "Invalid byte 0x%02hhx found in code on line %d.\nUse a text editor that can display non ASCII / unprintable characters and remove them.", params[0][0], lineno);
             break;
         case NUMBER_OVERFLOW:
             snprintf(what_str, 1023, "%s is too big for an immediate value expected %s bits got %s bits found on line %d", params[0].c_str(), params[1].c_str(), params[2].c_str(), lineno);
@@ -114,7 +114,7 @@ std::string LC3AssembleException::what() const throw()
             snprintf(what_str, 1023, "I'm at the end of memory (xFFFF) and I refuse to wrap around! found on line %d", lineno);
             break;
         case FILE_ERROR:
-            snprintf(what_str, 1023, "Could not open %s for reading\nAre you sure the file is in your current working directory?\n", params[0].c_str());
+            snprintf(what_str, 1023, "Could not open %s for reading.\nAre you sure the file is in your current working directory?\n", params[0].c_str());
             break;
         case UNTERMINATED_STRING:
             snprintf(what_str, 1023, "Unterminated string on line %d: %s", lineno, params[0].c_str());
@@ -184,7 +184,7 @@ std::string LC3AssembleException::what() const throw()
             snprintf(what_str, 1023, "Found signed number expecting unsigned number %s", params[0].c_str());
             break;
         case INVALID_BYTES:
-            snprintf(what_str, 1023, "Invalid bytes found in code %c(%02hhx)", params[0][0], params[0][0]);
+            snprintf(what_str, 1023, "Invalid byte 0x%02hhx found in code.\nUse a text editor that can display non ASCII / unprintable characters and remove them.", params[0][0]);
             break;
         case NUMBER_OVERFLOW:
             snprintf(what_str, 1023, "%s is too big for an immediate value expected %s bits got %s bits", params[0].c_str(), params[1].c_str(), params[2].c_str());
@@ -199,7 +199,7 @@ std::string LC3AssembleException::what() const throw()
             snprintf(what_str, 1023, "I'm at the end of memory (xFFFF) and I refuse to wrap around! found on line %d", lineno);
             break;
         case FILE_ERROR:
-            snprintf(what_str, 1023, "Could not open %s for reading\nAre you sure the file is in your current working directory?", params[0].c_str());
+            snprintf(what_str, 1023, "Could not open %s for reading.\nAre you sure the file is in your current working directory?", params[0].c_str());
             break;
         case UNTERMINATED_STRING:
             snprintf(what_str, 1023, "Unterminated string %s", params[0].c_str());
