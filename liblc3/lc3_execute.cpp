@@ -283,7 +283,7 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
         break;
     case RTI_INSTR:
         // Invalid instruction check
-        if (!instruction.rti.data != 0 && state.strict_execution)
+        if (instruction.rti.data != 0 && state.strict_execution)
         {
             state.halted = 1;
             state.pc--;
