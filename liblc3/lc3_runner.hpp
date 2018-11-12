@@ -110,6 +110,13 @@ void lc3_signal_interrupt(lc3_state& state, int priority, int vector);
   * @return bool true if it was added false otherwise.
   */
 bool lc3_signal_interrupt_once(lc3_state& state, int priority, int vector);
+/** lc3_check_keyboard_interrupt
+  *
+  * Checks if there is a character waiting and if we aren't in a keyboard interrupt
+  * already and if so (with random jitter) signals a keyboard interrupt.
+  * @param state LC3State object.
+  */
+void lc3_check_keyboard_interrupt(lc3_state& state);
 /** lc3_tick_plugins
   *
   * Calls OnTick for all plugins.

@@ -296,7 +296,8 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             setting: True to enable.
         """
-        self.state.interupts = setting
+        self.state.interrupts = setting
+        self.state.enable_keyboard_interrupt()
 
         self.preconditions.addEnvironment(PreconditionFlag.interrupts, setting)
 

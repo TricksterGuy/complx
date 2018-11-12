@@ -93,7 +93,7 @@ int complx_writer(lc3_state& state, std::ostream& file, int chr)
   *
   *
   */
-void complx_step(void)
+void complx_step(lc3_state& state)
 {
     wxCriticalSectionLocker enter(threadCS);
     // If we aren't executing a keyboard interrupt

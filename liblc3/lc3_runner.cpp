@@ -142,7 +142,7 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     state.total_reads = 0;
     state.total_writes = 0;
 
-    state.trace.reset();
+    state.trace.reset(nullptr);
 
     state.in_lc3test = false;
 }
@@ -271,7 +271,7 @@ void lc3_step(lc3_state& state)
     for (i = state.interrupt_test.begin(); i != state.interrupt_test.end(); ++i)
     {
         interrupt_test_func func = *i;
-        func();
+        func(state);
     }
 
     // Interrupt?
@@ -567,6 +567,24 @@ void lc3_signal_interrupt(lc3_state& state, int priority, int vector)
     interrupt.vector = vector;
     interrupt.priority = priority;
     state.interrupts.push_back(interrupt);
+}
+
+void lc3_check_keyboard_interrupt(lc3_state& state)
+{
+    // Note this function is reimplemented as complx_step in the GUI simulator
+    // If we aren't executing a keyboard interrupt
+    if (state.interrupt_vector != 0x80)
+    {
+        // If interrupts are enabled for keyboard and interrupts are enabled and there is a character
+        if (((state.mem[0xFE00] >> 14) & 1) && state.interrupt_enabled && state.input->peek() != EOF)
+        {
+            ///TODO make the random jitter be configurable
+            if (rand() % 16 < 5)
+            {
+                lc3_keyboard_interrupt(state);
+            }
+        }
+    }
 }
 
 bool lc3_signal_interrupt_once(lc3_state& state, int priority, int vector)

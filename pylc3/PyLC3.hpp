@@ -187,6 +187,7 @@ public:
     void set_true_traps(bool setting) { lc3_set_true_traps(state, setting); }
     bool get_interrupts() const { return state.interrupt_enabled; }
     void set_interrupts(bool setting) { state.interrupt_enabled = setting; }
+    void enable_keyboard_interrupt() { state.interrupt_test.push_back(lc3_check_keyboard_interrupt); }
     bool get_strict_execution() const { return state.strict_execution; }
     void set_strict_execution(bool setting) { state.strict_execution = setting; }
 

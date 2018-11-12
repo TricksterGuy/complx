@@ -48,7 +48,7 @@ bool refreshednoio = false;
 int complx_reader(lc3_state& state, std::istream& file);
 int complx_peek(lc3_state& state, std::istream& file);
 int complx_writer(lc3_state& state, std::ostream& file, int chr);
-void complx_step(void);
+void complx_step(lc3_state& state);
 
 // R0-R7, PC, CC
 int register_display[10] = {BASE_10, BASE_10, BASE_10, BASE_10, BASE_10, BASE_16, BASE_16, BASE_16, BASE_16, BASE_CC};

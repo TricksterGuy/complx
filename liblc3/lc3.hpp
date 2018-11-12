@@ -464,7 +464,9 @@ typedef struct lc3_state_change
     std::vector<lc3_change_info> info;  // Only used for changes = LC3_MULTI_CHANGE
 } lc3_state_change;
 
-typedef void (*interrupt_test_func)(void);
+struct lc3_state;
+
+typedef void (*interrupt_test_func)(lc3_state&);
 
 /** Main type for a running lc3 machine */
 typedef struct lc3_state
