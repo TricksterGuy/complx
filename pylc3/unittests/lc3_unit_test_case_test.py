@@ -655,6 +655,33 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.runCode(max_executions=1000)
         self.assertPc(0x4000)
 
+    def testProgramWithInterruptsAndDelay(self):
+        snippet = """
+        .orig x180
+            .fill x4000
+        .end
+
+        .orig x3000
+            LD R0, KBSRIE
+            STI R0, KBSR
+            SELF BR SELF
+            KBSR .fill xFE00
+            KBSRIE .fill x4000
+        .end
+
+        .orig x4000
+            HALT
+        .end
+        """
+        self.loadCode(snippet)
+
+        self.setConsoleInput("ADB")
+        self.setInterrupts(True)
+        self.setKeyboardInterruptDelay(100)
+
+        self.runCode(max_executions=110)
+        self.assertPc(0x4000)
+        self.assertEqual(self.state.executions, 101)
 
     def testReplayString(self):
         snippet = """

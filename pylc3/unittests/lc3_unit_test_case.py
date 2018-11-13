@@ -301,6 +301,14 @@ class LC3UnitTestCase(unittest.TestCase):
 
         self.preconditions.addEnvironment(PreconditionFlag.interrupts, setting)
 
+    def setKeyboardInterruptDelay(self, delay):
+        """Sets speed of which keyboard interrupts are generated.
+
+        Args:
+            delay: The delay in number of instructions.
+        """
+        self.state.keyboard_interrupt_delay = delay
+
     def setPluginsEnabled(self, setting):
         """Enables or disables plugins.
 

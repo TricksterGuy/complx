@@ -138,6 +138,9 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     state.savedssp = 0x3000;
     state.savedusp = 0xF000;
 
+    state.keyboard_int_counter = 0;
+    state.keyboard_int_delay = DEFAULT_KEYBOARD_INTERRUPT_DELAY;
+
     state.memory_ops.clear();
     state.total_reads = 0;
     state.total_writes = 0;
@@ -578,10 +581,11 @@ void lc3_check_keyboard_interrupt(lc3_state& state)
         // If interrupts are enabled for keyboard and interrupts are enabled and there is a character
         if (((state.mem[0xFE00] >> 14) & 1) && state.interrupt_enabled && state.input->peek() != EOF)
         {
-            ///TODO make the random jitter be configurable
-            if (rand() % 16 < 5)
+            state.keyboard_int_counter++;
+            if (state.keyboard_int_counter >= state.keyboard_int_delay)
             {
                 lc3_keyboard_interrupt(state);
+                state.keyboard_int_counter = 0;
             }
         }
     }

@@ -1,6 +1,7 @@
 #ifndef PYLC3_HPP
 #define PYLC3_HPP
 
+#include <algorithm>
 #include <sstream>
 #include <lc3_all.hpp>
 
@@ -162,6 +163,7 @@ public:
     unsigned short get_pc() const { return state.pc; }
     void set_pc(unsigned short pc) { state.pc = pc; }
     bool has_halted() const { return state.halted; }
+    unsigned int get_executions() const { return state.executions; }
 
     /** @see lc3_state.memory_ops */
     const std::map<unsigned short, lc3_memory_stats>& get_memory_ops() const { return state.memory_ops; }
@@ -187,7 +189,14 @@ public:
     void set_true_traps(bool setting) { lc3_set_true_traps(state, setting); }
     bool get_interrupts() const { return state.interrupt_enabled; }
     void set_interrupts(bool setting) { state.interrupt_enabled = setting; }
-    void enable_keyboard_interrupt() { state.interrupt_test.push_back(lc3_check_keyboard_interrupt); }
+    void enable_keyboard_interrupt()
+    {
+        const auto& it = std::find(state.interrupt_test.begin(), state.interrupt_test.end(), lc3_check_keyboard_interrupt);
+        if (it == state.interrupt_test.end())
+            state.interrupt_test.push_back(lc3_check_keyboard_interrupt);
+    }
+    unsigned int get_keyboard_interrupt_delay() const { return state.keyboard_int_delay; }
+    void set_keyboard_interrupt_delay(unsigned int delay) { state.keyboard_int_delay = delay; }
     bool get_strict_execution() const { return state.strict_execution; }
     void set_strict_execution(bool setting) { state.strict_execution = setting; }
 

@@ -148,6 +148,8 @@ enum DISASSEMBLE_LEVELS
     LC3_ADVANCED_DISASSEMBLE
 };
 
+#define DEFAULT_KEYBOARD_INTERRUPT_DELAY 1000
+
 class Plugin;
 class InstructionPlugin;
 class DeviceRegisterPlugin;
@@ -538,6 +540,8 @@ typedef struct lc3_state
     std::deque<int> interrupt_vector_stack; // Current stack of interrupts being handled.
     unsigned short savedusp;
     unsigned short savedssp;
+    unsigned int keyboard_int_delay; // Delay in instructions between keyboard interrupts
+    unsigned int keyboard_int_counter; // Counter for the above delay.
 
     // Debugging information.
     std::map<unsigned short, lc3_breakpoint_info> breakpoints;
