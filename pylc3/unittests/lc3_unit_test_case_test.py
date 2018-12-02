@@ -55,6 +55,9 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertEqual(self._readMem(0x0002), 0x0000)
         self.assertEqual(self._readMem(0x0003), 0x0002)
 
+        os.remove('sample.obj')
+        os.remove('sample.sym')
+
     def testRegister(self):
         snippet = """
         .orig x3000
