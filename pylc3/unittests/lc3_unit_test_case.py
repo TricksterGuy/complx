@@ -21,6 +21,7 @@ https://gist.github.com/TricksterGuy/f1e9e1c73dff231febe6d102345481e6
 import base64
 import enum
 from .. import pylc3
+import re
 import six
 import struct
 import unittest
@@ -194,12 +195,41 @@ class LC3UnitTestCase(unittest.TestCase):
         """Loads an assembly file.
 
         Will assert if the file failed to assemble.
+        Note this function uses my own assembler.
 
         Args:
             file: String - Full path to the assembly file to load.
         """
         status = self.state.load(file, disable_plugins=not self.enable_plugins, process_debug_comments=False)
         assert not status, ('Unable to load file %s\nReason: %s' % (file, status))
+
+    def loadPattObjAndSymFile(self, obj_file, sym_file):
+        """Loads an assembled object and symbol table file.
+
+        Note this function is only to be used on files assembled with the Patt/Patel's lc3tools.
+        It is preferred that loadAsmFile be used.
+
+        Args:
+            obj_file: String - Full path to the obj file to load.
+            sym_file: String - Full path to the sym file to load.
+        """
+        with open(obj_file, 'rb') as f:
+            loc, = struct.unpack('>H', f.read(2))
+            bytes = f.read(2)
+            while bytes:
+                data, = struct.unpack('>H', bytes)
+                self._writeMem(loc, data)
+                bytes = f.read(2)
+                loc += 1
+
+        with open(sym_file) as f:
+            line = f.readline()
+            while line:
+                m = re.search('//\t(\w+)\s*([0-9A-Fa-f]{4})', line)
+                if m:
+                    symbol, location = m.group(1), int(m.group(2), 16)
+                    self.state.add_symbol(symbol, location)
+                line = f.readline()
 
     def _lookup(self, label):
         """Gets the address of a label by looking it up in the symbol table.

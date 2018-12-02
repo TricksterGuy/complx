@@ -34,6 +34,27 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         os.remove("syntax_error.asm")
 
+    def testLoadPatt(self):
+        obj = six.b('\x00\x00\x20\x01\xF0\x25\x00\x00\x00\x02')
+        sym = ('// Symbol table\n'
+        '// Scope level 0:\n'
+        '//	Symbol Name       Page Address\n'
+        '//	----------------  ------------\n'
+        '//	A                 0002\n'
+        '//	B                 0003\n\n')
+        with open('sample.obj', 'wb') as f:
+            f.write(obj)
+        with open('sample.sym', 'w') as f:
+            f.write(sym)
+        self.loadPattObjAndSymFile('sample.obj', 'sample.sym')
+
+        self.assertEqual(self._lookup("A"), 2)
+        self.assertEqual(self._lookup("B"), 3)
+        self.assertEqual(self._readMem(0x0000), 0x2001)
+        self.assertEqual(self._readMem(0x0001) & 0xFFFF, 0xf025)
+        self.assertEqual(self._readMem(0x0002), 0x0000)
+        self.assertEqual(self._readMem(0x0003), 0x0002)
+
     def testRegister(self):
         snippet = """
         .orig x3000

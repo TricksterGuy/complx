@@ -72,6 +72,10 @@ public:
     int lookup(const std::string& symbol) { return lc3_sym_lookup(state, symbol); }
     /** @see lc3_sym_rev_lookup */
     const std::string reverse_lookup(unsigned short address) { return lc3_sym_rev_lookup(state, address); }
+    /** @see lc3_sym_add */
+    bool add_symbol(const std::string& symbol, unsigned short address) { return lc3_sym_add(state, symbol, address); }
+    /** @see lc3_sym_delete */
+    void delete_symbol(const std::string& symbol) { lc3_sym_delete(state, symbol); }
 
 
     /** Gets value at address, note that the difference between this and memory_read is that memory_read will trigger plugins and devices */
