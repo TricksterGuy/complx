@@ -7,7 +7,7 @@ Extensible LC-3 Simulator written in C++.  Includes a Graphical User Interface a
 __Special Note__ Let me know if your school is using any portion of the tools provided here. The tools are subject to change every semester as new features are added or stuff is tweaked based on student feedback. I don't want to break anyone's setup, and would like to keep users in the loop with changes and suggest features.
 
 # Overview
-complx is a suite of educational tools for learning lc3 assembly. It includes both a gui and cli based simulator (named complx and comp respectively), an assembler (as2obj), and a framework for testing and grading lc3 assembly code (lc3test).  Complx also be extended with plugins that add additional functionality to the LC3.  The tools also come with a C++ interface to the LC3 (liblc3). Complx was written using the wxWidgets library.
+complx is a suite of educational tools for learning lc3 assembly. It includes both a gui and cli based simulator (named complx and comp respectively), an assembler (as2obj), python bindings via pyLC3, and an autograder framework written in python.  Complx also be extended with plugins that add additional functionality to the LC3.  The tools also come with a C++ interface to the LC3 (liblc3) along with python bindings to it via [pyLC3](https://github.com/zucchini/pyLC3). Complx, the GUI simulator, was written using the wxWidgets library.
 
 # Installation
 
@@ -40,12 +40,12 @@ complx is a suite of educational tools for learning lc3 assembly. It includes bo
   * Can rearrange memory view, and filter out memory addresses you don't care about
   * Console which accepts input and displays output (and various warnings)
   * Can view comments from code from within simulator
-* Autograder framework lc3test which allows instructors/users to define tests in xml format and assign points (and partial credit) for each test.
+* Python bindings and a Python autograder framework via [pyLC3](https://github.com/zucchini/pyLC3)
 * Ability to extend complx via plugins
   * Currently complx ships with 5 plugins
     1. Black and white Display device
     2. Colored Display device
-    3. Random number generator that can be seeded via a write
+    3. Random number generator that can be seeded via a write to its address
     4. Plugin that changes opcode 0xD with a multiplication instruction
     5. Plugin that adds a new trap that performs division and modulus
   * Plugins can add new device registers, traps, send interrupts, and add a new instruction
