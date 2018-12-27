@@ -1,6 +1,6 @@
 complx
 ======
-[![Travis CI Build Status](https://travis-ci.org/TricksterGuy/complx.svg?branch=master)](https://travis-ci.org/TricksterGuy/complx)
+[![Travis CI Build Status](https://travis-ci.org/TricksterGuy/complx.svg?branch=restart)](https://travis-ci.org/TricksterGuy/complx)
 
 Extensible LC-3 Simulator written in C++.  Includes a Graphical User Interface and Command Line Interface simulator, Assembler, [Python Bindings](https://github.com/zucchini/pyLC3), and Python Autograder. Mainly used in CS2110 at Georgia Tech.  Maintained by Brandon (bwhitehead0308 [AT] gmail [DOT] com).
 
@@ -51,4 +51,4 @@ complx is a suite of educational tools for learning lc3 assembly. It includes bo
   * Plugins can add new device registers, traps, send interrupts, and add a new instruction
 
 # Screenshot
-![Main Screen](https://github.com/TricksterGuy/complx/blob/master/doc/main_screen.png)
+Soon to come...
