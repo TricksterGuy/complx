@@ -21,9 +21,9 @@ if(ENABLE_TESTS)
 endif(ENABLE_TESTS)
 
 # Require C++11 build
-if(NOT CMAKE_CXX_FLAGS MATCHES "-std=(c|gnu)\\+\\+11")
-    message(STATUS "This project requires C++11. Adding -std=c++11 to CXXFLAGS.")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" CACHE STRING "Flags used by the compiler during all build types." FORCE)
+if(NOT CMAKE_CXX_FLAGS MATCHES "-std=(c|gnu)\\+\\+17")
+    message(STATUS "This project requires C++17. Adding -std=c++17 to CXXFLAGS.")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17" CACHE STRING "Flags used by the compiler during all build types." FORCE)
 endif()
 
 # Additional debug flags
