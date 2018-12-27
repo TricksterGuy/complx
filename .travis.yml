@@ -17,7 +17,7 @@ before_install:
   - sudo pip install -r pylc3/requirements-build.txt
 
 script:
-  - mkdir build && cd build
+  - mkdir build-linux && cd build-linux
   - cmake -DENABLE_TESTS=ON -DENABLE_PYLC3=ON -DENABLE_COMPLX=OFF -DENABLE_AS2OBJ=OFF ..
   - make
   - sudo make install
