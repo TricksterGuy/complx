@@ -70,10 +70,9 @@ bool lc3_add_watch(lc3_state& state, bool is_reg, unsigned short data, const std
         assert(data <= 7);
         if (state.reg_watchpoints.find(data) != state.reg_watchpoints.end()) return true;
     }
-    else
+    else if (state.mem_watchpoints.find(data) != state.mem_watchpoints.end())
     {
-        assert(data <= 0xFFFF);
-        if (state.mem_watchpoints.find(data) != state.mem_watchpoints.end()) return true;
+        return true;
     }
 
     lc3_watchpoint_info info;

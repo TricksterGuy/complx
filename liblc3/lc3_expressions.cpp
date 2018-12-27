@@ -81,7 +81,7 @@ int get_pc(bool hasref, int ref)
         return calc_state->pc;
 }
 
-int get_mem(bool hasref, int ref)
+int get_mem(bool /*hasref*/, int ref)
 {
     return calc_state->mem[(unsigned short) ref];
 }

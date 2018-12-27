@@ -87,14 +87,14 @@ public:
       * This is not called when the user back steps.
       * @param state LC3State object.
       */
-    virtual void OnTick(lc3_state& state) {}
+    virtual void OnTick(lc3_state& state);
     /** OnTock
       *
       * Called at the end of the instruction execution cycle exactly after an instruction is executed.
       * This is not called when the user back steps.
       * @param state LC3State object.
       */
-    virtual void OnTock(lc3_state& state) {}
+    virtual void OnTock(lc3_state& state);
 
     /** Commit
       *

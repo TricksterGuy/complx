@@ -33,6 +33,17 @@ void Plugin::BindInterrupt(unsigned char int_vector)
     interrupts.insert(int_vector);
 }
 
+void Plugin::OnTick(lc3_state&)
+{
+
+}
+
+void Plugin::OnTock(lc3_state&)
+{
+
+}
+
+
 TrapFunctionPlugin::TrapFunctionPlugin(unsigned int _major, unsigned int _minor, const std::string& desc, unsigned char _vector) :
     Plugin(_major, _minor, LC3_TRAP, desc), vector(_vector)
 {
@@ -47,12 +58,11 @@ InstructionPlugin::InstructionPlugin(unsigned int major, unsigned int minor, con
 
 std::vector<RLEColorEntry> InstructionPlugin::GetInstructionColoring(unsigned short instr) const
 {
+    (void) instr;
     // By default do nothing.
     std::vector<RLEColorEntry> answer;
     return answer;
 }
-
-
 
 bool lc3_install_plugin(lc3_state& state, const std::string& filename, const PluginParams& params)
 {

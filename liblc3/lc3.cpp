@@ -89,7 +89,7 @@ std::string lc3_basic_disassemble(lc3_state& state, unsigned short data)
         // If all flags are off or offset is 0
         if (!(instr.br.n || instr.br.z || instr.br.p) || instr.br.pc_offset == 0)
         {
-            if (!(instr.br.n || instr.br.z || instr.br.p) && instr.br.pc_offset < 256)
+            if (!instr.br.n && !instr.br.z && !instr.br.p)
             {
                 // Hey do I have a printable character?
                 if (isprint(instr.br.pc_offset))
@@ -198,7 +198,7 @@ std::string lc3_normal_disassemble(lc3_state& state, unsigned short data)
         // If all flags are off
         if (!(instr.br.n || instr.br.z || instr.br.p) || instr.br.pc_offset == 0)
         {
-            if (!(instr.br.n || instr.br.z || instr.br.p) && instr.br.pc_offset < 256)
+            if (!instr.br.n && !instr.br.z && !instr.br.p)
             {
                 // Hey do I have a character?
                 if (isprint(instr.br.pc_offset))
@@ -686,7 +686,7 @@ int lc3_write_char(lc3_state& state, std::ostream& file, int chr)
     return state.writer(state, file, chr);
 }
 
-int lc3_do_write_char(lc3_state& state, std::ostream& file, int chr)
+int lc3_do_write_char(lc3_state&, std::ostream& file, int chr)
 {
     if (!file.good()) return -1;
     file.put((char) chr);
