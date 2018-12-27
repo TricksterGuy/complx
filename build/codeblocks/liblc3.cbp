@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="liblc3" />
+		<Option platforms="Windows;" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/liblc3" imp_lib="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option additional_output="bin/Debug/liblc3.a;" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/liblc3" imp_lib="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).a" def_file="$(TARGET_OUTPUT_DIR)$(TARGET_OUTPUT_BASENAME).def" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option additional_output="bin/Release/liblc3.a;" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-O3" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="$(#complx_deps.cflags)" />
+			<Add option='-DSO_SUFFIX=\&quot;.dll\&quot;' />
+			<Add directory="$(#complx_deps.include)" />
+		</Compiler>
+		<Linker>
+			<Add option="-lws2_32" />
+			<Add option="-ldl" />
+			<Add directory="$(#complx_deps.lib)" />
+		</Linker>
+		<Unit filename="../../liblc3/ExpressionEvaluator.cpp" />
+		<Unit filename="../../liblc3/ExpressionEvaluator.hpp" />
+		<Unit filename="../../liblc3/lc3.cpp" />
+		<Unit filename="../../liblc3/lc3.hpp" />
+		<Unit filename="../../liblc3/lc3_all.hpp" />
+		<Unit filename="../../liblc3/lc3_assemble.cpp" />
+		<Unit filename="../../liblc3/lc3_assemble.hpp" />
+		<Unit filename="../../liblc3/lc3_debug.cpp" />
+		<Unit filename="../../liblc3/lc3_debug.hpp" />
+		<Unit filename="../../liblc3/lc3_execute.cpp" />
+		<Unit filename="../../liblc3/lc3_execute.hpp" />
+		<Unit filename="../../liblc3/lc3_expressions.cpp" />
+		<Unit filename="../../liblc3/lc3_expressions.hpp" />
+		<Unit filename="../../liblc3/lc3_os.cpp" />
+		<Unit filename="../../liblc3/lc3_os.hpp" />
+		<Unit filename="../../liblc3/lc3_params.cpp" />
+		<Unit filename="../../liblc3/lc3_params.hpp" />
+		<Unit filename="../../liblc3/lc3_parser.cpp" />
+		<Unit filename="../../liblc3/lc3_parser.hpp" />
+		<Unit filename="../../liblc3/lc3_plugin.cpp" />
+		<Unit filename="../../liblc3/lc3_plugin.hpp" />
+		<Unit filename="../../liblc3/lc3_runner.cpp" />
+		<Unit filename="../../liblc3/lc3_runner.hpp" />
+		<Unit filename="../../liblc3/lc3_symbol.cpp" />
+		<Unit filename="../../liblc3/lc3_symbol.hpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
