@@ -59,19 +59,11 @@ add_definitions(-DPREFIX=${CMAKE_INSTALL_PREFIX})
 add_definitions(-DSO_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
 if(ENABLE_COMPLX)
-    set(wxWidgets_USE_LIBS stc xrc xml html adv net core base)
+    set(wxWidgets_USE_LIBS stc xrc xml html adv net core base aui propgrid)
     find_package(wxWidgets REQUIRED)
     set(CMAKE_SKIP_RPATH TRUE)
     include(${wxWidgets_USE_FILE})
 endif(ENABLE_COMPLX)
-
-if(CMAKE_HOST_WIN32)
-    # Needed for htons
-    set(LIBLC3_EXTRA_LIBS ws2_32)
-    # Windows doesn't set include directories correctly?
-    #include_directories("C:/msys/1.0/local/lib/wx/include/msw-unicode-3.0")
-    #include_directories("C:/msys/1.0/local/include/wx-3.0")
-endif(CMAKE_HOST_WIN32)
 
 include_directories(${complx-tools_SOURCE_DIR}/liblc3)
 include_directories(${complx-tools_SOURCE_DIR}/logging)
@@ -108,7 +100,6 @@ add_library(
 target_link_libraries(
     lc3
     dl
-    ${LIBLC3_EXTRA_LIBS}
 )
 
 add_library(
