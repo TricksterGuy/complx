@@ -20,7 +20,7 @@ if(ENABLE_TESTS)
     enable_testing()
 endif(ENABLE_TESTS)
 
-# Require C++11 build
+# Require C++17 build
 if(NOT CMAKE_CXX_FLAGS MATCHES "-std=(c|gnu)\\+\\+17")
     message(STATUS "This project requires C++17. Adding -std=c++17 to CXXFLAGS.")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17" CACHE STRING "Flags used by the compiler during all build types." FORCE)
@@ -36,7 +36,6 @@ if(ENABLE_COVERAGE)
     include(CodeCoverage)
     append_coverage_compiler_flags()
 endif(ENABLE_COVERAGE)
-
 
 # Set default warning flags
 set(PROJECT_WARNING_FLAGS "-Wall -Wno-deprecated -Wno-deprecated-declarations" CACHE STRING "Compiler warning flags to include")
@@ -59,7 +58,7 @@ add_definitions(-DPREFIX=${CMAKE_INSTALL_PREFIX})
 add_definitions(-DSO_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}")
 
 if(ENABLE_COMPLX)
-    set(wxWidgets_USE_LIBS stc xrc xml html adv net core base aui propgrid)
+    set(wxWidgets_USE_LIBS aui propgrid stc xrc xml html adv net core base)
     find_package(wxWidgets REQUIRED)
     set(CMAKE_SKIP_RPATH TRUE)
     include(${wxWidgets_USE_FILE})
@@ -68,61 +67,12 @@ endif(ENABLE_COMPLX)
 include_directories(${complx-tools_SOURCE_DIR}/liblc3)
 include_directories(${complx-tools_SOURCE_DIR}/logging)
 
-set(SRC_LIBLC3
-    liblc3/ExpressionEvaluator.cpp
-    liblc3/lc3_assemble.cpp
-    liblc3/lc3.cpp
-    liblc3/lc3_debug.cpp
-    liblc3/lc3_execute.cpp
-    liblc3/lc3_expressions.cpp
-    liblc3/lc3_os.cpp
-    liblc3/lc3_params.cpp
-    liblc3/lc3_parser.cpp
-    liblc3/lc3_plugin.cpp
-    liblc3/lc3_runner.cpp
-    liblc3/lc3_symbol.cpp
-)
-
-set(SRC_LOGGING
-    logging/logger.cpp
-)
-
-set(SRC_AS2OBJ
-    as2obj/main.cpp
-)
-
-add_library(
-    lc3
-    SHARED
-    ${SRC_LIBLC3}
-)
-
-target_link_libraries(
-    lc3
-    dl
-)
-
-add_library(
-    logger
-    SHARED
-    ${SRC_LOGGING}
-)
+add_subdirectory(liblc3)
+add_subdirectory(logging)
 
 if(ENABLE_AS2OBJ)
-    add_executable(
-        as2obj
-        ${SRC_AS2OBJ}
-    )
-
-    target_link_libraries(
-        as2obj
-        lc3
-    )
-
-    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/as2obj DESTINATION ${CMAKE_INSTALL_BINDIR})
+    add_subdirectory(as2obj)
 endif(ENABLE_AS2OBJ)
-
-install(TARGETS lc3 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if(ENABLE_REPLAY)
     add_subdirectory(replay)
