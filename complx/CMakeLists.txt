@@ -10,10 +10,11 @@ endif(CMAKE_HOST_UNIX)
 
 set(SRC_COMPLX
     data/MemoryViewDataModel.cpp
-    data/RegisterPropertyGridItems.cpp
+    data/RegisterProperty.cpp
     gen/ComplxFrameDecl.cpp
     ComplxApp.cpp
     ComplxFrame.cpp
+    MemoryView.cpp
 )
 
 add_executable(

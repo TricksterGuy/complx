@@ -2,6 +2,12 @@
 #include <sstream>
 #include <bitset>
 
+MemoryViewDataModel::MemoryViewDataModel(std::reference_wrapper<lc3_state>state, unsigned int _disassemble_level) :
+    wxDataViewVirtualListModel(0x10000), state_ref(state), disassemble_level(_disassemble_level)
+{
+
+}
+
 wxString MemoryViewDataModel::GetColumnType(unsigned int col) const
 {
     wxString ret;
@@ -37,41 +43,50 @@ wxString MemoryViewDataModel::GetColumnType(unsigned int col) const
     return ret;
 }
 
-void MemoryViewDataModel::GetValueByRow(wxVariant& variant, unsigned int row, unsigned int col) const
+void MemoryViewDataModel::GetValueByRow(wxVariant& variant, unsigned int row, unsigned int column) const
 {
-    //unsigned short addr = ViewToAddress(item);
-    //short data = state.mem[addr];
+    lc3_state& state = state_ref.get();
 
-    unsigned short addr = row;
-    unsigned short data = row;
     wxString ret = wxEmptyString;
-    std::stringstream binary;
-    std::bitset<16> b = data;
-    std::string instruction;
 
-    switch(col)
+    unsigned short pc = state.pc;
+    unsigned short addr = row; //ViewToAddress(row;
+    short data = state.mem[addr];
+
+    std::stringstream binary;
+    std::bitset<16> b;
+
+    switch(column)
     {
         case MemoryAddress:
-            ret = wxString::Format(_("%04X:"), addr);
+            ret = wxString::Format("%04X:", addr);
             break;
         case MemoryHexadecimal:
-            ret = wxString::Format(_("x%04X"), (unsigned short)data);
+            ret = wxString::Format("x%04X", static_cast<unsigned short>(data));
             break;
         case MemoryDecimal:
-            ret = wxString::Format(_("%d"), (short)data);
+            ret = wxString::Format("%d", data);
             break;
         case MemoryLabel:
-            ret = "don't label me";//wxString::FromUTF8(lc3_sym_rev_lookup(state, addr).c_str());
+            ret = lc3_sym_rev_lookup(state, addr);
             break;
         case MemoryInstruction:
-            ret = "ADD R0, R0, R0";
+            // Change the pc temporarily...
+            state.pc = addr + 1;
+            ret = lc3_disassemble(state, data, disassemble_level);
+            state.pc = pc;
             break;
         case MemoryBinary:
+            b = static_cast<unsigned short>(data);
             binary << b;
-            ret = wxString::FromUTF8(binary.str().c_str());
+            ret = binary.str();
             break;
         case MemoryComment:
-            ret = "Yeah test";
+            if (state.comments.find(addr) != state.comments.end())
+            {
+                ret = state.comments[addr];
+                ret.Replace("\n", " ", true);
+            }
             break;
         default:
             ret = wxEmptyString;

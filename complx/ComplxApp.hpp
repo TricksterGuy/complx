@@ -19,7 +19,7 @@ public:
     bool OnInit() override;
     int OnExit() override;
 private:
-    wxFrame* frame;
+    wxFrame* frame = nullptr;
 };
 
 #endif

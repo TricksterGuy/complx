@@ -1,6 +1,8 @@
 #ifndef MEMORY_VIEW_DATA_MODEL_HPP
 #define MEMORY_VIEW_DATA_MODEL_HPP
 
+#include <lc3_all.hpp>
+
 #include <wx/dataview.h>
 
 enum
@@ -19,7 +21,7 @@ enum
 class MemoryViewDataModel : public wxDataViewVirtualListModel
 {
 public:
-    MemoryViewDataModel() : wxDataViewVirtualListModel(0x10000) {}
+    MemoryViewDataModel(std::reference_wrapper<lc3_state> state, unsigned int disassemble_level = LC3_BASIC_DISASSEMBLE);
     ~MemoryViewDataModel() {}
 
     unsigned int GetColumnCount() const override { return MemorySize; }
@@ -29,6 +31,8 @@ public:
     bool SetValueByRow(const wxVariant& variant, unsigned int row, unsigned int col) override;
 
 private:
+    std::reference_wrapper<lc3_state> state_ref;
+    unsigned int disassemble_level;
 };
 
 
