@@ -1,11 +1,14 @@
 #include "MemoryViewDataModel.hpp"
-#include <sstream>
+
 #include <bitset>
+#include <sstream>
+
+#include "logger.hpp"
 
 MemoryViewDataModel::MemoryViewDataModel(std::reference_wrapper<lc3_state>state, unsigned int _disassemble_level) :
     wxDataViewVirtualListModel(0x10000), state_ref(state), disassemble_level(_disassemble_level)
 {
-
+    EventLog l(__func__);
 }
 
 wxString MemoryViewDataModel::GetColumnType(unsigned int col) const
@@ -97,5 +100,6 @@ void MemoryViewDataModel::GetValueByRow(wxVariant& variant, unsigned int row, un
 
 bool MemoryViewDataModel::SetValueByRow(const wxVariant& variant, unsigned int row, unsigned int col)
 {
+    EventLog l(__func__);
     return false;
 }

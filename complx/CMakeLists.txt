@@ -9,6 +9,7 @@ if(CMAKE_HOST_UNIX)
 endif(CMAKE_HOST_UNIX)
 
 set(SRC_COMPLX
+    data/MemoryViewBinaryDataRenderer.cpp
     data/MemoryViewDataModel.cpp
     data/RegisterProperty.cpp
     gen/ComplxFrameDecl.cpp
@@ -25,6 +26,7 @@ add_executable(
 target_link_libraries(
     complx
     lc3
+    logger
     ${wxWidgets_LIBRARIES}
     ${GLIB2_LIBRARIES}
 )

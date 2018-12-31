@@ -3,6 +3,8 @@
 
 #include <wx/valnum.h>
 
+#include "logger.hpp"
+
 const wxChar* bases[] = {
     wxT("Decimal"),
     wxT("Hexadecimal")
@@ -15,6 +17,7 @@ RegisterProperty::RegisterProperty(const wxString& property, std::reference_wrap
     base(display_base),
     base_property(new wxEnumProperty("Display As", wxPG_LABEL, bases, nullptr, base))
 {
+    EventLog l(__func__);
     SetClientData(reinterpret_cast<void*>(PropertyType::Register));
     base_property->SetClientData(reinterpret_cast<void*>(PropertyType::RegisterDisplayBase));
 
@@ -28,6 +31,7 @@ RegisterProperty::RegisterProperty(const wxString& property, std::reference_wrap
 
 bool RegisterProperty::ValidateValue(wxVariant& value, wxPGValidationInfo& validationInfo) const
 {
+    EventLog l(__func__);
     wxString str = value.GetString();
 
     bool isHex = str[0] == 'x';
@@ -64,6 +68,7 @@ bool RegisterProperty::ValidateValue(wxVariant& value, wxPGValidationInfo& valid
 
 void RegisterProperty::UpdateRegisterValue()
 {
+    EventLog l(__func__);
     short& reg = value.get();
     long convert;
 
@@ -83,6 +88,7 @@ void RegisterProperty::UpdateRegisterValue()
 
 void RegisterProperty::UpdateDisplayBase()
 {
+    EventLog l(__func__);
     base = base_property->GetChoiceSelection();
     wxString str = (base == Decimal) ? wxString::Format("%d", value.get()) :
                                        wxString::Format("x%04x", static_cast<unsigned short>(value.get()));

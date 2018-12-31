@@ -1,9 +1,14 @@
 #include "MemoryView.hpp"
 #include "data/MemoryViewDataModel.hpp"
 
+#include <wx/settings.h>
+
+#include "logger.hpp"
+
 MemoryView::MemoryView(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxValidator& validator, const wxString& name) :
     wxDataViewCtrl(parent, id, pos, size, style, validator, name)
 {
+    EventLog l(__func__);
     AppendColumn(new wxDataViewColumn("",               new wxDataViewTextRenderer(), MemoryInfo,           32));
     AppendColumn(new wxDataViewColumn("Address",        new wxDataViewTextRenderer(), MemoryAddress));
     AppendColumn(new wxDataViewColumn("Hexadecimal",    new wxDataViewTextRenderer(), MemoryHexadecimal));
