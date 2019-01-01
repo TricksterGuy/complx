@@ -9,10 +9,22 @@ public:
     MemoryViewBinaryDataRenderer();
     ~MemoryViewBinaryDataRenderer() {}
 
-    bool Render(wxRect cell, wxDC *dc, int state) override;
+    bool SetValue(const wxVariant& value) override;
+    bool GetValue(wxVariant& value) const override;
 
-protected:
+    bool Render(wxRect rect, wxDC* dc, int state) override;
+    wxSize GetSize() const override;
+
+    // in-place editing
+    bool HasEditorCtrl() const override;
+    wxWindow* CreateEditorCtrl(wxWindow* parent, wxRect labelRect, const wxVariant& value) override;
+    bool GetValueFromEditorCtrl(wxWindow* editor, wxVariant& value) override;
+
 private:
+    wxString FormBinary(unsigned short value);
+    void InstructionColor(wxDC& dc, const wxString& binary, wxRect rect) const;
+
+    long value;
 };
 
 

@@ -1,8 +1,5 @@
 #include "MemoryViewDataModel.hpp"
 
-#include <bitset>
-#include <sstream>
-
 #include "logger.hpp"
 
 MemoryViewDataModel::MemoryViewDataModel(std::reference_wrapper<lc3_state>state, unsigned int _disassemble_level) :
@@ -17,7 +14,7 @@ wxString MemoryViewDataModel::GetColumnType(unsigned int col) const
     switch(col)
     {
         case MemoryInfo:
-            ret = "null";
+            ret = "wxBitmap";
             break;
         case MemoryAddress:
             ret = "string";
@@ -29,7 +26,7 @@ wxString MemoryViewDataModel::GetColumnType(unsigned int col) const
             ret = "string";
             break;
         case MemoryBinary:
-            ret = "string";
+            ret = "long";
             break;
         case MemoryLabel:
             ret = "string";
@@ -56,11 +53,11 @@ void MemoryViewDataModel::GetValueByRow(wxVariant& variant, unsigned int row, un
     unsigned short addr = row; //ViewToAddress(row;
     short data = state.mem[addr];
 
-    std::stringstream binary;
-    std::bitset<16> b;
-
     switch(column)
     {
+        case MemoryInfo:
+            variant << wxNullBitmap;
+            return;
         case MemoryAddress:
             ret = wxString::Format("%04X:", addr);
             break;
@@ -80,10 +77,8 @@ void MemoryViewDataModel::GetValueByRow(wxVariant& variant, unsigned int row, un
             state.pc = pc;
             break;
         case MemoryBinary:
-            b = static_cast<unsigned short>(data);
-            binary << b;
-            ret = binary.str();
-            break;
+            variant = static_cast<long>(data);
+            return;
         case MemoryComment:
             if (state.comments.find(addr) != state.comments.end())
             {

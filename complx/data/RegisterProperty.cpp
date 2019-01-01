@@ -1,6 +1,7 @@
 #include "RegisterProperty.hpp"
 #include "PropertyTypes.hpp"
 
+#include <wx/debug.h>
 #include <wx/valnum.h>
 
 #include "logger.hpp"
@@ -76,12 +77,14 @@ void RegisterProperty::UpdateRegisterValue()
 
     if (str[0] == 'x')
     {
-        str.Mid(1).ToCULong(reinterpret_cast<unsigned long*>(&convert), 16);
+        bool ret = str.Mid(1).ToCULong(reinterpret_cast<unsigned long*>(&convert), 16);
+        wxASSERT(ret);
         reg = convert;
     }
     else
     {
-        str.ToCLong(&convert, 10);
+        bool ret = str.ToCLong(&convert, 10);
+        wxASSERT(ret);
         reg = convert;
     }
 }
