@@ -22,7 +22,10 @@ ComplxFrame::ComplxFrame() : ComplxFrameDecl(nullptr), memoryViewModel(new Memor
 
         registerProperties.push_back(property);
     }
+
     statePropGridManager->GetGrid()->CenterSplitter();
+
+    memoryView->ScrollLines(13);
 }
 
 ComplxFrame::~ComplxFrame()

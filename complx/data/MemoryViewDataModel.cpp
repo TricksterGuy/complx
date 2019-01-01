@@ -1,4 +1,5 @@
 #include "MemoryViewDataModel.hpp"
+#include "MemoryViewInfoState.hpp"
 
 #include "logger.hpp"
 
@@ -14,7 +15,8 @@ wxString MemoryViewDataModel::GetColumnType(unsigned int col) const
     switch(col)
     {
         case MemoryInfo:
-            ret = "wxBitmap";
+            // Technically a MemoryViewInfoState
+            ret = "long";
             break;
         case MemoryAddress:
             ret = "string";
@@ -52,11 +54,34 @@ void MemoryViewDataModel::GetValueByRow(wxVariant& variant, unsigned int row, un
     unsigned short pc = state.pc;
     unsigned short addr = row; //ViewToAddress(row;
     short data = state.mem[addr];
+    long info = 0;
 
     switch(column)
     {
         case MemoryInfo:
-            variant << wxNullBitmap;
+            if (state.pc == addr)
+                info |= DRAW_PC;
+            if  (state.breakpoints.find(addr) != state.breakpoints.end())
+            {
+                info |= DRAW_BREAKPOINT;
+                if (!state.breakpoints[addr].enabled)
+                    info |= BREAKPOINT_DISABLED;
+            }
+            if  (state.blackboxes.find(addr) != state.blackboxes.end())
+            {
+                info |= DRAW_BLACKBOX;
+                if (!state.blackboxes[addr].enabled)
+                    info |= BLACKBOX_DISABLED;
+            }
+            if (state.mem_watchpoints.find(addr) != state.mem_watchpoints.end())
+            {
+                info |= DRAW_WATCHPOINT;
+                if (!state.mem_watchpoints[addr].enabled)
+                    info |= WATCHPOINT_DISABLED;
+            }
+            if (state.halted)
+                info |= IS_HALTED;
+            variant = info;
             return;
         case MemoryAddress:
             ret = wxString::Format("%04X:", addr);

@@ -10,9 +10,11 @@ endif(CMAKE_HOST_UNIX)
 
 set(SRC_COMPLX
     data/MemoryViewBinaryDataRenderer.cpp
+    data/MemoryViewInfoDataRenderer.cpp
     data/MemoryViewDataModel.cpp
     data/RegisterProperty.cpp
     gen/ComplxFrameDecl.cpp
+    util/GuiConstants.cpp
     ComplxApp.cpp
     ComplxFrame.cpp
     MemoryView.cpp
