@@ -29,7 +29,7 @@ MemoryView::MemoryView(wxWindow* parent, wxWindowID id, const wxPoint& pos, cons
 
     AppendColumn(new wxDataViewColumn("Binary",         new MemoryViewBinaryDataRenderer(), MemoryBinary,   binary_column_width,    wxALIGN_CENTER,     cell_flags));
 
-    AppendTextColumn("Label",           MemoryLabel,            wxDATAVIEW_CELL_EDITABLE,   -1, wxALIGN_LEFT,   cell_flags);
+    AppendTextColumn("Label",           MemoryLabel,            wxDATAVIEW_CELL_INERT,   -1, wxALIGN_LEFT,   cell_flags);
     AppendTextColumn("Instruction",     MemoryInstruction,      wxDATAVIEW_CELL_EDITABLE,   128, wxALIGN_LEFT,   cell_flags);
     AppendTextColumn("Comment",         MemoryComment,          wxDATAVIEW_CELL_INERT,      -1, wxALIGN_LEFT,   cell_flags);
 }
