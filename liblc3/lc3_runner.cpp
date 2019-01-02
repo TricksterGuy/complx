@@ -110,6 +110,7 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
         // Necessary since lc3_randomize only randomizes if a location is 0.
         // This is a problem if we don't do this, since memory is dirty from
         // a previous call to lc3_randomize, so just zero out everything here.
+        /// TODO rewrite so this isn't an issue.  Mainly the LC3 OS is the issue here and not clobbering memory that should be zero'd there.
         memset(state.mem, 0, 65536 * sizeof(short));
         lc3_randomize(state);
     }

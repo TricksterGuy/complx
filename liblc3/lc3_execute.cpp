@@ -621,7 +621,9 @@ short lc3_mem_read(lc3_state& state, unsigned short addr, bool privileged)
         switch(addr)
         {
         case DEV_KBSR:
-            if (rand() % 16 < 5)
+            /// TODO remove this call to lc3_random.  Its ok though since the state is already initialized and the sequence of rand calls is guaranteed to be the same
+            /// Unless the code polls from both status registers at the same time...
+            if (lc3_random(state) % 16 < 5)
             {
                 int val = state.peek(state, *state.input);
                 if (val != -1)
@@ -644,7 +646,9 @@ short lc3_mem_read(lc3_state& state, unsigned short addr, bool privileged)
             }
             break;
         case DEV_DSR:
-            if (rand() % 4 < 1)
+            /// TODO remove this call to lc3_random.  Its ok though since the state is already initialized and the sequence of rand calls is guaranteed to be the same
+            /// Unless the code polls from both status registers at the same time...
+            if (lc3_random(state) % 4 < 1)
             {
                 state.mem[DEV_DSR] = (short)(1 << 15);
             }
