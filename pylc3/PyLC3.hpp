@@ -137,11 +137,11 @@ public:
         return true;
     }
 
-    /** @see srand */
-    void seed(unsigned int seed) { srand(seed); }
+    /** Sets the seed used when initializing state */
+    void seed(unsigned int seed) { state.default_seed = seed; }
 
     /** @see lc3_random */
-    short random() { return lc3_random(); }
+    short random() { return lc3_random(state); }
 
     int get_r0() const { return state.regs[0]; }
     void set_r0(int r0) { state.regs[0] = r0; }
