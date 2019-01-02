@@ -186,14 +186,10 @@ std::string MultiplyPlugin::OnDisassemble(lc3_state& state, lc3_instr& instr, un
 
 const RLEColorEntry mulColorings[2][4] =
 {
-    {{96, 0, 0, 3}, {0, 0, 80, 3}, {0, 0, 0, 1}, {0, 0, 80, 5}}, // IMM Version
-    {{96, 0, 0, 3}, {0, 0, 80, 3}, {0, 0, 0, 3}, {0, 0, 80, 3}}, // REG Version
+    {{"DR_COLOR", 96, 0, 0, 3}, {"SR_COLOR", 0, 0, 80, 3}, {"UNUSED_BITS_COLOR", 0, 0, 0, 1}, {"IMM_COLOR", 0, 0, 80, 5}}, // IMM Version
+    {{"DR_COLOR", 96, 0, 0, 3}, {"SR_COLOR", 0, 0, 80, 3}, {"UNUSED_BITS_COLOR", 0, 0, 0, 3}, {"SR_COLOR", 0, 0, 80, 3}},  // REG Version
 };
 
-/** @brief GetInstructionColoring
-  *
-  * @todo: document this function
-  */
 std::vector<RLEColorEntry> MultiplyPlugin::GetInstructionColoring(unsigned short instr) const
 {
     // Just like the ADD instruction

@@ -1,5 +1,6 @@
 #include "GuiConstants.hpp"
 
+/// TODO Support reading all of these values through config using the values defined here as defaults.
 GuiConstants::GuiConstants()
 {
 
@@ -29,4 +30,7 @@ GuiConstants::GuiConstants()
     };
 #endif
 
+    color_map = {
+
+    };
 }

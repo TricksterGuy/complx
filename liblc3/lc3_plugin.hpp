@@ -178,15 +178,17 @@ struct LC3AssembleContext;
   * For Instruction Coloring.
   * These determine the color of each bit in the Binary column in the GUI.
   * This can only control the least significant 12 bits of the binary representation.
-  * These entries have a color and a number of bits to color.
+  * These entries have a name, a color (r, g, b), and a number of bits to color.
+  * The color can be overridden in the GUI via a config entry with name mapping to a color.
   * The ordering is from most significant to least significant bit.
   */
 struct RLEColorEntry
 {
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
-    unsigned char length;
+    std::string name = "";
+    unsigned char r = 0;
+    unsigned char g = 0;
+    unsigned char b = 0;
+    unsigned char length = 0;
 };
 
 /** Represents a brand new instruction replacing the ERROR instruction opcode 0xD

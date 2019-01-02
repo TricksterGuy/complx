@@ -33,9 +33,9 @@ void MemoryViewInfoDataRenderer::DoRender(wxDC& dc, wxRect rect) const
     if (state & DRAW_PC)
     {
         wxPoint triangle[3] = {
-            {32 - 14, 4},
-            {32 - 14, 18},
-            {32 , 11}
+            {32 - 14, 3},
+            {32 - 14, 17},
+            {32 , 10}
         };
         triangle[0] += rect.GetTopLeft();
         triangle[1] += rect.GetTopLeft();

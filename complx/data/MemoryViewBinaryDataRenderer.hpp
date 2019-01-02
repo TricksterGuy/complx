@@ -21,9 +21,7 @@ public:
     bool GetValueFromEditorCtrl(wxWindow* editor, wxVariant& value) override;
 
 private:
-    wxString FormBinary(unsigned short value);
     void InstructionColor(wxDC& dc, const wxString& binary, wxRect rect) const;
-
     long value;
 };
 

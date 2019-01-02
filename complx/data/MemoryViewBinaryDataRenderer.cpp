@@ -1,15 +1,15 @@
 #include "MemoryViewBinaryDataRenderer.hpp"
-
-
-#include <wx/dc.h>
-#include <wx/debug.h>
-#include <wx/settings.h>
-#include <wx/valtext.h>
+#include "../util/GuiConstants.hpp"
 
 #include <bitset>
 #include <sstream>
 
 #include <lc3_all.hpp>
+
+#include <wx/dc.h>
+#include <wx/debug.h>
+#include <wx/settings.h>
+#include <wx/valtext.h>
 
 enum Colorings
 {
@@ -26,19 +26,47 @@ enum Colorings
     COLORINGS_SIZE
 };
 
+RLEColorEntry defaultColoring = {"UNUSED_BITS_COLOR", 0, 0, 0, 12};
+RLEColorEntry opcodeColoring = {"OPCODE_COLOR", 0, 96, 96, 4};
+
 RLEColorEntry instrColorings[COLORINGS_SIZE][4] =
 {
-    {{160, 64, 64, 1},  {64, 64, 160, 1},   {64, 160, 64, 1},   {48, 48, 72, 9} },
-    {{0, 0, 0, 1},      {48, 48, 72, 11}                                        },
-    {{0, 0, 0, 3},      {0, 0, 80, 3},      {0, 0, 0, 6}                        },
-    {{0, 0, 0, 4},      {48, 48, 72, 8}                                         },
-    {{96, 0, 0, 3},     {0, 0, 80, 3},      {0, 0, 0, 1},       {0, 0, 80, 5}   },
-    {{96, 0, 0, 3},     {0, 0, 80, 3},      {0, 0, 0, 3},       {0, 0, 80, 3}   },
-    {{96, 0, 0, 3},     {0, 0, 80, 3},      {0, 0, 0, 6}                        },
-    {{96, 0, 0, 3},     {48, 48, 72, 9}                                         },
-    {{96, 0, 0, 3},     {0, 0, 80, 3},      {48, 48, 72, 6}                     },
-    {{0, 0, 0, 12}                                                              },
+    {{"BRN_COLOR", 160, 64, 64, 1},     {"BRZ_COLOR", 64, 64, 160, 1},      {"BRP_COLOR", 64, 160, 64, 1},      {"PCOFFSET_COLOR", 48, 48, 72, 9}   },
+    {{"UNUSED_BITS_COLOR", 0, 0, 0, 1}, {"PCOFFSET_COLOR", 48, 48, 72, 11}                                                                          },
+    {{"UNUSED_BITS_COLOR", 0, 0, 0, 3}, {"SR_COLOR", 0, 0, 80, 3},          {"UNUSED_BITS_COLOR", 0, 0, 0, 6}                                       },
+    {{"UNUSED_BITS_COLOR", 0, 0, 0, 4}, {"VECTOR_COLOR", 48, 48, 72, 8}                                                                             },
+    {{"DR_COLOR", 96, 0, 0, 3},         {"SR_COLOR", 0, 0, 80, 3},          {"UNUSED_BITS_COLOR", 0, 0, 0, 1},  {"IMM_COLOR", 0, 0, 80, 5}          },
+    {{"DR_COLOR", 96, 0, 0, 3},         {"SR_COLOR", 0, 0, 80, 3},          {"UNUSED_BITS_COLOR", 0, 0, 0, 3},  {"SR_COLOR", 0, 0, 80, 3}           },
+    {{"DR_COLOR", 96, 0, 0, 3},         {"SR_COLOR", 0, 0, 80, 3},          {"UNUSED_BITS_COLOR", 0, 0, 0, 6}                                       },
+    {{"DR_COLOR", 96, 0, 0, 3},         {"PCOFFSET_COLOR", 48, 48, 72, 9}                                                                           },
+    {{"DR_COLOR", 96, 0, 0, 3},         {"SR_COLOR", 0, 0, 80, 3},          {"OFFSET_COLOR", 48, 48, 72, 6}                                         },
+    {{"UNUSED_BITS_COLOR", 0, 0, 0, 12}                                                                                                             },
 };
+
+namespace {
+
+wxColour GetColor(const RLEColorEntry& rle)
+{
+    if (GuiConstants().HasColor(rle.name))
+        return GuiConstants().GetColor(rle.name);
+    else
+        return wxColour(rle.r, rle.g, rle.b);
+}
+
+wxBrush GetBrush(const RLEColorEntry& rle)
+{
+    return wxBrush(GetColor(rle));
+}
+
+wxString FormBinary(unsigned short value)
+{
+    std::stringstream binary;
+    std::bitset<16> b = value;
+    binary << b;
+    return binary.str();
+}
+
+}
 
 MemoryViewBinaryDataRenderer::MemoryViewBinaryDataRenderer() :
     wxDataViewCustomRenderer("long", wxDATAVIEW_CELL_EDITABLE)
@@ -76,23 +104,23 @@ void MemoryViewBinaryDataRenderer::InstructionColor(wxDC& dc, const wxString& bi
     const wxCoord char_height = rect.GetHeight();
     const wxPoint start = rect.GetTopLeft();
 
-    dc.SetTextForeground(*wxWHITE);
     dc.SetPen(*wxTRANSPARENT_PEN);
+    dc.SetTextForeground(*wxWHITE);
 
     unsigned short instr = static_cast<unsigned short>(value);
     int opcode = (instr >> 12) & 0xF;
 
-    // If data just draw in black.
+    // If data just draw it all in black.
     if (instr >> 9 == 0 || (instr & (~0xE00)) == 0)
     {
-        dc.SetBrush(*wxBLACK_BRUSH);
+        dc.SetBrush(GetBrush(defaultColoring));
         dc.DrawRectangle(start, wxSize(char_width * 16, char_height));
         dc.DrawText(binary, start);
         return;
     }
 
     // Draw Opcode
-    dc.SetBrush(wxBrush(wxColour(0, 96, 96)));
+    dc.SetBrush(GetBrush(opcodeColoring));
     dc.DrawRectangle(start, wxSize(char_width * 4, char_height));
     dc.DrawText(binary.Mid(0, 4), start);
 
@@ -146,20 +174,20 @@ void MemoryViewBinaryDataRenderer::InstructionColor(wxDC& dc, const wxString& bi
             break;
     }
 
-    unsigned int colored = 0;
-    unsigned int colorptr = 0;
-    while (colored < 12)
-    {
-        RLEColorEntry& entry = colors[colorptr];
-        dc.SetBrush(wxBrush(wxColour(entry.r, entry.g, entry.b)));
+    // Defend against bad instruction plugin that didn't implement GetInstructionColoring correctly.
+    if (colors.empty())
+        colors.assign(instrColorings[NULL_TYPE], instrColorings[NULL_TYPE] + 4);
 
-        wxPoint loc = start + wxSize((colored + 4) * char_width, 0);
+    unsigned int colored = 4;
+    for (const auto& entry : colors)
+    {
+        dc.SetBrush(GetBrush(entry));
+
+        wxPoint loc = start + wxSize((colored) * char_width, 0);
         wxSize rect_size(entry.length * char_width, char_height);
         dc.DrawRectangle(loc, rect_size);
-        dc.DrawText(binary.Mid(colored + 4, entry.length), loc);
-
+        dc.DrawText(binary.Mid(colored, entry.length), loc);
         colored += entry.length;
-        colorptr++;
     }
 }
 
@@ -221,12 +249,4 @@ bool MemoryViewBinaryDataRenderer::GetValueFromEditorCtrl(wxWindow* editor, wxVa
     value = binary;
 
     return true;
-}
-
-wxString MemoryViewBinaryDataRenderer::FormBinary(unsigned short value)
-{
-    std::stringstream binary;
-    std::bitset<16> b = value;
-    binary << b;
-    return binary.str();
 }
