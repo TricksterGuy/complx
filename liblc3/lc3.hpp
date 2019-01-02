@@ -1,14 +1,15 @@
 #ifndef LC3_HPP
 #define LC3_HPP
 
-#include <string>
-#include <fstream>
+#include <cstdlib>
 #include <deque>
+#include <fstream>
+#include <list>
 #include <map>
 #include <memory>
-#include <list>
+#include <random>
+#include <string>
 #include <vector>
-#include <cstdlib>
 
 /** Sign Character */
 #define SIGN_CHR(x) (((x) < 0) ? "-" : "+")
@@ -529,6 +530,11 @@ typedef struct lc3_state
     // First layer of trap calls (In case of multi recursion).
     std::vector<lc3_trap_call_info> first_level_traps;
 
+    // Random number generator
+    std::mt19937 rng;
+    std::uniform_int_distribution<unsigned short> dist;
+    unsigned int default_seed = 0;
+
     // Warn limit map
     std::map<int, unsigned int> warn_stats;
     std::map<int, unsigned int> warn_limits;
@@ -682,7 +688,7 @@ int lc3_write_str(lc3_state& state, int (*writer)(lc3_state& state, std::ostream
   */
 inline void lc3_set_true_traps(lc3_state& state, bool value) {state.true_traps = value;}
 /** Generate a random number LC-3 */
-inline unsigned short lc3_random(void) {return rand() & 0xFFFF;}
+inline unsigned short lc3_random(lc3_state& state) { return state.dist(state.rng); }
 /** lc3_randomize
   *
   * Randomizes LC3 Memory

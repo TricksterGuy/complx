@@ -163,7 +163,7 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
             break;
         case 1:
             srand(memory_strategy_value);
-            random_value = lc3_random();
+            random_value = lc3_random(state);
             lc3_init(state, false, false, random_value, random_value);
             break;
         case 2:

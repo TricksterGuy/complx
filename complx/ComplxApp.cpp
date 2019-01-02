@@ -29,8 +29,6 @@ bool ComplxApp::OnInit()
     SetVendorName("Complx");
     SetAppName("Complx");
 
-    srand(time(NULL));
-
     frame = new ComplxFrame();
     frame->Show();
 

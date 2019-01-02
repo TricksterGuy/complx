@@ -9,6 +9,8 @@ ComplxFrame::ComplxFrame() : ComplxFrameDecl(nullptr), memoryViewModel(new Memor
 {
     EventLog l(__func__);
 
+    state.default_seed = time(NULL);
+    InfoLog("Random Seed %u", state.default_seed);
     lc3_init(state);
 
     memoryView->AssociateModel(memoryViewModel.get());

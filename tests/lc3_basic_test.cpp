@@ -1501,3 +1501,18 @@ BOOST_FIXTURE_TEST_CASE(InstructionAssembleTest, LC3BasicTest)
     BOOST_CHECK_EQUAL(state.symbols["A"], 0x3004);
     BOOST_CHECK_EQUAL(state.symbols["B"], 0x3005);
 }
+
+BOOST_FIXTURE_TEST_CASE(InitRandomTest, LC3BasicTest)
+{
+    state.default_seed = 1000;
+
+    lc3_init(state);
+
+    unsigned short first = lc3_random(state);
+
+    lc3_init(state);
+
+    unsigned short second = lc3_random(state);
+
+    BOOST_CHECK_EQUAL(first, second);
+}

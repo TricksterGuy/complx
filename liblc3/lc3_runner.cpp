@@ -45,15 +45,18 @@ void lc3_trace(lc3_state& state)
 
 void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory, short register_fill_value, short memory_fill_value)
 {
+    state.dist.reset();
+    state.rng.seed(state.default_seed);
+
     // Set Registers
-    state.regs[0] = randomize_registers ? lc3_random() : register_fill_value;
-    state.regs[1] = randomize_registers ? lc3_random() : register_fill_value;
-    state.regs[2] = randomize_registers ? lc3_random() : register_fill_value;
-    state.regs[3] = randomize_registers ? lc3_random() : register_fill_value;
-    state.regs[4] = randomize_registers ? lc3_random() : register_fill_value;
-    state.regs[5] = randomize_registers ? lc3_random() : register_fill_value;
-    state.regs[6] = randomize_registers ? lc3_random() : register_fill_value;
-    state.regs[7] = randomize_registers ? lc3_random() : register_fill_value;
+    state.regs[0] = randomize_registers ? lc3_random(state) : register_fill_value;
+    state.regs[1] = randomize_registers ? lc3_random(state) : register_fill_value;
+    state.regs[2] = randomize_registers ? lc3_random(state) : register_fill_value;
+    state.regs[3] = randomize_registers ? lc3_random(state) : register_fill_value;
+    state.regs[4] = randomize_registers ? lc3_random(state) : register_fill_value;
+    state.regs[5] = randomize_registers ? lc3_random(state) : register_fill_value;
+    state.regs[6] = randomize_registers ? lc3_random(state) : register_fill_value;
+    state.regs[7] = randomize_registers ? lc3_random(state) : register_fill_value;
 
     // PC is initially at address 3000
     /// TODO Add PC parameter and avoid hardcoding this value.
@@ -63,9 +66,8 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     state.privilege = 1;
     state.priority = 0;
 
-
     // Set Control Flags
-    short rand_value = randomize_registers ? lc3_random() : register_fill_value;
+    short rand_value = randomize_registers ? lc3_random(state) : register_fill_value;
     state.n = rand_value < 0;
     state.z = rand_value == 0;
     state.p = rand_value > 0;
@@ -105,6 +107,10 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     // Clear memory
     if (randomize_memory)
     {
+        // Necessary since lc3_randomize only randomizes if a location is 0.
+        // This is a problem if we don't do this, since memory is dirty from
+        // a previous call to lc3_randomize, so just zero out everything here.
+        memset(state.mem, 0, 65536 * sizeof(short));
         lc3_randomize(state);
     }
     else
@@ -146,6 +152,8 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     state.total_writes = 0;
 
     state.trace.reset(nullptr);
+
+
 
     state.in_lc3test = false;
 }

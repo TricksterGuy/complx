@@ -715,11 +715,11 @@ void lc3_randomize(lc3_state& state)
     for (int i = 0x200; i < 0x3000; i++)
     {
         if (!state.mem[i])
-            state.mem[i] = lc3_random();
+            state.mem[i] = lc3_random(state);
     }
 
     // Stage 3 write over it all (even device registers).
     for (int i = 0x3000; i <= 0xFFFF; i++)
-        state.mem[i] = lc3_random();
+        state.mem[i] = lc3_random(state);
 }
 
