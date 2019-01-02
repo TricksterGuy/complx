@@ -45,7 +45,7 @@ inline const char* GetLogAbbrev(LogLevel level)
 
 inline const char* GetLogColor(LogLevel level)
 {
-#ifndef WINDOWS
+#ifdef _WIN32
     switch(level)
     {
     case LogLevel::FATAL:

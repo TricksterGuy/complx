@@ -68,7 +68,7 @@ bool lc3_install_plugin(lc3_state& state, const std::string& filename, const Plu
 {
     std::string realfilename = "lib" + filename + SO_SUFFIX;
 #ifdef PLUGIN_INSTALL_PREFIX
-#ifdef WINDOWS
+#ifdef _WIN32
     std::string full_path = PLUGIN_INSTALL_PREFIX + "\\" + realfilename;
 #else
     std::string full_path = PLUGIN_INSTALL_PREFIX + "/" + realfilename;
