@@ -16,7 +16,8 @@ public:
     wxSize GetSize() const override;
 
 private:
-    void DoRender(wxDC& dc, wxSize size) const;
+    void DoRender(wxDC& dc, wxRect rect) const;
+    // See MemoryViewInfoState enum
     long state;
 };
 

@@ -14,6 +14,7 @@ public:
     MemoryView(wxWindow *parent, wxWindowID id, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize, long style=0, const wxValidator &validator=wxDefaultValidator, const wxString &name=wxDataViewCtrlNameStr);
     ~MemoryView() {}
 
+    void ScrollTo(unsigned short address);
 private:
     std::optional<std::reference_wrapper<lc3_state>> state;
 };

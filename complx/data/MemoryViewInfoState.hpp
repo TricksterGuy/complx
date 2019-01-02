@@ -1,6 +1,7 @@
 #ifndef MEMORY_VIEW_INFO_STATE_HPP
 #define MEMORY_VIEW_INFO_STATE_HPP
 
+/// Represents what to render in the Info Column in MemoryView.
 enum MemoryViewInfoState
 {
     DRAW_PC = 1,

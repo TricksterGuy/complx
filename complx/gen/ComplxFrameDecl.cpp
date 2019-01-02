@@ -18,26 +18,30 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	m_mgr.SetManagedWindow(this);
 	m_mgr.SetFlags(wxAUI_MGR_DEFAULT);
 
-	m_menubar3 = new wxMenuBar( 0 );
+	menuBar = new wxMenuBar( 0 );
 	menuFile = new wxMenu();
-	m_menubar3->Append( menuFile, wxT("File") );
+	wxMenuItem* menuFileExit;
+	menuFileExit = new wxMenuItem( menuFile, wxID_EXIT, wxString( wxT("&Exit") ) + wxT('\t') + wxT("Alt+F4"), wxT("Exits the Program"), wxITEM_NORMAL );
+	menuFile->Append( menuFileExit );
+
+	menuBar->Append( menuFile, wxT("File") );
 
 	menuView = new wxMenu();
-	m_menubar3->Append( menuView, wxT("View") );
+	menuBar->Append( menuView, wxT("View") );
 
 	menuState = new wxMenu();
-	m_menubar3->Append( menuState, wxT("State") );
+	menuBar->Append( menuState, wxT("State") );
 
 	menuDebug = new wxMenu();
-	m_menubar3->Append( menuDebug, wxT("Debug") );
+	menuBar->Append( menuDebug, wxT("Debug") );
 
 	menuTest = new wxMenu();
-	m_menubar3->Append( menuTest, wxT("Test") );
+	menuBar->Append( menuTest, wxT("Test") );
 
 	menuHelp = new wxMenu();
-	m_menubar3->Append( menuHelp, wxT("Help") );
+	menuBar->Append( menuHelp, wxT("Help") );
 
-	this->SetMenuBar( m_menubar3 );
+	this->SetMenuBar( menuBar );
 
 	toolbarPanel = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	m_mgr.AddPane( toolbarPanel, wxAuiPaneInfo() .Top() .CaptionVisible( false ).CloseButton( false ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxDefaultSize ).BestSize( wxSize( -1,48 ) ).Layer( 10 ).ToolbarPane() );

@@ -12,6 +12,9 @@
 class MemoryView;
 
 #include <wx/string.h>
+#include <wx/bitmap.h>
+#include <wx/image.h>
+#include <wx/icon.h>
 #include <wx/menu.h>
 #include <wx/gdicmn.h>
 #include <wx/font.h>
@@ -22,9 +25,6 @@ class MemoryView;
 #include <wx/sizer.h>
 #include <wx/panel.h>
 #include <wx/dataview.h>
-#include <wx/bitmap.h>
-#include <wx/image.h>
-#include <wx/icon.h>
 #include <wx/propgrid/propgrid.h>
 #include <wx/propgrid/manager.h>
 #include <wx/propgrid/advprops.h>
@@ -44,7 +44,7 @@ class ComplxFrameDecl : public wxFrame
 	private:
 
 	protected:
-		wxMenuBar* m_menubar3;
+		wxMenuBar* menuBar;
 		wxMenu* menuFile;
 		wxMenu* menuView;
 		wxMenu* menuState;

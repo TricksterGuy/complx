@@ -72,6 +72,7 @@ void RegisterProperty::UpdateRegisterValue()
     EventLog l(__func__);
     short& reg = value.get();
     long convert;
+    short old = reg;
 
     wxString str = GetValueAsString();
 
@@ -87,6 +88,8 @@ void RegisterProperty::UpdateRegisterValue()
         wxASSERT(ret);
         reg = convert;
     }
+
+    InfoLog("Updated %s from (%d %04x) to (%d %04x)", static_cast<const char*>(GetName()), old, static_cast<unsigned short>(old), reg, static_cast<unsigned short>(reg));
 }
 
 void RegisterProperty::UpdateDisplayBase()
@@ -96,4 +99,6 @@ void RegisterProperty::UpdateDisplayBase()
     wxString str = (base == Decimal) ? wxString::Format("%d", value.get()) :
                                        wxString::Format("x%04x", static_cast<unsigned short>(value.get()));
     SetValue(str);
+
+    InfoLog("Changed display base of %s to %s", static_cast<const char*>(GetName()), base == Decimal ? "Decimal" : "Hexadecimal");
 }

@@ -23,25 +23,23 @@ bool MemoryViewInfoDataRenderer::GetValue(wxVariant& variant) const
 
 bool MemoryViewInfoDataRenderer::Render(wxRect rect, wxDC* dc, int state)
 {
-    wxCoord ox, oy;
-    dc->GetDeviceOrigin(&ox, &oy);
-    dc->SetDeviceOrigin(rect.GetLeft(), rect.GetTop());
-    DoRender(*dc, rect.GetSize());
-    dc->SetDeviceOrigin(ox, oy);
-
+    DoRender(*dc, rect);
     return true;
 }
 
-void MemoryViewInfoDataRenderer::DoRender(wxDC& dc, wxSize size) const
+void MemoryViewInfoDataRenderer::DoRender(wxDC& dc, wxRect rect) const
 {
     // (size / 2, 0, size / 2, size)
     if (state & DRAW_PC)
     {
-        const wxPoint triangle[3] = {
-            {16, 8},
-            {16, 24},
-            {32, 16}
+        wxPoint triangle[3] = {
+            {32 - 14, 4},
+            {32 - 14, 18},
+            {32 , 11}
         };
+        triangle[0] += rect.GetTopLeft();
+        triangle[1] += rect.GetTopLeft();
+        triangle[2] += rect.GetTopLeft();
 
         dc.SetPen(*wxBLACK_PEN);
         if (state & IS_HALTED)
@@ -61,5 +59,5 @@ void MemoryViewInfoDataRenderer::DoRender(wxDC& dc, wxSize size) const
 
 wxSize MemoryViewInfoDataRenderer::GetSize() const
 {
-    return wxSize(32, 32);
+    return wxSize(32, -1);
 }

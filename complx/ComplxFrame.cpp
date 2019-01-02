@@ -8,8 +8,11 @@
 ComplxFrame::ComplxFrame() : ComplxFrameDecl(nullptr), memoryViewModel(new MemoryViewDataModel(std::ref(state)))
 {
     EventLog l(__func__);
+
     lc3_init(state);
+
     memoryView->AssociateModel(memoryViewModel.get());
+    memoryView->ScrollTo(0x3000);
 
     for (unsigned int i = 0; i < 8; i++)
     {
@@ -24,8 +27,6 @@ ComplxFrame::ComplxFrame() : ComplxFrameDecl(nullptr), memoryViewModel(new Memor
     }
 
     statePropGridManager->GetGrid()->CenterSplitter();
-
-    memoryView->ScrollLines(13);
 }
 
 ComplxFrame::~ComplxFrame()
@@ -39,12 +40,12 @@ void ComplxFrame::OnStateChange(wxPropertyGridEvent& event)
     auto* property = event.GetProperty();
     auto property_type = reinterpret_cast<uintptr_t>(property->GetClientData());
 
+
     if (property_type == PropertyType::Register)
     {
         auto* register_property = dynamic_cast<RegisterProperty*>(property);
         wxASSERT(register_property);
         register_property->UpdateRegisterValue();
-        return;
     }
 
     if (property_type == PropertyType::RegisterDisplayBase)
@@ -52,6 +53,5 @@ void ComplxFrame::OnStateChange(wxPropertyGridEvent& event)
         auto* register_property = dynamic_cast<RegisterProperty*>(property->GetParent());
         wxASSERT(register_property);
         register_property->UpdateDisplayBase();
-        return;
     }
 }

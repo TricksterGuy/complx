@@ -63,10 +63,10 @@
                 <property name="font"></property>
                 <property name="hidden">0</property>
                 <property name="id">wxID_ANY</property>
-                <property name="label">MyMenuBar</property>
+                <property name="label"></property>
                 <property name="maximum_size"></property>
                 <property name="minimum_size"></property>
-                <property name="name">m_menubar3</property>
+                <property name="name">menuBar</property>
                 <property name="permission">protected</property>
                 <property name="pos"></property>
                 <property name="size"></property>
@@ -80,6 +80,19 @@
                     <property name="label">File</property>
                     <property name="name">menuFile</property>
                     <property name="permission">protected</property>
+                    <object class="wxMenuItem" expanded="1">
+                        <property name="bitmap"></property>
+                        <property name="checked">0</property>
+                        <property name="enabled">1</property>
+                        <property name="help">Exits the Program</property>
+                        <property name="id">wxID_EXIT</property>
+                        <property name="kind">wxITEM_NORMAL</property>
+                        <property name="label">&amp;Exit</property>
+                        <property name="name">menuFileExit</property>
+                        <property name="permission">none</property>
+                        <property name="shortcut">Alt+F4</property>
+                        <property name="unchecked_bitmap"></property>
+                    </object>
                 </object>
                 <object class="wxMenu" expanded="1">
                     <property name="label">View</property>
