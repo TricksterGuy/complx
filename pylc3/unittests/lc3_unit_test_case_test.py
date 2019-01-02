@@ -676,7 +676,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.setConsoleInput("ADB")
         self.setInterrupts(True)
 
-        self.runCode(max_executions=1000)
+        self.runCode(max_executions=10010)
         self.assertPc(0x4000)
 
     def testProgramWithInterruptsAndDelay(self):
@@ -705,7 +705,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         self.runCode(max_executions=110)
         self.assertPc(0x4000)
-        self.assertEqual(self.state.executions, 101)
+        self.assertEqual(self.state.executions, 102)
 
     def testReplayString(self):
         snippet = """
