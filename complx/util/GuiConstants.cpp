@@ -24,7 +24,7 @@ GuiConstants::GuiConstants()
     /// TODO find out proper values for these guys
     /// Defaulting to linux values...
     offset_map = {
-        {"INFO_COLUMN_WIDTH", 37}
+        {"INFO_COLUMN_WIDTH", 37},
         {"BINARY_COLUMN_ADDITION", 5}
     };
 #endif
