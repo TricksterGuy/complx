@@ -72,4 +72,7 @@ void ComplxFrame::OnStateChange(wxPropertyGridEvent& event)
     // This means they changed the value of the PC.
     if (property == pc_property)
         memoryView->Refresh();
+
+    if (property == cc_property)
+        cc_property->UpdateRegisterValue();
 }
