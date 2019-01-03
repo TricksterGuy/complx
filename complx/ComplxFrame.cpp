@@ -23,7 +23,7 @@ ComplxFrame::ComplxFrame() : ComplxFrameDecl(nullptr), memory_view_model(new Mem
     statePropGrid->SetPropertyMaxLength(pc_property, 5);
 
     // Setup CC property.
-    cc_property = new ProcessStatusRegisterProperty(std::ref(state), ProcessStatusRegisterProperty::DisplayAsPSR);
+    cc_property = new ProcessStatusRegisterProperty(std::ref(state), ProcessStatusRegisterProperty::DisplayAsCC);
     statePropGrid->Append(cc_property);
     statePropGrid->SetPropertyMaxLength(cc_property, cc_property->GetPropertyMaximumLength());
 
