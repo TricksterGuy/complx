@@ -20,6 +20,14 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 
 	menuBar = new wxMenuBar( 0 );
 	menuFile = new wxMenu();
+	wxMenuItem* menuFileLoad;
+	menuFileLoad = new wxMenuItem( menuFile, wxID_OPEN, wxString( wxT("&Load") ) + wxT('\t') + wxT("Ctrl+O"), wxT("Loads an assembly file"), wxITEM_NORMAL );
+	menuFile->Append( menuFileLoad );
+
+	wxMenuItem* menuFileReload;
+	menuFileReload = new wxMenuItem( menuFile, wxID_REFRESH, wxString( wxT("&Reload") ) + wxT('\t') + wxT("Ctrl+R"), wxT("Reloads current asm file under same conditions"), wxITEM_NORMAL );
+	menuFile->Append( menuFileReload );
+
 	wxMenuItem* menuFileExit;
 	menuFileExit = new wxMenuItem( menuFile, wxID_EXIT, wxString( wxT("&Exit") ) + wxT('\t') + wxT("Alt+F4"), wxT("Exits the Program"), wxITEM_NORMAL );
 	menuFile->Append( menuFileExit );
@@ -159,6 +167,8 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	this->Centre( wxBOTH );
 
 	// Connect Events
+	menuFile->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnLoad ), this, menuFileLoad->GetId());
+	menuFile->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReload ), this, menuFileReload->GetId());
 	statePropGridManager->Connect( wxEVT_PG_CHANGED, wxPropertyGridEventHandler( ComplxFrameDecl::OnStateChange ), NULL, this );
 }
 

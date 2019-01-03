@@ -72,6 +72,8 @@ class ComplxFrameDecl : public wxFrame
 		wxStatusBar* m_statusBar2;
 
 		// Virtual event handlers, overide them in your derived class
+		virtual void OnLoad( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnReload( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnStateChange( wxPropertyGridEvent& event ) { event.Skip(); }
 
 
