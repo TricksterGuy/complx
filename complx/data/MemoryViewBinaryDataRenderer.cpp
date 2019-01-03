@@ -11,6 +11,8 @@
 #include <wx/settings.h>
 #include <wx/valtext.h>
 
+namespace {
+
 enum Colorings
 {
     BR_TYPE,
@@ -42,8 +44,6 @@ RLEColorEntry instrColorings[COLORINGS_SIZE][4] =
     {{"DR_COLOR", 96, 0, 0, 3},         {"SR_COLOR", 0, 0, 80, 3},          {"OFFSET_COLOR", 48, 48, 72, 6}                                         },
     {{"UNUSED_BITS_COLOR", 0, 0, 0, 12}                                                                                                             },
 };
-
-namespace {
 
 wxColour GetColor(const RLEColorEntry& rle)
 {

@@ -6,12 +6,12 @@
 
 #include "logger.hpp"
 
+namespace {
+
 const wxChar* bases[] = {
     wxT("Decimal"),
     wxT("Hexadecimal")
 };
-
-namespace {
 
 wxString GetAllowedCharacters(unsigned int flags)
 {
