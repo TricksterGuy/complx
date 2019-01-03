@@ -3,10 +3,10 @@
 
 #include <functional>
 
-#include <wx/string.h>
-
 #include <wx/propgrid/propgrid.h> // Needed for because props.h doesn't include everything.
 #include <wx/propgrid/props.h>
+
+#include <wx/string.h>
 
 /** wxPropertyGrid Property class representing a register
   * registers are simply a wxStringProperty with two child properties
@@ -16,11 +16,13 @@ class RegisterProperty : public wxStringProperty
 {
 public:
     /** Sets default display base for the property*/
-    enum Base {
+    enum Base
+    {
         Decimal,
         Hexadecimal
     };
-    enum Flags {
+    enum Flags
+    {
         Invalid = 0,
         /** Don't create a child property for changing the base */
         NoBaseProperty = 1,

@@ -16,10 +16,16 @@ ComplxFrame::ComplxFrame() : ComplxFrameDecl(nullptr), memory_view_model(new Mem
     memoryView->AssociateModel(memory_view_model.get());
     memoryView->ScrollTo(0x3000);
 
+    // Setup PC Property.
     pc_property = new RegisterProperty("PC", std::ref(reinterpret_cast<short&>(state.pc)), RegisterProperty::Hexadecimal, RegisterProperty::NoBaseProperty | RegisterProperty::AllowHexadecimal);
     statePropGrid->Append(pc_property);
     // xFFFF
     statePropGrid->SetPropertyMaxLength(pc_property, 5);
+
+    // Setup CC property.
+    cc_property = new ProcessStatusRegisterProperty(std::ref(state), ProcessStatusRegisterProperty::DisplayAsPSR);
+    statePropGrid->Append(cc_property);
+    statePropGrid->SetPropertyMaxLength(cc_property, cc_property->GetPropertyMaximumLength());
 
     for (unsigned int i = 0; i < 8; i++)
     {
@@ -29,6 +35,7 @@ ComplxFrame::ComplxFrame() : ComplxFrameDecl(nullptr), memory_view_model(new Mem
         statePropGrid->Append(property);
         // -32768 is 6 characters.
         statePropGrid->SetPropertyMaxLength(property, 6);
+        statePropGrid->Collapse(property);
 
         register_properties.push_back(property);
     }

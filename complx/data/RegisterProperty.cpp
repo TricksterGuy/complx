@@ -1,10 +1,12 @@
 #include "RegisterProperty.hpp"
 #include "PropertyTypes.hpp"
+#include "../util/ValidationHelper.hpp"
 
 #include <wx/debug.h>
 #include <wx/valnum.h>
 
 #include "logger.hpp"
+
 
 namespace {
 
@@ -63,26 +65,15 @@ bool RegisterProperty::ValidateValue(wxVariant& value, wxPGValidationInfo& valid
     if (!isHex && !(flags & AllowDecimal))
         return false;
 
-    // Reject xFFFFF, x
-    if (isHex && (str.Length() > 5 || str.Length() == 1))
-        return false;
-
     if (isHex)
     {
-        // Reject x-34, xxxxx
-        for (size_t i = 1; i < str.Length(); i++)
-            if (!isxdigit(str[i]))
-                return false;
+        if (str.Length() > 5 || !ValidateHexValue(str))
+            return false;
     }
     else
     {
-        // Reject a192
-        if (!(str[0] == '-' || isdigit(str[0])))
+        if (!ValidateDecimalValue(str))
             return false;
-
-        for (size_t i = 1; i < str.Length(); i++)
-            if (!isdigit(str[i]))
-                return false;
 
         // Reject -99999, 99999
         int val = wxAtoi(str);
@@ -97,25 +88,12 @@ void RegisterProperty::UpdateRegisterValue()
 {
     EventLog l(__func__);
     short& reg = value.get();
-    long convert;
+
     short old = reg;
 
-    wxString str = GetValueAsString();
+    reg = ParseValueOrDie(GetValueAsString());
 
-    if (str[0] == 'x')
-    {
-        bool ret = str.Mid(1).ToCULong(reinterpret_cast<unsigned long*>(&convert), 16);
-        wxASSERT(ret);
-        reg = convert;
-    }
-    else
-    {
-        bool ret = str.ToCLong(&convert, 10);
-        wxASSERT(ret);
-        reg = convert;
-    }
-
-    InfoLog("Updated %s from (%d %04x) to (%d %04x)", static_cast<const char*>(GetName()), old, static_cast<unsigned short>(old), reg, static_cast<unsigned short>(reg));
+    InfoLog("Updated %s from (%d x%04x) to (%d x%04x)", static_cast<const char*>(GetName()), old, static_cast<unsigned short>(old), reg, static_cast<unsigned short>(reg));
 }
 
 void RegisterProperty::UpdateDisplayBase()

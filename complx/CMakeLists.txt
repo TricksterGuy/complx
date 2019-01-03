@@ -12,9 +12,11 @@ set(SRC_COMPLX
     data/MemoryViewBinaryDataRenderer.cpp
     data/MemoryViewInfoDataRenderer.cpp
     data/MemoryViewDataModel.cpp
+    data/ProcessStatusRegisterProperty.cpp
     data/RegisterProperty.cpp
     gen/ComplxFrameDecl.cpp
     util/GuiConstants.cpp
+    util/ValidationHelper.cpp
     ComplxApp.cpp
     ComplxFrame.cpp
     MemoryView.cpp
