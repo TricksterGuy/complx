@@ -51,6 +51,8 @@ void MemoryView::ScrollTo(unsigned short address)
 #else
     // GetCountPerPage is not available which makes fixing the above issue much easier...
     // There's also no GetRowHeight so approximate it.
+    wxSize size = GetClientSize();
+    address += size.y / 23 - 1;
 #endif
 #endif
 
