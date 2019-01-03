@@ -20,8 +20,9 @@ public:
     void OnStateChange(wxPropertyGridEvent& event) override;
 
 private:
-    wxObjectDataPtr<MemoryViewDataModel> memoryViewModel;
-    std::list<RegisterProperty*> registerProperties;
+    wxObjectDataPtr<MemoryViewDataModel> memory_view_model;
+    RegisterProperty* pc_property;
+    std::list<RegisterProperty*> register_properties;
     lc3_state state;
 };
 

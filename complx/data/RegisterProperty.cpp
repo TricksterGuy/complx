@@ -11,22 +11,42 @@ const wxChar* bases[] = {
     wxT("Hexadecimal")
 };
 
-RegisterProperty::RegisterProperty(const wxString& property, std::reference_wrapper<short> register_value, Base display_base) :
+namespace {
+
+wxString GetAllowedCharacters(unsigned int flags)
+{
+    wxString ret = "";
+    if ((flags & RegisterProperty::AllowDecimal) && (flags & RegisterProperty::AllowHexadecimal))
+        ret = "0123456789ABCDEFabcdefx-";
+    else if (flags & RegisterProperty::AllowHexadecimal)
+        ret = "0123456789ABCDEFabcdefx";
+    else if (flags & RegisterProperty::AllowDecimal)
+        ret = "0123456789-";
+    return ret;
+}
+
+}
+
+RegisterProperty::RegisterProperty(const wxString& property, std::reference_wrapper<short> register_value, unsigned int display_base, unsigned int settings) :
     wxStringProperty(property),
     name(property),
     value(register_value),
     base(display_base),
-    base_property(new wxEnumProperty("Display As", wxPG_LABEL, bases, nullptr, base))
+    flags(settings)
 {
     EventLog l(__func__);
     SetClientData(reinterpret_cast<void*>(PropertyType::Register));
-    base_property->SetClientData(reinterpret_cast<void*>(PropertyType::RegisterDisplayBase));
 
     wxTextValidator validator(wxFILTER_INCLUDE_CHAR_LIST);
-    validator.SetCharIncludes("0123456789ABCDEFabcdefx-");
+    validator.SetCharIncludes(GetAllowedCharacters(settings));
     SetValidator(validator);
 
-    AppendChild(base_property);
+    if (!(flags & NoBaseProperty))
+    {
+        base_property = new wxEnumProperty("Display As", wxPG_LABEL, bases, nullptr, base);
+        base_property->SetClientData(reinterpret_cast<void*>(PropertyType::RegisterDisplayBase));
+        AppendChild(base_property);
+    }
     UpdateDisplayBase();
 }
 
@@ -36,6 +56,12 @@ bool RegisterProperty::ValidateValue(wxVariant& value, wxPGValidationInfo& valid
     wxString str = value.GetString();
 
     bool isHex = str[0] == 'x';
+
+    // Reject if flags didn't allow mode.
+    if (isHex && !(flags & AllowHexadecimal))
+        return false;
+    if (!isHex && !(flags & AllowDecimal))
+        return false;
 
     // Reject xFFFFF, x
     if (isHex && (str.Length() > 5 || str.Length() == 1))
@@ -95,7 +121,10 @@ void RegisterProperty::UpdateRegisterValue()
 void RegisterProperty::UpdateDisplayBase()
 {
     EventLog l(__func__);
-    base = base_property->GetChoiceSelection();
+
+    if (base_property)
+        base = static_cast<Base>(base_property->GetChoiceSelection());
+
     wxString str = (base == Decimal) ? wxString::Format("%d", value.get()) :
                                        wxString::Format("x%04x", static_cast<unsigned short>(value.get()));
     SetValue(str);

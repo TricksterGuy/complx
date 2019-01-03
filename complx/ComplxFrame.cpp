@@ -5,7 +5,7 @@
 
 #include "logger.hpp"
 
-ComplxFrame::ComplxFrame() : ComplxFrameDecl(nullptr), memoryViewModel(new MemoryViewDataModel(std::ref(state)))
+ComplxFrame::ComplxFrame() : ComplxFrameDecl(nullptr), memory_view_model(new MemoryViewDataModel(std::ref(state)))
 {
     EventLog l(__func__);
 
@@ -13,8 +13,13 @@ ComplxFrame::ComplxFrame() : ComplxFrameDecl(nullptr), memoryViewModel(new Memor
     InfoLog("Random Seed %u", state.default_seed);
     lc3_init(state);
 
-    memoryView->AssociateModel(memoryViewModel.get());
+    memoryView->AssociateModel(memory_view_model.get());
     memoryView->ScrollTo(0x3000);
+
+    pc_property = new RegisterProperty("PC", std::ref(reinterpret_cast<short&>(state.pc)), RegisterProperty::Hexadecimal, RegisterProperty::NoBaseProperty | RegisterProperty::AllowHexadecimal);
+    statePropGrid->Append(pc_property);
+    // xFFFF
+    statePropGrid->SetPropertyMaxLength(pc_property, 5);
 
     for (unsigned int i = 0; i < 8; i++)
     {
@@ -25,7 +30,7 @@ ComplxFrame::ComplxFrame() : ComplxFrameDecl(nullptr), memoryViewModel(new Memor
         // -32768 is 6 characters.
         statePropGrid->SetPropertyMaxLength(property, 6);
 
-        registerProperties.push_back(property);
+        register_properties.push_back(property);
     }
 
     statePropGridManager->GetGrid()->CenterSplitter();
@@ -56,4 +61,8 @@ void ComplxFrame::OnStateChange(wxPropertyGridEvent& event)
         wxASSERT(register_property);
         register_property->UpdateDisplayBase();
     }
+
+    // This means they changed the value of the PC.
+    if (property == pc_property)
+        memoryView->Refresh();
 }
