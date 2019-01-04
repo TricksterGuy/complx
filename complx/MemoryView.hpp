@@ -11,7 +11,7 @@
 class MemoryView : public wxDataViewCtrl
 {
 public:
-    MemoryView(wxWindow *parent, wxWindowID id, const wxPoint &pos=wxDefaultPosition, const wxSize &size=wxDefaultSize, long style=0, const wxValidator &validator=wxDefaultValidator, const wxString &name=wxDataViewCtrlNameStr);
+    MemoryView(wxWindow* parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = 0, const wxValidator& validator = wxDefaultValidator, const wxString& name = wxDataViewCtrlNameStr);
     ~MemoryView() {}
 
     void ScrollTo(unsigned short address);

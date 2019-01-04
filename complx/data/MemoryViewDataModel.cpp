@@ -102,6 +102,7 @@ void MemoryViewDataModel::GetValueByRow(wxVariant& variant, unsigned int row, un
             state.pc = pc;
             break;
         case MemoryBinary:
+            /// TODO roll the RLEColorEntry and data in the variant here.
             variant = static_cast<long>(data);
             return;
         case MemoryComment:
