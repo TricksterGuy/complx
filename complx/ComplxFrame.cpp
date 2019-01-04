@@ -71,6 +71,7 @@ void ComplxFrame::OnReload(wxCommandEvent& event)
 void ComplxFrame::OnExit(wxCommandEvent& event)
 {
     EventLog l(__func__);
+    Destroy();
 }
 
 void ComplxFrame::OnStateChange(wxPropertyGridEvent& event)
