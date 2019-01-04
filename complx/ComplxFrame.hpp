@@ -33,8 +33,9 @@ private:
     void InitializeMemoryView();
     void InitializeStatePropGrid();
 
-    // Do the work of assembling a file.
+    /** Do the work of assembling a file. */
     bool DoLoadFile(const LoadingOptions& options);
+    /** Updates all objects referring to the now stale lc3_state object */
     void PostLoadFile();
 
     std::unique_ptr<lc3_state> state;
