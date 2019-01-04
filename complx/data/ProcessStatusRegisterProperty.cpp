@@ -84,3 +84,9 @@ void ProcessStatusRegisterProperty::UpdateDisplay()
         SetValue(wxString::Format("x%04x", psr));
     }
 }
+
+void ProcessStatusRegisterProperty::UpdateRef(std::reference_wrapper<lc3_state> new_value)
+{
+    state_ref = new_value;
+    UpdateDisplay();
+}

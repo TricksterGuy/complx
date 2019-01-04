@@ -24,7 +24,10 @@ public:
     bool ValidateValue(wxVariant& value, wxPGValidationInfo& validationInfo) const override;
     void UpdateRegisterValue();
     void UpdateDisplay();
-    int GetPropertyMaximumLength() const { return mode == DisplayAsCC ? 1 : 5;}
+    /** Updates the reference wrapper. Usually done after loading a new assembly file */
+    void UpdateRef(std::reference_wrapper<lc3_state> new_value);
+    /** Gets the Maximum Length for editing. Not to be confused with GetMaxLength */
+    int GetPropertyMaximumLength() const { return mode == DisplayAsCC ? 1 : 5; }
 private:
     std::reference_wrapper<lc3_state> state_ref;
     unsigned int mode = Invalid;

@@ -49,7 +49,14 @@ RegisterProperty::RegisterProperty(const wxString& property, std::reference_wrap
         base_property->SetClientData(reinterpret_cast<void*>(PropertyType::RegisterDisplayBase));
         AppendChild(base_property);
     }
-    UpdateDisplayBase();
+    RefreshDisplayedValue();
+}
+
+void RegisterProperty::RefreshDisplayedValue()
+{
+    wxString str = (base == Decimal) ? wxString::Format("%d", value.get()) :
+                                       wxString::Format("x%04x", static_cast<unsigned short>(value.get()));
+    SetValue(str);
 }
 
 bool RegisterProperty::ValidateValue(wxVariant& value, wxPGValidationInfo& validationInfo) const
@@ -103,9 +110,13 @@ void RegisterProperty::UpdateDisplayBase()
     if (base_property)
         base = static_cast<Base>(base_property->GetChoiceSelection());
 
-    wxString str = (base == Decimal) ? wxString::Format("%d", value.get()) :
-                                       wxString::Format("x%04x", static_cast<unsigned short>(value.get()));
-    SetValue(str);
+    RefreshDisplayedValue();
 
     InfoLog("Changed display base of %s to %s", static_cast<const char*>(GetName()), base == Decimal ? "Decimal" : "Hexadecimal");
+}
+
+void RegisterProperty::UpdateRef(std::reference_wrapper<short> new_value)
+{
+    value = new_value;
+    RefreshDisplayedValue();
 }

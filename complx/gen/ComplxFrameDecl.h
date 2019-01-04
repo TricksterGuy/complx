@@ -74,6 +74,7 @@ class ComplxFrameDecl : public wxFrame
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnLoad( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnReload( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnExit( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnStateChange( wxPropertyGridEvent& event ) { event.Skip(); }
 
 

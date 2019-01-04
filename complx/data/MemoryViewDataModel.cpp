@@ -123,3 +123,10 @@ bool MemoryViewDataModel::SetValueByRow(const wxVariant& variant, unsigned int r
     EventLog l(__func__);
     return false;
 }
+
+void MemoryViewDataModel::UpdateRef(std::reference_wrapper<lc3_state> new_value)
+{
+    state_ref = new_value;
+    // Do not call Reset here. It results in clear lag in updating the values.
+    // Instead call Refresh on each view.
+}

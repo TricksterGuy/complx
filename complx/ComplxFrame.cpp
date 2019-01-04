@@ -1,49 +1,74 @@
 #include "ComplxFrame.hpp"
 #include "data/PropertyTypes.hpp"
 
+#include <wx/filedlg.h>
 #include <wx/valnum.h>
+
+#include <sstream>
 
 #include "logger.hpp"
 
-ComplxFrame::ComplxFrame() : ComplxFrameDecl(nullptr), memory_view_model(new MemoryViewDataModel(std::ref(state)))
+namespace
+{
+
+wxString AskForAssemblyFile()
+{
+    std::unique_ptr<wxFileDialog> dialog(new wxFileDialog(NULL, _("Load .asm file"), wxEmptyString, wxEmptyString, _("LC-3 Assembly Files (*.asm)|*.asm"), wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR));
+    if (dialog->ShowModal() == wxID_OK)
+        return dialog->GetPath();
+
+    return wxEmptyString;
+}
+
+}
+
+ComplxFrame::ComplxFrame() : ComplxFrameDecl(nullptr), state(new lc3_state()), memory_view_model(new MemoryViewDataModel(std::ref(*state)))
 {
     EventLog l(__func__);
 
-    state.default_seed = time(NULL);
-    InfoLog("Random Seed %u", state.default_seed);
-    lc3_init(state);
-
-    memoryView->AssociateModel(memory_view_model.get());
-    memoryView->ScrollTo(0x3000);
-
-    // Setup PC Property.
-    pc_property = new RegisterProperty("PC", std::ref(reinterpret_cast<short&>(state.pc)), RegisterProperty::Hexadecimal, RegisterProperty::NoBaseProperty | RegisterProperty::AllowHexadecimal);
-    statePropGrid->Append(pc_property);
-    // xFFFF
-    statePropGrid->SetPropertyMaxLength(pc_property, 5);
-
-    // Setup CC property.
-    cc_property = new ProcessStatusRegisterProperty(std::ref(state), ProcessStatusRegisterProperty::DisplayAsCC);
-    statePropGrid->Append(cc_property);
-    statePropGrid->SetPropertyMaxLength(cc_property, cc_property->GetPropertyMaximumLength());
-
-    for (unsigned int i = 0; i < 8; i++)
-    {
-        auto base = i < 5 ? RegisterProperty::Decimal : RegisterProperty::Hexadecimal;
-
-        auto* property = new RegisterProperty(wxString::Format("R%d", i), std::ref(state.regs[i]), base);
-        statePropGrid->Append(property);
-        // -32768 is 6 characters.
-        statePropGrid->SetPropertyMaxLength(property, 6);
-        statePropGrid->Collapse(property);
-
-        register_properties.push_back(property);
-    }
-
-    statePropGridManager->GetGrid()->CenterSplitter();
+    InitializeLC3State();
+    InitializeMemoryView();
+    InitializeStatePropGrid();
 }
 
 ComplxFrame::~ComplxFrame()
+{
+    EventLog l(__func__);
+}
+
+void ComplxFrame::OnLoad(wxCommandEvent& event)
+{
+    EventLog l(__func__);
+    wxString file = AskForAssemblyFile();
+    if (file.IsEmpty())
+    {
+        WarnLog("No file loaded.");
+        return;
+    }
+
+    InfoLog("File selected: %s", static_cast<const char*>(file));
+
+    LoadingOptions options;
+    options.file = file;
+
+    // Success failure logs handled in DoLoadFile.
+    if (DoLoadFile(options))
+        reload_options = options;
+}
+
+void ComplxFrame::OnReload(wxCommandEvent& event)
+{
+    EventLog l(__func__);
+    if (reload_options.file.IsEmpty())
+    {
+        OnLoad(event);
+        return;
+    }
+
+    DoLoadFile(reload_options);
+}
+
+void ComplxFrame::OnExit(wxCommandEvent& event)
 {
     EventLog l(__func__);
 }
@@ -75,4 +100,104 @@ void ComplxFrame::OnStateChange(wxPropertyGridEvent& event)
 
     if (property == cc_property)
         cc_property->UpdateRegisterValue();
+}
+
+void ComplxFrame::InitializeLC3State()
+{
+    state->default_seed = time(NULL);
+    InfoLog("Random Seed %u", state->default_seed);
+    lc3_init(*state);
+}
+
+void ComplxFrame::InitializeMemoryView()
+{
+    memoryView->AssociateModel(memory_view_model.get());
+    memoryView->ScrollTo(0x3000);
+}
+
+void ComplxFrame::InitializeStatePropGrid()
+{
+    // Setup PC Property.
+    pc_property = new RegisterProperty("PC", std::ref(reinterpret_cast<short&>(state->pc)), RegisterProperty::Hexadecimal, RegisterProperty::NoBaseProperty | RegisterProperty::AllowHexadecimal);
+    statePropGrid->Append(pc_property);
+    // xFFFF
+    statePropGrid->SetPropertyMaxLength(pc_property, 5);
+
+    // Setup CC property.
+    cc_property = new ProcessStatusRegisterProperty(std::ref(*state), ProcessStatusRegisterProperty::DisplayAsCC);
+    statePropGrid->Append(cc_property);
+    statePropGrid->SetPropertyMaxLength(cc_property, cc_property->GetPropertyMaximumLength());
+
+    for (unsigned int i = 0; i < 8; i++)
+    {
+        auto base = i < 5 ? RegisterProperty::Decimal : RegisterProperty::Hexadecimal;
+
+        auto* property = new RegisterProperty(wxString::Format("R%d", i), std::ref(state->regs[i]), base);
+        statePropGrid->Append(property);
+        // -32768 is 6 characters.
+        statePropGrid->SetPropertyMaxLength(property, 6);
+        statePropGrid->Collapse(property);
+
+        register_properties[i] = property;
+    }
+
+    statePropGridManager->GetGrid()->CenterSplitter();
+}
+
+bool ComplxFrame::DoLoadFile(const LoadingOptions& opts)
+{
+    std::unique_ptr<lc3_state> new_state(new lc3_state());
+
+    wxFileName filename(opts.file);
+    bool randomize_registers = opts.registers == RANDOMIZE;
+    bool randomize_memory = opts.memory == RANDOMIZE;
+    short fill_registers = opts.registers;
+    short fill_memory = opts.memory;
+
+    lc3_init(*new_state, randomize_registers, randomize_memory, fill_registers, fill_memory);
+    new_state->pc = opts.pc;
+
+    try
+    {
+        std::vector<code_range> ranges;
+        LC3AssembleOptions options;
+        options.multiple_errors = true;
+        options.warnings_as_errors = false;
+        options.process_debug_comments = true;
+        options.enable_warnings = false;
+        options.disable_plugins = false;
+        lc3_assemble(*new_state, filename.GetFullPath().ToStdString(), ranges, options);
+    }
+    catch (const LC3AssembleException& e)
+    {
+        WarnLog("Assembling file %s failed. Reason: %s", static_cast<const char*>(filename.GetFullName()), e.what().c_str());
+        return false;
+    }
+    catch (const std::vector<LC3AssembleException>& vec)
+    {
+        WarnLog("Assembling file %s failed. Reasons below.\n-----", static_cast<const char*>(filename.GetFullName()));
+
+        for (const auto& ex : vec)
+            WarnLog("%s", ex.what().c_str());
+
+        return false;
+    }
+
+    InfoLog("Successfully loaded file: %s", static_cast<const char*>(opts.file));
+    state = std::move(new_state);
+    PostLoadFile();
+    reload_options.file_modification_time = filename.GetModificationTime();
+
+    return true;
+}
+
+void ComplxFrame::PostLoadFile()
+{
+    memory_view_model->UpdateRef(std::ref(*state));
+    cc_property->UpdateRef(std::ref(*state));
+    pc_property->UpdateRef(std::ref(reinterpret_cast<short&>(state->pc)));
+    for (unsigned int i = 0; i < 8; i++)
+        register_properties[i]->UpdateRef(std::ref(state->regs[i]));
+    memoryView->Refresh();
+    memoryView->ScrollTo(state->pc);
 }

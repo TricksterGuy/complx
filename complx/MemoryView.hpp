@@ -15,10 +15,7 @@ public:
     ~MemoryView() {}
 
     void ScrollTo(unsigned short address);
-private:
-    std::optional<std::reference_wrapper<lc3_state>> state;
 };
-
 
 #endif
 
