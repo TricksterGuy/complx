@@ -4,7 +4,7 @@
 #include <lc3_all.hpp>
 
 #define MULTIPLY_MAJOR_VERSION 1
-#define MULTIPLY_MINOR_VERSION 5
+#define MULTIPLY_MINOR_VERSION 6
 
 class MultiplyPlugin : public InstructionPlugin
 {
@@ -15,7 +15,7 @@ public:
     void OnDecode(lc3_state& state, unsigned short data, lc3_instr& instr) override;
     void OnExecute(lc3_state& state, lc3_instr& instruction, lc3_state_change& changes) override;
     std::string OnDisassemble(lc3_state& state, lc3_instr& instr, unsigned int level) override;
-    std::vector<RLEColorEntry> GetInstructionColoring(unsigned short instr) const override;
+    std::list<RLEColorEntry> GetInstructionColoring(unsigned short instr) const override;
 };
 
 

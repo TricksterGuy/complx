@@ -19,7 +19,7 @@ enum PluginTypes
 
 /** Define version of lc3 any plugins that are not of the same version will be rejected. */
 #define LC3_MAJOR_VERSION 1
-#define LC3_MINOR_VERSION 5
+#define LC3_MINOR_VERSION 6
 
 /** Main class for complx's plugin system.
   *
@@ -189,6 +189,10 @@ struct RLEColorEntry
     unsigned char g = 0;
     unsigned char b = 0;
     unsigned char length = 0;
+    bool operator==(const RLEColorEntry& other) const
+    {
+        return name == other.name && r == other.r && g == other.g && b == other.b && length == other.length;
+    }
 };
 
 /** Represents a brand new instruction replacing the ERROR instruction opcode 0xD
@@ -254,11 +258,11 @@ public:
       * Called to get the instruction coloring for this instruction.
       * Note that the opcode bits should not be included, the other 12 bits can be colored.
       * For example to color the instruction [data12 red]:
-      * `return {{255, 0, 0, 12}}`.
+      * `return {{"MY_BITS", 255, 0, 0, 12}}`.
       * @param instr decoded bits for the instruction.
       * @return A vector containing several color entries.
       */
-    virtual std::vector<RLEColorEntry> GetInstructionColoring(unsigned short instr) const;
+    virtual std::list<RLEColorEntry> GetInstructionColoring(unsigned short instr) const;
 };
 
 /** Typedef of function that handles creation of a plugin */

@@ -56,11 +56,11 @@ InstructionPlugin::InstructionPlugin(unsigned int major, unsigned int minor, con
 
 }
 
-std::vector<RLEColorEntry> InstructionPlugin::GetInstructionColoring(unsigned short instr) const
+std::list<RLEColorEntry> InstructionPlugin::GetInstructionColoring(unsigned short instr) const
 {
     (void) instr;
-    // By default do nothing.
-    std::vector<RLEColorEntry> answer;
+    // By default do nothing. The GUI will fill this with the default unused bits color.
+    std::list<RLEColorEntry> answer;
     return answer;
 }
 

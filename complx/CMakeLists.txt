@@ -9,6 +9,7 @@ if(CMAKE_HOST_UNIX)
 endif(CMAKE_HOST_UNIX)
 
 set(SRC_COMPLX
+    data/Lc3BinaryDisplayData.cpp
     data/MemoryViewBinaryDataRenderer.cpp
     data/MemoryViewInfoDataRenderer.cpp
     data/MemoryViewDataModel.cpp

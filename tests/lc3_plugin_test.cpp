@@ -122,10 +122,11 @@ BOOST_FIXTURE_TEST_CASE(TestInstructionPluginColoring, LC3PluginTest)
     PluginParams params;
     BOOST_REQUIRE(lc3_install_plugin(state, "lc3_multiply", params));
 
-    std::vector<RLEColorEntry> coloring;
+    std::list<RLEColorEntry> colors;
 
     // MUL R0, R1, 3
-    coloring = state.instructionPlugin->GetInstructionColoring(0xD163);
+    colors = state.instructionPlugin->GetInstructionColoring(0xD163);
+    std::vector<RLEColorEntry> coloring(colors.begin(), colors.end());
     // Colors can change so just check the lengths
     BOOST_REQUIRE_EQUAL(coloring.size(), 4);
     BOOST_CHECK_EQUAL(coloring[0].length, 3);
@@ -133,7 +134,8 @@ BOOST_FIXTURE_TEST_CASE(TestInstructionPluginColoring, LC3PluginTest)
     BOOST_CHECK_EQUAL(coloring[2].length, 1);
     BOOST_CHECK_EQUAL(coloring[3].length, 5);
 
-    coloring = state.instructionPlugin->GetInstructionColoring(0xD042);
+    colors = state.instructionPlugin->GetInstructionColoring(0xD042);
+    coloring.assign(colors.begin(), colors.end());
     // Colors can change so just check the lengths
     BOOST_REQUIRE_EQUAL(coloring.size(), 4);
     BOOST_CHECK_EQUAL(coloring[0].length, 3);

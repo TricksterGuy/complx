@@ -3,6 +3,8 @@
 
 #include <wx/dataview.h>
 
+#include "Lc3BinaryDisplayData.hpp"
+
 class MemoryViewBinaryDataRenderer : public wxDataViewCustomRenderer
 {
 public:
@@ -21,8 +23,8 @@ public:
     bool GetValueFromEditorCtrl(wxWindow* editor, wxVariant& value) override;
 
 private:
-    void InstructionColor(wxDC& dc, const wxString& binary, wxRect rect) const;
-    long value;
+    void InstructionColor(wxDC& dc, wxRect rect) const;
+    Lc3BinaryDisplayData value;
 };
 
 

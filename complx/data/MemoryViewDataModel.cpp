@@ -1,5 +1,6 @@
 #include "MemoryViewDataModel.hpp"
 #include "MemoryViewInfoState.hpp"
+#include "Lc3BinaryDisplayData.hpp"
 
 #include "logger.hpp"
 
@@ -28,7 +29,7 @@ wxString MemoryViewDataModel::GetColumnType(unsigned int col) const
             ret = "string";
             break;
         case MemoryBinary:
-            ret = "long";
+            ret = "Lc3BinaryDisplayData";
             break;
         case MemoryLabel:
             ret = "string";
@@ -103,7 +104,7 @@ void MemoryViewDataModel::GetValueByRow(wxVariant& variant, unsigned int row, un
             break;
         case MemoryBinary:
             /// TODO roll the RLEColorEntry and data in the variant here.
-            variant = static_cast<long>(data);
+            variant << ConstructBinaryDisplayData(static_cast<unsigned short>(data), state.instructionPlugin);
             return;
         case MemoryComment:
             if (state.comments.find(addr) != state.comments.end())

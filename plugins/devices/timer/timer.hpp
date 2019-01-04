@@ -5,7 +5,7 @@
 #include <lc3_all.hpp>
 
 #define TIMER_MAJOR_VERSION 1
-#define TIMER_MINOR_VERSION 5
+#define TIMER_MINOR_VERSION 6
 
 ///TODO complete this plugin
 class TimerPlugin : public Plugin

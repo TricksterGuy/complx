@@ -3,7 +3,7 @@
 
 #include <lc3_all.hpp>
 #define PINGER_MAJOR_VERSION 1
-#define PINGER_MINOR_VERSION 5
+#define PINGER_MINOR_VERSION 6
 
 class PingerPlugin : public Plugin
 {

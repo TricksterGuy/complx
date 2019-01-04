@@ -18,19 +18,12 @@ void destroy_plugin(Plugin* ptr = NULL)
     }
 }
 
-/** @brief GetOpcode
-  *
-  * @todo: document this function
-  */
 std::string MultiplyPlugin::GetOpcode() const
 {
     return std::string("MUL");
 }
 
-/** @brief DoAssembleOne
-  *
-  * @todo: document this function
-  */
+
 unsigned short MultiplyPlugin::DoAssembleOne(lc3_state& state, LC3AssembleContext& context)
 {
     size_t pos = context.line.find_first_of(" \t");
@@ -67,10 +60,6 @@ unsigned short MultiplyPlugin::DoAssembleOne(lc3_state& state, LC3AssembleContex
     return instruction;
 }
 
-/** @brief OnDecode
-  *
-  * @todo: document this function
-  */
 void MultiplyPlugin::OnDecode(lc3_state& state, unsigned short data, lc3_instr& instr)
 {
     // ARITH FORMAT INSTRUCTION
@@ -83,10 +72,6 @@ void MultiplyPlugin::OnDecode(lc3_state& state, unsigned short data, lc3_instr& 
         instr.arith.reg.sr2 = data & 0x7;
 }
 
-/** @brief OnExecute
-  *
-  * format for this is similar to ADD/AND
-  */
 void MultiplyPlugin::OnExecute(lc3_state& state, lc3_instr& instruction, lc3_state_change& changes)
 {
     // Hey DR will change here save it
@@ -125,10 +110,6 @@ const char* MUL_ADVANCED_DISASSEMBLE[7] =
 };
 
 
-/** @brief OnDisassemble
-  *
-  * @todo: document this function
-  */
 std::string MultiplyPlugin::OnDisassemble(lc3_state& state, lc3_instr& instr, unsigned int level)
 {
     char buf[128];
@@ -190,10 +171,10 @@ const RLEColorEntry mulColorings[2][4] =
     {{"DR_COLOR", 96, 0, 0, 3}, {"SR_COLOR", 0, 0, 80, 3}, {"UNUSED_BITS_COLOR", 0, 0, 0, 3}, {"SR_COLOR", 0, 0, 80, 3}},  // REG Version
 };
 
-std::vector<RLEColorEntry> MultiplyPlugin::GetInstructionColoring(unsigned short instr) const
+std::list<RLEColorEntry> MultiplyPlugin::GetInstructionColoring(unsigned short instr) const
 {
     // Just like the ADD instruction
-    std::vector<RLEColorEntry> answer;
+    std::list<RLEColorEntry> answer;
 
     if (instr >> 5 & 0x1)
         answer.assign(mulColorings[0], mulColorings[0] + 4);

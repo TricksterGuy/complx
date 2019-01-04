@@ -5,7 +5,7 @@
 #include <random>
 
 #define RANDOM_MAJOR_VERSION 1
-#define RANDOM_MINOR_VERSION 5
+#define RANDOM_MINOR_VERSION 6
 
 class RandomPlugin : public Plugin
 {

@@ -4,7 +4,7 @@
 #include <lc3_all.hpp>
 
 #define SECOND_TIMER_MAJOR_VERSION 1
-#define SECOND_TIMER_MINOR_VERSION 5
+#define SECOND_TIMER_MINOR_VERSION 6
 
 ///TODO complete this plugin
 class SecondTimerPlugin : public Plugin
