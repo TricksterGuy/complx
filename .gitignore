@@ -1,3 +1,15 @@
+build*/
 
-build-linux/
+**/gmon.out
+
+*.so
+*.o
+*.a
+
+tests/lc3_test_suite
+
+pylc3/PyLC3Gen.cpp
+*.pyc
+pylc3/exposed_decl.pypp.txt
+pylc3/named_tuple.py
 
