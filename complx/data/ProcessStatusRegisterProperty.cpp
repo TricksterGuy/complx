@@ -26,7 +26,23 @@ ProcessStatusRegisterProperty::ProcessStatusRegisterProperty(std::reference_wrap
     validator.SetCharIncludes(GetAllowedCharacters(mode));
     SetValidator(validator);
 
-    UpdateDisplay();
+    RefreshDisplayedValue();
+}
+
+void ProcessStatusRegisterProperty::RefreshDisplayedValue()
+{
+    EventLog l(__func__);
+    lc3_state& state = state_ref.get();
+
+    if (mode == DisplayAsCC)
+    {
+        SetValue(state.n ? "N" : (state.z ? "Z" : "P"));
+    }
+    else if (mode == DisplayAsPSR)
+    {
+        unsigned short psr = (state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p;
+        SetValue(wxString::Format("x%04x", psr));
+    }
 }
 
 bool ProcessStatusRegisterProperty::ValidateValue(wxVariant& value, wxPGValidationInfo& validationInfo) const
@@ -65,28 +81,13 @@ void ProcessStatusRegisterProperty::UpdateRegisterValue()
         state.n = (psr >> 2) & 1;
         state.z = (psr >> 1) & 1;
         state.p = (psr >> 0) & 1;
+
         InfoLog("Updated %s from x%04x to x%04x", static_cast<const char*>(GetName()), old, psr);
-    }
-}
-
-void ProcessStatusRegisterProperty::UpdateDisplay()
-{
-    EventLog l(__func__);
-    lc3_state& state = state_ref.get();
-
-    if (mode == DisplayAsCC)
-    {
-        SetValue(state.n ? "N" : (state.z ? "Z" : "P"));
-    }
-    else if (mode == DisplayAsPSR)
-    {
-        unsigned short psr = (state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p;
-        SetValue(wxString::Format("x%04x", psr));
     }
 }
 
 void ProcessStatusRegisterProperty::UpdateRef(std::reference_wrapper<lc3_state> new_value)
 {
     state_ref = new_value;
-    UpdateDisplay();
+    RefreshDisplayedValue();
 }

@@ -5,7 +5,9 @@
 #include "util/GuiConstants.hpp"
 
 #include <algorithm>
+
 #include <wx/debug.h>
+#include <wx/menu.h>
 #include <wx/settings.h>
 #include <wx/version.h>
 
@@ -32,19 +34,55 @@ MemoryView::MemoryView(wxWindow* parent, wxWindowID id, const wxPoint& pos, cons
     AppendTextColumn("Label",           MemoryLabel,            wxDATAVIEW_CELL_INERT,      -1,     wxALIGN_LEFT,   cell_flags);
     AppendTextColumn("Instruction",     MemoryInstruction,      wxDATAVIEW_CELL_EDITABLE,   128,    wxALIGN_LEFT,   cell_flags);
     AppendTextColumn("Comment",         MemoryComment,          wxDATAVIEW_CELL_INERT,      -1,     wxALIGN_LEFT,   cell_flags);
+
+
+    Connect(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, wxDataViewEventHandler(MemoryView::OnContextMenu), NULL, this);
+    Connect(MemoryMenuBreakpoint,   wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryView::OnBreakpoint));
+    Connect(MemoryMenuTemporary,    wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryView::OnTemporaryBreakpoint));
+    Connect(MemoryMenuWatchpoint,   wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryView::OnWatchpoint));
+    Connect(MemoryMenuBlackbox,     wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryView::OnBlackbox));
+    Connect(MemoryMenuAdvanced,     wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryView::OnAdvancedBreakpoint));
+    Connect(MemoryMenuPCHere,       wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryView::OnSetPcHere));
+    Connect(MemoryMenuGoto,         wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryView::OnGotoAddress));
+}
+
+MemoryView::~MemoryView()
+{
+}
+
+int MemoryView::GetSelectedAddress() const
+{
+    if (!HasSelection())
+        return -1;
+
+    auto selection = GetSelection();
+
+    const auto* model = GetModel();
+
+    wxASSERT(model);
+
+    auto* lmodel = dynamic_cast<const wxDataViewListModel*>(model);
+
+    wxASSERT(lmodel);
+
+    return lmodel->GetRow(selection);
 }
 
 void MemoryView::ScrollTo(unsigned short address)
 {
-    InfoLog("Scrolling Memory to x%04x", address);
+    VerboseLog("Scrolling Memory to x%04x", address);
 
     auto* model = GetModel();
+
+    wxASSERT(model);
+
     auto* vlmodel = dynamic_cast<wxDataViewVirtualListModel*>(model);
 
     wxASSERT(vlmodel);
 
 #ifdef _WIN32
     /// TODO Delete this section when wx 3.2 is a thing and GetCountPerPage can be used, odd numbered minor versions are experimental releases.
+    unsigned short original = address;
 #if wxCHECK_VERSION(3, 1, 0)
     // Apparently Windows uses the Generic wxDataViewCtrl whose implementation is to put the VisibleItem at the bottom.
     address += GetCountPerPage() - 1;
@@ -54,9 +92,187 @@ void MemoryView::ScrollTo(unsigned short address)
     wxSize size = GetClientSize();
     address += size.y / 23 - 1;
 #endif
+    if (original > address)
+        address = original;
 #endif
 
-    auto item = vlmodel->GetItem(address);
+    EnsureVisible(vlmodel->GetItem(address));
 
-    EnsureVisible(item);
+#ifdef _WIN32
+    // The issue with the above correction is if the PC moves back up then the actual item we want visible will probably not be visible
+    // So make another call with the item we want to be visible.
+    EnsureVisible(vlmodel->GetItem(original));
+#endif
+}
+
+void MemoryView::OnContextMenu(wxDataViewEvent& event)
+{
+    EventLog l(__func__);
+    wxMenu menu;
+
+    menu.Append(MemoryMenuTemporary,    "Mark as Temporary Breakpoint");
+    menu.Append(MemoryMenuBreakpoint,   "Mark as Breakpoint");
+    menu.Append(MemoryMenuWatchpoint,   "Mark as Watchpoint");
+    menu.Append(MemoryMenuAdvanced,     "Advanced Breakpoint...");
+    menu.Append(MemoryMenuBlackbox,     "Mark as Blackbox");
+    menu.Append(MemoryMenuPCHere,       "Move PC Here");
+    menu.Append(MemoryMenuGoto,         "Goto Address...");
+
+    PopupMenu(&menu);
+}
+
+void MemoryView::OnTemporaryBreakpoint(wxCommandEvent& event)
+{
+    EventLog l(__func__);
+
+    wxASSERT(state_ref);
+    lc3_state& state = *state_ref;
+
+    int addr = GetSelectedAddress();
+    if (addr == -1)
+    {
+        WarnLog("No address selected");
+        return;
+    }
+
+    auto address = static_cast<unsigned short>(addr);
+
+    if (!lc3_has_breakpoint(state, address))
+    {
+        InfoLog("Adding temporary breakpoint at x%04x", address);
+        lc3_add_break(state, address, "", "1", 1);
+    }
+    else
+    {
+        InfoLog("Removing breakpoint at x%04x", address);
+        lc3_remove_break(state, address);
+    }
+}
+
+void MemoryView::OnBreakpoint(wxCommandEvent& event)
+{
+    EventLog l(__func__);
+
+    wxASSERT(state_ref);
+    lc3_state& state = *state_ref;
+
+    int addr = GetSelectedAddress();
+    if (addr == -1)
+    {
+        WarnLog("No address selected");
+        return;
+    }
+
+    auto address = static_cast<unsigned short>(addr);
+
+
+    if (!lc3_has_breakpoint(state, address))
+    {
+        InfoLog("Adding breakpoint at x%04x", address);
+        lc3_add_break(state, address);
+    }
+    else
+    {
+        InfoLog("Removing breakpoint at x%04x", address);
+        lc3_remove_break(state, address);
+    }
+}
+
+void MemoryView::OnWatchpoint(wxCommandEvent& event)
+{
+    EventLog l(__func__);
+
+    wxASSERT(state_ref);
+    lc3_state& state = *state_ref;
+
+    int addr = GetSelectedAddress();
+    if (addr == -1)
+    {
+        WarnLog("No address selected");
+        return;
+    }
+
+    auto address = static_cast<unsigned short>(addr);
+
+    if (!lc3_has_watch(state, false, address))
+    {
+        InfoLog("Adding watchpoint at x%04x", address);
+        lc3_add_watch(state, false, address, "1");
+    }
+    else
+    {
+        InfoLog("Removing watchpoint at x%04x", address);
+        lc3_remove_watch(state, false, address);
+    }
+}
+
+void MemoryView::OnBlackbox(wxCommandEvent& event)
+{
+    EventLog l(__func__);
+
+    wxASSERT(state_ref);
+    lc3_state& state = *state_ref;
+
+    int addr = GetSelectedAddress();
+    if (addr == -1)
+    {
+        WarnLog("No address selected");
+        return;
+    }
+
+    auto address = static_cast<unsigned short>(addr);
+
+    if (!lc3_has_blackbox(state, address))
+    {
+        InfoLog("Adding blackbox at x%04x", address);
+        lc3_add_blackbox(state, address);
+    }
+    else
+    {
+        InfoLog("Removing blackbox at x%04x", address);
+        lc3_remove_blackbox(state, address);
+    }
+}
+
+void MemoryView::OnAdvancedBreakpoint(wxCommandEvent& event)
+{
+
+}
+
+void MemoryView::OnSetPcHere(wxCommandEvent& event)
+{
+    EventLog l(__func__);
+
+    wxASSERT(state_ref);
+    lc3_state& state = *state_ref;
+
+    int addr = GetSelectedAddress();
+    if (addr == -1)
+    {
+        WarnLog("No address selected");
+        return;
+    }
+
+    state.pc = addr;
+}
+
+void MemoryView::OnGotoAddress(wxCommandEvent& event)
+{
+    EventLog l(__func__);
+
+}
+
+void MemoryView::UpdateRef(std::reference_wrapper<lc3_state> new_value)
+{
+    state_ref = new_value;
+
+    auto* model = GetModel();
+
+    if (!model) return;
+
+    auto* mvdmodel = dynamic_cast<MemoryViewDataModel*>(model);
+
+    wxASSERT(mvdmodel);
+
+    mvdmodel->UpdateRef(new_value);
 }

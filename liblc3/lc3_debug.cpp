@@ -6,6 +6,49 @@
 
 bool lc3_add_subroutine(lc3_state& state, unsigned short address, const std::string& name, int num_params, const std::vector<std::string>& params);
 
+bool lc3_has_breakpoint(lc3_state& state, const std::string& symbol)
+{
+    int addr = lc3_sym_lookup(state, symbol);
+    if (addr == -1) return false;
+
+    return lc3_has_breakpoint(state, addr);
+}
+
+bool lc3_has_breakpoint(lc3_state& state, unsigned short addr)
+{
+    return state.breakpoints.find(addr) != state.breakpoints.end();
+}
+
+bool lc3_has_watch(lc3_state& state, const std::string& symbol)
+{
+    int addr = lc3_sym_lookup(state, symbol);
+    if (addr == -1) return false;
+
+    return lc3_has_watch(state, false, addr);
+}
+
+bool lc3_has_watch(lc3_state& state, bool is_reg, unsigned short data)
+{
+    if (is_reg)
+        return state.reg_watchpoints.find(data) != state.reg_watchpoints.end();
+    else
+        return state.mem_watchpoints.find(data) != state.mem_watchpoints.end();
+}
+
+
+bool lc3_has_blackbox(lc3_state& state, const std::string& symbol)
+{
+    int addr = lc3_sym_lookup(state, symbol);
+    if (addr == -1) return false;
+
+    return lc3_has_blackbox(state, addr);
+}
+
+bool lc3_has_blackbox(lc3_state& state, unsigned short addr)
+{
+    return state.blackboxes.find(addr) != state.blackboxes.end();
+}
+
 bool lc3_add_break(lc3_state& state, const std::string& symbol, const std::string& label, const std::string& condition, int times)
 {
     int addr = lc3_sym_lookup(state, symbol);

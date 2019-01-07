@@ -103,7 +103,6 @@ void MemoryViewDataModel::GetValueByRow(wxVariant& variant, unsigned int row, un
             state.pc = pc;
             break;
         case MemoryBinary:
-            /// TODO roll the RLEColorEntry and data in the variant here.
             variant << ConstructBinaryDisplayData(static_cast<unsigned short>(data), state.instructionPlugin);
             return;
         case MemoryComment:
@@ -120,9 +119,41 @@ void MemoryViewDataModel::GetValueByRow(wxVariant& variant, unsigned int row, un
     variant = ret;
 }
 
-bool MemoryViewDataModel::SetValueByRow(const wxVariant& variant, unsigned int row, unsigned int col)
+bool MemoryViewDataModel::SetValueByRow(const wxVariant& variant, unsigned int row, unsigned int column)
 {
     EventLog l(__func__);
+    lc3_state& state = state_ref.get();
+
+    /*switch(column)
+    {
+        case MemoryHexadecimal:
+            ret = wxString::Format("x%04X", static_cast<unsigned short>(data));
+            break;
+        case MemoryDecimal:
+            ret = wxString::Format("%d", data);
+            break;
+        case MemoryLabel:
+            ret = lc3_sym_rev_lookup(state, addr);
+            break;
+        case MemoryInstruction:
+            // Change the pc temporarily...
+            state.pc = addr + 1;
+            ret = lc3_disassemble(state, data, disassemble_level);
+            state.pc = pc;
+            break;
+        case MemoryBinary:
+            variant << ConstructBinaryDisplayData(static_cast<unsigned short>(data), state.instructionPlugin);
+            return;
+        case MemoryComment:
+            if (state.comments.find(addr) != state.comments.end())
+            {
+                ret = state.comments[addr];
+                ret.Replace("\n", " ", true);
+            }
+            break;
+        default:
+            ret = wxEmptyString;
+    }*/
     return false;
 }
 

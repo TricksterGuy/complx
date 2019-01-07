@@ -35,6 +35,8 @@ class MemoryView;
 
 ///////////////////////////////////////////////////////////////////////////
 
+#define ID_STEP 1000
+#define ID_BACK 1001
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class ComplxFrameDecl
@@ -47,6 +49,7 @@ class ComplxFrameDecl : public wxFrame
 		wxMenuBar* menuBar;
 		wxMenu* menuFile;
 		wxMenu* menuView;
+		wxMenu* menuControl;
 		wxMenu* menuState;
 		wxMenu* menuDebug;
 		wxMenu* menuTest;
@@ -75,6 +78,8 @@ class ComplxFrameDecl : public wxFrame
 		virtual void OnLoad( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnReload( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnExit( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnStep( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnBack( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnStateChange( wxPropertyGridEvent& event ) { event.Skip(); }
 
 

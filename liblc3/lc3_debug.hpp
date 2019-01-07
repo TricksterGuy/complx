@@ -25,6 +25,22 @@ bool lc3_add_break(lc3_state& state, const std::string& symbol, const std::strin
   * @return True if there was an error adding the breakpoint false otherwise.
   */
 bool lc3_add_break(lc3_state& state, unsigned short addr, const std::string& label = "", const std::string& condition = "1", int times = -1);
+/** lc3_has_breakpoint
+  *
+  * Checks if there is a breakpoint at the given symbol.
+  * @param state LC3State object.
+  * @param symbol Address to check.
+  * @return True if there is a breakpoint at the given symbol.
+  */
+bool lc3_has_breakpoint(lc3_state& state, const std::string& symbol);
+/** lc3_has_breakpoint
+  *
+  * Checks if there is a breakpoint at the given address.
+  * @param state LC3State object.
+  * @param addr Address to check.
+  * @return True if there is a breakpoint at the given address.
+  */
+bool lc3_has_breakpoint(lc3_state& state, unsigned short addr);
 /** lc3_add_blackbox
   *
   * Adds a blackbox at the given symbol.
@@ -45,9 +61,25 @@ bool lc3_add_blackbox(lc3_state& state, const std::string& symbol, const std::st
   * @return True if there was an error adding the blackbox false otherwise.
   */
 bool lc3_add_blackbox(lc3_state& state, unsigned short addr, const std::string& label = "", const std::string& condition = "1");
+/** lc3_has_blackbox
+  *
+  * Checks if there is a blackbox at the given symbol.
+  * @param state LC3State object.
+  * @param symbol Address to check.
+  * @return True if there is a blackbox at the given symbol.
+  */
+bool lc3_has_blackbox(lc3_state& state, const std::string& symbol);
+/** lc3_has_blackbox
+  *
+  * Checks if there is a blackbox at the given address.
+  * @param state LC3State object.
+  * @param addr Address to check.
+  * @return True if there is a blackbox at the given address.
+  */
+bool lc3_has_blackbox(lc3_state& state, unsigned short addr);
 /** lc3_add_watch
   *
-  * Adds a watchpoint at the given symbol.
+  * Adds a watchpoint at the given address or register.
   * A watch point is a breakpoint on stores to addresses/registers.
   * @param state LC3State object.
   * @param is_reg True if data is referring to a register, otherwise false for a memory address
@@ -69,6 +101,24 @@ bool lc3_add_watch(lc3_state& state, bool is_reg, unsigned short data, const std
   * @return True if there was an error adding the watchpoint false otherwise.
   */
 bool lc3_add_watch(lc3_state& state, const std::string& symbol, const std::string& condition, const std::string& label = "", int times = -1);
+/** lc3_has_watch
+  *
+  * Checks if there is a watchpoint at the given symbol.
+  * @param state LC3State object.
+  * @param symbol Symbol to associate with the watchpoint.
+  * @return True if there is a watchpoint at the symbol false otherwise
+  */
+bool lc3_has_watch(lc3_state& state, const std::string& symbol);
+/** lc3_has_watch
+  *
+  * Checks if there is a watchpoint at the given address or register.
+  * @param state LC3State object.
+  * @param is_reg True if data is referring to a register, otherwise false for a memory address
+  * @param data Register number or memory address.
+  * @return True if there was a watchpoint at the given address/register false otherwise.
+  */
+bool lc3_has_watch(lc3_state& state, bool is_reg, unsigned short data);
+
 /** lc3_add_subroutine
   *
   * Registers a symbol as a subroutine.

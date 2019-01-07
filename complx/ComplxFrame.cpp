@@ -22,6 +22,7 @@ wxString AskForAssemblyFile()
 
 }
 
+
 ComplxFrame::ComplxFrame() : ComplxFrameDecl(nullptr), state(new lc3_state()), memory_view_model(new MemoryViewDataModel(std::ref(*state)))
 {
     EventLog l(__func__);
@@ -65,6 +66,7 @@ void ComplxFrame::OnReload(wxCommandEvent& event)
         return;
     }
 
+    InfoLog("Reloading: %s", static_cast<const char*>(reload_options.file));
     DoLoadFile(reload_options);
 }
 
@@ -72,6 +74,22 @@ void ComplxFrame::OnExit(wxCommandEvent& event)
 {
     EventLog l(__func__);
     Destroy();
+}
+
+void ComplxFrame::OnStep(wxCommandEvent& event)
+{
+    EventLog l(__func__);
+    InfoLog("Stepping 1 instruction");
+    lc3_step(*state);
+    PostExecute();
+}
+
+void ComplxFrame::OnBack(wxCommandEvent& event)
+{
+    EventLog l(__func__);
+    InfoLog("Stepping back 1 instruction");
+    lc3_back(*state);
+    PostExecute();
 }
 
 void ComplxFrame::OnStateChange(wxPropertyGridEvent& event)
@@ -112,6 +130,7 @@ void ComplxFrame::InitializeLC3State()
 
 void ComplxFrame::InitializeMemoryView()
 {
+    memoryView->UpdateRef(std::ref(*state));
     memoryView->AssociateModel(memory_view_model.get());
     memoryView->ScrollTo(0x3000);
 }
@@ -185,6 +204,11 @@ bool ComplxFrame::DoLoadFile(const LoadingOptions& opts)
     }
 
     InfoLog("Successfully loaded file: %s", static_cast<const char*>(opts.file));
+
+    /// TODO should really have an lc3_destroy function.
+    // Without this plugins will be dangling.
+    lc3_init(*state);
+
     state = std::move(new_state);
     PostLoadFile();
     reload_options.file_modification_time = filename.GetModificationTime();
@@ -194,11 +218,22 @@ bool ComplxFrame::DoLoadFile(const LoadingOptions& opts)
 
 void ComplxFrame::PostLoadFile()
 {
-    memory_view_model->UpdateRef(std::ref(*state));
+    memoryView->UpdateRef(std::ref(*state));
     cc_property->UpdateRef(std::ref(*state));
     pc_property->UpdateRef(std::ref(reinterpret_cast<short&>(state->pc)));
     for (unsigned int i = 0; i < 8; i++)
         register_properties[i]->UpdateRef(std::ref(state->regs[i]));
     memoryView->Refresh();
     memoryView->ScrollTo(state->pc);
+}
+
+void ComplxFrame::PostExecute()
+{
+    memoryView->Refresh();
+    memoryView->ScrollTo(state->pc);
+
+    for (auto& property : register_properties)
+        property->RefreshDisplayedValue();
+    pc_property->RefreshDisplayedValue();
+    cc_property->RefreshDisplayedValue();
 }

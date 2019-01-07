@@ -24,6 +24,10 @@ public:
 
     void OnExit(wxCommandEvent& event) override;
 
+    // Control Menu Event Handlers
+    void OnStep(wxCommandEvent& event) override;
+    void OnBack(wxCommandEvent& event) override;
+
     // State Event Handling
     void OnStateChange(wxPropertyGridEvent& event) override;
 
@@ -37,6 +41,8 @@ private:
     bool DoLoadFile(const LoadingOptions& options);
     /** Updates all objects referring to the now stale lc3_state object */
     void PostLoadFile();
+    /** Called when the display needs to be updated after executing instructions */
+    void PostExecute();
 
     std::unique_ptr<lc3_state> state;
 

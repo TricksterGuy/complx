@@ -22,8 +22,10 @@ public:
     ProcessStatusRegisterProperty(std::reference_wrapper<lc3_state> state, unsigned int display_mode = Invalid);
     ~ProcessStatusRegisterProperty() {}
     bool ValidateValue(wxVariant& value, wxPGValidationInfo& validationInfo) const override;
+    /** Refreshes the Property Grid Property's value. */
+    void RefreshDisplayedValue();
+    /** Updates the LC3 state's CC or PSR value */
     void UpdateRegisterValue();
-    void UpdateDisplay();
     /** Updates the reference wrapper. Usually done after loading a new assembly file */
     void UpdateRef(std::reference_wrapper<lc3_state> new_value);
     /** Gets the Maximum Length for editing. Not to be confused with GetMaxLength */

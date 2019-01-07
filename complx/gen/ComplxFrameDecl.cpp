@@ -37,6 +37,17 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuView = new wxMenu();
 	menuBar->Append( menuView, wxT("View") );
 
+	menuControl = new wxMenu();
+	wxMenuItem* menuControlStep;
+	menuControlStep = new wxMenuItem( menuControl, ID_STEP, wxString( wxT("&Step") ) + wxT('\t') + wxT("F2"), wxT("Executes one instruction"), wxITEM_NORMAL );
+	menuControl->Append( menuControlStep );
+
+	wxMenuItem* menuControlBack;
+	menuControlBack = new wxMenuItem( menuControl, ID_BACK, wxString( wxT("&Back") ) + wxT('\t') + wxT("F3"), wxT("Undo one instruction"), wxITEM_NORMAL );
+	menuControl->Append( menuControlBack );
+
+	menuBar->Append( menuControl, wxT("Control") );
+
 	menuState = new wxMenu();
 	menuBar->Append( menuState, wxT("State") );
 
@@ -72,7 +83,7 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	wxBoxSizer* bSizer6;
 	bSizer6 = new wxBoxSizer( wxVERTICAL );
 
-	memoryView = new MemoryView( memoryPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_HORIZ_RULES|wxDV_SINGLE|wxDV_VERT_RULES );
+	memoryView = new MemoryView( memoryPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_HORIZ_RULES|wxDV_ROW_LINES|wxDV_SINGLE|wxDV_VERT_RULES );
 	memoryView->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
 
 	bSizer6->Add( memoryView, 1, wxEXPAND, 5 );
@@ -170,6 +181,8 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuFile->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnLoad ), this, menuFileLoad->GetId());
 	menuFile->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReload ), this, menuFileReload->GetId());
 	menuFile->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnExit ), this, menuFileExit->GetId());
+	menuControl->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnStep ), this, menuControlStep->GetId());
+	menuControl->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnBack ), this, menuControlBack->GetId());
 	statePropGridManager->Connect( wxEVT_PG_CHANGED, wxPropertyGridEventHandler( ComplxFrameDecl::OnStateChange ), NULL, this );
 }
 
