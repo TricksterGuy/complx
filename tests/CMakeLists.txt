@@ -32,6 +32,8 @@ target_link_libraries(
     lc3_test_suite
     lc3
     ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+    # Necessary for msys2
+    ${LC3_TEST_SUITE_EXTRA_LIBS}
 )
 
 if(ENABLE_REPLAY)
