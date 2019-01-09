@@ -18,7 +18,7 @@ void lc3_trace(lc3_state& state)
     snprintf(buf, 128, "PC x%04x\n", state.pc);
     stream << buf;
 
-    snprintf(buf, 128, "instr: %s", lc3_disassemble(state, state.mem[state.pc], 1).c_str());
+    snprintf(buf, 128, "instr: %s", lc3_disassemble(state, state.mem[state.pc], state.pc, 1).c_str());
     stream << buf;
 
     snprintf(buf, 128, " (%04x)\n", static_cast<unsigned short>(state.mem[state.pc]));

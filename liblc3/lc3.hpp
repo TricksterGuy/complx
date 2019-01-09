@@ -570,44 +570,18 @@ typedef struct lc3_state
     bool in_lc3test;
 } lc3_state;
 
-/** lc3_basic_disassemble
-  *
-  * Disassemble the data passed in.
-  * @param state LC3State object.
-  * @param data Instruction data.
-  * @return The disassembled instruction as a string.
-  */
-std::string lc3_basic_disassemble(lc3_state& state, unsigned short data);
-/** lc3_disassemble
-  *
-  * Disassemble the data passed in with label information
-  * This utilizes symbol table information in its output.
-  * @param state LC3State object.
-  * @param data Instruction data.
-  * @return The disassembled instruction as a string.
-  */
-std::string lc3_normal_disassemble(lc3_state& state, unsigned short data);
-/** lc3_smart_disassemble
-  *
-  * Disassembles the instruction into something a little more high level.
-  * This utilizes symbol table information in its output.
-  * @param state LC3State object.
-  * @param data Instruction data.
-  * @return The disassembled instruction as a string.
-  */
-std::string lc3_smart_disassemble(lc3_state& state, unsigned short data);
-
 /** lc3_disassemble
   *
   * Entry function for disassembling instructions.
-  * If state.strict_execution is enabled will append a ! at the end of the instruction.
+  * If state.strict_execution is enabled will append a * at the end of the instruction.
   *
   * @param state LC3State object.
   * @param data Instruction data.
-  * @param level disassemle level (0: basic, 1: normal, 2:high level)
+  * @param pc PC value to interpret the instruction for symbols. Default is current PC value in the LC3State.
+  * @param level disassemle level (0: basic, 1: normal, 2:high level). Default is normal.
   * @return The disassembled instruction as a string.
   */
-std::string lc3_disassemble(lc3_state& state, unsigned short data, int level);
+std::string lc3_disassemble(lc3_state& state, unsigned short data, int pc = -1, int level = LC3_NORMAL_DISASSEMBLE);
 
 /** lc3_load
   *
@@ -632,7 +606,6 @@ int lc3_reader_obj(std::istream& file);
   * @return Zero on success, nonzero for failure.
   */
 int lc3_reader_hex(std::istream& file);
-
 
 /** lc3_read_char
   *

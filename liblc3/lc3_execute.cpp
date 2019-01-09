@@ -770,7 +770,7 @@ void lc3_warning(lc3_state& state, const std::string& msg)
     std::string message;
 
     unsigned short addr = state.pc - 1;
-    std::string instr = lc3_disassemble(state, state.mem[addr], 1);
+    std::string instr = lc3_disassemble(state, state.mem[addr], state.pc, 1);
 
     sprintf(warning, "Warning at x%04x (instruction - %s): %s", addr, instr.c_str(), msg.c_str());
 

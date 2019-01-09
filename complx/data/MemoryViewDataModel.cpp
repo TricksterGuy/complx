@@ -52,7 +52,6 @@ void MemoryViewDataModel::GetValueByRow(wxVariant& variant, unsigned int row, un
 
     wxString ret = wxEmptyString;
 
-    unsigned short pc = state.pc;
     unsigned short addr = row; //ViewToAddress(row;
     short data = state.mem[addr];
     long info = 0;
@@ -97,10 +96,7 @@ void MemoryViewDataModel::GetValueByRow(wxVariant& variant, unsigned int row, un
             ret = lc3_sym_rev_lookup(state, addr);
             break;
         case MemoryInstruction:
-            // Change the pc temporarily...
-            state.pc = addr + 1;
-            ret = lc3_disassemble(state, data, disassemble_level);
-            state.pc = pc;
+            ret = lc3_disassemble(state, data, addr + 1, disassemble_level);
             break;
         case MemoryBinary:
             variant << ConstructBinaryDisplayData(static_cast<unsigned short>(data), state.instructionPlugin);

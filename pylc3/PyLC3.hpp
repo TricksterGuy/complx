@@ -86,17 +86,12 @@ public:
     /** @see lc3_disassemble */
     const std::string disassemble(unsigned short address, int level)
     {
-        ///TODO remove disassemble's accessing of state.pc it should assume the address where it is located is the "pc"
-        unsigned short pc = state.pc;
-        state.pc = address + 1;
-        const std::string ret = lc3_disassemble(state, state.mem[address], level);
-        state.pc = pc;
-        return ret;
+        return lc3_disassemble(state, state.mem[address], address + 1, level);
     }
     /** @see lc3_disassemble */
     const std::string disassemble_data(unsigned short data, int level)
     {
-        return lc3_disassemble(state, data, level);
+        return lc3_disassemble(state, data, -1, level);
     }
     /** @see lc3_add_break */
     bool add_breakpoint(unsigned short address, const std::string& condition = "1", int times = -1, const std::string& label = "") { return lc3_add_break(state, address, label, condition, times); }

@@ -76,7 +76,7 @@ const char* ADV_DISASSEMBLE_LOOKUP[16][8] =
     {"GETC", "OUT", "PUTS", "IN", "PUTSP", "HALT", "TRAP x%02x"},
 };
 
-std::string lc3_basic_disassemble(lc3_state& state, unsigned short data)
+std::string lc3_basic_disassemble(lc3_state& state, unsigned short data, unsigned short pc)
 {
     lc3_instr instr = lc3_decode(state, data);
     unsigned int opcode = instr.data.opcode;
@@ -181,7 +181,7 @@ std::string lc3_basic_disassemble(lc3_state& state, unsigned short data)
     return buf;
 }
 
-std::string lc3_normal_disassemble(lc3_state& state, unsigned short data)
+std::string lc3_normal_disassemble(lc3_state& state, unsigned short data, unsigned short pc)
 {
     lc3_instr instr = lc3_decode(state, data);
     unsigned int opcode = instr.data.opcode;
@@ -194,7 +194,7 @@ std::string lc3_normal_disassemble(lc3_state& state, unsigned short data)
     {
     case BR_INSTR:
         offset = instr.br.pc_offset;
-        label = lc3_sym_rev_lookup(state, state.pc + offset);
+        label = lc3_sym_rev_lookup(state, pc + offset);
         // If all flags are off
         if (!(instr.br.n || instr.br.z || instr.br.p) || instr.br.pc_offset == 0)
         {
@@ -262,7 +262,7 @@ std::string lc3_normal_disassemble(lc3_state& state, unsigned short data)
     case LDI_INSTR:
     case STI_INSTR:
         offset = instr.mem.offset.pc_offset;
-        label = lc3_sym_rev_lookup(state, state.pc + offset);
+        label = lc3_sym_rev_lookup(state, pc + offset);
         if (label.empty())
         {
             sprintf(buf, DISASSEMBLE_LOOKUP[opcode][0], instr.mem.offset.reg,
@@ -282,7 +282,7 @@ std::string lc3_normal_disassemble(lc3_state& state, unsigned short data)
         if (instr.subr.jsr.is_jsr)
         {
             offset = instr.subr.jsr.pc_offset;
-            label = lc3_sym_rev_lookup(state, state.pc + offset);
+            label = lc3_sym_rev_lookup(state, pc + offset);
 
             if (label.empty())
                 sprintf(buf, DISASSEMBLE_LOOKUP[opcode][1], instr.subr.jsr.pc_offset);
@@ -327,7 +327,7 @@ std::string lc3_normal_disassemble(lc3_state& state, unsigned short data)
     return buf;
 }
 
-std::string lc3_smart_disassemble(lc3_state& state, unsigned short instruction)
+std::string lc3_smart_disassemble(lc3_state& state, unsigned short instruction, unsigned short pc)
 {
     lc3_instr instr = lc3_decode(state, instruction);
     int offset;
@@ -341,7 +341,7 @@ std::string lc3_smart_disassemble(lc3_state& state, unsigned short instruction)
     {
     case BR_INSTR:
         offset = instr.br.pc_offset;
-        label = lc3_sym_rev_lookup(state, state.pc + offset);
+        label = lc3_sym_rev_lookup(state, pc + offset);
         // If no flags are on or offset == 0 its a NOP
         if (!(instr.br.n || instr.br.z || instr.br.p) || offset == 0)
         {
@@ -469,7 +469,7 @@ std::string lc3_smart_disassemble(lc3_state& state, unsigned short instruction)
     case LEA_INSTR:
     case LDI_INSTR:
         offset = instr.mem.offset.pc_offset;
-        label = lc3_sym_rev_lookup(state, state.pc + offset);
+        label = lc3_sym_rev_lookup(state, pc + offset);
         if (!label.empty())
             sprintf(buf, ADV_DISASSEMBLE_LOOKUP[opcode][MEM_LABEL], instr.mem.offset.reg, label.c_str());
         else if (offset != 0)
@@ -481,7 +481,7 @@ std::string lc3_smart_disassemble(lc3_state& state, unsigned short instruction)
     case ST_INSTR:
     case STI_INSTR:
         offset = instr.mem.offset.pc_offset;
-        label = lc3_sym_rev_lookup(state, state.pc + offset);
+        label = lc3_sym_rev_lookup(state, pc + offset);
         if (!label.empty())
             sprintf(buf, ADV_DISASSEMBLE_LOOKUP[opcode][MEM_LABEL], label.c_str(), instr.mem.offset.reg);
         else if (offset != 0)
@@ -502,7 +502,7 @@ std::string lc3_smart_disassemble(lc3_state& state, unsigned short instruction)
         if (instr.subr.jsr.is_jsr)
         {
             offset = instr.subr.jsr.pc_offset;
-            label = lc3_sym_rev_lookup(state, state.pc + offset);
+            label = lc3_sym_rev_lookup(state, pc + offset);
 
             if (!label.empty())
                 sprintf(buf, ADV_DISASSEMBLE_LOOKUP[opcode][JSR_LABEL], label.c_str());
@@ -547,19 +547,21 @@ std::string lc3_smart_disassemble(lc3_state& state, unsigned short instruction)
     return buf;
 }
 
-std::string lc3_disassemble(lc3_state& state, unsigned short data, int level)
+std::string lc3_disassemble(lc3_state& state, unsigned short data, int pc, int level)
 {
+    unsigned short address = (pc == -1) ? state.pc : static_cast<unsigned short>(pc);
+
     std::string instr;
     switch(level)
     {
         case 0:
-            instr = lc3_basic_disassemble(state, data);
+            instr = lc3_basic_disassemble(state, data, address);
             break;
         case 1:
-            instr = lc3_normal_disassemble(state, data);
+            instr = lc3_normal_disassemble(state, data, address);
             break;
         case 2:
-            instr = lc3_smart_disassemble(state, data);
+            instr = lc3_smart_disassemble(state, data, address);
             break;
         default:
             instr = "";
@@ -568,7 +570,7 @@ std::string lc3_disassemble(lc3_state& state, unsigned short data, int level)
 
     if (state.strict_execution)
     {
-        switch((data >> 12) & 0xF)
+        switch(data >> 12)
         {
             case ADD_INSTR:
             case AND_INSTR:
