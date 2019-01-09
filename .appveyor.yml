@@ -30,6 +30,7 @@ init:
 build_script:
 - cmake -E make_directory build
 - cmake -E chdir build cmake -G "%CMAKE_GENERATOR%" -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_INCLUDEDIR="%BOOST_INCLUDEDIR%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR%" -DENABLE_TESTS=ON -DENABLE_PYLC3=OFF -DENABLE_COMPLX=OFF -DENABLE_AS2OBJ=OFF ..
+- cmake --build build
 
 test_script:
 - set CTEST_OUTPUT_ON_FAILURE=ON
