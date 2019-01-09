@@ -282,13 +282,14 @@ BOOST_FIXTURE_TEST_CASE(InstructionBasicDisassembleTest, LC3BasicTest)
     }
 
     // Test special cases
-    const std::string more_answers[5] =
+    const std::string more_answers[6] =
     {
         "BRN #3",
-        "NOP",
+        "NOP *",
         "RTI",
         "ERROR",
-        "NOP ('0')"
+        "NOP ('0') *",
+        "NOP"
     };
 
     // BRN 3
@@ -304,7 +305,7 @@ BOOST_FIXTURE_TEST_CASE(InstructionBasicDisassembleTest, LC3BasicTest)
     BOOST_CHECK_EQUAL(rti, more_answers[2]);
     BOOST_CHECK_EQUAL(error, more_answers[3]);
     BOOST_CHECK_EQUAL(nop0, more_answers[4]);
-    BOOST_CHECK_EQUAL(nop2, more_answers[1]);
+    BOOST_CHECK_EQUAL(nop2, more_answers[5]);
 
 }
 
@@ -339,8 +340,8 @@ BOOST_FIXTURE_TEST_CASE(TestDisassemble, LC3BasicTest)
         "NOT R0, R0",
         "NOT R0, R1",
         "NOP",
-        "NOP ('0')",
-        "NOP",
+        "NOP ('0') *",
+        "NOP *",
         "BRN LABEL",
         "BRZ LABEL",
         "BRP LABEL",
@@ -422,8 +423,8 @@ BOOST_FIXTURE_TEST_CASE(TestSmartDisassemble, LC3BasicTest)
         "R0 = ~R1",
 
         "NOP",
-        "NOP ('0')",
-        "NOP",
+        "NOP ('0') *",
+        "NOP *",
         "if cc<0, PC = LABEL",
         "if cc=0, PC = LABEL",
         "if cc>0, PC = LABEL",
