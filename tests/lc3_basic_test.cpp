@@ -1,3 +1,6 @@
+#ifdef __MINGW32__
+#define BOOST_TEST_DYN_LINK
+#endif
 #define BOOST_TEST_MODULE LC3_Test_Suite
 #include <boost/test/auto_unit_test.hpp>
 #include <iostream>
@@ -233,12 +236,12 @@ BOOST_FIXTURE_TEST_CASE(MalformedInstructionDisassemble, LC3BasicTest)
     for (unsigned int i = 0; i < malformed_instructions.size(); i++)
     {
         BOOST_TEST_MESSAGE("data = x" << std::hex << malformed_instructions[i]);
-        std::string disassemble = lc3_disassemble(state, malformed_instructions[i], 0);
+        std::string disassemble = lc3_disassemble(state, malformed_instructions[i], -1, 0);
         BOOST_CHECK_EQUAL(disassemble, answers[i]);
     }
 
     // This should not be considered malformed
-    std::string disassemble = lc3_disassemble(state, 0x0E00, 0);
+    std::string disassemble = lc3_disassemble(state, 0x0E00, -1, 0);
     BOOST_CHECK_EQUAL(disassemble, "NOP");
 }
 
@@ -274,8 +277,8 @@ BOOST_FIXTURE_TEST_CASE(InstructionBasicDisassembleTest, LC3BasicTest)
     {
         file.read((char*) &data, sizeof(unsigned short));
         data = ((data >> 8) & 0xFF) | ((data & 0xFF) << 8);
-        std::string instruct = lc3_basic_disassemble(state, data);
-        BOOST_CHECK_EQUAL(instruct,  answers[i]);
+        std::string instruct = lc3_disassemble(state, data, -1, LC3_BASIC_DISASSEMBLE);
+        BOOST_CHECK_EQUAL(instruct, answers[i]);
     }
 
     // Test special cases
@@ -289,12 +292,12 @@ BOOST_FIXTURE_TEST_CASE(InstructionBasicDisassembleTest, LC3BasicTest)
     };
 
     // BRN 3
-    std::string brn = lc3_basic_disassemble(state, 0x0803);
-    std::string nop = lc3_basic_disassemble(state, 0x0000);
-    std::string rti = lc3_basic_disassemble(state, 0x8000);
-    std::string error = lc3_basic_disassemble(state, 0xD392);
-    std::string nop0 = lc3_basic_disassemble(state, 0x0030);
-    std::string nop2 = lc3_basic_disassemble(state, 0x0E00);
+    std::string brn   = lc3_disassemble(state, 0x0803, -1, LC3_BASIC_DISASSEMBLE);
+    std::string nop   = lc3_disassemble(state, 0x0000, -1, LC3_BASIC_DISASSEMBLE);
+    std::string rti   = lc3_disassemble(state, 0x8000, -1, LC3_BASIC_DISASSEMBLE);
+    std::string error = lc3_disassemble(state, 0xD392, -1, LC3_BASIC_DISASSEMBLE);
+    std::string nop0  = lc3_disassemble(state, 0x0030, -1, LC3_BASIC_DISASSEMBLE);
+    std::string nop2  = lc3_disassemble(state, 0x0E00, -1, LC3_BASIC_DISASSEMBLE);
 
     BOOST_CHECK_EQUAL(brn, more_answers[0]);
     BOOST_CHECK_EQUAL(nop, more_answers[1]);
@@ -380,7 +383,7 @@ BOOST_FIXTURE_TEST_CASE(TestDisassemble, LC3BasicTest)
         state.pc += 1;
         file.read((char*) &data, sizeof(unsigned short));
         data = ((data >> 8) & 0xFF) | ((data & 0xFF) << 8);
-        std::string instruct = lc3_normal_disassemble(state, data);
+        std::string instruct = lc3_disassemble(state, data, -1, LC3_NORMAL_DISASSEMBLE);
         BOOST_CHECK_EQUAL(instruct,  answers[i]);
     }
 }
@@ -472,7 +475,7 @@ BOOST_FIXTURE_TEST_CASE(TestSmartDisassemble, LC3BasicTest)
         state.pc += 1;
         file.read((char*) &data, sizeof(unsigned short));
         data = ((data >> 8) & 0xFF) | ((data & 0xFF) << 8);
-        std::string instruct = lc3_smart_disassemble(state, data);
+        std::string instruct = lc3_disassemble(state, data, -1, LC3_ADVANCED_DISASSEMBLE);
         BOOST_CHECK_EQUAL(instruct,  answers[i]);
     }
 
