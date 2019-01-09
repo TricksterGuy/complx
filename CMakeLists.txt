@@ -1,6 +1,8 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
 # Ignore warnings about rpath behavior on OS X
 cmake_policy(SET CMP0042 NEW)
+# Ignore warnings about _ROOT being used
+cmake_policy(SET CMP0074 NEW)
 project(complx-tools)
 
 # Add code coverage stuff.
