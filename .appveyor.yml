@@ -26,6 +26,7 @@ environment:
 init:
 - set PATH=%MINGW_ROOT%\bin;C:\msys64\usr\bin\;%PATH%
 - bash -lc "pacman --needed --noconfirm -S mingw-w64-%MSYS2_ARCH%-boost"
+- bash -lc "pacman --needed --noconfirm -S mingw-w64-%MSYS2_ARCH%-dlfcn"
 
 build_script:
 - cmake -E make_directory build
