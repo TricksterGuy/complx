@@ -23,8 +23,11 @@ environment:
       BOOST_INCLUDEDIR: C:\msys64\mingw64\include\boost
       CMAKE_GENERATOR: 'MSYS Makefiles'
 
-build_script:
+init:
 - set PATH=%MINGW_ROOT%\bin;C:\msys64\usr\bin\;%PATH%
+- bash -lc "pacman --needed --noconfirm -S mingw-w64-%MSYS2_ARCH%-boost"
+
+build_script:
 - cmake -E make_directory build
 - cmake -E chdir build cmake -G "%CMAKE_GENERATOR%" -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_INCLUDEDIR="%BOOST_INCLUDEDIR%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR%" -DENABLE_TESTS=ON -DENABLE_PYLC3=OFF -DENABLE_COMPLX=OFF -DENABLE_AS2OBJ=OFF ..
 
