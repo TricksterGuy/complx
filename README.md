@@ -1,9 +1,5 @@
 complx
 ======
-[![Travis CI Build Status](https://travis-ci.org/TricksterGuy/complx.svg?branch=restart)](https://travis-ci.org/TricksterGuy/complx)
-[![Appveyor Build status](https://ci.appveyor.com/api/projects/status/in28s58ta7guv8cq/branch/restart?svg=true)](https://ci.appveyor.com/project/TricksterGuy/complx/branch/restart)
-[![Tokei](https://tokei.rs/b1/github/TricksterGuy/complx)](https://github.com/Aaronepower/tokei)
-
 
 Extensible LC-3 Simulator written in C++.  Includes a Graphical User Interface and Command Line Interface simulator, Assembler, [Python Bindings](https://github.com/zucchini/pyLC3), and Python Autograder. Mainly used in CS2110 at Georgia Tech.  Maintained by Brandon (bwhitehead0308 [AT] gmail [DOT] com).
 
