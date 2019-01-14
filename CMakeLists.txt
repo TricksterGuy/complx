@@ -1,110 +1,207 @@
-cmake_minimum_required(VERSION 3.12)
-# Ignore warnings about rpath behavior on OS X
-cmake_policy(SET CMP0042 NEW)
-# Ignore warnings about _ROOT being used
-cmake_policy(SET CMP0074 NEW)
-project(complx-tools)
 
-# Add code coverage stuff.
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+#
+# CMake options
+#
 
-option(ENABLE_PLUGINS "Enable Official Plugins" ON)
-option(ENABLE_LC3EDIT "Build lc3edit" OFF)
-option(ENABLE_AS2OBJ "Build as2obj" ON)
-option(ENABLE_COMPLX "Build complx" ON)
-option(ENABLE_DEV "Build dev version" OFF)
-option(ENABLE_TESTS "Enable testing" OFF)
-option(ENABLE_COVERAGE "Enable testing coverage" OFF)
-option(ENABLE_PYLC3 "Enable python bindings to liblc3" OFF)
-option(ENABLE_REPLAY "Enable replay setup from pylc3 tests" ON)
+# CMake version
+cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 
-if(ENABLE_TESTS)
-    enable_testing()
-endif(ENABLE_TESTS)
+#
+# Configure CMake environment
+#
 
-# Require C++17 build
-if(NOT CMAKE_CXX_FLAGS MATCHES "-std=(c|gnu)\\+\\+17")
-    message(STATUS "This project requires C++17. Adding -std=c++17 to CXXFLAGS.")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17" CACHE STRING "Flags used by the compiler during all build types." FORCE)
+# Register general cmake commands
+include(cmake/Custom.cmake)
+
+# Set policies
+set_policy(CMP0054 NEW) # ENABLE CMP0054: Only interpret if() arguments as variables or keywords when unquoted.
+set_policy(CMP0042 NEW) # ENABLE CMP0042: MACOSX_RPATH is enabled by default.
+set_policy(CMP0063 NEW) # ENABLE CMP0063: Honor visibility properties for all target types.
+set_policy(CMP0074 NEW) # ENABLE CMP0074: Ignore warnings about _ROOT being used
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+include(GenerateExportHeader)
+
+set(WriterCompilerDetectionHeaderFound NOTFOUND)
+# This module is only available with CMake >=3.1, so check whether it could be found
+# BUT in CMake 3.1 this module doesn't recognize AppleClang as compiler, so just use it as of CMake 3.2
+if (${CMAKE_VERSION} VERSION_GREATER "3.2")
+    include(WriteCompilerDetectionHeader OPTIONAL RESULT_VARIABLE WriterCompilerDetectionHeaderFound)
 endif()
 
-# Additional debug flags
-set(CMAKE_CXX_FLAGS_DEBUG "-g -pg")
-# Install directories
-set(CMAKE_INSTALL_LIBDIR lib CACHE STRING "where to install libraries/plugins")
-set(CMAKE_INSTALL_BINDIR bin CACHE STRING "where to install programs")
+# Include custom cmake modules
+include(cmake/Coverage.cmake)
+include(cmake/GenerateTemplateExportHeader.cmake)
+include(cmake/GetGitRevisionDescription.cmake)
+include(cmake/HealthCheck.cmake)
 
-if(ENABLE_COVERAGE)
-    include(CodeCoverage)
-    append_coverage_compiler_flags()
-endif(ENABLE_COVERAGE)
 
-# Set default warning flags
-set(PROJECT_WARNING_FLAGS "-Wall -Wno-deprecated -Wno-deprecated-declarations" CACHE STRING "Compiler warning flags to include")
-mark_as_advanced(PROJECT_WARNING_FLAGS)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${PROJECT_WARNING_FLAGS}")
+#
+# Project description and (meta) information
+#
 
-# Default to release build if not specified
-if(NOT CMAKE_BUILD_TYPE)
-    message(STATUS "Setting build type to 'Release' as none was specified.")
-    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
-    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
-    "MinSizeRel" "RelWithDebInfo")
-endif(NOT CMAKE_BUILD_TYPE)
+# Get git revision
+get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+string(SUBSTRING "${GIT_SHA1}" 0 12 GIT_REV)
+if(NOT GIT_SHA1)
+    set(GIT_REV "0")
+endif()
 
-if(CMAKE_BUILD_TYPE MATCHES "Debug")
-    set(CMAKE_EXE_LINKER_FLAGS "-fprofile-arcs -ftest-coverage")
-endif(CMAKE_BUILD_TYPE MATCHES "Debug")
+# Meta information about the project
+set(META_PROJECT_NAME        "complx-tools")
+set(META_PROJECT_DESCRIPTION "complx-tools is a suite of educational tools for learning lc3 assembly. "
+"It includes both a gui and cli based simulator (named complx and comp respectively), an assembler "
+"(as2obj), and a framework for testing and grading lc3 assembly code (lc3test). Complx also be "
+"extended with plugins that add additional functionality to the LC3. The tools also come with a "
+"C++ interface to the LC3 (liblc3). Complx was written using the wxWidgets library.")
+set(META_AUTHOR_ORGANIZATION "TricksterGuy")
+set(META_AUTHOR_DOMAIN       "https://github.com/TricksterGuy/complx/")
+set(META_AUTHOR_MAINTAINER   "bwhitehead0308@gmail.com")
+set(META_VERSION_MAJOR       "5")
+set(META_VERSION_MINOR       "0")
+set(META_VERSION_PATCH       "0")
+set(META_VERSION_REVISION    "${GIT_REV}")
+set(META_VERSION             "${META_VERSION_MAJOR}.${META_VERSION_MINOR}.${META_VERSION_PATCH}")
+set(META_NAME_VERSION        "${META_PROJECT_NAME} v${META_VERSION} (${META_VERSION_REVISION})")
+set(META_CMAKE_INIT_SHA      "${GIT_REV}")
 
-add_definitions(-DPREFIX=${CMAKE_INSTALL_PREFIX})
-add_definitions(-DSO_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}")
+string(MAKE_C_IDENTIFIER ${META_PROJECT_NAME} META_PROJECT_ID)
+string(TOUPPER ${META_PROJECT_ID} META_PROJECT_ID)
 
-if(ENABLE_COMPLX)
-    set(wxWidgets_USE_LIBS aui propgrid stc xrc xml html adv net core base)
-    find_package(wxWidgets REQUIRED)
-    set(CMAKE_SKIP_RPATH TRUE)
-    include(${wxWidgets_USE_FILE})
-endif(ENABLE_COMPLX)
+#
+# Project configuration options
+#
 
-include_directories(${complx-tools_SOURCE_DIR}/liblc3)
-include_directories(${complx-tools_SOURCE_DIR}/logging)
+# Project options
+option(OPTION_SELF_CONTAINED  "Create a self-contained install with all dependencies." OFF)
+option(OPTION_BUILD_TESTS     "Build tests."                                           OFF)
+option(OPTION_BUILD_DOCS      "Build documentation."                                   OFF)
+option(OPTION_ENABLE_COVERAGE "Add coverage information."                              OFF)
 
-add_subdirectory(liblc3)
-add_subdirectory(logging)
 
-if(ENABLE_AS2OBJ)
-    add_subdirectory(as2obj)
-endif(ENABLE_AS2OBJ)
+#
+# Declare project
+#
 
-if(ENABLE_REPLAY)
-    add_subdirectory(replay)
-endif(ENABLE_REPLAY)
+# Generate folders for IDE targets (e.g., VisualStudio solutions)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set(IDE_FOLDER "")
 
-if(ENABLE_PLUGINS)
-    add_subdirectory(plugins)
-endif(ENABLE_PLUGINS)
+# Declare project
+project(${META_PROJECT_NAME} C CXX)
 
-if(ENABLE_LC3EDIT)
-    add_subdirectory(lc3edit)
-endif(ENABLE_LC3EDIT)
+# Set output directories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 
-if(ENABLE_COMPLX)
-    add_subdirectory(complx)
-endif(ENABLE_COMPLX)
+# Create version file
+file(WRITE "${PROJECT_BINARY_DIR}/VERSION" "${META_NAME_VERSION}")
 
-if(ENABLE_TESTS)
-    add_subdirectory(tests)
-endif(ENABLE_TESTS)
 
-if(ENABLE_PYLC3)
-    add_subdirectory(pylc3)
-endif(ENABLE_PYLC3)
+#
+# Project Health Check Setup
+#
 
-# uninstall target
-configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
-    IMMEDIATE @ONLY)
+# Add cmake-init template check cmake targets
+add_check_template_target(${META_CMAKE_INIT_SHA})
 
-add_custom_target(uninstall
-    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+# Configure health check tools
+enable_cppcheck(ON)
+enable_clang_tidy(ON)
+enable_coverage(${OPTION_ENABLE_COVERAGE})
+
+
+#
+# Compiler settings and options
+#
+
+include(cmake/CompileOptions.cmake)
+
+
+#
+# Deployment/installation setup
+#
+
+# Get project name
+set(project ${META_PROJECT_NAME})
+
+# Check for system dir install
+set(SYSTEM_DIR_INSTALL FALSE)
+if("${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr" OR "${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr/local")
+    set(SYSTEM_DIR_INSTALL TRUE)
+endif()
+
+# Installation paths
+if(UNIX AND SYSTEM_DIR_INSTALL)
+    # Install into the system (/usr/bin or /usr/local/bin)
+    set(INSTALL_ROOT      "share/${project}")       # /usr/[local]/share/<project>
+    set(INSTALL_CMAKE     "share/${project}/cmake") # /usr/[local]/share/<project>/cmake
+    set(INSTALL_EXAMPLES  "share/${project}")       # /usr/[local]/share/<project>
+    set(INSTALL_DATA      "share/${project}")       # /usr/[local]/share/<project>
+    set(INSTALL_BIN       "bin")                    # /usr/[local]/bin
+    set(INSTALL_SHARED    "lib")                    # /usr/[local]/lib
+    set(INSTALL_LIB       "lib")                    # /usr/[local]/lib
+    set(INSTALL_INCLUDE   "include")                # /usr/[local]/include
+    set(INSTALL_DOC       "share/doc/${project}")   # /usr/[local]/share/doc/<project>
+    set(INSTALL_SHORTCUTS "share/applications")     # /usr/[local]/share/applications
+    set(INSTALL_ICONS     "share/pixmaps")          # /usr/[local]/share/pixmaps
+    set(INSTALL_INIT      "/etc/init")              # /etc/init (upstart init scripts)
+else()
+    # Install into local directory
+    set(INSTALL_ROOT      ".")                      # ./
+    set(INSTALL_CMAKE     "cmake")                  # ./cmake
+    set(INSTALL_EXAMPLES  ".")                      # ./
+    set(INSTALL_DATA      ".")                      # ./
+    set(INSTALL_BIN       ".")                      # ./
+    set(INSTALL_SHARED    "lib")                    # ./lib
+    set(INSTALL_LIB       "lib")                    # ./lib
+    set(INSTALL_INCLUDE   "include")                # ./include
+    set(INSTALL_DOC       "doc")                    # ./doc
+    set(INSTALL_SHORTCUTS "misc")                   # ./misc
+    set(INSTALL_ICONS     "misc")                   # ./misc
+    set(INSTALL_INIT      "misc")                   # ./misc
+endif()
+
+# Set runtime path
+set(CMAKE_SKIP_BUILD_RPATH            FALSE) # Add absolute path to all dependencies for BUILD
+set(CMAKE_BUILD_WITH_INSTALL_RPATH    FALSE) # Use CMAKE_INSTALL_RPATH for INSTALL
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE) # Do NOT add path to dependencies for INSTALL
+
+if(NOT SYSTEM_DIR_INSTALL)
+    # Find libraries relative to binary
+    if(APPLE)
+        set(CMAKE_INSTALL_RPATH "@loader_path/../../../${INSTALL_LIB}")
+    else()
+        set(CMAKE_INSTALL_RPATH "$ORIGIN/${INSTALL_LIB}")
+    endif()
+endif()
+
+
+#
+# Project modules
+#
+
+add_subdirectory(source)
+add_subdirectory(docs)
+add_subdirectory(deploy)
+
+
+#
+# Deployment (global project files)
+#
+
+# Install version file
+install(FILES "${PROJECT_BINARY_DIR}/VERSION" DESTINATION ${INSTALL_ROOT} COMPONENT runtime)
+
+# Install cmake find script for the project
+install(FILES ${META_PROJECT_NAME}-config.cmake DESTINATION ${INSTALL_ROOT} COMPONENT dev)
+
+# Install the project meta files
+install(FILES AUTHORS   DESTINATION ${INSTALL_ROOT} COMPONENT runtime)
+install(FILES LICENSE   DESTINATION ${INSTALL_ROOT} COMPONENT runtime)
+install(FILES README.md DESTINATION ${INSTALL_ROOT} COMPONENT runtime)
+
+# Install runtime data
+install(DIRECTORY ${PROJECT_SOURCE_DIR}/data DESTINATION ${INSTALL_DATA} COMPONENT runtime)
