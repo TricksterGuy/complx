@@ -212,7 +212,7 @@ BOOST_FIXTURE_TEST_CASE(MalformedInstructionTest, LC3BasicTest)
 
     for (const auto& data : malformed_instructions)
     {
-        BOOST_MESSAGE("data = x" << std::hex << data);
+        BOOST_TEST_MESSAGE("data = x" << std::hex << data);
         lc3_instr instr = lc3_decode(state, data);
         lc3_state_change change = lc3_execute(state, instr);
         BOOST_CHECK(state.halted);
@@ -232,7 +232,7 @@ BOOST_FIXTURE_TEST_CASE(MalformedInstructionDisassemble, LC3BasicTest)
 
     for (unsigned int i = 0; i < malformed_instructions.size(); i++)
     {
-        BOOST_MESSAGE("data = x" << std::hex << malformed_instructions[i]);
+        BOOST_TEST_MESSAGE("data = x" << std::hex << malformed_instructions[i]);
         std::string disassemble = lc3_disassemble(state, malformed_instructions[i], 0);
         BOOST_CHECK_EQUAL(disassemble, answers[i]);
     }
