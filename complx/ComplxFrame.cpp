@@ -360,7 +360,7 @@ void ComplxFrame::DoLoadFile(const LoadingOptions& opts)
         }
     }
 
-    SetTitle(wxString::Format("%s - %s", base_title, filename.GetFullPath()));
+    SetTitle(wxString::Format("%s LC-3 v%d - %s", base_title, state.lc3_version, filename.GetFullPath()));
 
 merge:
     std::map<std::string, unsigned short>::const_iterator i;

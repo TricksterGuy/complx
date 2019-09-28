@@ -57,6 +57,7 @@ enum LC3AssembleExceptionTypes
     MALFORMED_STRING,
     EXTRA_INPUT,
     PLUGIN_FAILED_TO_LOAD,
+    INVALID_LC3_VERSION,
 };
 
 /** Exception class for assembler errors */

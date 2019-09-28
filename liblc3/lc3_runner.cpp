@@ -77,6 +77,7 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     state.executions = 0;
     state.interrupt_enabled = 0;
     state.strict_execution = 1;
+    state.lc3_version = 0;
 
     // Clear subroutine info
     state.max_call_stack_size = -1;

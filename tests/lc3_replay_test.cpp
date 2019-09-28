@@ -16,7 +16,7 @@ void split(const std::string& s, char delimiter, std::vector<std::string>& token
 
 void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& replay_string, std::stringstream& newinput);
 
-const std::string REPLAY_STRING = "AQEAAAACAQAAAAMBAAAABAAAAAAFAAAAAAb/////BwCAAAAQEQEAAAA0AQAAAAFAEgAAAAABAAAAAAUTAwAAAEFISAEAAAAHABQEAAAAQkxBSAEAAACmAhUGAAAAQ0FXQ0FXBQAAAAUAAgAJAAAw//8WBAAAAFBBUEEEAAAATQBBAE0AQQAXAAAAAAYAAABSAEEASABSAEEASAAYBAAAAFRBVEEGAAAABQBAQACAAgAFAAcA/w==";
+const std::string REPLAY_STRING = "AQEAAAACAQAAAAMBAAAABAAAAAAFAAAAAAb/////BwCAAAAIAQAAABARAQAAADQBAAAAAUASAAAAAAEAAAAABRMDAAAAQUhIAQAAAAcAFAQAAABCTEFIAQAAAKYCFQYAAABDQVdDQVcFAAAABQACAAkAADD//xYEAAAAUEFQQQQAAABNAEEATQBBABcAAAAABgAAAFIAQQBIAFIAQQBIABgEAAAAVEFUQQYAAAAFAEBAAIACAAUABwAZBAAAADgwMDABAAAAIQD/";
 
 const std::vector<std::string> REPLAY_DESCRIPTIONS = {
 "true_traps: on",
@@ -26,6 +26,7 @@ const std::vector<std::string> REPLAY_DESCRIPTIONS = {
 "memory_strategy: fill_with_value",
 "memory_strategy_value: 4294967295",
 "breakpoint: x8000",
+"LC-3 version: 1",
 "",
 "R4 = (16385 x4001)",
 "PC = x0500",
@@ -35,6 +36,7 @@ const std::vector<std::string> REPLAY_DESCRIPTIONS = {
 "String at MEM[PAPA] = MAMA",
 "Console Input RAHRAH",
 "Call Subroutine TATA params: (2 x0002),(5 x0005),(7 x0007) R5 = x0005 R6 = x4040 R7 = x8000",
+"MEM[x8000] = (33 x0021)",
 };
 
 struct LC3ReplayTest
@@ -99,6 +101,7 @@ BOOST_FIXTURE_TEST_CASE(ReplayTest, LC3ReplayTest)
     BOOST_CHECK(state.interrupt_enabled);
     BOOST_CHECK(!state.strict_execution);
     BOOST_CHECK_EQUAL(state.mem[0x3010], -1);
+    BOOST_CHECK_EQUAL(state.lc3_version, 1);
 
 }
 
@@ -107,6 +110,8 @@ BOOST_FIXTURE_TEST_CASE(DescribeReplayTest, LC3ReplayTest)
     std::string output = lc3_describe_replay(REPLAY_STRING);
     std::vector<std::string> lines;
     split(output, '\n', lines);
+
+    BOOST_REQUIRE_EQUAL(lines.size(), REPLAY_DESCRIPTIONS.size());
 
     for (unsigned int i = 0; i < lines.size(); i++)
         BOOST_CHECK_EQUAL(lines[i], REPLAY_DESCRIPTIONS[i]);

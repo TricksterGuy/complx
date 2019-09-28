@@ -44,6 +44,7 @@ unsigned short lc3_assemble_one(lc3_state& state, LC3AssembleContext& context);
 
 void process_debug_info(lc3_state& state, const debug_statement& statement, bool enable_debug_statements);
 void process_plugin_info(lc3_state& state, const LC3AssembleContext& context);
+void process_version_info(lc3_state& state, const LC3AssembleContext& context);
 void parse_params(const std::string& line, std::map<std::string, std::string>& params);
 
 std::string LC3AssembleException::what() const throw()
@@ -127,6 +128,9 @@ std::string LC3AssembleException::what() const throw()
             break;
         case PLUGIN_FAILED_TO_LOAD:
             snprintf(what_str, 1023, "Plugin %s failed to load at line %d", params[0].c_str(), lineno);
+            break;
+        case INVALID_LC3_VERSION:
+            snprintf(what_str, 1023, "Invalid LC3 Version %s at line %d", params[0].c_str(), lineno);
             break;
         case UNKNOWN_ERROR:
         default:
@@ -212,6 +216,9 @@ std::string LC3AssembleException::what() const throw()
             break;
         case PLUGIN_FAILED_TO_LOAD:
             snprintf(what_str, 1023, "Plugin %s failed to load", params[0].c_str());
+            break;
+        case INVALID_LC3_VERSION:
+            snprintf(what_str, 1023, "Invalid LC3 Version %s", params[0].c_str());
             break;
         case UNKNOWN_ERROR:
         default:
@@ -439,6 +446,10 @@ void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>&
         if (comment.size() > 2 && comment.substr(1, 7) == std::string("@plugin") && !context.options.disable_plugins)
         {
             process_plugin_info(state, context);
+        }
+        else if (comment.size() > 2 && comment.substr(1, 8) == std::string("@version"))
+        {
+            process_version_info(state, context);
         }
         else if (comment.size() > 2 && comment[1] == '@')
         {
@@ -911,6 +922,26 @@ void process_plugin_info(lc3_state& state, const LC3AssembleContext& context)
     if (!lc3_install_plugin(state, params["filename"], params))
         THROW(LC3AssembleException(line, params["filename"], PLUGIN_FAILED_TO_LOAD, context.lineno));
 
+}
+
+/** process_version_info
+  *
+  * Process version statements,
+  */
+void process_version_info(lc3_state& state, const LC3AssembleContext& context)
+{
+    // version <version>
+    std::string line = context.line.substr(2);
+    size_t index = line.find_first_of(" \t");
+    std::string version = (index == std::string::npos) ? "" : line.substr(index + 1);
+    trim(version);
+
+    if (version == "1")
+        state.lc3_version = 1;
+    else if (version == "0")
+        state.lc3_version = 0;
+    else
+        THROW(LC3AssembleException(line, version, INVALID_LC3_VERSION, context.lineno));
 }
 
 bool lc3_add_break(const std::string& symbol, const std::string& label = "", const std::string& condition = "1", int times = -1);

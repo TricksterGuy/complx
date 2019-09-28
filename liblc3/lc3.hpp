@@ -484,6 +484,7 @@ typedef struct lc3_state
     unsigned char true_traps:1;
     unsigned char interrupt_enabled:1;
     unsigned char strict_execution:1;
+    int lc3_version;
     unsigned int warnings;
     unsigned int executions;
 

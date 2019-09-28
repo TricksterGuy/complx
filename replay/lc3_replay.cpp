@@ -27,6 +27,8 @@ enum PreconditionFlag
     MEMORY_STRATEGY_VALUE = 6,
     // Breakpoint address for Subroutine Testing.
     BREAK_ADDRESS = 7,
+    // LC3 Version
+    LC3_VERSION = 8,
 
     // 8-16 reserved.
     END_OF_ENVIRONMENT = 16,
@@ -107,6 +109,7 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
     bool strict_execution = true;
     bool plugins = true;
     unsigned int break_address = -1;
+    int version = 0;
 
     std::stringstream error;
 
@@ -149,6 +152,9 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
             case BREAK_ADDRESS:
                 break_address = value;
                 break;
+            case LC3_VERSION:
+                version = value;
+                break;
             default:
                 error << "Unknown tag found id: " << ((int)id);
                 throw error.str();
@@ -172,9 +178,15 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
             break;
     }
 
+    if (version < 0 || version > 1) {
+        error << "Invalid LC-3 Version found version: " << version;
+        throw error.str();
+    }
+
     lc3_set_true_traps(state, true_traps);
     state.interrupt_enabled = interrupts;
     state.strict_execution = strict_execution;
+    state.lc3_version = version;
     LC3AssembleOptions options;
     options.multiple_errors = false;
     options.warnings_as_errors = false;
@@ -324,6 +336,9 @@ std::string lc3_describe_replay(const std::string& replay_string)
                 break;
             case BREAK_ADDRESS:
                 description << "breakpoint: x" << std::hex << std::setw(4) << std::setfill('0') << value << std::endl;
+                break;
+            case LC3_VERSION:
+                description << "LC-3 version: " << value << std::endl;
                 break;
             default:
                 error << "Unknown tag found id: " << ((int)id);

@@ -809,6 +809,26 @@ BOOST_FIXTURE_TEST_CASE(TestMemoryInstructions, LC3BasicTest)
     BOOST_CHECK_EQUAL(state.p, 0);
 }
 
+BOOST_FIXTURE_TEST_CASE(TestLC3Version1, LC3BasicTest)
+{
+    state.lc3_version = 1;
+    lc3_instr instr;
+    // LEA R0, #-1      : op, reg, pc_offset
+    memoryoffset_instr lea = (memoryoffset_instr){LEA_INSTR, 0, -1};
+    instr.mem.offset = lea;
+    state.n = 1;
+    state.z = 0;
+    state.p = 0;
+
+    lc3_execute(state, instr);
+
+    // LEA no longer changes the CC register.
+    BOOST_CHECK_EQUAL(state.regs[0], 0x2FFF);
+    BOOST_CHECK_EQUAL(state.n, 1);
+    BOOST_CHECK_EQUAL(state.z, 0);
+    BOOST_CHECK_EQUAL(state.p, 0);
+}
+
 BOOST_FIXTURE_TEST_CASE(TestLoadObj, LC3BasicTest)
 {
     std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));

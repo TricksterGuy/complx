@@ -403,7 +403,9 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
         changes.value = state.regs[changes.location];
 
         state.regs[changes.location] = state.pc + instruction.mem.offset.pc_offset;
-        lc3_setcc(state, state.regs[changes.location]);
+        // In the 2019 revision of LC-3 LEA no longer sets condition codes.
+        if (state.lc3_version == 0)
+            lc3_setcc(state, state.regs[changes.location]);
         break;
     case TRAP_INSTR:
         // Invalid instruction check

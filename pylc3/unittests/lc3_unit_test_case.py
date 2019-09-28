@@ -56,6 +56,8 @@ class PreconditionFlag(enum.Enum):
     memory_strategy_value = 6
     # Breakpoint address for Subroutine Testing.
     break_address = 7
+    # LC3 Version.
+    lc3_version = 8
 
     # 8-15 reserved.
     end_of_environment = 16
@@ -306,6 +308,18 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         assert reg >= 0 and reg < 8, 'Invalid register number'
         self.state.set_register(toShort(addr), value)
+
+    def setLC3Version(self, version):
+        """Sets the LC-3 Version.
+
+        This function should be used to change the LC3 behavior.
+
+        0 - Default Version
+        1 - 2019 Revision (LEA no longer sets CC / Trap pushes PSR,PC on stack, RTI returns from trap or interrupt)
+        """
+        assert version >= 0 and version <= 1, 'Invalid LC-3 Version Given. Valid values are 0 or 1.'
+        self.state.lc3_version = version
+        self.preconditions.addEnvironment(PreconditionFlag.lc3_version, version)
 
     def setTrueTraps(self, setting):
         """Enables or disables True Traps.
