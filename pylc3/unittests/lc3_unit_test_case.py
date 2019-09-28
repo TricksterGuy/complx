@@ -29,7 +29,7 @@ import unittest
 
 DEFAULT_MAX_EXECUTIONS = 1000000
 
-def _toUShort(value):
+def toShort(value):
     """Converts a value into a 16 bit unsigned short.
 
     Args:
@@ -39,18 +39,6 @@ def _toUShort(value):
         The value as a 16 bit unsigned short.
     """
     return value & 0xFFFF
-
-def _toShort(value):
-    """Converts a value into a 16 bit signed short.
-
-    Args:
-        value: Integer - Value to convert.
-
-    Returns:
-        The value as a 16 bit signed short.
-    """
-    value = _toUShort(value)
-    return value if value < 32767 else value - 65536
 
 class PreconditionFlag(enum.Enum):
     invalid = 0
@@ -90,15 +78,6 @@ class PreconditionFlag(enum.Enum):
     subroutine = 24
     # Directly set an address to a value.
     direct_set = 25
-    # Directly set a string in memory.
-    direct_string = 26
-    # Directly set an array in memory.
-    direct_array = 27
-    # Set a node in memory.
-    # Format (data) -> Leaf node (of linked list)
-    # (next, data) -> Linked List
-    # (left, right, data) -> Tree Node
-    node = 28
 
     end_of_preconditions = 0xff
 
@@ -201,7 +180,7 @@ class LC3UnitTestCase(unittest.TestCase):
             value: Param for Memory Fill Strategy, either a fill value or random seed.
         """
         if strategy == MemoryFillStrategy.fill_with_value:
-            self.state.init(False, _toUShort(value))
+            self.state.init(False, toShort(value))
         elif strategy == MemoryFillStrategy.random_fill_with_seed:
             self.state.seed(value)
             self.state.init(False, self.state.random())
@@ -265,7 +244,7 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         addr = self.state.lookup(label)
         assert addr != -1, "Label %s was not found in the assembly code." % label
-        return _toUShort(addr)
+        return toShort(addr)
 
     def _reverse_lookup(self, address):
         """Gets the label associated with address.
@@ -278,7 +257,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Returns:
             The label associated with the address.
         """
-        label = self.state.reverse_lookup(_toUShort(address))
+        label = self.state.reverse_lookup(toShort(address))
         assert label, "Address %x is not associated with a label." % address
         return label
 
@@ -292,8 +271,8 @@ class LC3UnitTestCase(unittest.TestCase):
         Returns:
             The value stored at that address.
         """
-        value = self.state.get_memory(_toUShort(addr))
-        return value if not unsigned else _toUShort(value)
+        value = self.state.get_memory(toShort(addr))
+        return value if not unsigned else toShort(value)
 
     def _writeMem(self, addr, value):
         """Write a value to a memory address.
@@ -302,7 +281,7 @@ class LC3UnitTestCase(unittest.TestCase):
             addr: Integer - Address to write to.
             value: Integer - Value to write.
         """
-        self.state.set_memory(_toUShort(addr), value)
+        self.state.set_memory(toShort(addr), value)
 
     def _readReg(self, reg, unsigned=False):
         """Reads a value in a register.
@@ -316,7 +295,7 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         assert reg >= 0 and reg < 8, 'Invalid register number'
         value = self.state.get_register(reg)
-        return value if not unsigned else _toUShort(value)
+        return value if not unsigned else toShort(value)
 
     def _writeReg(self, addr, value):
         """Write a value to a register.
@@ -326,7 +305,7 @@ class LC3UnitTestCase(unittest.TestCase):
             value: Integer - Value to write.
         """
         assert reg >= 0 and reg < 8, 'Invalid register number'
-        self.state.set_register(_toUShort(addr), value)
+        self.state.set_register(toShort(addr), value)
 
     def setTrueTraps(self, setting):
         """Enables or disables True Traps.
@@ -406,7 +385,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             value: Integer - Value to write to that register.
         """
-        self.state.pc = _toUShort(value)
+        self.state.pc = toShort(value)
 
         self.preconditions.addPrecondition(PreconditionFlag.pc, "", value)
 
@@ -422,6 +401,21 @@ class LC3UnitTestCase(unittest.TestCase):
         self._writeMem(self._lookup(label), value)
 
         self.preconditions.addPrecondition(PreconditionFlag.value, label, value)
+
+    def setAddress(self, address, value):
+        """Sets a value at an address.
+
+        This exactly performs state.memory[address] = value.
+        This is different from setValue as it doesn't require a label to be present in the assembly code.
+
+        Args:
+            address: Short - Address to set.
+            value: Integer - Value to write at that address
+        """
+        address = toShort(address)
+        self._writeMem(address, value)
+
+        self.preconditions.addPrecondition(PreconditionFlag.direct_set, '%04x' % address, value)
 
     def setPointer(self, label, value):
         """Sets a value at an address pointed to by label
@@ -447,7 +441,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
         Args:
             label: String - Label pointing at the address which in turn contains the first address to set.
-            arr: Iterable of Shorts - Values to write sequentially in memory.
+            arr: Iterable of Integers - Values to write sequentially in memory.
         """
         start_addr = self._readMem(self._lookup(label))
         for addr, elem in enumerate(arr, start_addr):
@@ -568,137 +562,6 @@ class LC3UnitTestCase(unittest.TestCase):
 
         assert not (value in self.expected_subroutines and value in self.optional_subroutines), 'Subroutine %s found in both expected and optional subroutine calls.' % value
 
-    def fillValue(self, address, value):
-        """Fills a value at an address.
-
-        This exactly performs state.memory[address] = value.
-
-        *NOTICE* It is an error to call this function on an labelled address, the reasoning for this is that there is
-        the potential to overwrite user data past the end of the string in the original template if the text parameter
-        is larger. Use setString for that use case since it avoids that problem by having the string be at a address
-        pointed to by a label.
-
-        Args:
-            address: Short - Address to set.
-            value: Integer - Value to write at that address
-        """
-        label = self.state.reverse_lookup(address)
-        if label:
-            raise ValueError('fillValue is not to be used on a labelled address, use setValue instead.')
-
-        self._writeMem(address, value)
-
-        self.preconditions.addPrecondition(PreconditionFlag.direct_set, '%04x' % address, value)
-
-    def fillString(self, address, text):
-        """Sets a sequence of characters followed by a NUL terminator starting at the addresss given.
-        
-        This exactly performs:
-            state.memory[address] = text[0]
-            state.memory[address + 1] = text[1]
-            [...]
-            state.memory[address + len(text) - 1] = text[len(text) - 1]
-            state.memory[address + len(text)] = 0
-
-        *NOTICE* It is an error to call this function on an labelled address, the reasoning for this is that there is
-        the potential to overwrite user data past the end of the string in the original template if the text parameter
-        is larger. Use setString for that use case since it avoids that problem by having the string be at a address
-        pointed to by a label.
-
-        This function is intended to dump a string out in memory to pass the address as an argument to a subroutine.
-
-        Args:
-            address: Short - Address to set.
-            value: String - String to write in memory.
-
-        Raises:
-            ValueError if the address has a label (use setString instead).
-        """
-        label = self.state.reverse_lookup(address)
-        if label:
-            raise ValueError('fillString is not to be used on a labelled address, use setString instead.')
-
-        for addr, elem in enumerate(text, address):
-            self._writeMem(addr, ord(elem))
-        self._writeMem(address + len(text), 0)
-
-        self.preconditions.addPrecondition(PreconditionFlag.direct_string, '%04x' % address, [ord(c) for c in text])
-
-    def fillArray(self, address, arr):
-        """Sets a sequence of values starting at the address given.
-        
-        This exactly performs:
-            state.memory[address] = arr[0]
-            state.memory[address + 1] = arr[1]
-            [...]
-            state.memory[address + len(arr) - 1] = arr[len(arr) - 1]
-
-        *NOTICE* It is an error to call this function on an labelled address, the reasoning for this is that there is
-        the potential to overwrite user data past the end of the string in the original template if the parameter
-        is larger. Use setArray for that use case since it avoids that problem by having the string be at a address
-        pointed to by a label.
-
-        This function is intended to dump an array out in memory to pass the address as an argument to a subroutine.
-
-        Args:
-            address: Short - Address to set.
-            arr: Iterable of Shorts - Values to write sequentially in memory.
-
-        Raises:
-            ValueError if the address has a label (use setArray instead).
-        """
-        label = self.state.reverse_lookup(address)
-        if label:
-            raise ValueError('fillArray is not to be used on a labelled address, use setArray instead.')
-
-        for addr, elem in enumerate(arr, address):
-            self._writeMem(addr, elem)
-
-        self.preconditions.addPrecondition(PreconditionFlag.direct_array, '%04x' % address, arr)
-
-    def fillNode(self, address, next, data):
-        """Sets a node in memory at the address given.
-        
-        This can fill nodes of arbitary type: linked list nodes or n-ary tree nodes
-        This exactly performs:
-            state.memory[address] = next_info
-            state.memory[address + n] = data
-
-        *NOTICE* It is an error to call this function on an labelled address.
-
-        This function is intended to dump an node out in memory.
-        
-        It is greatly preferred to use this function over fillValue/fillArray to improve tooling in the future.
-
-        Args:
-            address: Short - Address to set.
-            next_info: 1) None to indicate leaf node or last node.
-                       2) Short - Next address.
-                       3) Iterable of Shorts - Next addresses.
-            data: Short - Node data.
-        """
-        label = self.state.reverse_lookup(address)
-        if label:
-            raise ValueError('fillNode is not to be used on a labelled address.')
-
-        node_data = []
-        size_next = 1
-        if not next:
-            self._writeMem(address, 0)
-            node_data = [data]
-        elif isinstance(next, int):
-            self._writeMem(address, next)
-            node_data = [next, data]
-        else:
-            for addr, elem in enumerate(next, address):
-                self._writeMem(addr, elem)
-            size_next = len(next)
-            node_data = next + [data]
-
-        self._writeMem(address + size_next, data)
-
-        self.preconditions.addPrecondition(PreconditionFlag.node, '%04x' % address, node_data)
-
     def _addSubroutineInfo(self, subroutine, num_params):
         """Adds metadata for a subroutine.
 
@@ -725,7 +588,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
     def assertShortEqual(self, expected, actual, msg=None):
         """Helper to assert if two 16 bit values are equal."""
-        self.assertEqual(_toUShort(expected), _toUShort(actual), msg=msg)
+        self.assertEqual(toShort(expected), toShort(actual), msg=msg)
 
     def assertReturned(self):
         """Assert that the code successfully returned from a subroutine call.
@@ -775,8 +638,8 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         assert register_number >= 0 and register_number < 8, 'Invalid register number'
         actual = self._readReg(register_number)
-        expected = _toShort(value)
-        self.assertShortEqual(expected, actual, 'R%d was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (register_number, expected, _toUShort(expected), actual, _toUShort(actual), self.replay_msg))
+        expected = value
+        self.assertShortEqual(expected, actual, 'R%d was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (register_number, expected, toShort(expected), actual, toShort(actual), self.replay_msg))
 
     def assertPc(self, value):
         """Asserts that the PC is a certain value.
@@ -787,7 +650,7 @@ class LC3UnitTestCase(unittest.TestCase):
             value: Integer - Expected value.
         """
         actual = self.state.pc
-        expected = _toUShort(value)
+        expected = value
         self.assertShortEqual(expected, actual, 'PC was expected to be x%04x but code produced x%04x\n%s' % (expected, actual, self.replay_msg))
 
     def assertValue(self, label, value):
@@ -800,8 +663,8 @@ class LC3UnitTestCase(unittest.TestCase):
             value: Integer - Expected value.
         """
         actual = self._readMem(self._lookup(label))
-        expected = _toShort(value)
-        self.assertShortEqual(expected, actual, 'MEM[%s] was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (label, expected, _toUShort(expected), actual, _toUShort(actual), self.replay_msg))
+        expected = value
+        self.assertShortEqual(expected, actual, 'MEM[%s] was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (label, expected, toShort(expected), actual, toShort(actual), self.replay_msg))
 
     def assertAddress(self, address, value):
         """Asserts that a value at an address is a certain value.
@@ -813,10 +676,10 @@ class LC3UnitTestCase(unittest.TestCase):
             address: Short - Address to check.
             value: Integer - Expected value.
         """
-        address = _toUShort(address)
+        address = toShort(address)
         actual = self._readMem(address)
-        expected = _toShort(value)
-        self.assertShortEqual(expected, actual, 'MEM[x%04x] was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (address, expected, _toUShort(expected), actual, _toUShort(actual), self.replay_msg))
+        expected = value
+        self.assertShortEqual(expected, actual, 'MEM[x%04x] was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (address, expected, toShort(expected), actual, toShort(actual), self.replay_msg))
 
     def assertPointer(self, label, value):
         """Asserts that a value at an address pointed to by label is a certain value.
@@ -828,8 +691,8 @@ class LC3UnitTestCase(unittest.TestCase):
             value: Integer - Expected value.
         """
         actual = self._readMem(self._readMem(self._lookup(label)))
-        expected = _toShort(value)
-        self.assertShortEqual(expected, actual, 'MEM[MEM[%s]] was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (label, expected, _toUShort(expected), actual, _toUShort(actual), self.replay_msg))
+        expected = value
+        self.assertShortEqual(expected, actual, 'MEM[MEM[%s]] was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (label, expected, toShort(expected), actual, toShort(actual), self.replay_msg))
 
     def assertArray(self, label, arr):
         """Asserts that a sequence of values starting at the address pointed to by label are certain values.
@@ -891,21 +754,18 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             answer: Integer - Expected answer.
         """
-        expected = _toShort(answer)
+        expected = answer
         actual = self._readMem(self.state.r6)
-        self.assertShortEqual(expected, actual, 'Return value was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (expected, _toUShort(expected), actual, _toUShort(actual), self.replay_msg))
+        self.assertShortEqual(expected, actual, 'Return value was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (expected, toShort(expected), actual, toShort(actual), self.replay_msg))
 
-    def assertRegistersUnchanged(self, registers=None):
+    def assertRegistersUnchanged(self, registers):
         """Asserts that registers value are the same as the beginning of execution.
 
         This is for verifying that caller saved registers are not clobbered as part of the lc3 calling convention.
 
         Args:
-            registers: List(Integer) - Register numbers's to check. None to check all except R6.
+            registers: List(Integer) - Register numbers's to check.
         """
-        if not registers:
-            registers = [0, 1, 2, 3, 4, 5, 7]
-
         original_values = {num: self.registers[num] for num in registers}
         current_values = {num: self._readReg(num) for num in registers}
 
@@ -929,7 +789,7 @@ class LC3UnitTestCase(unittest.TestCase):
         actual_return_address = self._readMem(self.state.r6 - 1, unsigned=True)
         actual_old_frame_ptr = self._readMem(self.state.r6 - 2, unsigned=True)
 
-        self.assertShortEqual(self.state.r6, stack, 'Calling convention not followed.\nExpected R6 to be decremented by exactly 1 after returning from subroutine it was decremented by: %d\n%s' % (_toUShort(self.state.r6) - (stack + 1), self.replay_msg))
+        self.assertShortEqual(self.state.r6, stack, 'Calling convention not followed.\nExpected R6 to be decremented by exactly 1 after returning from subroutine it was decremented by: %d\n%s' % (toShort(self.state.r6) - (stack + 1), self.replay_msg))
         self.assertEqual(return_address, actual_return_address, 'Expected return address x%04x not found on stack in correct location code produced x%04x\n%s' % (return_address, actual_return_address, self.replay_msg))
         self.assertEqual(old_frame_pointer, actual_old_frame_ptr, 'Expected old frame pointer x%04x not found on stack in correct location code produced x%04x\n%s' % (old_frame_pointer, actual_old_frame_ptr, self.replay_msg))
 
@@ -976,7 +836,7 @@ class LC3UnitTestCase(unittest.TestCase):
                 vector, params = trap
                 params_pairs = list(params)
                 trap_name = self.state.disassemble_data(0xF000 | vector, 1)
-                params = ', '.join(['R%d=(%d x%04x)' % (reg, value, _toUShort(value)) for reg, value in params_pairs])
+                params = ', '.join(['R%d=(%d x%04x)' % (reg, value, toShort(value)) for reg, value in params_pairs])
                 trap_strs.append('%s(%s)' % (trap_name, params) if params else trap_name)
             return ' '.join(trap_strs)
 
