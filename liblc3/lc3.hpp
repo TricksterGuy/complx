@@ -65,6 +65,8 @@ enum DEVICES
     DEV_KBDR = 0xFE02,
     DEV_DSR = 0xFE04,
     DEV_DDR = 0xFE06,
+    // LC3 revision 2019.
+    DEV_PSR = 0xFFFC,
     DEV_MCR = 0xFFFE
 };
 
@@ -322,7 +324,7 @@ enum lc3_change_t
     LC3_SUBROUTINE_BEGIN = 4,
     LC3_SUBROUTINE_END = 5,
     LC3_INTERRUPT_BEGIN = 6,    // Signals begin of interrupt can't backstep past this. (this will be in the undo stack while the interrupt is handled)
-    LC3_INTERRUPT_END = 7,      // Signals end of interrupt (this will never be in the undo stack)
+    LC3_INTERRUPT_END = 7,      // Signals end of interrupt (or end of trap in lc-3 revision) (this will never be in the undo stack)
     LC3_INTERRUPT = 8,          // Signals a processed interrupt. (LC3_INTERRUPT_BEGIN changes to this after its processed.
 };
 
@@ -453,6 +455,7 @@ typedef struct lc3_state_change
 {
     unsigned short pc;
     short r7; /* In the case of fake traps two registers can be modified. So we have a special place for r7*/
+    unsigned char privilege:1;
     unsigned char n:1;
     unsigned char z:1;
     unsigned char p:1;
@@ -460,11 +463,19 @@ typedef struct lc3_state_change
     unsigned char changes:4;
     unsigned short location;
     unsigned short value;
+    unsigned short savedusp;
+    unsigned short savedssp;
     unsigned int warnings;
     unsigned int executions;            // Only used for changes = LC3_INTERRUPT(_BEGIN) otherwise we know its changed by 1.
     lc3_subroutine_call subroutine;     // Only used for changes = LC3_SUBROUTINE_*
     std::vector<lc3_change_info> info;  // Only used for changes = LC3_MULTI_CHANGE
 } lc3_state_change;
+
+// Stack of RTI-able items for lc-3 revision.
+typedef struct lc3_rti_stack_item
+{
+    bool is_interrupt;
+} lc3_rti_stack_item;
 
 struct lc3_state;
 
@@ -525,6 +536,8 @@ typedef struct lc3_state
     unsigned int max_call_stack_size;
     // Subroutine debugging info (again see note above)
     std::deque<lc3_subroutine_call> call_stack;
+    // RTI stack to find out if the current RTI instruction targets a trap or an interrupt.
+    std::deque<lc3_rti_stack_item> rti_stack;
     // First layer of calls for testing student code. (In case of multi recursion).
     std::vector<lc3_subroutine_call_info> first_level_calls;
     // First layer of trap calls (In case of multi recursion).

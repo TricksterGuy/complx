@@ -112,6 +112,7 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
     lc3_state_change changes;
     changes.pc = state.pc;
     changes.r7 = state.regs[0x7];
+    changes.privilege = state.privilege;
     changes.n = state.n;
     changes.z = state.z;
     changes.p = state.p;
@@ -119,6 +120,8 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
     changes.changes = LC3_NO_CHANGE;
     changes.location = 0xFFFF;
     changes.value = 0xFFFF;
+    changes.savedusp = state.savedusp;
+    changes.savedssp = state.savedssp;
     changes.warnings = state.warnings;
 
     changes.subroutine.address = 0x0;
@@ -318,21 +321,44 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
             state.z = (psr >> 1) & 1;
             state.p = psr & 1;
 
-            if (state.privilege)
+            if (state.privilege) {
+                state.savedssp = state.regs[6];
                 state.regs[6] = state.savedusp;
+            }
 
-
-            if (!state.interrupt_vector_stack.empty())
+            // Determine if this RTI is for an interrupt or a trap.
+            // If not lc3 2019 revision this should always be true.
+            bool in_interrupt = state.lc3_version == 0;
+            if (!state.rti_stack.empty())
             {
-                state.interrupt_vector = state.interrupt_vector_stack.back();
-                state.interrupt_vector_stack.pop_back();
+                lc3_rti_stack_item item = state.rti_stack.back();
+                state.rti_stack.pop_back();
+                in_interrupt = item.is_interrupt;
+            }
+
+            if (in_interrupt)
+            {
+                if (!state.interrupt_vector_stack.empty())
+                {
+                    state.interrupt_vector = state.interrupt_vector_stack.back();
+                    state.interrupt_vector_stack.pop_back();
+                }
+                else
+                {
+                    state.interrupt_vector = -1;
+                }
+
+                changes.changes = LC3_INTERRUPT_END; // second flag.
             }
             else
             {
-                state.interrupt_vector = -1;
+                changes.changes = LC3_SUBROUTINE_END;
+                if (!state.call_stack.empty())
+                {
+                    changes.subroutine = state.call_stack.back();
+                    state.call_stack.pop_back();
+                }
             }
-
-            changes.changes = LC3_INTERRUPT_END; // second flag.
         }
         break;
     case NOT_INSTR:
@@ -417,9 +443,14 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
         }
         else
         {
-            // R7's going to change save it But again its already saved.
-            // Save Return Address
-            state.regs[0x7] = state.pc;
+            if (state.lc3_version == 0)
+            {
+                // R7's going to change save it But again its already saved.
+                // Save Return Address
+                state.regs[0x7] = state.pc;
+            }
+
+            // Return information is done via the stack in the lc3 revision.
 
             // Execute the trap
             lc3_trap(state, changes, instruction.trap);
@@ -481,15 +512,39 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
     // Declarations
     unsigned short r0 = state.regs[0];
     bool kernel_mode = (state.pc >= 0x200 && state.pc < 0x3000) || (state.privilege == 0);
+
+    // The only nice thing about the revision is that traps now set PSR[15] to 0 for us.
+    // No need to check the PC's location.
+    if (state.lc3_version != 0)
+        kernel_mode = state.privilege == 0;
+
     // If we are doing true traps.
     if (state.true_traps)
     {
         changes.changes = LC3_SUBROUTINE_BEGIN;
+        if (state.lc3_version > 0)
+        {
+            short psr = (short)((state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p);
+            // If we are in user mode we must switch usp/ssp
+            if (state.privilege)
+            {
+                state.savedusp = state.regs[6];
+                state.regs[6] = state.savedssp;
+            }
+
+            state.privilege = 0;
+            state.regs[6] -= 2;
+            state.mem[(unsigned short)state.regs[6]] = state.pc;
+            state.mem[(unsigned short)(state.regs[6] + 1)] = psr;
+            state.rti_stack.push_back(lc3_rti_stack_item{false});
+        }
+
         // PC = MEM[VECTOR]
         state.pc = state.mem[trap.vector];
 
         // If not within an interrupt
-        if (state.privilege)
+        /// TODO why do I have this check here?
+        if (state.privilege || state.lc3_version != 0)
         {
             changes.changes = LC3_SUBROUTINE_BEGIN;
             changes.subroutine.address = state.pc;
@@ -655,6 +710,19 @@ short lc3_mem_read(lc3_state& state, unsigned short addr, bool privileged)
             if (!kernel_mode)
                 lc3_warning(state, LC3_RESERVED_MEM_READ, addr, 0);
             break;
+        case DEV_PSR:
+            if (state.lc3_version > 0)
+            {
+                state.mem[DEV_PSR] = (short)((state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p);
+            } else
+            {
+                if (addr >= 0xFE00U && state.address_plugins.find(addr) != state.address_plugins.end())
+                    return state.address_plugins[addr]->OnRead(state, addr);
+                else if (!kernel_mode)
+                    // Warn if reading from reserved memory if you aren't in kernel mode
+                    lc3_warning(state, LC3_RESERVED_MEM_READ, addr, 0);
+            }
+            break;
         case DEV_MCR:
             state.mem[DEV_MCR] = (short)(1 << 15);
             break;
@@ -712,6 +780,16 @@ void lc3_mem_write(lc3_state& state, unsigned short addr, short value, bool priv
             else
             {
                 lc3_warning(state, LC3_DISPLAY_NOT_READY, 0, 0);
+            }
+            break;
+        case DEV_PSR:
+            if (state.lc3_version > 0) {
+                lc3_warning(state, LC3_RESERVED_MEM_WRITE, addr, 0);
+            } else {
+                if (addr >= 0xFE00U && state.address_plugins.find(addr) != state.address_plugins.end())
+                    state.address_plugins[addr]->OnWrite(state, addr, value);
+                else if (!kernel_mode)
+                    lc3_warning(state, LC3_RESERVED_MEM_WRITE, value, addr);
             }
             break;
         case DEV_MCR:

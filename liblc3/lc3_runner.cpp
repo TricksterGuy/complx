@@ -287,6 +287,7 @@ void lc3_step(lc3_state& state)
     interrupt.executions = state.executions;
     if (state.max_stack_size != 0)
         state.undo_stack.push_back(interrupt);
+    state.rti_stack.push_back(lc3_rti_stack_item{true});
 
     // Another breakpoint test
     lc3_break_test(state, &interrupt);
@@ -310,10 +311,13 @@ void lc3_back(lc3_state& state)
         state.pc = changes.pc;
         state.regs[0x7] = changes.r7;
 
+        state.privilege = changes.privilege;
         state.n = changes.n;
         state.z = changes.z;
         state.p = changes.p;
         state.halted = changes.halted;
+        state.savedusp = changes.savedusp;
+        state.savedssp = changes.savedssp;
 
         if (changes.changes == LC3_REGISTER_CHANGE)
         {
@@ -345,6 +349,8 @@ void lc3_back(lc3_state& state)
         {
             if (!state.call_stack.empty())
                 state.call_stack.pop_back();
+            if (changes.subroutine.is_trap && state.lc3_version != 0 && !state.rti_stack.empty())
+                state.rti_stack.pop_back();
         }
         else if (changes.changes == LC3_SUBROUTINE_END)
         {
