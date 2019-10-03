@@ -13,6 +13,7 @@ set(SRC_TESTS
     lc3_basic_test.cpp
     lc3_parser_test.cpp
     lc3_plugin_test.cpp
+    lc3_revision_2019_test.cpp
 )
 
 if(ENABLE_REPLAY)
@@ -49,8 +50,8 @@ add_dependencies(
 
 add_custom_command(
     TARGET lc3_test_suite POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/plugins/instructions/liblc3_multiply.so ${CMAKE_BINARY_DIR}/liblc3_multiply.so
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/plugins/traps/liblc3_udiv.so ${CMAKE_BINARY_DIR}/liblc3_udiv.so
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/plugins/instructions/liblc3_multiply${CMAKE_SHARED_LIBRARY_SUFFIX} ${CMAKE_BINARY_DIR}/liblc3_multiply${CMAKE_SHARED_LIBRARY_SUFFIX}
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/plugins/traps/liblc3_udiv${CMAKE_SHARED_LIBRARY_SUFFIX} ${CMAKE_BINARY_DIR}/liblc3_udiv${CMAKE_SHARED_LIBRARY_SUFFIX}
     COMMENT "Copying needed plugins for testing")
 
 set_target_properties(lc3_test_suite PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})

@@ -79,7 +79,6 @@ BOOST_FIXTURE_TEST_CASE(FillTest, LC3AssembleTest)
     BOOST_CHECK_EQUAL(state.mem[0x3005], 'A');
     BOOST_CHECK_EQUAL(state.mem[0x3006], -32768);
     BOOST_CHECK_EQUAL(state.mem[0x3007], -32768);
-    BOOST_CHECK_EQUAL(state.lc3_version, 0);
 
     std::istringstream bad_file(
         ".orig x3000\n"
@@ -245,19 +244,6 @@ BOOST_FIXTURE_TEST_CASE(BinaryLiteralTest, LC3AssembleTest)
     BOOST_CHECK_EQUAL(state.mem[0x3006], 0x605F);
 }
 
-BOOST_FIXTURE_TEST_CASE(LC3VersionTest, LC3AssembleTest)
-{
-    std::istringstream file(
-        ";@version 1\n"
-        ".orig x3000\n"
-        "HALT\n"
-        ".end"
-    );
-    lc3_assemble(state, file, options);
-
-    BOOST_CHECK_EQUAL(state.lc3_version, 1);
-}
-
 BOOST_FIXTURE_TEST_CASE(InvalidRegisterTest, LC3AssembleTest)
 {
     std::istringstream file(
@@ -300,15 +286,4 @@ BOOST_FIXTURE_TEST_CASE(InvalidImmediateOffsetTest, LC3AssembleTest)
         ".end"
     );
     BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, IS_EXCEPTION(OFFSET_OVERFLOW));
-}
-
-BOOST_FIXTURE_TEST_CASE(InvalidLC3VersionTest, LC3AssembleTest)
-{
-    std::istringstream file(
-        ";@version 15\n"
-        ".orig x3000\n"
-        "HALT\n"
-        ".end"
-    );
-    BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, IS_EXCEPTION(INVALID_LC3_VERSION));
 }
