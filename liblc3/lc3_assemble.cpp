@@ -937,9 +937,9 @@ void process_version_info(lc3_state& state, const LC3AssembleContext& context)
     trim(version);
 
     if (version == "1")
-        state.lc3_version = 1;
+        lc3_set_version(state, 1);
     else if (version == "0")
-        state.lc3_version = 0;
+        lc3_set_version(state, 0);
     else
         THROW(LC3AssembleException(line, version, INVALID_LC3_VERSION, context.lineno));
 }

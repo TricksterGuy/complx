@@ -138,6 +138,7 @@ BOOST_FIXTURE_TEST_CASE(TestCustomTrap, LC3Revision2019Test)
 BOOST_FIXTURE_TEST_CASE(TestCustomMultiTrap, LC3Revision2019Test)
 {
     std::istringstream file(
+        ";@version 1\n"
         ".orig x30\n"
         ".fill x1000\n"
         ".fill x1010\n"
