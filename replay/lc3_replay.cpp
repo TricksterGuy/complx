@@ -186,7 +186,7 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
     lc3_set_true_traps(state, true_traps);
     state.interrupt_enabled = interrupts;
     state.strict_execution = strict_execution;
-    state.lc3_version = version;
+    lc3_set_version(state, version);
     LC3AssembleOptions options;
     options.multiple_errors = false;
     options.warnings_as_errors = false;
