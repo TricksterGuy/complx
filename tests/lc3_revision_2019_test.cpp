@@ -14,7 +14,7 @@ struct LC3Revision2019Test
     LC3Revision2019Test()
     {
         lc3_init(state, false, false);
-        state.lc3_version = 1;
+        lc3_set_version(state, 1);
         options.multiple_errors = false;
     }
 };
@@ -198,6 +198,144 @@ BOOST_FIXTURE_TEST_CASE(TestCustomMultiTrap, LC3Revision2019Test)
     BOOST_CHECK_EQUAL(state.call_stack[1].is_trap, true);
     BOOST_CHECK_EQUAL(state.call_stack[2].address, 0x1020);
     BOOST_CHECK_EQUAL(state.call_stack[2].is_trap, true);
+}
+
+BOOST_FIXTURE_TEST_CASE(TestTrueTrapsV2, LC3Revision2019Test)
+{
+    std::istringstream file(
+        ".orig x3000\n"
+        "OUT\n"
+        "IN\n"
+        "GETC\n"
+        "LEA R0, HW\n"
+        "PUTS\n"
+        "LEA R0, PUTSP_STR\n"
+        "PUTSP\n"
+        "HALT\n"
+        "HW .stringz \"HELLO WORLD\"\n"
+        "PUTSP_STR .fill x3130\n"
+        ".fill x3332\n"
+        ".fill x3534\n"
+        ".fill x3736\n"
+        ".fill x3938\n"
+        ".fill x0030\n"
+        ".fill x0000\n"
+        ".end"
+    );
+
+    lc3_assemble(state, file, options);
+    lc3_set_true_traps(state, true);
+
+    std::istringstream proginput("BC");
+    std::ostringstream progoutput;
+
+    state.input = &proginput;
+    state.output = &progoutput;
+
+    short r1 = state.regs[1];
+    short r2 = state.regs[2];
+    short r3 = state.regs[3];
+    short r4 = state.regs[4];
+    short r5 = state.regs[5];
+    short r6 = state.regs[6];
+    short r7 = state.regs[7];
+
+    // OUT;
+    state.regs[0] = 65;
+    lc3_next_line(state);
+    BOOST_REQUIRE_EQUAL(state.pc, 0x3001);
+    BOOST_CHECK_EQUAL(state.regs[0], 65);
+    BOOST_CHECK_EQUAL(state.regs[1], r1);
+    BOOST_CHECK_EQUAL(state.regs[2], r2);
+    BOOST_CHECK_EQUAL(state.regs[3], r3);
+    BOOST_CHECK_EQUAL(state.regs[4], r4);
+    BOOST_CHECK_EQUAL(state.regs[5], r5);
+    BOOST_CHECK_EQUAL(state.regs[6], r6);
+    BOOST_CHECK_EQUAL(state.regs[7], r7);
+
+    // IN
+    lc3_next_line(state);
+    BOOST_CHECK_EQUAL(state.regs[0], 66);
+    BOOST_CHECK_EQUAL(state.regs[1], r1);
+    BOOST_CHECK_EQUAL(state.regs[2], r2);
+    BOOST_CHECK_EQUAL(state.regs[3], r3);
+    BOOST_CHECK_EQUAL(state.regs[4], r4);
+    BOOST_CHECK_EQUAL(state.regs[5], r5);
+    BOOST_CHECK_EQUAL(state.regs[6], r6);
+    BOOST_CHECK_EQUAL(state.regs[7], r7);
+
+    // GETC
+    lc3_next_line(state);
+    BOOST_CHECK_EQUAL(state.regs[0], 67);
+    BOOST_CHECK_EQUAL(state.regs[1], r1);
+    BOOST_CHECK_EQUAL(state.regs[2], r2);
+    BOOST_CHECK_EQUAL(state.regs[3], r3);
+    BOOST_CHECK_EQUAL(state.regs[4], r4);
+    BOOST_CHECK_EQUAL(state.regs[5], r5);
+    BOOST_CHECK_EQUAL(state.regs[6], r6);
+    BOOST_CHECK_EQUAL(state.regs[7], r7);
+
+    // LEA R0, HELLOWORLD; PUTS;
+    lc3_next_line(state);
+    lc3_next_line(state);
+    BOOST_CHECK_EQUAL(state.regs[0], 0x3008);
+    BOOST_CHECK_EQUAL(state.regs[1], r1);
+    BOOST_CHECK_EQUAL(state.regs[2], r2);
+    BOOST_CHECK_EQUAL(state.regs[3], r3);
+    BOOST_CHECK_EQUAL(state.regs[4], r4);
+    BOOST_CHECK_EQUAL(state.regs[5], r5);
+    BOOST_CHECK_EQUAL(state.regs[6], r6);
+    BOOST_CHECK_EQUAL(state.regs[7], r7);
+
+    // LEA R0, PUTSPSTR; PUTSP;
+    lc3_next_line(state);
+    lc3_next_line(state);
+    BOOST_CHECK_EQUAL(state.regs[0], 0x3014);
+    BOOST_CHECK_EQUAL(state.regs[1], r1);
+    BOOST_CHECK_EQUAL(state.regs[2], r2);
+    BOOST_CHECK_EQUAL(state.regs[3], r3);
+    BOOST_CHECK_EQUAL(state.regs[4], r4);
+    BOOST_CHECK_EQUAL(state.regs[5], r5);
+    BOOST_CHECK_EQUAL(state.regs[6], r6);
+    BOOST_CHECK_EQUAL(state.regs[7], r7);
+
+    // HALT
+    lc3_next_line(state);
+    BOOST_CHECK_EQUAL(state.halted, 0x1);
+    BOOST_CHECK_EQUAL(state.regs[0], 0x3014);
+    BOOST_CHECK_EQUAL(state.regs[1], r1);
+    BOOST_CHECK_EQUAL(state.regs[2], r2);
+    BOOST_CHECK_EQUAL(state.regs[3], r3);
+    BOOST_CHECK_EQUAL(state.regs[4], r4);
+    BOOST_CHECK_EQUAL(state.regs[5], r5);
+    BOOST_CHECK_EQUAL(state.regs[6], state.savedssp - 2);
+
+    state.input = &std::cin;
+    state.output = &std::cout;
+
+    std::istringstream verify(progoutput.str());
+    BOOST_CHECK_EQUAL(verify.get(), 'A');
+
+    const std::string answers[3] = {"Input character: ", "HELLO WORLD", "01234567890"};
+    char str[18];
+    std::string val;
+
+    verify.get(str, 18);
+    str[17] = 0;
+    val = str;
+    BOOST_CHECK_EQUAL(val, answers[0]);
+
+    BOOST_CHECK_EQUAL(verify.get(), 66);
+
+    verify.get(str, 12);
+    str[12] = 0;
+    val = str;
+    BOOST_CHECK_EQUAL(val, answers[1]);
+
+    verify.get(str, 12);
+    str[12] = 0;
+    val = str;
+    BOOST_CHECK_EQUAL(val, answers[2]);
 }
 
 BOOST_FIXTURE_TEST_CASE(LC3DefaultVersionTest, LC3Revision2019Test)

@@ -13,6 +13,12 @@
   * @param memory_fill_value ignored if randomize_memory is true otherwise sets memory to this value (except for TVT, IVT and lc3 os code).
   */
 void lc3_init(lc3_state& state, bool randomize_registers = true, bool randomize_memory = true, short register_fill_value = 0, short memory_fill_value = 0);
+/** lc3_set_version
+  * Sets the lc3's version should be done after lc3_init.
+  * This function will overwrite the LC3OS code with the proper OS for that version.
+  * @param version. LC-3 Version. Valid values are 0 for original LC-3 and 1 for 2019's revision.
+  */
+void lc3_set_version(lc3_state& state, int version);
 /** lc3_remove_plugins
   *
   * Removes all installed lc3 plugins.

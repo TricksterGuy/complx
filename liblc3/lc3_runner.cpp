@@ -115,7 +115,7 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     }
 
     // Add LC3 OS
-    memcpy(state.mem, lc3_os, LC3_OS_SIZE * sizeof(unsigned short));
+    memcpy(state.mem, lc3_os.data(), lc3_os.size() * sizeof(unsigned short));
 
     // Clear plugins
     lc3_remove_plugins(state);
@@ -149,6 +149,20 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     state.trace.reset(nullptr);
 
     state.in_lc3test = false;
+}
+
+void lc3_set_version(lc3_state& state, int version)
+{
+    if (version >=0 && version <= 1)
+    {
+        state.lc3_version = version;
+        const std::array<unsigned short, 0x300>& os = (version == 0) ? lc3_os : lc3_osv2;
+        memcpy(state.mem, os.data(), os.size() * sizeof(unsigned short));
+    }
+    else
+    {
+        fprintf(stderr, "Invalid lc3 version: %d. Valid values are 0 or 1\n", version);
+    }
 }
 
 void lc3_remove_plugins(lc3_state& state)

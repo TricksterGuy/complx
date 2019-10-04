@@ -84,6 +84,7 @@ set(SRC_LIBLC3
     liblc3/lc3_execute.cpp
     liblc3/lc3_expressions.cpp
     liblc3/lc3_os.cpp
+    liblc3/lc3_osv2.cpp
     liblc3/lc3_params.cpp
     liblc3/lc3_parser.cpp
     liblc3/lc3_plugin.cpp

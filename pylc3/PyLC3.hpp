@@ -192,7 +192,7 @@ public:
     bool get_true_traps() const { return state.true_traps; }
     void set_true_traps(bool setting) { lc3_set_true_traps(state, setting); }
     int get_lc3_version() const { return state.lc3_version; }
-    void set_lc3_version(int version) { state.lc3_version = version; }
+    void set_lc3_version(int version) { lc3_set_version(state, version); }
     bool get_interrupts() const { return state.interrupt_enabled; }
     void set_interrupts(bool setting) { state.interrupt_enabled = setting; }
     void enable_keyboard_interrupt()

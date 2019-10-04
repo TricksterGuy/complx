@@ -695,6 +695,7 @@ int lc3_write_str(lc3_state& state, int (*writer)(lc3_state& state, std::ostream
   * @param value If true enable true traps, otherwise disable.
   */
 inline void lc3_set_true_traps(lc3_state& state, bool value) {state.true_traps = value;}
+
 /** Generate a random number LC-3 */
 inline unsigned short lc3_random(void) {return rand() & 0xFFFF;}
 /** lc3_randomize

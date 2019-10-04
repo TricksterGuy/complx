@@ -810,26 +810,6 @@ BOOST_FIXTURE_TEST_CASE(TestMemoryInstructions, LC3BasicTest)
     BOOST_CHECK_EQUAL(state.p, 0);
 }
 
-BOOST_FIXTURE_TEST_CASE(TestLC3Version1, LC3BasicTest)
-{
-    state.lc3_version = 1;
-    lc3_instr instr;
-    // LEA R0, #-1      : op, reg, pc_offset
-    memoryoffset_instr lea = (memoryoffset_instr){LEA_INSTR, 0, -1};
-    instr.mem.offset = lea;
-    state.n = 1;
-    state.z = 0;
-    state.p = 0;
-
-    lc3_execute(state, instr);
-
-    // LEA no longer changes the CC register.
-    BOOST_CHECK_EQUAL(state.regs[0], 0x2FFF);
-    BOOST_CHECK_EQUAL(state.n, 1);
-    BOOST_CHECK_EQUAL(state.z, 0);
-    BOOST_CHECK_EQUAL(state.p, 0);
-}
-
 BOOST_FIXTURE_TEST_CASE(TestLoadObj, LC3BasicTest)
 {
     std::stringstream file(std::string(reinterpret_cast<char*>(simple), simple_len));
@@ -1263,6 +1243,155 @@ BOOST_FIXTURE_TEST_CASE(TestTrapInstructions, LC3BasicTest)
     val = str;
     BOOST_CHECK_EQUAL(val, answers[2]);
 }
+
+BOOST_FIXTURE_TEST_CASE(TestTrueTraps, LC3BasicTest)
+{
+    std::istringstream file(
+        ".orig x3000\n"
+        "OUT\n"
+        "IN\n"
+        "GETC\n"
+        "LEA R0, HW\n"
+        "PUTS\n"
+        "LEA R0, PUTSP_STR\n"
+        "PUTSP\n"
+        "HALT\n"
+        "HW .stringz \"HELLO WORLD\"\n"
+        "PUTSP_STR .fill x3130\n"
+        ".fill x3332\n"
+        ".fill x3534\n"
+        ".fill x3736\n"
+        ".fill x3938\n"
+        ".fill x0030\n"
+        ".fill x0000\n"
+        ".end"
+    );
+
+    try
+    {
+        LC3AssembleOptions options;
+        options.multiple_errors = false;
+        lc3_assemble(state, file, options);
+    }
+    catch (LC3AssembleException e)
+    {
+        BOOST_FAIL(e.what());
+    }
+
+    lc3_set_true_traps(state, true);
+
+    std::istringstream proginput("BC");
+    std::ostringstream progoutput;
+
+    state.input = &proginput;
+    state.output = &progoutput;
+
+    short r1 = state.regs[1];
+    short r2 = state.regs[2];
+    short r3 = state.regs[3];
+    short r4 = state.regs[4];
+    short r5 = state.regs[5];
+    short r6 = state.regs[6];
+
+    // OUT;
+    state.regs[0] = 65;
+    lc3_next_line(state);
+    BOOST_REQUIRE_EQUAL(state.pc, 0x3001);
+    BOOST_CHECK_EQUAL(state.regs[0], 65);
+    BOOST_CHECK_EQUAL(state.regs[1], r1);
+    BOOST_CHECK_EQUAL(state.regs[2], r2);
+    BOOST_CHECK_EQUAL(state.regs[3], r3);
+    BOOST_CHECK_EQUAL(state.regs[4], r4);
+    BOOST_CHECK_EQUAL(state.regs[5], r5);
+    BOOST_CHECK_EQUAL(state.regs[6], r6);
+    BOOST_CHECK_EQUAL(state.regs[7], 0x3001);
+
+    // IN
+    lc3_next_line(state);
+    BOOST_CHECK_EQUAL(state.regs[0], 66);
+    BOOST_CHECK_EQUAL(state.regs[1], r1);
+    BOOST_CHECK_EQUAL(state.regs[2], r2);
+    BOOST_CHECK_EQUAL(state.regs[3], r3);
+    BOOST_CHECK_EQUAL(state.regs[4], r4);
+    BOOST_CHECK_EQUAL(state.regs[5], r5);
+    BOOST_CHECK_EQUAL(state.regs[6], r6);
+    BOOST_CHECK_EQUAL(state.regs[7], 0x3002);
+
+    // GETC
+    lc3_next_line(state);
+    BOOST_CHECK_EQUAL(state.regs[0], 67);
+    BOOST_CHECK_EQUAL(state.regs[1], r1);
+    BOOST_CHECK_EQUAL(state.regs[2], r2);
+    BOOST_CHECK_EQUAL(state.regs[3], r3);
+    BOOST_CHECK_EQUAL(state.regs[4], r4);
+    BOOST_CHECK_EQUAL(state.regs[5], r5);
+    BOOST_CHECK_EQUAL(state.regs[6], r6);
+    BOOST_CHECK_EQUAL(state.regs[7], 0x3003);
+
+    // LEA R0, HELLOWORLD; PUTS;
+    lc3_next_line(state);
+    lc3_next_line(state);
+    BOOST_CHECK_EQUAL(state.regs[0], 0x3008);
+    BOOST_CHECK_EQUAL(state.regs[1], r1);
+    BOOST_CHECK_EQUAL(state.regs[2], r2);
+    BOOST_CHECK_EQUAL(state.regs[3], r3);
+    BOOST_CHECK_EQUAL(state.regs[4], r4);
+    BOOST_CHECK_EQUAL(state.regs[5], r5);
+    BOOST_CHECK_EQUAL(state.regs[6], r6);
+    BOOST_CHECK_EQUAL(state.regs[7], 0x3005);
+
+    // LEA R0, PUTSPSTR; PUTSP;
+    lc3_next_line(state);
+    lc3_next_line(state);
+    BOOST_CHECK_EQUAL(state.regs[0], 0x3014);
+    BOOST_CHECK_EQUAL(state.regs[1], r1);
+    BOOST_CHECK_EQUAL(state.regs[2], r2);
+    BOOST_CHECK_EQUAL(state.regs[3], r3);
+    BOOST_CHECK_EQUAL(state.regs[4], r4);
+    BOOST_CHECK_EQUAL(state.regs[5], r5);
+    BOOST_CHECK_EQUAL(state.regs[6], r6);
+    BOOST_CHECK_EQUAL(state.regs[7], 0x3007);
+
+    // HALT
+    lc3_next_line(state);
+    BOOST_CHECK_EQUAL(state.halted, 0x1);
+    BOOST_CHECK_EQUAL(state.regs[0], 0x3014);
+    BOOST_CHECK_EQUAL(state.regs[1], r1);
+    BOOST_CHECK_EQUAL(state.regs[2], r2);
+    BOOST_CHECK_EQUAL(state.regs[3], r3);
+    BOOST_CHECK_EQUAL(state.regs[4], r4);
+    BOOST_CHECK_EQUAL(state.regs[5], r5);
+    BOOST_CHECK_EQUAL(state.regs[6], r6);
+    BOOST_CHECK_EQUAL(state.mem[0xFFFE], 0);
+
+    state.input = &std::cin;
+    state.output = &std::cout;
+
+    std::istringstream verify(progoutput.str());
+    BOOST_CHECK_EQUAL(verify.get(), 'A');
+
+    const std::string answers[3] = {"Input character: ", "HELLO WORLD", "01234567890"};
+    char str[18];
+    std::string val;
+
+    verify.get(str, 18);
+    str[17] = 0;
+    val = str;
+    BOOST_CHECK_EQUAL(val, answers[0]);
+
+    BOOST_CHECK_EQUAL(verify.get(), 66);
+
+    verify.get(str, 12);
+    str[12] = 0;
+    val = str;
+    BOOST_CHECK_EQUAL(val, answers[1]);
+
+    verify.get(str, 12);
+    str[12] = 0;
+    val = str;
+    BOOST_CHECK_EQUAL(val, answers[2]);
+}
+
 
 BOOST_FIXTURE_TEST_CASE(TestDeviceRegisters, LC3BasicTest)
 {
