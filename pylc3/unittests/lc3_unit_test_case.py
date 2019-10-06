@@ -12,7 +12,7 @@ will produce the replay string upon the assertion failing.
 
 The replay strings produced are only populated with data from calling the methods of this class only.  If any
 modifications to the LC3State object are done directly and not through the LC3UnitTestCase class will not be
-recorded leading to a frustrating debugging experinence.
+recorded leading to a frustrating debugging experience.
 
 To see an example of an LC3UnitTestCase please see
 https://gist.github.com/TricksterGuy/f1e9e1c73dff231febe6d102345481e6
@@ -193,7 +193,7 @@ class LC3UnitTestCase(unittest.TestCase):
         self.preconditions.addEnvironment(PreconditionFlag.memory_strategy, strategy.value)
         self.preconditions.addEnvironment(PreconditionFlag.memory_strategy_value, value)
 
-    def loadAsmFile(self, file):
+    def loadAsmFile(self, file, lc3_version=0):
         """Loads an assembly file.
 
         Will assert if the file failed to assemble.
@@ -201,9 +201,11 @@ class LC3UnitTestCase(unittest.TestCase):
 
         Args:
             file: String - Full path to the assembly file to load.
+            lc3_version: Integer - which version of the LC-3 to use.
         """
         status = self.state.load(file, disable_plugins=not self.enable_plugins, process_debug_comments=False)
         assert not status, ('Unable to load file %s\nReason: %s' % (file, status))
+        self.setLC3Version(lc3_version)
 
     def loadPattObjAndSymFile(self, obj_file, sym_file):
         """Loads an assembled object and symbol table file.
