@@ -1446,6 +1446,7 @@ void ComplxFrame::DoSetupReplayString(const std::string& replay_string)
 #ifdef ENABLE_LC3_REPLAY
     try
     {
+        wxFileName filename(reload_options.file);
         std::stringstream input;
         lc3_setup_replay(state, reload_options.file, replay_string, input);
         console->SetInput(input.str());
@@ -1453,6 +1454,7 @@ void ComplxFrame::DoSetupReplayString(const std::string& replay_string)
         UpdateRegisters();
         UpdateMemory();
         UpdateStatus();
+        SetTitle(wxString::Format("%s LC-3 v%d - %s", base_title, state.lc3_version, filename.GetFullPath()));
     }
     catch (std::string err)
     {
