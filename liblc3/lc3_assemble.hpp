@@ -101,6 +101,17 @@ struct LC3AssembleOptions
     bool enable_warnings = false;
     bool disable_plugins = false;
     bool process_debug_comments = true;
+    enum OutputMode {
+        // Non readable object file.
+        OBJECT_FILE = 0,
+        // Machine langauge ASCII in binary.
+        BINARY_FILE = 1,
+        // Machine language ASCII in hex.
+        HEXADECIMAL_FILE = 2,
+    };
+    // Only for calls to lc3_assemble that produce file output.
+    OutputMode output_mode = OBJECT_FILE;
+
 };
 
 /** Contextual information pass among assemble/parser functions */

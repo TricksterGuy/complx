@@ -11,49 +11,52 @@ int main(int argc, char** argv)
     if (argc < 2)
     {
 usage:
-        printf("Usage: as2obj file.asm [-all_errors] [-disable_plugins] [outfile] \n");
+        printf("Usage: as2obj [-all_errors] [-disable_plugins] [-hex|-bin] [asmfile] [output_file_prefix]\n");
         abort();
     }
 
+    std::string filename;
+    std::string outfile_prefix;
+    LC3AssembleOptions options;
+    std::vector<std::string> params;
+
+    for (int i = 1; i < argc; i++)
+    {
+        const std::string& arg = argv[i];
+        if (arg == "-all_errors")
+            options.multiple_errors = true;
+        else if (arg == "-disable_plugins")
+            options.disable_plugins = true;
+        else if (arg == "-hex")
+            options.output_mode = LC3AssembleOptions::HEXADECIMAL_FILE;
+        else if (arg == "-bin")
+            options.output_mode = LC3AssembleOptions::BINARY_FILE;
+        else if (arg[0] == '-') {
+            printf("Invalid option %s given.\n", argv[i]);
+            goto usage;
+        }
+        else
+            params.push_back(argv[i]);
+    }
+
+    if (params.empty())
+    {
+        printf("No asm file given.\n");
+        goto usage;
+    }
+    else if (params.size() > 2)
+    {
+        printf("Too many parameters given.\n");
+        goto usage;
+    }
+
+    filename = params[0];
+    if (params.size() == 2)
+        outfile_prefix = params[1];
+
     try
     {
-        const char* filename = argv[1];
-        bool nonfatal_errors = false;
-        bool disable_plugins = false;
-        const char* outfile = "";
-        /// @todo write this better
-        if (argc == 3)
-        {
-            if (std::string(argv[2]) == "-all_errors")
-                nonfatal_errors = true;
-            else if (std::string(argv[2]) == "-disable_plugins")
-                disable_plugins = true;
-            else if (argv[2][0] == '-')
-                goto usage;
-            else
-                outfile = argv[2];
-        }
-        else if (argc == 4)
-        {
-            nonfatal_errors = std::string(argv[2]) == "-all_errors" || std::string(argv[3]) == "-all_errors";
-            disable_plugins = std::string(argv[2]) == "-disable_plugins" || std::string(argv[3]) == "-disable_plugins";
-            outfile = argv[2][0] == '-' ? argv[3] : argv[2];
-            if (outfile[0] == '-') goto usage;
-        }
-        else if (argc == 5)
-        {
-            nonfatal_errors = std::string(argv[2]) == "-all_errors" || std::string(argv[3]) == "-all_errors" || std::string(argv[4]) == "-all_errors";
-            disable_plugins = std::string(argv[2]) == "-disable_plugins" || std::string(argv[3]) == "-disable_plugins" || std::string(argv[4]) == "-disable_plugins";
-            outfile = argv[4][0] == '-' ? (argv[3][0] == '-' ? argv[2] : argv[3]) : argv[4];
-            if (outfile[0] == '-') goto usage;
-        }
-        LC3AssembleOptions options;
-        options.multiple_errors = nonfatal_errors;
-        options.warnings_as_errors = false;
-        options.process_debug_comments = true;
-        options.enable_warnings = true;
-        options.disable_plugins = disable_plugins;
-        lc3_assemble(filename, outfile, options);
+        lc3_assemble(filename, outfile_prefix, options);
     }
     catch (std::vector<LC3AssembleException> e)
     {

@@ -6,7 +6,9 @@
 #include "lc3_parser.hpp"
 
 #include <algorithm>
+#include <bitset>
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <cmath>
 #include <cassert>
@@ -464,7 +466,8 @@ void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>&
             comments << "\n";
         }
 
-        if (line.empty()) continue;
+        if (line.empty())
+            continue;
 
         for (const char& c : line)
         {
@@ -596,7 +599,8 @@ symbolcheckdone:
             }
         }
 
-        if (tokens.empty()) continue;
+        if (tokens.empty())
+            continue;
 
         // If assembler directive
         if (tokens[0][0] == '.')
@@ -784,7 +788,8 @@ symbolcheckdone:
             }
         }
 
-        if (tokens.empty()) continue;
+        if (tokens.empty())
+            continue;
         // If assembler directive
         if (tokens[0][0] == '.')
         {
@@ -861,6 +866,80 @@ void lc3_assemble(lc3_state& state, std::istream& file, const LC3AssembleOptions
     lc3_assemble(state, file, ranges, options);
 }
 
+bool lc3_assemble_object_writer(const std::string& filename, const lc3_state& state, const std::vector<code_range>& ranges)
+{
+    std::string obj_file = filename + ".obj";
+    std::ofstream obj(obj_file.c_str(), std::ios::binary);
+    if (!obj.good())
+        return false;
+
+    for (const auto& range : ranges)
+    {
+        if (range.size == 0)
+            continue;
+
+        short lol = htons(range.location);
+        obj.write((char*)(&lol), sizeof(short));
+        lol = htons(range.size);
+        obj.write((char*)(&lol), sizeof(short));
+        for (unsigned int j = 0; j < range.size; j++)
+        {
+            lol = htons(state.mem[range.location + j]);
+            obj.write((char*)(&lol), sizeof(short));
+        }
+    }
+
+    return true;
+}
+
+bool lc3_assemble_binary_writer(const std::string& filename, const lc3_state& state, const std::vector<code_range>& ranges)
+{
+    std::string obj_file = filename + ".bin";
+    std::ofstream obj(obj_file.c_str(), std::ios::binary);
+    if (!obj.good())
+        return false;
+
+    for (const auto& range : ranges)
+    {
+        if (range.size == 0)
+            continue;
+
+        obj << "x" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << range.location  << std::endl << std::nouppercase;
+        obj << std::dec << range.size << std::endl;
+
+        for (unsigned int j = 0; j < range.size; j++)
+            obj << std::bitset<16>(state.mem[range.location + j]) << std::endl;
+
+        obj << std::endl;
+    }
+
+    return true;
+}
+
+bool lc3_assemble_hexadecimal_writer(const std::string& filename, const lc3_state& state, const std::vector<code_range>& ranges)
+{
+    std::string obj_file = filename + ".hex";
+    std::ofstream obj(obj_file.c_str(), std::ios::binary);
+    if (!obj.good())
+        return false;
+
+    for (const auto& range : ranges)
+    {
+        if (range.size == 0)
+            continue;
+
+        obj << "x" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << range.location  << std::endl << std::nouppercase;
+        obj << std::dec << range.size << std::endl;
+        for (unsigned int j = 0; j < range.size; j++)
+        {
+            obj << "x" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << state.mem[range.location + j] << std::endl << std::nouppercase;
+        }
+        obj << std::endl;
+    }
+
+    return true;
+}
+
 bool lc3_assemble(const std::string& filename, const std::string& output_prefix, const LC3AssembleOptions& options)
 {
     lc3_state state;
@@ -875,7 +954,8 @@ bool lc3_assemble(const std::string& filename, const std::string& output_prefix,
     {
         std::string sym_file = prefix + ".sym";
         std::ofstream sym(sym_file.c_str());
-        if (!sym.good()) return false;
+        if (!sym.good())
+            return false;
         std::map<unsigned short, std::string>::const_iterator i;
         for (i = state.rev_symbols.begin(); i != state.rev_symbols.end(); i++)
         {
@@ -883,26 +963,12 @@ bool lc3_assemble(const std::string& filename, const std::string& output_prefix,
         }
     }
 
-    std::string obj_file = prefix + ".obj";
-    std::ofstream obj(obj_file.c_str(), std::ios::binary);
-    if (!obj.good()) return false;
+    auto writer = (options.output_mode == LC3AssembleOptions::OBJECT_FILE) ? lc3_assemble_object_writer :
+                  (
+                      (options.output_mode == LC3AssembleOptions::BINARY_FILE) ? lc3_assemble_binary_writer : lc3_assemble_hexadecimal_writer
+                  );
 
-    for (unsigned int i = 0; i < ranges.size(); i++)
-    {
-        code_range range = ranges[i];
-        if (range.size == 0) continue;
-        short lol = htons(range.location);
-        obj.write((char*)(&lol), sizeof(short));
-        lol = htons(range.size);
-        obj.write((char*)(&lol), sizeof(short));
-        for (unsigned int j = 0; j < range.size; j++)
-        {
-            lol = htons(state.mem[range.location + j]);
-            obj.write((char*)(&lol), sizeof(short));
-        }
-    }
-
-    return true;
+    return writer(prefix, state, ranges);
 }
 
 /** process_plugin_info
@@ -1006,7 +1072,8 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
             // Address calculation
             if (params.find("address") == params.end())
             {
-                if (statement.address == 0) return;
+                if (statement.address == 0)
+                    return;
                 address = statement.address;
             }
             else
@@ -1025,7 +1092,8 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
 
             std::vector<std::string> pieces;
             tokenize(debug_params, pieces, " \t");
-            if (pieces.size() > 4) pieces.resize(4);
+            if (pieces.size() > 4)
+                pieces.resize(4);
 
             switch (pieces.size())
             {
@@ -1039,7 +1107,8 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
                 address = get_sym_imm(pieces[0], 16, dummy, true);
                 break;
             case 0:
-                if (statement.address == 0) return;
+                if (statement.address == 0)
+                    return;
                 address = statement.address;
                 break;
             default: // shouldn't happen
@@ -1069,7 +1138,8 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
             // Address calculation
             if (params.find("target") == params.end())
             {
-                if (statement.address == 0) return;
+                if (statement.address == 0)
+                    return;
                 data = statement.address;
                 is_reg = false;
             }
@@ -1097,7 +1167,8 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
 
             std::vector<std::string> pieces;
             tokenize(debug_params, pieces, " \t");
-            if (pieces.size() > 4) pieces.resize(4);
+            if (pieces.size() > 4)
+                pieces.resize(4);
 
             switch (pieces.size())
             {
@@ -1121,7 +1192,8 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
                 }
                 break;
             case 0:
-                if (statement.address == 0) return;
+                if (statement.address == 0)
+                    return;
                 data = statement.address;
                 is_reg = false;
                 condition = "1";
@@ -1154,7 +1226,8 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
             // Address calculation
             if (params.find("address") == params.end())
             {
-                if (statement.address == 0) return;
+                if (statement.address == 0)
+                    return;
                 address = statement.address;
             }
             else
@@ -1176,7 +1249,8 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
 
             std::vector<std::string> pieces;
             tokenize(debug_params, pieces, " \t");
-            if (pieces.size() > 3) pieces.resize(3);
+            if (pieces.size() > 3)
+                pieces.resize(3);
 
             switch (pieces.size())
             {
@@ -1188,7 +1262,8 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
                 address = get_sym_imm(pieces[0], 16, dummy, true);
                 break;
             case 0:
-                if (statement.address == 0) return;
+                if (statement.address == 0)
+                    return;
                 address = statement.address;
                 break;
             default: // shouldn't happen
@@ -1224,7 +1299,8 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
             // Address calculation
             if (params.find("address") == params.end())
             {
-                if (statement.address == 0) return;
+                if (statement.address == 0)
+                    return;
                 address = statement.address;
             }
             else
@@ -1242,7 +1318,8 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
 
             std::vector<std::string> pieces;
             tokenize(debug_params, pieces, " \t");
-            if (pieces.size() > 3) pieces.resize(3);
+            if (pieces.size() > 3)
+                pieces.resize(3);
 
             switch (pieces.size())
             {
@@ -1254,7 +1331,8 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
                 address = get_sym_imm(pieces[0], 16, dummy, true);
                 break;
             case 0:
-                if (statement.address == 0) return;
+                if (statement.address == 0)
+                    return;
                 address = statement.address;
                 break;
             default: // shouldn't happen
@@ -1278,7 +1356,8 @@ void parse_params(const std::string& line, std::map<std::string, std::string>& p
     {
         std::string piece = pieces[i];
         size_t index = piece.find('=');
-        if (index == std::string::npos) continue;
+        if (index == std::string::npos)
+            continue;
         std::string key = piece.substr(0, index);
         std::string value = piece.substr(index+1);
         params[key]=value;
