@@ -1,0 +1,110 @@
+complx-tools (4.18.1-0ubuntu1~ppa1) precise trusty xenial bionic disco eoan; urgency=low
+
+  * Official release notes can be found at https://github.com/TricksterGuy/complx/releases/tag/4.18.1
+
+ -- Brandon Whitehead <tricksterguy87@gmail.com>  Sat, 5 Oct 2019 21:56:00 -0800
+
+complx-tools (4.18.0-0ubuntu1~ppa1) precise trusty xenial bionic disco eoan; urgency=low
+
+  * Official release notes can be found at https://github.com/TricksterGuy/complx/releases/tag/4.18.0
+
+ -- Brandon Whitehead <tricksterguy87@gmail.com>  Thu, 27 Sep 2018 2:33:00 -0800
+
+complx-tools (4.17.0-0ubuntu1~ppa1) precise trusty xenial bionic disco eoan; urgency=low
+
+  * Official release notes can be found at https://github.com/TricksterGuy/complx/releases/tag/4.17.0
+
+ -- Brandon Whitehead <tricksterguy87@gmail.com>  Mon, 24 Sep 2018 3:59:00 -0800
+
+complx-tools (4.16.6-0ubuntu1~ppa1) precise trusty xenial bionic disco eoan; urgency=low
+
+  * Official release notes can be found at https://github.com/TricksterGuy/complx/releases/tag/4.16.6
+
+ -- Brandon Whitehead <tricksterguy87@gmail.com>  Sat, 3 Mar 2018 15:30:00 -0800
+
+complx-tools (4.16.5-0ubuntu1~ppa1) precise trusty xenial bionic disco eoan; urgency=low
+
+  * Official release notes can be found at https://github.com/TricksterGuy/complx/releases/tag/4.16.5
+
+ -- Brandon Whitehead <tricksterguy87@gmail.com>  Thu, 22 Feb 2018 21:20:00 -0800
+
+complx-tools (4.16.4-0ubuntu1~ppa1) precise trusty xenial bionic disco eoan; urgency=low
+
+  * Official release notes can be found at https://github.com/TricksterGuy/complx/releases/tag/4.16.4
+
+ -- Brandon Whitehead <tricksterguy87@gmail.com>  Thu, 1 Feb 2018 21:57:00 -0800
+
+complx-tools (4.16.3-0ubuntu1~ppa1~precise trusty xenial bionic disco eoan2) precise trusty xenial bionic disco eoan; urgency=low
+
+  * Official release notes can be found at https://github.com/TricksterGuy/complx/releases/tag/4.16.3
+
+ -- Brandon Whitehead <tricksterguy87@gmail.com>  Thu, 1 Feb 2018 00:52:00 -0800
+
+complx-tools (4.16.1-0ubuntu1~ppa1) precise trusty xenial bionic disco eoan; urgency=low
+
+  * Official release notes can be found at https://github.com/TricksterGuy/complx/releases/tag/4.16.0
+
+ -- Brandon Whitehead <tricksterguy87@gmail.com>  Fri, 12 Jan 2018 00:52:00 -0800
+
+complx-tools (4.15.6-0ubuntu1~ppa1~precise trusty xenial bionic disco eoan2) precise trusty xenial bionic disco eoan; urgency=low
+
+  * Fixes for lc3test, saved registers calling convention checker
+
+ -- Brandon Whitehead <tricksterguy87@gmail.com>  Sun, 5 Mar 2017 14:00:00 -0500
+
+complx-tools (4.15.5-0ubuntu1~ppa1) precise trusty xenial bionic disco eoan; urgency=low
+
+  * Fixes for lc3test
+
+ -- Brandon Whitehead <tricksterguy87@gmail.com>  Sun, 5 Mar 2017 2:00:00 -0500
+
+complx-tools (4.15.4-0ubuntu1~ppa1) precise trusty xenial bionic disco eoan; urgency=low
+
+  * Fixes for lc3test
+
+ -- Brandon Whitehead <tricksterguy87@gmail.com>  Thu, 23 Feb 2017 4:30:00 -0500
+
+complx-tools (4.15.3-0ubuntu1~ppa1) precise trusty xenial bionic disco eoan; urgency=low
+
+  * Fix for lc3test parameters
+  * lc3test now seeds with current time if seed is not specified
+  * lc3test now has -runs parameter to run the test multiple times
+  * lc3test subroutine/recursion checker improved
+  * console window pops up if any output is written
+  * Assembler is more strict with immediate values
+  * Menus are less strict with values given (allowing -32767 - 65535)
+  * New warning when non printable characters printed
+  * Warnings are now less spammy
+  * Complx now remembers layout and sizing and computes best size on first start up.
+
+ -- Brandon Whitehead <tricksterguy87@gmail.com>  Wed, 22 Feb 2017 4:09:00 -0500
+
+complx-tools (4.14.2-0ubuntu1~ppa1) precise trusty xenial bionic disco eoan; urgency=low
+
+  * Fix for lc3test
+
+ -- Brandon Whitehead <tricksterguy87@gmail.com>  Tue, 18 Oct 2016 1:47:00 -0500
+
+complx-tools (4.14.0-0ubuntu1~ppa1) precise trusty xenial bionic disco eoan; urgency=low
+
+  * New lc3 plugin that generates interrupts every x instructions
+
+ -- Brandon Whitehead <tricksterguy87@gmail.com>  Wed, 21 Sep 2016 14:28:00 -0500
+
+complx-tools (4.13.1-0ubuntu1~ppa1) precise trusty xenial bionic disco eoan; urgency=low
+
+  * Fix column sizing on Ubuntu 15.10 and above
+
+ -- Brandon Whitehead <tricksterguy87@gmail.com>  Sat, 20 Feb 2016 17:26:00 -0500
+
+complx-tools (4.13.0-0ubuntu1~ppa1) precise trusty xenial bionic disco eoan; urgency=low
+
+  * Initial release
+
+ -- Brandon Whitehead <tricksterguy87@gmail.com>  Sat, 20 Feb 2016 17:26:00 -0500
+
+complx-tools (4.12.1-0ubuntu1~ppa1) precise trusty xenial bionic disco eoan; urgency=low
+
+  * Initial release
+
+ -- Brandon Whitehead <tricksterguy87@gmail.com>  Sun, 14 Feb 2016 19:42:00 -0500
