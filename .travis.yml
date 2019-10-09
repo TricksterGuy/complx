@@ -1,25 +1,31 @@
 sudo: required
 dist: xenial
-
 language: cpp
-
 matrix:
   include:
-    - os: linux
-    - compiler: gcc
-
+  - os: linux
+  - compiler: gcc
 before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -y libboost-test-dev castxml python-pip libpython-dev libboost-python-dev libboost-serialization-dev 
-
-  - sudo pip install wheel setuptools unittest2 pygccxml pyplusplus terminaltables
-  - sudo pip install -r pylc3/requirements.txt
-  - sudo pip install -r pylc3/requirements-build.txt
-
+- sudo apt-get update -qq
+- sudo apt-get install -y libboost-test-dev castxml python-pip libpython-dev libboost-python-dev
+  libboost-serialization-dev
+- sudo pip install wheel setuptools unittest2 pygccxml pyplusplus terminaltables
+- sudo pip install -r pylc3/requirements.txt
+- sudo pip install -r pylc3/requirements-build.txt
 script:
-  - mkdir build && cd build
-  - cmake -DENABLE_TESTS=ON -DENABLE_PYLC3=ON -DENABLE_COMPLX=OFF -DENABLE_AS2OBJ=OFF ..
-  - make
-  - sudo make install
-  - sudo ldconfig
-  - ctest -VV
+- mkdir build && cd build
+- cmake -DENABLE_TESTS=ON -DENABLE_PYLC3=ON -DENABLE_COMPLX=OFF -DENABLE_AS2OBJ=OFF
+  ..
+- make
+- sudo make install
+- sudo ldconfig
+- ctest -VV
+deploy:
+  provider: launchpad
+  slug: "~tricksterguy87/complx-tools/+git/master"
+  oauth_token:
+    secure: SnWoYJTg6yDhMTI1GyTSG0eXl5LFbQLlcWmPcKG5YYgFIxJUW6SoI8+XCAF6hITovzpn49XWmKF/Ma+Zr53YsULblCCdDKAslYlbEugzHBeoAJ+LmgH9lej29cKQprQjxEatcOut1YvzN+91Ol46gvbX+tqNpiG71fLyAES0Ept3FP01EK7q8VjHMVhV0HfKHGMjZ2qsSaxpkqipFL56vYNB9wjG7UhC+nsvDEdd3VqeEXy/yH7dhLZ2CNtHmsI3Wdki80nEssRyZt/pFV4Z18G9Kh2FUmLRCOBTxnCq9ycIpqISMemMGq3Lx/Josd+E0qVH0bC/oMQNbvZXyjTZVksnsLED4Xii1LKB45WXOBkIVhmUTFWFwFmY/8NuWNYpzsEzbt5NDydfBOK+4RCPkc/zMf+fMTizWZdC8c1EUGMGJ1xdJgPqD2QVYfhUL0oednw8vcMVEmll5c7y8YF0IcGKfqiaoK7r+uyv+gYyKvJEnYVWMk4sloDb6yzd3+oYm6FbRrS4VuQhnQHs3UsPGwRpGFKKElEBMNa6u9ATHEYeFwBxhPDrdQLm+Is+qMmLF75N2ISLRZOxskdf8++QmVT/Afru/uQvX+aGIcRo1kgI11hDHXnp2IuLahDMbRxYK2F61oXu+QXOGZgxwe2ocIzdkikgmkDyMSYCn4QCZYs=
+  oauth_token_secret:
+    secure: UIrEV3im/0YP2Iw9ZpNtjgYKgb+wgMxsSjhYjvOw0/e0sdy/pfAoJEoY9auXchsJW6F+pkfmgyS6fvCGDMjsiulf5Ri0Nxzi5f7Uji9emagkfB1UpmfMyLNU0pBEtCj9kmtIKU4PdwSljJj5ixOMJVGX7bTurzDRRuHWduxx8YTqisvUeCF6ChvSKNygLYxk3ZG4V3EC4AvvynQlmnIA2vdOCaTixPP5a0sdUL/ZcA4CCW5OiNm+p2grCF6Uggl1qgjAgpZe5PzDlWpXnXEJ3PR0diW4ovrDvdxJgBW7qKxgUaFMDQ/6l0VWOAQGSgPEmc6SLJ0fpccwoQ0rdE5ytJRRZocQMxmcu1GrA7eFbvN78V911GbP9hSzp3oaqD/ZD85YvJQHBNaBBv7x5KNt8o1WyKLPmKPeKXWabkjHetW02Aa8555dUQ9CFCZe9vY1x1+DkcrJn6t1XZSH3aFOmylu1q4tujSY49Hf8ZSXOH9v93gaCQ63FbBwKWLFE4nTxc1NfMRDoIinWlumtoxzfhCeqS+POJ0fXt0Im5ISynxcoYECh0Nnb/Z+k4s9ZUwY5paf4PnNfQMJdAJhVWor4vQo293FEtlejQi7e/jfmm2GRcDlf8hWQq9rf1S4X2SY+EM2j+EeHZwQz9yO5AGF0SNNEE1qDqqEoQzvbxEZVB4=
+  on:
+    tags: true
