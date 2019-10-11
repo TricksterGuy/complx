@@ -156,7 +156,12 @@ class Preconditions(object):
 
         return blob
 
+    def describe(self, include_environment=True):
+        """Returns a string describing the preconditions."""
+        return ""
+
     def encode(self):
+        """Returns a base64 encoded string with the data."""
         return base64.b64encode(self._formBlob())
 
 
@@ -347,7 +352,7 @@ class LC3UnitTestCase(unittest.TestCase):
     def setTrueTraps(self, setting):
         """Enables or disables True Traps.
 
-        This should be called before load.
+        This should be called before loadXXX.
 
         Args:
             setting: True to enable.
@@ -379,7 +384,7 @@ class LC3UnitTestCase(unittest.TestCase):
     def setPluginsEnabled(self, setting):
         """Enables or disables plugins.
 
-        This should be called before load.
+        This should be called before loadXXX.
 
         Args:
             setting: True to enable.
@@ -533,14 +538,14 @@ class LC3UnitTestCase(unittest.TestCase):
 
         This function verifies only the first level of subroutine calls *not* all of them if the subroutine is recursive or calls other subroutines that call subroutines.
         The methodology of this is to verify the subroutine through inductive reasoning.
-        
+
         That is, if I have this factorial pseudocode
-        
+
         def fact(n):
           if (n <= 1)
             return 1
           return n * fact(n-1)
-        
+
         Then for a subroutine call n = 4 I would expect fact(3) to be called.
 
         Note that passing in the same (subroutine, params, optional) triplet is not supported. Nor is
@@ -622,7 +627,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
     def fillString(self, address, text):
         """Sets a sequence of characters followed by a NUL terminator starting at the addresss given.
-        
+
         This exactly performs:
             state.memory[address] = text[0]
             state.memory[address + 1] = text[1]
@@ -656,7 +661,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
     def fillArray(self, address, arr):
         """Sets a sequence of values starting at the address given.
-        
+
         This exactly performs:
             state.memory[address] = arr[0]
             state.memory[address + 1] = arr[1]
@@ -688,17 +693,19 @@ class LC3UnitTestCase(unittest.TestCase):
 
     def fillNode(self, address, next, data):
         """Sets a node in memory at the address given.
-        
-        This can fill nodes of arbitary type: linked list nodes or n-ary tree nodes
+
+        This can fill nodes of arbitrary type: linked list nodes or n-ary tree nodes
         This exactly performs:
-            state.memory[address] = next_info
+            state.memory[address] = next_info[0]
+            state.memory[address + 1] = next_info[1]
+            ...
             state.memory[address + n] = data
 
         *NOTICE* It is an error to call this function on an labelled address.
 
         This function is intended to dump an node out in memory.
-        
-        It is greatly preferred to use this function over fillValue/fillArray to improve tooling in the future.
+
+        It is *greatly* preferred to use this function over fillValue/fillArray to improve tooling in the future.
 
         Args:
             address: Short - Address to set.
