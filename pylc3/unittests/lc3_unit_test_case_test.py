@@ -130,34 +130,6 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertValue("B", 3)
         self.assertValue("ANS", 5)
 
-    def testAddress(self):
-        snippet = """
-        .orig x3000
-            LD R0, A
-            LD R1, B
-            ADD R2, R1, R0
-            ST R2, ANS
-            HALT
-            A .blkw 1
-            B .blkw 1
-            ANS .blkw 1
-        .end
-        """
-        self.loadCode(snippet)
-        self.setAddress(0x3005, 2)
-        self.setAddress(0x3006, 3)
-
-        # Sanity checks
-        self.assertEqual(self._lookup("A"), 0x3005)
-        self.assertEqual(self._readMem(0x3005), 2)
-
-        self.runCode()
-        self.assertHalted()
-        self.assertNoWarnings()
-        self.assertAddress(0x3005, 2)
-        self.assertAddress(0x3006, 3)
-        self.assertAddress(0x3007, 5)
-
     def testPointer(self):
         snippet = """
         .orig x3000
@@ -273,6 +245,135 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertHalted()
         self.assertNoWarnings()
         self.assertConsoleOutput("BEC")
+
+    def testFillValue(self):
+        snippet = """
+        .orig x3000
+            LD R0, A
+            LD R1, 4
+            ADD R2, R1, R0
+            ST R2, 3
+            HALT
+            A .blkw 1
+            .blkw 1 ; B
+            .blkw 1 ; ANS
+        .end
+        """
+        self.loadCode(snippet)
+
+        # Sanity checks I
+        # This is an error as it is a labelled address, setValue should be used here.
+        with self.assertRaises(ValueError):
+            self.fillValue(0x3005, 2)
+
+        self.setValue("A", 2)
+        self.fillValue(0x3006, 3)
+
+        # Sanity checks II
+        self.assertEqual(self._readMem(0x3006), 3)
+
+        self.runCode()
+        self.assertHalted()
+        self.assertNoWarnings()
+        
+        # TODO rename.
+        self.assertAddress(0x3005, 2)
+        self.assertAddress(0x3006, 3)
+        self.assertAddress(0x3007, 5)
+
+    def testFillString(self):
+        # This is not really testing assembly code see the others for more full fledged examples with code snippets.
+        snippet = """
+        .orig x3000
+            NOTHERE .stringz "HI"
+        .end
+        """
+        self.loadCode(snippet)
+
+        # Sanity checks
+        # This is an error as it is a labelled address, setString should be used here (on a label with an address
+        # to put the string) as there is potential to overwrite data past the label. Assembly code should not be setup
+        # like so due to this since the fill will happen *after* the code is assembled and loaded.  In either case even
+        # if this replacement was still done before assembling data after the label could cause code not to assemble.
+        with self.assertRaises(ValueError):
+            self.fillString(0x3000, "HELLO")
+
+        self.fillString(0x4000, "HELLO")
+
+        self.assertEqual(self._readMem(0x4000), ord('H'))
+        self.assertEqual(self._readMem(0x4001), ord('E'))
+        self.assertEqual(self._readMem(0x4002), ord('L'))
+        self.assertEqual(self._readMem(0x4003), ord('L'))
+        self.assertEqual(self._readMem(0x4004), ord('O'))
+        self.assertEqual(self._readMem(0x4005), 0)
+
+    def testFillArray(self):
+        # This is not really testing assembly code see the others for more full fledged examples with code snippets.
+        snippet = """
+        .orig x3000
+            NOTHERE .blkw 10
+        .end
+        """
+        self.loadCode(snippet)
+
+        # Sanity checks
+        # This is an error as it is a labelled address, setArray should be used here (on a label with an address
+        # to put the array) as there is potential to overwrite data past the label. Assembly code should not be setup
+        # like so due to this since the fill will happen *after* the code is assembled and loaded.  In either case even
+        # if this replacement was still done before assembling data after the label could cause code not to assemble.
+        with self.assertRaises(ValueError):
+            self.fillArray(0x3000, [10, 12, 15])
+
+        self.fillArray(0x4000, [10, 12, 15])
+
+        self.assertEqual(self._readMem(0x4000), 10)
+        self.assertEqual(self._readMem(0x4001), 12)
+        self.assertEqual(self._readMem(0x4002), 15)
+
+    def testFillNode(self):
+        # This is not really testing assembly code see the others for more full fledged examples with code snippets.
+        snippet = """
+        .orig x3000
+            NOTHERE .blkw 3
+        .end
+        """
+        self.loadCode(snippet)
+
+        # Sanity checks
+        # This is an error as it is a labelled address, setArray should be used here (on a label with an address
+        # to put the array) as there is potential to overwrite data past the label. Assembly code should not be setup
+        # like so due to this since the fill will happen *after* the code is assembled and loaded.  In either case even
+        # if this replacement was still done before assembling data after the label could cause code not to assemble.
+        with self.assertRaises(ValueError):
+            self.fillNode(0x3000, next=None, data=3)
+
+        # Ending node of linkedlist if you want.
+        self.fillNode(0x4000, next=None, data=27)
+        self.assertEqual(self._readMem(0x4000), 0)
+        self.assertEqual(self._readMem(0x4001), 27)
+
+        # Linkedlist node.
+        self.fillNode(0x5000, next=0x4000, data=32)
+        self.assertEqual(self._readMem(0x5000), 0x4000)
+        self.assertEqual(self._readMem(0x5001), 32)
+
+        # Still a Linkedlist node.
+        self.fillNode(0x5050, next=[0x4000], data=32)
+        self.assertEqual(self._readMem(0x5050), 0x4000)
+        self.assertEqual(self._readMem(0x5051), 32)
+        
+        # Binary tree node.
+        self.fillNode(0x6000, next=[0x5000, 0x4000], data=102)
+        self.assertEqual(self._readMem(0x6000), 0x5000)
+        self.assertEqual(self._readMem(0x6001), 0x4000)
+        self.assertEqual(self._readMem(0x6002), 102)
+
+        # What the heck a ternary tree node or maybe a skiplist node, its up to your imagination.
+        self.fillNode(0x7000, next=[0x6000, 0x5000, 0x4000], data=1382)
+        self.assertEqual(self._readMem(0x7000), 0x6000)
+        self.assertEqual(self._readMem(0x7001), 0x5000)
+        self.assertEqual(self._readMem(0x7002), 0x4000)
+        self.assertEqual(self._readMem(0x7003), 1382)        
 
     def testTrapCall(self):
         snippet = """
@@ -676,7 +777,11 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.setConsoleInput("ADB")
         self.setInterrupts(True)
 
+<<<<<<< HEAD
         self.runCode(max_executions=10000)
+=======
+        self.runCode(max_executions=1010)
+>>>>>>> parent of 0a60550... Reverting due to CONTE2110
         self.assertPc(0x4000)
         #self.assertEqual(self.state.executions, 102)
 
@@ -758,6 +863,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.setPluginsEnabled(True)
         self.setStrictExecution(False)
         self.loadCode(snippet)
+        self.setLC3Version(1)
         self.setRegister(4, 0x4001)
         self.setPc(0x500)
         self.setValue("AHH", 7)
@@ -766,8 +872,12 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.setString("PAPA", "MAMA")
         self.setConsoleInput("RAHRAH")
         self.callSubroutine("TATA", [2, 5, 7], r5=5, r6=0x4040, r7=0x8000)
-        self.setAddress(0x8000, 33)
-        self.setLC3Version(1)
+        self.fillValue(0x8000, 33)
+        self.fillString(0x9000, "VAVA")
+        self.fillArray(0xA000, [1, 32, 729])
+        self.fillNode(0xB000, next=None, data=34)
+        self.fillNode(0xB020, next=0xB000, data=56)
+        self.fillNode(0xB050, next=[0xB000, 0xB001, 0xB002, 0xB003], data=72)
 
         blob = self.preconditions._formBlob()
 
@@ -791,6 +901,11 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
                     '\x17\x00\x00\x00\x00\x06\x00\x00\x00R\x00A\x00H\x00R\x00A\x00H\x00'
                     '\x18\x04\x00\x00\x00TATA\x06\x00\x00\x00\x05\x00@@\x00\x80\x02\x00\x05\x00\x07\x00'
                     '\x19\x04\x00\x00\x008000\x01\x00\x00\x00!\x00'
+                    '\x1A\x04\x00\x00\x009000\x04\x00\x00\x00V\x00A\x00V\x00A\x00'
+                    '\x1B\x04\x00\x00\x00a000\x03\x00\x00\x00\x01\x00 \x00\xd9\x02'
+                    '\x1C\x04\x00\x00\x00b000\x01\x00\x00\x00\"\x00'
+                    '\x1C\x04\x00\x00\x00b020\x02\x00\x00\x00\x00\xb08\x00'
+                    '\x1C\x04\x00\x00\x00b050\x05\x00\x00\x00\x00\xb0\x01\xb0\x02\xb0\x03\xb0H\x00'
                     '\xff')
 
         self.assertEqual(blob, expected_blob)
