@@ -777,11 +777,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.setConsoleInput("ADB")
         self.setInterrupts(True)
 
-<<<<<<< HEAD
         self.runCode(max_executions=10000)
-=======
-        self.runCode(max_executions=1010)
->>>>>>> parent of 0a60550... Reverting due to CONTE2110
         self.assertPc(0x4000)
         #self.assertEqual(self.state.executions, 102)
 
