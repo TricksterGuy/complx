@@ -51,6 +51,15 @@ enum PreconditionFlag
     SUBROUTINE = 24,
     // Set an address to a value
     DIRECT_SET = 25,
+    // Directly set a string in memory.
+    DIRECT_STRING = 26,
+    // Directly set an array in memory.
+    DIRECT_ARRAY = 27,
+    // Set a node in memory.
+    // Format (data) -> Leaf node (of linked list)
+    // (next, data) -> Linked List
+    // (left, right, data) -> Tree Node
+    NODE = 28,
 
     END_OF_INPUT = 0xFF,
 };
@@ -156,7 +165,7 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
                 version = value;
                 break;
             default:
-                error << "Unknown tag found id: " << ((int)id);
+                error << "Unknown tag found id: " << static_cast<int>(id);
                 throw error.str();
         }
     }
@@ -236,6 +245,9 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
                 address = (unsigned short) address_calc;
                 break;
             case DIRECT_SET:
+            case DIRECT_STRING:
+            case DIRECT_ARRAY:
+            case NODE:
                 address_calc = strtoul(label.c_str(), nullptr, 16);
                 if (address_calc > 0x10000 || address_calc < 0)
                 {
@@ -264,6 +276,7 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
                 break;
             case STRING:
                 state.mem[static_cast<unsigned short>(state.mem[address] + params.size())] = 0;
+                // fall through
             case ARRAY:
                 for (unsigned int i = 0; i < params.size(); i++)
                     state.mem[static_cast<unsigned short>(state.mem[address]) + i] = params[i];
@@ -283,8 +296,16 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
             case DIRECT_SET:
                 state.mem[address] = params[0];
                 break;
+            case DIRECT_STRING:
+                state.mem[address + params.size()] = 0;
+                // fall through
+            case DIRECT_ARRAY:
+            case NODE:
+                for (unsigned int i = 0; i < params.size(); i++)
+                    state.mem[address + i] = params[i];
+                break;
             default:
-                error << "Unknown tag found id: " << ((int)id);
+                error << "Unknown tag found id: " << static_cast<int>(id);
                 throw error.str();
         }
     }
@@ -299,7 +320,6 @@ std::string lc3_describe_replay(const std::string& replay_string)
     std::istringstream stream(decoded);
     BinaryStreamReader bstream(stream);
     std::stringstream description;
-
     std::stringstream error;
 
     while (bstream.Ok())
@@ -341,7 +361,7 @@ std::string lc3_describe_replay(const std::string& replay_string)
                 description << "LC-3 version: " << value << std::endl;
                 break;
             default:
-                error << "Unknown tag found id: " << ((int)id);
+                error << "Unknown tag found id: " << static_cast<int>(id);
                 throw error.str();
         }
     }
@@ -380,7 +400,7 @@ std::string lc3_describe_replay(const std::string& replay_string)
             case STRING:
                 description << "String at MEM[" << label << "] = ";
                 for (const auto& param : params)
-                    description << (char)param;
+                    description << static_cast<char>(param);
                 description << std::endl;
                 break;
             case ARRAY:
@@ -396,7 +416,7 @@ std::string lc3_describe_replay(const std::string& replay_string)
             case INPUT:
                 description << "Console Input ";
                 for (const auto& param : params)
-                    description << (char)param;
+                    description << static_cast<char>(param);
                 description << std::endl;
                 break;
             case SUBROUTINE:
@@ -414,8 +434,26 @@ std::string lc3_describe_replay(const std::string& replay_string)
             case DIRECT_SET:
                 description << "MEM[x" << label << "] = (" << std::dec << params[0] << " x" << std::hex << std::setw(4) << std::setfill('0') << params[0] << ")" << std::endl;
                 break;
+            case DIRECT_STRING:
+                description << "MEM[x" << label << "] = \"";
+                for (const auto& param : params)
+                    description << static_cast<char>(param);
+                description << "\"" << std::endl;
+                break;
+            case DIRECT_ARRAY:
+                description << "MEM[x" << label << "] = [";
+                for (unsigned int i = 0; i < params.size(); i++)
+                {
+                    description << "(" << std::dec << params[i] << " x" << std::hex << std::setw(4) << std::setfill('0') << params[i] << ")";
+                    if (i != params.size() - 1)
+                        description << ",";
+                }
+                description << "]" << std::endl;
+                break;
+            case NODE:
+                break;
             default:
-                error << "Unknown tag found id: " << ((int)id);
+                error << "Unknown tag found id: " << static_cast<int>(id);
                 throw error.str();
         }
     }
