@@ -525,6 +525,18 @@ class LC3UnitTestCase(unittest.TestCase):
     def expectSubroutineCall(self, subroutine, params, optional=False):
         """Expects that a subroutine call was made with parameters.
 
+        This function verifies only the first level of subroutine calls *not* all of them if the subroutine is recursive or calls other subroutines that call subroutines.
+        The methodology of this is to verify the subroutine through inductive reasoning.
+        
+        That is, if I have this factorial pseudocode
+        
+        def fact(n):
+          if (n <= 1)
+            return 1
+          return n * fact(n-1)
+        
+        Then for a subroutine call n = 4 I would expect fact(3) to be called.
+
         Note that passing in the same (subroutine, params, optional) triplet is not supported. Nor is
         passing in the same (subroutine, params) with both optional set and not set.
 
@@ -551,6 +563,8 @@ class LC3UnitTestCase(unittest.TestCase):
 
         Note that passing in the same (vector, params, optional) triplet is not supported. Nor is
         passing in the same (vector, params) with both optional set and not set.
+
+        This function will only check the first level trap calls made not all of them if the trap is recursive, or the trap called calls other traps.
 
         It is undefined to call this with the same trap vector, but a different set of register parameters.
 
