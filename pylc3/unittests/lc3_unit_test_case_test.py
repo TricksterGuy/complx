@@ -476,6 +476,52 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         # Checks that no subroutines were called.
         self.assertSubroutineCallsMade()
 
+    def testSubroutineCallWithParamsInRegisters(self):
+        snippet = """
+        .orig x4000
+			; x in R0, y in R1, z in R2.
+            ; ans in R0
+            ; def MYADD(x, y, z):
+            ;     return x + y + z
+            MYADD
+                ADD R6, R6, -2
+                STR R5, R6, 0
+                STR R7, R6, 1
+                ADD R5, R6, -1
+                ADD R0, R0, R1
+                ADD R0, R0, R2
+                LDR R5, R6, 0
+                LDR R7, R6, 1
+                ADD R6, R6, 2
+                RET
+        .end
+        """
+        self.loadCode(snippet)
+        self.setRegister(0, 7)
+        self.setRegister(1, 81)
+        self.setRegister(2, 123)
+        self.callSubroutine("MYADD", [], r5=0xCAFE, r6=0xF000, r7=0x8000)
+        # self.callSubroutine("MYADD", params={0:7, 1:81, 2:123}, r5=0xCAFE, r6=0xF000, r7=0x8000)
+
+        # Sanity checks
+        self.assertEqual(self.state.pc, 0x4000)
+        self.assertEqual(self._lookup("MYADD"), 0x4000)
+        self.assertEqual(self._readReg(0, unsigned=True), 7)
+        self.assertEqual(self._readReg(1, unsigned=True), 81)
+        self.assertEqual(self._readReg(2, unsigned=True), 123)
+        self.assertEqual(self._readReg(5, unsigned=True), 0xCAFE)
+        self.assertEqual(self._readReg(6, unsigned=True), 0xF000)
+        self.assertEqual(self._readReg(7, unsigned=True), 0x8000)
+
+        self.runCode()
+        self.assertReturned()
+        self.assertNoWarnings()
+        self.assertRegister(0, 211)
+        self.assertRegistersUnchanged([1, 2, 5, 7])
+        self.assertStackManaged(stack=0xF000, return_address=0x8000, old_frame_pointer=0xCAFE)
+        # Checks that no subroutines were called.
+        self.assertSubroutineCallsMade()
+
     def testSubroutineCallWithParamsAndCalls(self):
         # Psuedocode
         # int a(int x, int y, int z) {
@@ -584,6 +630,134 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         #self.assertReturnValue(72)
         self.assertRegistersUnchanged([5, 7])
         self.assertStackManaged(stack=0xEFFC, return_address=0x8000, old_frame_pointer=0xCAFE)
+        self.assertSubroutineCallsMade()
+
+    def testSubroutineCallWithParamsAndCallsInRegisters(self):
+        # Psuedocode
+        # X: R0 Y: R1 Z: R2
+        # ANS: R0
+        # int a(int x, int y, int z) {
+        #   return b(x, y) + b(x, z) + b(y, z) + c(x);
+        # }
+        #
+        # X: R3 Y: R4
+        # ANS R3
+        # int b(int x, int y) {
+        #    return x * y;
+        # }
+        #
+        # X: R4
+        # ANS: R2
+        # int c(int x) {
+        #    return x / 2;
+        # }
+        snippet = """
+        ;@plugin filename=lc3_multiply
+        ;@plugin filename=lc3_udiv vector=x80
+
+        .orig x3000
+            A
+                ADD R6, R6, -2
+                STR R5, R6, 0
+                STR R7, R6, 1
+                ADD R5, R6, -1
+                ADD R6, R6, -3
+                STR R2, R6, 0
+                STR R3, R6, 1
+                STR R4, R6, 2
+
+                ADD R3, R0, 0
+                ADD R4, R1, 0
+                JSR B
+
+                ADD R6, R6, -1
+                STR R3, R6, 0
+
+                ADD R3, R0, 0
+                ADD R4, R2, 0
+                JSR B
+
+                ADD R6, R6, -1
+                STR R3, R6, 0
+
+                ADD R3, R1, 0
+                ADD R4, R2, 0
+                JSR B
+
+                ADD R6, R6, -1
+                STR R3, R6, 0
+
+                ADD R4, R0, 0
+                JSR C
+    
+                ADD R0, R2, 0
+                LDR R2, R6, 0
+                ADD R0, R0, R2
+                LDR R2, R6, 1
+                ADD R0, R0, R2
+                LDR R2, R6, 2
+                ADD R0, R0, R2
+                ADD R6, R6, 3
+
+                LDR R2, R6, 0
+                LDR R3, R6, 1
+                LDR R4, R6, 2
+                LDR R5, R6, 3
+                LDR R7, R6, 4
+                ADD R6, R6, 5
+                RET
+
+            B
+                ADD R6, R6, -2
+                STR R5, R6, 0
+                STR R7, R6, 1
+                ADD R5, R6, -1
+                MUL R3, R3, R4
+                LDR R5, R6, 0
+                LDR R7, R6, 1
+                ADD R6, R6, 2
+                RET
+
+            C
+                ADD R6, R6, -2
+                STR R5, R6, 0
+                STR R7, R6, 1
+                ADD R5, R6, -1
+                ADD R6, R6, -2
+                STR R0, R6, 0
+                STR R1, R6, 1
+                ADD R0, R4, 0
+                AND R1, R1, 0
+                ADD R1, R1, 2
+                UDIV
+                ADD R2, R0, 0
+                LDR R0, R6, 0
+                LDR R1, R6, 1
+                ADD R6, R6, 2
+                LDR R5, R6, 0
+                LDR R7, R6, 1
+                ADD R6, R6, 2
+                RET
+           .end
+        """
+        self.loadCode(snippet)
+        self.setRegister(0, 3)
+        self.setRegister(1, 5)
+        self.setRegister(2, 7)
+        self.callSubroutine("A", params=[], r5=0xCAFE, r6=0xF000, r7=0x8000)
+        # For assertSubroutineCallMade.
+        self.expectSubroutineCall("B", params={3: 3, 4: 5})
+        self.expectSubroutineCall("B", params={3: 3, 4: 7})
+        self.expectSubroutineCall("B", params={3: 5, 4: 7})
+        self.expectSubroutineCall("C", params={4: 3})
+        # Don't call expectTrapCall here since A doesn't directly use it. Only the first level calls are logged.
+
+        self.runCode()
+        self.assertReturned()
+        self.assertNoWarnings()
+        self.assertRegister(0, 72)
+        self.assertRegistersUnchanged([1, 2, 3, 4, 5, 6, 7])
+        self.assertStackManaged(stack=0xF000, return_address=0x8000, old_frame_pointer=0xCAFE)
         self.assertSubroutineCallsMade()
 
     def testSubroutineCallWithOptionalNotTaken(self):

@@ -109,6 +109,10 @@ class MemoryFillStrategy(enum.Enum):
     random_fill_with_seed = 1
     completely_random_with_seed = 2
 
+class SubroutineCallMode(enum.Enum):
+    lc3_calling_convention = 0
+    pass_by_register = 1
+
 class Preconditions(object):
     """Represents the setup environment for a test case for replay.
 
@@ -165,6 +169,7 @@ class Preconditions(object):
         return base64.b64encode(self._formBlob())
 
 
+
 class LC3UnitTestCase(unittest.TestCase):
     """LC3UnitTestCase class eases testing of LC3 code from within python.
 
@@ -198,6 +203,9 @@ class LC3UnitTestCase(unittest.TestCase):
         self.optional_traps = set()
         # Trap specifications.  Dict of Vector to List of interested registers
         self.trap_specifications = dict()
+        # Subroutine specifications. Dict of String to List of interested registers. Only for SubroutineCallMode.pass_by_register.
+        self._subroutine_call_mode = None
+        self.subroutine_specifications = dict()
 
 
     def init(self, strategy=MemoryFillStrategy.fill_with_value, value=0):
@@ -514,20 +522,21 @@ class LC3UnitTestCase(unittest.TestCase):
 
         Args:
             subroutine: String - Label pointing at the start of the subroutine.
-            params: List of Integer - Paramters to the subroutine.
+            params: List of Integer - (LC-3 Calling Convention Style) Parameters to the subroutine. If passing by registers this should be empty.
             r5: Integer - Dummy value to store in r5 (frame pointer) for the test.
             r6: Integer - Dummy value to store in r6 (stack pointer) for the test.
             r7: Integer - Dummy value to store in r7 (return address) for the test.
         """
+		# TODO Have this function support pass by register semantics.
         self.state.pc = self._lookup(subroutine)
         self.state.r5 = r5
-        self.state.r6 = r6 - len(params)
         self.state.r7 = r7
         self.break_address = r7
         self.state.add_breakpoint(r7)
+
+        self.state.r6 = r6 - len(params)
         for addr, param in enumerate(params, self.state.r6):
             self._writeMem(addr, param)
-
         self.state.add_subroutine_info(subroutine, len(params))
 
         self.preconditions.addEnvironment(PreconditionFlag.break_address, r7)
@@ -557,10 +566,23 @@ class LC3UnitTestCase(unittest.TestCase):
                     Dict of Integer to Integer - (Pass by Register Style) Map of Register number to value.
             optional: Mark this as a optional subroutine call, if this subroutine call is found it is not checked.
         """
-        self._addSubroutineInfo(subroutine, len(params))
+        inner_value = None
+        if isinstance(params, list):
+            self._addSubroutineInfo(subroutine, len(params))
+            inner_value = tuple(params)
+            assert self._subroutine_call_mode is None or self._subroutine_call_mode == SubroutineCallMode.lc3_calling_convention, "Can't mix subroutine call styles in the same test."
+            self._subroutine_call_mode = SubroutineCallMode.lc3_calling_convention
+        elif isinstance(params, dict):
+            if subroutine not in self.subroutine_specifications:
+                self.subroutine_specifications[subroutine] = params.keys()
+            inner_value = tuple([(k, v) for k, v in params.items()])
+            assert self._subroutine_call_mode is None or self._subroutine_call_mode == SubroutineCallMode.pass_by_register, "Can't mix subroutine call styles in the same test."
+            self._subroutine_call_mode = SubroutineCallMode.pass_by_register
+        else:
+            assert 'Invalid Type for params. Expected (list or dict) Got: %s.' % type(params) 
 
         set_to_add = self.expected_subroutines
-        value = (subroutine, tuple(params))
+        value = (subroutine, inner_value)
         if optional:
             set_to_add = self.optional_subroutines
 
@@ -978,11 +1000,25 @@ class LC3UnitTestCase(unittest.TestCase):
         not then it will check for no subroutines to be called.
         """
         def subroutine_list(subrs):
-            return ' '.join(['%s(%s)' % (name, ','.join(map(str, params))) for name, params in subrs])
+            if self._subroutine_call_mode == SubroutineCallMode.lc3_calling_convention:
+                return ' '.join(['%s(%s)' % (name, ','.join(map(str, params))) for name, params in subrs])
+            else:
+                subr_strs = []
+                for subr in subrs:
+                    name, params = subr
+                    params_pairs = list(params)
+                    params = ', '.join(['R%d=(%d x%04x)' % (reg, value, _toUShort(value)) for reg, value in params_pairs])
+                    subr_strs.append('%s(%s)' % (name, params) if params else trap_name)
+                return ' '.join(subr_strs)
+
 
         actual_subroutines = set()
         for call in self.state.first_level_calls:
-            actual_subroutines.add((self._reverse_lookup(call.address), tuple(call.params)))
+            if self._subroutine_call_mode == SubroutineCallMode.lc3_calling_convention:
+                actual_subroutines.add((self._reverse_lookup(call.address), tuple(call.params)))
+            else:
+                params = tuple([(reg, param) for reg, param in enumerate(call.regs) if reg in self.subroutine_specifications[self._reverse_lookup(call.address)]])
+                actual_subroutines.add((self._reverse_lookup(call.address), params))
 
         made_calls = self.expected_subroutines & actual_subroutines
         missing_calls = self.expected_subroutines - actual_subroutines
