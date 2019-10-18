@@ -405,6 +405,8 @@ typedef struct lc3_subroutine_call_info
     unsigned short address;
     unsigned short r6;
     std::vector<unsigned short> params;
+    // This should be std::array<short, 8> but due to a bug with py++ it doesn't work.
+    std::vector<short> regs;
     // For availability in pylc3 equality operator must be defined.
     bool operator==(const lc3_subroutine_call_info& other) const
     {

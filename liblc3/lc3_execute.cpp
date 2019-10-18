@@ -226,6 +226,8 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
                         num_params = state.subroutines[state.pc].num_params;
                     for (unsigned int i = 0; i < num_params; i++)
                         call_info.params.push_back(state.mem[call_info.r6 + i]);
+           			for (unsigned int i = 0; i < 8; i++)
+                		call_info.regs[i] = state.regs[i];
 
                     state.first_level_calls.push_back(call_info);
                 }
