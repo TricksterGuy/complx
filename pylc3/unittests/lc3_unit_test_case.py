@@ -553,7 +553,8 @@ class LC3UnitTestCase(unittest.TestCase):
 
         Args:
             subroutine: String - Label pointing at the start of the subroutine.
-            params: List of Integer - Parameters to the subroutine.
+            params: List of Integer - (LC-3 Calling Convention Style) Parameters to the subroutine
+                    Dict of Integer to Integer - (Pass by Register Style) Map of Register number to value.
             optional: Mark this as a optional subroutine call, if this subroutine call is found it is not checked.
         """
         self._addSubroutineInfo(subroutine, len(params))

@@ -402,6 +402,7 @@ typedef struct lc3_subroutine_call
 /** Record of active subroutine call info for each call made */
 typedef struct lc3_subroutine_call_info
 {
+	lc3_subroutine_call_info() : regs(8) {}
     unsigned short address;
     unsigned short r6;
     std::vector<unsigned short> params;
@@ -410,7 +411,7 @@ typedef struct lc3_subroutine_call_info
     // For availability in pylc3 equality operator must be defined.
     bool operator==(const lc3_subroutine_call_info& other) const
     {
-        return address == other.address && r6 == other.r6 && params == other.params;
+        return address == other.address && r6 == other.r6 && params == other.params && regs == other.regs;
     }
 
 } lc3_subroutine_call_info;
