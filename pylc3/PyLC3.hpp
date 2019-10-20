@@ -5,6 +5,12 @@
 #include <sstream>
 #include <lc3_all.hpp>
 
+enum MemoryFillStrategy {
+    fill_with_value = 0,
+    single_random_value_fill = 1,
+    completely_random = 2
+};
+
 /** A simple wrapper around lc3_state struct to bind to python. */
 class LC3State
 {

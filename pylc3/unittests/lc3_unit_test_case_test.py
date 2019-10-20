@@ -1,3 +1,4 @@
+from .. import pylc3
 import lc3_unit_test_case
 import unittest
 import six
@@ -13,7 +14,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.state.loadCode(snippet)
 
     def testInit(self):
-        self.init(lc3_unit_test_case.MemoryFillStrategy.fill_with_value, 0x8000)
+        self.init(pylc3.MemoryFillStrategy.fill_with_value, 0x8000)
         self.assertEqual(self._readMem(0x3005) & 0xFFFF, 0x8000)
 
     def testLoadFailed(self):
@@ -275,7 +276,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.runCode()
         self.assertHalted()
         self.assertNoWarnings()
-        
+
         # TODO rename.
         self.assertAddress(0x3005, 2)
         self.assertAddress(0x3006, 3)
@@ -361,7 +362,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.fillNode(0x5050, next=[0x4000], data=32)
         self.assertEqual(self._readMem(0x5050), 0x4000)
         self.assertEqual(self._readMem(0x5051), 32)
-        
+
         # Binary tree node.
         self.fillNode(0x6000, next=[0x5000, 0x4000], data=102)
         self.assertEqual(self._readMem(0x6000), 0x5000)
@@ -373,7 +374,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertEqual(self._readMem(0x7000), 0x6000)
         self.assertEqual(self._readMem(0x7001), 0x5000)
         self.assertEqual(self._readMem(0x7002), 0x4000)
-        self.assertEqual(self._readMem(0x7003), 1382)        
+        self.assertEqual(self._readMem(0x7003), 1382)
 
     def testTrapCall(self):
         snippet = """
@@ -689,7 +690,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
                 ADD R4, R0, 0
                 JSR C
-    
+
                 ADD R0, R2, 0
                 LDR R2, R6, 0
                 ADD R0, R0, R2
@@ -1027,7 +1028,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
             TATA RET
         .end
         """
-        self.init(value=-1)
+        self.init(pylc3.MemoryFillStrategy.fill_with_value, -1)
         self.setTrueTraps(True)
         self.setInterrupts(True)
         self.setPluginsEnabled(True)

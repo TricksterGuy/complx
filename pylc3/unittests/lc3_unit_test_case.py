@@ -104,11 +104,6 @@ class PreconditionFlag(enum.Enum):
 
     end_of_preconditions = 0xff
 
-class MemoryFillStrategy(enum.Enum):
-    fill_with_value = 0
-    random_fill_with_seed = 1
-    completely_random_with_seed = 2
-
 class SubroutineCallMode(enum.Enum):
     lc3_calling_convention = 0
     pass_by_register = 1
@@ -208,23 +203,23 @@ class LC3UnitTestCase(unittest.TestCase):
         self.subroutine_specifications = dict()
 
 
-    def init(self, strategy=MemoryFillStrategy.fill_with_value, value=0):
+    def init(self, strategy, value):
         """Initializes LC3 state memory.
 
         Args:
             strategy: a MemoryFillStrategy telling how memory should be initialized.
-            value: Param for Memory Fill Strategy, either a fill value or random seed.
+            value: Parameter for Memory Fill Strategy, either a fill value or random seed.
         """
-        if strategy == MemoryFillStrategy.fill_with_value:
+        if strategy == pylc3.MemoryFillStrategy.fill_with_value:
             self.state.init(False, _toUShort(value))
-        elif strategy == MemoryFillStrategy.random_fill_with_seed:
+        elif strategy == pylc3.MemoryFillStrategy.single_random_value_fill:
             self.state.seed(value)
             self.state.init(False, self.state.random())
-        elif strategy == MemoryFillStrategy.completely_random_with_seed:
+        elif strategy == pylc3.MemoryFillStrategy.completely_random:
             self.state.seed(value)
             self.state.init(True)
 
-        self.preconditions.addEnvironment(PreconditionFlag.memory_strategy, strategy.value)
+        self.preconditions.addEnvironment(PreconditionFlag.memory_strategy, strategy)
         self.preconditions.addEnvironment(PreconditionFlag.memory_strategy_value, value)
 
     def loadAsmFile(self, file, lc3_version=0):
@@ -579,7 +574,7 @@ class LC3UnitTestCase(unittest.TestCase):
             assert self._subroutine_call_mode is None or self._subroutine_call_mode == SubroutineCallMode.pass_by_register, "Can't mix subroutine call styles in the same test."
             self._subroutine_call_mode = SubroutineCallMode.pass_by_register
         else:
-            assert 'Invalid Type for params. Expected (list or dict) Got: %s.' % type(params) 
+            assert 'Invalid Type for params. Expected (list or dict) Got: %s.' % type(params)
 
         set_to_add = self.expected_subroutines
         value = (subroutine, inner_value)
