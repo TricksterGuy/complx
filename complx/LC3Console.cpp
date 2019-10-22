@@ -1,6 +1,7 @@
-#include <wx/textctrl.h>
-#include <wx/string.h>
 #include <wx/app.h>
+#include <wx/textctrl.h>
+#include <wx/tokenzr.h>
+#include <wx/string.h>
 #include <sstream>
 #include "LC3Console.hpp"
 #include "LC3RunThread.hpp"
@@ -13,6 +14,36 @@ std::streambuf* oldcout;
 
 extern wxCriticalSection threadCS;
 extern lc3_state state;
+
+wxString PostProcess(const std::string& str)
+{
+    std::stringstream output;
+    wxStringTokenizer tokenizer(str, "\n");
+    while (tokenizer.HasMoreTokens())
+    {
+        wxString token = tokenizer.GetNextToken();
+        auto start = output.tellp();
+        bool carriage_return = false;
+        for (unsigned int i = 0; i < token.size(); i++)
+        {
+            if (token[i] == '\b')
+                output.seekp(-1, std::ios_base::cur);
+            else if (token[i] == '\r')
+            {
+                output.seekp(start);
+                carriage_return = true;
+            }
+            else
+                output.put(token[i]);
+        }
+
+        if (carriage_return)
+            output.seekp(0, std::ios_base::end);
+        output.put('\n');
+    }
+    return output.str();
+}
+
 
 /** complx_reader
   *
@@ -211,9 +242,9 @@ void LC3Console::Update()
     wxCriticalSectionLocker enter(threadCS);
     if (oss.tellp() != 0)
     {
-        (*output) << oss.str();
-        oss.seekp(0);
-        oss.str("");
+        if (output)
+            output->SetValue(PostProcess(oss.str()));
+
         if (!IsShown())
             Raise();
     }
