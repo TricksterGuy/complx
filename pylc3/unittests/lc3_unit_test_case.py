@@ -88,21 +88,82 @@ class PreconditionFlag(enum.Enum):
     string = 22
     # Sets console input
     input = 23
-    # Simulate a call to a subroutine (following lc-3 calling convention).
+    # Simulate a call to a subroutine following lc-3 calling convention.
     subroutine = 24
+    # Simulate a call to a trap or a subroutine using pass by register.
+    pass_by_regs = 25
     # Directly set an address to a value.
-    direct_set = 25
+    direct_set = 26
     # Directly set a string in memory.
-    direct_string = 26
+    direct_string = 27
     # Directly set an array in memory.
-    direct_array = 27
+    direct_array = 28
     # Set a node in memory.
     # Format (data) -> Leaf node (of linked list)
     # (next, data) -> Linked List
     # (left, right, data) -> Tree Node
-    node = 28
+    node = 29
+    # An arbitrary struct/record/tuple.
+    data = 30
 
     end_of_preconditions = 0xff
+
+class DataItem(enum.Enum):
+    # End of Data.
+    end_of_data = 0
+    # A single 16 bit integer representing a value, or memory address.
+    number = 1
+    # A null terminated string which each char being 16 bits.
+    string = 2
+    # An array of 16 bit integers.
+    array = 3
+    # An embedded data item.
+    data = 0xFF
+
+
+def tuple_to_data(t):
+    """Converts any tuple to a data item."""
+    assert isinstance(t, tuple), 'Param is not a tuple, type found: %s' % type(t)
+    l = list(t)
+    expanded = []
+    for item in l:
+        if isinstance(item, int):
+            expanded.append(DataItem.number)
+            expanded.append(item)
+        elif isinstance(item, str):
+            expanded.append(DataItem.string)
+            expanded.append(len(item))
+            expanded.append(item)
+        elif isinstance(item, list):
+            expanded.append(DataItem.array)
+            expanded.append(len(item))
+            expanded.append(item)
+        elif isinstance(item, tuple):
+            expanded.append(DataItem.data)
+            expanded.extend(tuple_to_data(item))
+            expanded.append(DataItem.end_of_data)
+    return expanded
+
+def tuple_to_data_spec(t):
+    """Converts any tuple to a data item specification."""
+    assert isinstance(t, tuple), 'Param is not a tuple, type found: %s' % type(t)
+    l = list(t)
+    expanded = []
+    for item in l:
+        if isinstance(item, int):
+            expanded.append(DataItem.number)
+        elif isinstance(item, str):
+            expanded.append(DataItem.string)
+            expanded.append(len(item))
+        elif isinstance(item, list):
+            expanded.append(DataItem.array)
+            expanded.append(len(item))
+        elif isinstance(item, tuple):
+            expanded.append(DataItem.data)
+            expanded.extend(tuple_to_data(item))
+            expanded.append(DataItem.end_of_data)
+    return expanded
+
 
 class SubroutineCallMode(enum.Enum):
     lc3_calling_convention = 0
@@ -162,7 +223,6 @@ class Preconditions(object):
     def encode(self):
         """Returns a base64 encoded string with the data."""
         return base64.b64encode(self._formBlob())
-
 
 
 class LC3UnitTestCase(unittest.TestCase):
@@ -234,6 +294,7 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         status = self.state.load(file, disable_plugins=not self.enable_plugins, process_debug_comments=False)
         assert not status, ('Unable to load file %s\nReason: %s' % (file, status))
+        assert self.state.lc3_version == lc3_version, ('File uses different lc3 version than grader version: %d expected: %d\n' % (self.state.lc3_version, lc3_version))
         self.setLC3Version(lc3_version)
 
     def loadPattObjAndSymFile(self, obj_file, sym_file):
@@ -330,7 +391,7 @@ class LC3UnitTestCase(unittest.TestCase):
         value = self.state.get_register(reg)
         return value if not unsigned else _toUShort(value)
 
-    def _writeReg(self, addr, value):
+    def _writeReg(self, reg, value):
         """Write a value to a register.
 
         Args:
@@ -338,7 +399,79 @@ class LC3UnitTestCase(unittest.TestCase):
             value: Integer - Value to write.
         """
         assert reg >= 0 and reg < 8, 'Invalid register number'
-        self.state.set_register(_toUShort(addr), value)
+        self.state.set_register(reg, value)
+
+    def _writeData(self, address, data):
+        """Writes arbitrary data.
+        """
+        def _writeDataInternal(address, dataitems, index=0):
+            i = index
+            while i < len(dataitems):
+                t = dataitems[i]
+                if t == DataItem.number:
+                    self._writeMem(address, dataitems[i + 1])
+                    address += 1
+                    i += 2
+                elif t == DataItem.string:
+                    length = dataitems[i + 1]
+                    string = dataitems[i + 2]
+                    for addr, elem in enumerate(string, address):
+                        self._writeMem(addr, ord(elem))
+                    self._writeMem(address + length, 0)
+                    address += length + 1
+                    i += 3
+                elif t == DataItem.array:
+                    length = dataitems[i + 1]
+                    array = dataitems[i + 2]
+                    for addr, elem in enumerate(array, address):
+                        self._writeMem(addr, elem)
+                    address += length
+                    i += 3
+                elif t == DataItem.data:
+                    address, i = _writeDataInternal(address, data, index=i)
+                    assert address != -1, 'No end of data segment found.'
+                elif t == DataItem.end_of_data:
+                    return address, i
+            return -1, -1
+        a, b = _writeDataInternal(address, tuple_to_data(data))
+        assert a == -1, 'Extra end of data segment found.'
+
+    def _readData(self, address, data):
+        def _readDataInternal(address, dataspec, index=0):
+            i = index
+            data = []
+            while i < len(dataspec):
+                t = dataspec[i]
+                if t == DataItem.number:
+                    data.append(self._readMem(address))
+                    address += 1
+                    i += 1
+                elif t == DataItem.string:
+                    length = dataspec[i + 1]
+                    string = []
+                    for addr in range(address, address + length + 1):
+                        string.append(six.unichr(self._readMem(addr, unsigned=True)))
+                    data.append(''.join(string))
+                    address += length + 1
+                    i += 2
+                elif t == DataItem.array:
+                    length = dataspec[i + 1]
+                    array = []
+                    for addr in range(address, address + length):
+                        array.append(self._readMem(addr))
+                    data.append(array)
+                    address += length
+                    i += 2
+                elif t == DataItem.data:
+                    inner_data, address, i = _readDataInternal(address, dataspec, index=i)
+                    data.append(inner_data)
+                    assert address != -1, 'No end of data segment found.'
+                elif t == DataItem.end_of_data:
+                    return tuple(data), address, i
+            return tuple(data), -1, -1
+        result, a, b = _readDataInternal(address, tuple_to_data_spec(data))
+        assert a == -1, 'Extra end of data segment found.'
+        return result
 
     def setLC3Version(self, version):
         """Sets the LC-3 Version.
@@ -513,29 +646,51 @@ class LC3UnitTestCase(unittest.TestCase):
     def callSubroutine(self, subroutine, params, r5=0xCAFE, r6=0xF000, r7=0x8000):
         """Sets the state to start executing a subroutine for the test.
 
-        Note that this follows the LC3 Calling Convention.
+        For lc-3 calling convention pass in a list of params.
+        For pass by register pass in a dict of register number to params.
 
         Args:
             subroutine: String - Label pointing at the start of the subroutine.
             params: List of Integer - (LC-3 Calling Convention Style) Parameters to the subroutine. If passing by registers this should be empty.
+            params: List of Integer - (LC-3 Calling Convention Style) Parameters to the subroutine
+                    Dict of Integer to Integer - (Pass by Register Style) Map of Register number to value. (Do not set R5-R7 in this dictionary).
             r5: Integer - Dummy value to store in r5 (frame pointer) for the test.
             r6: Integer - Dummy value to store in r6 (stack pointer) for the test.
             r7: Integer - Dummy value to store in r7 (return address) for the test.
         """
-		# TODO Have this function support pass by register semantics.
         self.state.pc = self._lookup(subroutine)
-        self.state.r5 = r5
+        if r5:
+            self.state.r5 = r5
         self.state.r7 = r7
         self.break_address = r7
         self.state.add_breakpoint(r7)
 
-        self.state.r6 = r6 - len(params)
-        for addr, param in enumerate(params, self.state.r6):
-            self._writeMem(addr, param)
-        self.state.add_subroutine_info(subroutine, len(params))
-
+        if isinstance(params, list):
+            self.state.r6 = r6 - len(params)
+            for addr, param in enumerate(params, self.state.r6):
+                self._writeMem(addr, param)
+            self.state.add_subroutine_info(subroutine, len(params))
+            assert self._subroutine_call_mode is None or self._subroutine_call_mode == SubroutineCallMode.lc3_calling_convention, "Can't mix subroutine call styles in the same test."
+            self._subroutine_call_mode = SubroutineCallMode.lc3_calling_convention
+            self.preconditions.addPrecondition(PreconditionFlag.subroutine, subroutine, [r5, r6, r7] + params)
+        elif isinstance(params, dict):
+            self.state.r6 = r6
+            assert 5 not in params, 'R5 present in params list in pass by register mode, use kwarg r5 instead.'
+            assert 6 not in params, 'R6 present in params list in pass by register mode, use kwarg r6 instead.'
+            assert 7 not in params, 'R7 present in params list in pass by register mode, use kwarg r7 instead.'
+            for register, value in params.items():
+                self._writeReg(register, value)
+            self.subroutine_specifications[subroutine] = params.keys()
+            if r5:
+                params[5] = r5
+            params[6] = r6
+            params[7] = r7
+            assert self._subroutine_call_mode is None or self._subroutine_call_mode == SubroutineCallMode.pass_by_register, "Can't mix subroutine call styles in the same test."
+            self._subroutine_call_mode = SubroutineCallMode.pass_by_register
+            self.preconditions.addPrecondition(PreconditionFlag.pass_by_regs, subroutine, params)
         self.preconditions.addEnvironment(PreconditionFlag.break_address, r7)
-        self.preconditions.addPrecondition(PreconditionFlag.subroutine, subroutine, [r5, r6, r7] + params)
+
+    # TODO Add callTrap, support both lc-3 and the 2019 revision.
 
     def expectSubroutineCall(self, subroutine, params, optional=False):
         """Expects that a subroutine call was made with parameters.
@@ -754,6 +909,33 @@ class LC3UnitTestCase(unittest.TestCase):
 
         self.preconditions.addPrecondition(PreconditionFlag.node, '%04x' % address, node_data)
 
+    def fillData(self, address, data):
+        """Sets an arbitrary data structure/struct/record at the address given.
+
+        Argument data should contain a tuple with any of the following data types
+            An Integer
+            A List of Integers
+            A String
+            Another Tuple following the above structure
+
+        This exactly performs:
+
+        *NOTICE* It is an error to call this function on an labelled address.
+
+        This function is intended to dump a set of related data out in memory.
+
+        It is *greatly* preferred to use this function over fillValue/fillString/fillArray to improve tooling in the future.
+
+        Args:
+            address: Short - Address to set.
+            data: Tuple - Node data.
+        """
+        label = self.state.reverse_lookup(address)
+        if label:
+            raise ValueError('fillData is not to be used on a labelled address.')
+        self._writeData(address, data)
+        #self.preconditions.addPrecondition(PreconditionFlag.data, '%04x' % address, data)
+
     def _addSubroutineInfo(self, subroutine, num_params):
         """Adds metadata for a subroutine.
 
@@ -928,6 +1110,25 @@ class LC3UnitTestCase(unittest.TestCase):
         expected_str.append(u'\0')
         self.assertEqual(expected_str, actual_str, 'String of characters starting at MEM[%s] was expected to be %s but code produced %s\n%s' % (label, repr(''.join(expected_str)), repr(''.join(actual_str)), self.replay_msg))
 
+    def assertData(self, address, named_tuple, field_names=None):
+        """Asserts that an arbitrary data structure starting at the address given is a certain value
+
+        Args:
+            address: - Address of where the data is located
+            named_tuple: A NamedTuple describing the data and its contents
+                         or a tuple with the contents.
+            field_names: If a tuple is given for named_tuple a description of the fields in the tuple.
+        """
+        def _cstringify_values(l):
+            return [six.u(d) + u'\0' if isinstance(d, str) else d for d in l]
+
+        label = self.state.reverse_lookup(address)
+        if label:
+            raise ValueError('assertData is not to be used on a labelled address.')
+        actual = named_tuple._make(self._readData(address, named_tuple))
+        expected = named_tuple._make(_cstringify_values(list(named_tuple)))
+        self.assertEqual(expected, actual)
+
     def assertConsoleOutput(self, output):
         """Asserts that console output is a certain string.
 
@@ -1005,7 +1206,6 @@ class LC3UnitTestCase(unittest.TestCase):
                     params = ', '.join(['R%d=(%d x%04x)' % (reg, value, _toUShort(value)) for reg, value in params_pairs])
                     subr_strs.append('%s(%s)' % (name, params) if params else trap_name)
                 return ' '.join(subr_strs)
-
 
         actual_subroutines = set()
         for call in self.state.first_level_calls:

@@ -1,8 +1,11 @@
 from .. import pylc3
-import lc3_unit_test_case
-import unittest
-import six
+import collections
 import os
+import six
+import unittest
+import lc3_unit_test_case
+from lc3_unit_test_case import DataItem
+
 
 
 # Note this file is not to be used as a template for writing student tests.
@@ -376,6 +379,93 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertEqual(self._readMem(0x7002), 0x4000)
         self.assertEqual(self._readMem(0x7003), 1382)
 
+    def testFillData(self):
+        snippet = """
+        .orig x3000
+            ;@plugin filename=lc3_udiv vector=x80
+            ;@plugin filename=lc3_multiply
+            LD R0, STUDENT_DATA
+            PUTS
+
+            CHECK LDR R7, R0, 0
+            BRZ DONE
+            ADD R0, R0, 1
+            BR CHECK
+            DONE ADD R2, R0, 1
+
+            LDR R3, R2, 0 ; num tests
+            LDR R4, R2, 1 ; num hws
+            ADD R2, R2, 2
+            AND R0, R0, 0
+            ADD_TEST LDR R5, R2, 0
+            ADD R0, R0, R5
+            ADD R2, R2, 1
+            ADD R3, R3, -1
+            BRP ADD_TEST
+            LD R1, TEST_FACTOR
+            MUL R0, R0, R1
+            ADD R6, R0, 0
+            AND R0, R0, 0
+            ADD_HW LDR R5, R2, 0
+            ADD R0, R0, R5
+            ADD R2, R2, 1
+            ADD R4, R4, -1
+            BRP ADD_HW
+            LD R1, HW_FACTOR
+            MUL R0, R0, R1
+            ADD R0, R0, R6
+            LD R1, HUNNIT
+            UDIV
+            STR R0, R2, 0
+            HALT
+            ; NAME
+            ; TEST GRADES
+            ; HW GRADES
+            STUDENT_DATA .fill x4000
+            TEST_FACTOR .fill 10 ; 10 * 3 = 30
+            HW_FACTOR .fill 14 ; 14 * 5 = 70
+            HUNNIT .fill 100
+        .end
+        """
+        self.loadCode(snippet)
+        # struct Student {
+        #   char* name;
+        #   short num_tests;
+        #   short num_homeworks;
+        #   short tests[];
+        #   short homeworks[];
+        # }
+        self.fillData(0x4000, ("Student", 3, 5, [100, 75, 80], [100, 50, 80, 60, 100]))
+
+        # Sanity Checks
+        self.assertEqual(self._readMem(0x4000), ord('S')) # name = Student
+        self.assertEqual(self._readMem(0x4001), ord('t'))
+        self.assertEqual(self._readMem(0x4002), ord('u'))
+        self.assertEqual(self._readMem(0x4003), ord('d'))
+        self.assertEqual(self._readMem(0x4004), ord('e'))
+        self.assertEqual(self._readMem(0x4005), ord('n'))
+        self.assertEqual(self._readMem(0x4006), ord('t'))
+        self.assertEqual(self._readMem(0x4007), 0)
+        self.assertEqual(self._readMem(0x4008), 3) # num_tests = 3
+        self.assertEqual(self._readMem(0x4009), 5) # num_homeworks = 5
+        self.assertEqual(self._readMem(0x400A), 100) # tests[3] = {100, 75, 80}
+        self.assertEqual(self._readMem(0x400B), 75)
+        self.assertEqual(self._readMem(0x400C), 80)
+        self.assertEqual(self._readMem(0x400D), 100) # homeworks[5] = {100, 50, 80, 60, 100)
+        self.assertEqual(self._readMem(0x400E), 50)
+        self.assertEqual(self._readMem(0x400F), 80)
+        self.assertEqual(self._readMem(0x4010), 60)
+        self.assertEqual(self._readMem(0x4011), 100)
+
+        self.runCode()
+
+        self.assertHalted()
+        self.assertNoWarnings()
+
+        Student = collections.namedtuple('Student', ['name', 'num_tests', 'num_homeworks', 'tests', 'homeworks', 'grade'])
+        expected = Student('Student', 3, 5, [100, 75, 80], [100, 50, 80, 60, 100], 80)
+        self.assertData(0x4000, expected)
+
     def testTrapCall(self):
         snippet = """
         ;@plugin filename=lc3_udiv vector=x80
@@ -498,11 +588,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         .end
         """
         self.loadCode(snippet)
-        self.setRegister(0, 7)
-        self.setRegister(1, 81)
-        self.setRegister(2, 123)
-        self.callSubroutine("MYADD", [], r5=0xCAFE, r6=0xF000, r7=0x8000)
-        # self.callSubroutine("MYADD", params={0:7, 1:81, 2:123}, r5=0xCAFE, r6=0xF000, r7=0x8000)
+        self.callSubroutine("MYADD", {0: 7, 1: 81, 2: 123}, r5=0xCAFE, r6=0xF000, r7=0x8000)
 
         # Sanity checks
         self.assertEqual(self.state.pc, 0x4000)
@@ -742,10 +828,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
            .end
         """
         self.loadCode(snippet)
-        self.setRegister(0, 3)
-        self.setRegister(1, 5)
-        self.setRegister(2, 7)
-        self.callSubroutine("A", params=[], r5=0xCAFE, r6=0xF000, r7=0x8000)
+        self.callSubroutine("A", params={0: 3, 1: 5, 2: 7}, r5=0xCAFE, r6=0xF000, r7=0x8000)
         # For assertSubroutineCallMade.
         self.expectSubroutineCall("B", params={3: 3, 4: 5})
         self.expectSubroutineCall("B", params={3: 3, 4: 7})
@@ -1071,17 +1154,36 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
                     '\x16\x04\x00\x00\x00PAPA\x04\x00\x00\x00M\x00A\x00M\x00A\x00'
                     '\x17\x00\x00\x00\x00\x06\x00\x00\x00R\x00A\x00H\x00R\x00A\x00H\x00'
                     '\x18\x04\x00\x00\x00TATA\x06\x00\x00\x00\x05\x00@@\x00\x80\x02\x00\x05\x00\x07\x00'
-                    '\x19\x04\x00\x00\x008000\x01\x00\x00\x00!\x00'
-                    '\x1A\x04\x00\x00\x009000\x04\x00\x00\x00V\x00A\x00V\x00A\x00'
-                    '\x1B\x04\x00\x00\x00a000\x03\x00\x00\x00\x01\x00 \x00\xd9\x02'
-                    '\x1C\x04\x00\x00\x00b000\x01\x00\x00\x00\"\x00'
-                    '\x1C\x04\x00\x00\x00b020\x02\x00\x00\x00\x00\xb08\x00'
-                    '\x1C\x04\x00\x00\x00b050\x05\x00\x00\x00\x00\xb0\x01\xb0\x02\xb0\x03\xb0H\x00'
+                    '\x1A\x04\x00\x00\x008000\x01\x00\x00\x00!\x00'
+                    '\x1B\x04\x00\x00\x009000\x04\x00\x00\x00V\x00A\x00V\x00A\x00'
+                    '\x1C\x04\x00\x00\x00a000\x03\x00\x00\x00\x01\x00 \x00\xd9\x02'
+                    '\x1D\x04\x00\x00\x00b000\x01\x00\x00\x00\"\x00'
+                    '\x1D\x04\x00\x00\x00b020\x02\x00\x00\x00\x00\xb08\x00'
+                    '\x1D\x04\x00\x00\x00b050\x05\x00\x00\x00\x00\xb0\x01\xb0\x02\xb0\x03\xb0H\x00'
                     '\xff')
 
         self.assertEqual(blob, expected_blob)
 
         #print self.preconditions.encode()
+
+    # -----------------------------------
+    # ---- Internal tests begin here ----
+    # -----------------------------------
+    def testTupleToData(self):
+        data = lc3_unit_test_case.tuple_to_data((1,))
+        self.assertEqual(data, [DataItem.number, 1])
+
+        data = lc3_unit_test_case.tuple_to_data(("LOL",))
+        self.assertEqual(data, [DataItem.string, 3, "LOL"])
+
+        data = lc3_unit_test_case.tuple_to_data(([1, 2, 3],))
+        self.assertEqual(data, [DataItem.array, 3, [1, 2, 3]])
+
+        data = lc3_unit_test_case.tuple_to_data((("LOL",),))
+        self.assertEqual(data, [DataItem.data, DataItem.string, 3, "LOL", DataItem.end_of_data])
+
+        data = lc3_unit_test_case.tuple_to_data(("Some Student", 76, [100, 52]))
+        self.assertEqual(data, [DataItem.string, 12, "Some Student", DataItem.number, 76, DataItem.array, 2, [100, 52]])
 
 
 if __name__ == '__main__':
