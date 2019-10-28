@@ -1,6 +1,6 @@
 """Module defining the lc3 unit test case class and utilities.
 
-The main class is LC3UnitTestCase and is indeeded to be used as a base for a python unit test on student code.
+The main class is LC3UnitTestCase and is intended to be used as a base for a python unit test on student code.
 
 The class keeps track of the preconditions and environment set on the LC3State before the code is ran.
 Then when things are checked on the LC3State if any assertion fails a replay string is generated so students,
@@ -14,10 +14,10 @@ The replay strings produced are only populated with data from calling the method
 modifications to the LC3State object are done directly and not through the LC3UnitTestCase class will not be
 recorded leading to a frustrating debugging experience.
 
-To see an example of an LC3UnitTestCase please see
-https://gist.github.com/TricksterGuy/f1e9e1c73dff231febe6d102345481e6
+For examples and demos of real live test and assembly code that passes them see
+https://github.com/TricksterGuy/pylc3-examples
 """
-# TODO make a sample test and get it checked into the demos folder.
+
 import base64
 import enum
 from .. import pylc3
@@ -51,6 +51,7 @@ def _toShort(value):
     """
     value = _toUShort(value)
     return value if value < 32767 else value - 65536
+
 
 class PreconditionFlag(enum.Enum):
     invalid = 0
@@ -107,6 +108,7 @@ class PreconditionFlag(enum.Enum):
     data = 30
 
     end_of_preconditions = 0xff
+
 
 class DataItem(enum.Enum):
     # End of Data.
@@ -166,8 +168,10 @@ def tuple_to_data_spec(t):
 
 
 class SubroutineCallMode(enum.Enum):
+    """Internal Enum to ensure subroutine call conventions are consistent."""
     lc3_calling_convention = 0
     pass_by_register = 1
+
 
 class Preconditions(object):
     """Represents the setup environment for a test case for replay.
@@ -261,7 +265,6 @@ class LC3UnitTestCase(unittest.TestCase):
         # Subroutine specifications. Dict of String to List of interested registers. Only for SubroutineCallMode.pass_by_register.
         self._subroutine_call_mode = None
         self.subroutine_specifications = dict()
-
 
     def init(self, strategy, value):
         """Initializes LC3 state memory.
@@ -737,7 +740,6 @@ class LC3UnitTestCase(unittest.TestCase):
             set_to_add = self.optional_subroutines
 
         assert value not in set_to_add, 'Duplicate subroutine found %s, multiple copies of [subroutine, params] is not supported.' % value
-
         set_to_add.add(value)
 
         assert not (value in self.expected_subroutines and value in self.optional_subroutines), 'Subroutine %s found in both expected and optional subroutine calls.' % value
@@ -799,7 +801,7 @@ class LC3UnitTestCase(unittest.TestCase):
         self.preconditions.addPrecondition(PreconditionFlag.direct_set, '%04x' % address, value)
 
     def fillString(self, address, text):
-        """Sets a sequence of characters followed by a NUL terminator starting at the addresss given.
+        """Sets a sequence of characters followed by a NUL terminator starting at the address given.
 
         This exactly performs:
             state.memory[address] = text[0]
@@ -882,10 +884,10 @@ class LC3UnitTestCase(unittest.TestCase):
 
         Args:
             address: Short - Address to set.
-            next_info: 1) None to indicate leaf node or last node.
+            next_info: 1) None to indicate leaf node or last node. (Note only one 0 is written in this case).
                        2) Short - Next address.
                        3) Iterable of Shorts - Next addresses.
-            data: Short - Node data.
+            data: Tuple - Node data. (See fillData for a more detailed description on the tuple's contents.)
         """
         label = self.state.reverse_lookup(address)
         if label:
@@ -905,9 +907,10 @@ class LC3UnitTestCase(unittest.TestCase):
             size_next = len(next)
             node_data = next + [data]
 
-        self._writeMem(address + size_next, data)
+        self._writeData(address + size_next, data)
 
-        self.preconditions.addPrecondition(PreconditionFlag.node, '%04x' % address, node_data)
+        # TODO write preconditions.
+        #self.preconditions.addPrecondition(PreconditionFlag.node, '%04x' % address, node_data)
 
     def fillData(self, address, data):
         """Sets an arbitrary data structure/struct/record at the address given.
@@ -934,6 +937,7 @@ class LC3UnitTestCase(unittest.TestCase):
         if label:
             raise ValueError('fillData is not to be used on a labelled address.')
         self._writeData(address, data)
+        # TODO write preconditions.
         #self.preconditions.addPrecondition(PreconditionFlag.data, '%04x' % address, data)
 
     def _addSubroutineInfo(self, subroutine, num_params):
@@ -968,21 +972,27 @@ class LC3UnitTestCase(unittest.TestCase):
         """Assert that the code successfully returned from a subroutine call.
 
         This is achieved by hitting the breakpoint set at r7 when callSubroutine was called.
+        This function should only be used if callSubroutine/callTrap was called.
         """
         assert self.break_address is not None, "self.assertReturned() should only be used when a previous call to self.callSubroutine() was made."
         instruction = self.state.disassemble(self.state.pc, 1)
         malformed = '*' in instruction
         failure_msg = 'Code did not return from subroutine correctly.\n'
-        failure_msg += 'This was due to executing data which was interpreted to a malformed instruction.\n' if malformed else ''
-        failure_msg += 'This was probably due to an infinite loop in the code.\n' if not malformed else ''
+        if malformed:
+            failure_msg += 'This was due to executing data which was interpreted to a malformed instruction.\n'
+        elif instruction == 'HALT':
+            failure_msg += 'This was due to the code reaching a HALT statement unexpectedly.\n'
+        else:
+            failure_msg += 'This was probably due to an infinite loop in the code.\n'
         failure_msg += 'This may indicate that your handling of the stack is incorrect or that R7 was clobbered.\n'
-        failure_msg += 'PC: x%04x\nInstruction last on: %s\n%s' % (self.state.pc, instruction, self.replay_msg)
+        failure_msg += 'PC: x%04x\nExecuted: %d instructions\nInstruction last on: %s\n%s' % (self.state.pc, self.state.executions, instruction, self.replay_msg)
         self.assertShortEqual(self.state.pc, self.break_address, failure_msg)
 
     def assertHalted(self):
         """Asserts that the LC3 has been halted normally.
 
         This is achieved by reaching a HALT statement or if true_traps is set and the MCR register's 15 bit is set.
+        This function should not be called if callSubroutine/callTrap was called instead use assertReturned.
         """
         assert self.break_address is None, "self.callSubroutine was previously used in this test, a call to assertReturned() should be made instead of assertHalted()."
         # Don't use self.state.halted here as that is set if a Malformed instruction is executed.
@@ -991,7 +1001,7 @@ class LC3UnitTestCase(unittest.TestCase):
         failure_msg = 'Code did not halt normally.\n'
         failure_msg += 'This was due to executing data which was interpreted to a malformed instruction.\n' if malformed else ''
         failure_msg += 'This was probably due to an infinite loop in the code.\n' if not malformed else ''
-        failure_msg += 'PC: x%04x\nInstruction last on: %s\n%s' % (self.state.pc, instruction, self.replay_msg)
+        failure_msg += 'PC: x%04x\nExecuted: %d instructions\nInstruction last on: %s\n%s' % (self.state.pc, self.state.executions, instruction, self.replay_msg)
         if self.true_traps:
             self.assertEqual(state.get_memory(0xFFFE) >> 15 & 1, 0, failure_msg)
         else:
@@ -1122,12 +1132,22 @@ class LC3UnitTestCase(unittest.TestCase):
         def _cstringify_values(l):
             return [six.u(d) + u'\0' if isinstance(d, str) else d for d in l]
 
+        def assertDataHelper(t1, t2, fields):
+            failure_msg = 'Data starting at MEM[%s] was not equal.\nNon equal fields below.\n-----------------------\n'
+            if fields is None:
+                fields = ['Item %d' % i for i in range(len(t2))]
+            for v1, v2, field in zip(t1, t2, fields):
+                if v1 != v2:
+                    failure_msg += 'Data field: %s was not equal. expected: %s actual: %s\n' % (field, v1, v2)
+            failure_msg += self.replay_msg
+            self.assertEqual(expected, actual, failure_msg)
+
         label = self.state.reverse_lookup(address)
         if label:
             raise ValueError('assertData is not to be used on a labelled address.')
         actual = named_tuple._make(self._readData(address, named_tuple))
         expected = named_tuple._make(_cstringify_values(list(named_tuple)))
-        self.assertEqual(expected, actual)
+        assertDataHelper(expected, actual, field_names or (named_tuple._fields if hasattr(named_tuple, '_fields') else None))
 
     def assertConsoleOutput(self, output):
         """Asserts that console output is a certain string.
