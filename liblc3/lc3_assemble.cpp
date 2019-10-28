@@ -940,6 +940,38 @@ bool lc3_assemble_hexadecimal_writer(const std::string& filename, const lc3_stat
     return true;
 }
 
+bool lc3_assemble_full_writer(const std::string& filename, lc3_state& state, const std::vector<code_range>& ranges)
+{
+    std::string obj_file = filename + ".txt";
+    std::ofstream obj(obj_file.c_str(), std::ios::binary);
+    if (!obj.good())
+        return false;
+
+    unsigned short pc = state.pc;
+    for (const auto& range : ranges)
+    {
+        if (range.size == 0)
+            continue;
+
+        for (unsigned int j = 0; j < range.size; j++)
+        {
+            unsigned short address = range.location + j;
+            state.pc = address + 1;
+            short data = state.mem[range.location + j];
+            unsigned short udata = static_cast<unsigned short>(data);
+            obj << "x" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << address << std::nouppercase << "\t";
+            obj << "x" << std::hex << std::uppercase << std::setw(4) << udata << std::dec << std::nouppercase << std::setfill(' ') << "\t";
+            obj << std::setw(6) << data << "\t";
+            obj << std::bitset<16>(udata) << "\t";
+            obj << lc3_sym_rev_lookup(const_cast<lc3_state&>(state), address) << "\t";
+            obj << lc3_disassemble(const_cast<lc3_state&>(state), udata, 1) << std::endl;
+        }
+    }
+    state.pc = pc;
+
+    return true;
+}
+
 bool lc3_assemble(const std::string& filename, const std::string& output_prefix, const LC3AssembleOptions& options)
 {
     lc3_state state;
@@ -963,12 +995,19 @@ bool lc3_assemble(const std::string& filename, const std::string& output_prefix,
         }
     }
 
-    auto writer = (options.output_mode == LC3AssembleOptions::OBJECT_FILE) ? lc3_assemble_object_writer :
-                  (
-                      (options.output_mode == LC3AssembleOptions::BINARY_FILE) ? lc3_assemble_binary_writer : lc3_assemble_hexadecimal_writer
-                  );
-
-    return writer(prefix, state, ranges);
+    switch (options.output_mode)
+    {
+        case LC3AssembleOptions::OBJECT_FILE:
+            return lc3_assemble_object_writer(prefix, state, ranges);
+        case LC3AssembleOptions::BINARY_FILE:
+            return lc3_assemble_binary_writer(prefix, state, ranges);
+        case LC3AssembleOptions::HEXADECIMAL_FILE:
+            return lc3_assemble_hexadecimal_writer(prefix, state, ranges);
+        case LC3AssembleOptions::FULL_REPRESENTATION_FILE:
+            return lc3_assemble_full_writer(prefix, state, ranges);
+        default:
+            return lc3_assemble_object_writer(prefix, state, ranges);
+    }
 }
 
 /** process_plugin_info

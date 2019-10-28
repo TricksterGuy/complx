@@ -611,7 +611,7 @@ std::string lc3_smart_disassemble(lc3_state& state, unsigned short data);
 /** lc3_disassemble
   *
   * Entry function for disassembling instructions.
-  * If state.strict_execution is enabled will append a ! at the end of the instruction.
+  * If state.strict_execution is enabled will append a * at the end of the instruction.
   *
   * @param state LC3State object.
   * @param data Instruction data.

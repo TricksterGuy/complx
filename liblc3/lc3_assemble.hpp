@@ -108,6 +108,8 @@ struct LC3AssembleOptions
         BINARY_FILE = 1,
         // Machine language ASCII in hex.
         HEXADECIMAL_FILE = 2,
+        // Output data in all formats.
+        FULL_REPRESENTATION_FILE = 3,
     };
     // Only for calls to lc3_assemble that produce file output.
     OutputMode output_mode = OBJECT_FILE;

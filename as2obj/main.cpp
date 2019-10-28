@@ -11,7 +11,7 @@ int main(int argc, char** argv)
     if (argc < 2)
     {
 usage:
-        printf("Usage: as2obj [-all_errors] [-disable_plugins] [-hex|-bin] [asmfile] [output_file_prefix]\n");
+        printf("Usage: as2obj [-all_errors] [-disable_plugins] [-hex|-bin|-full] [asmfile] [output_file_prefix]\n");
         abort();
     }
 
@@ -31,6 +31,8 @@ usage:
             options.output_mode = LC3AssembleOptions::HEXADECIMAL_FILE;
         else if (arg == "-bin")
             options.output_mode = LC3AssembleOptions::BINARY_FILE;
+        else if (arg == "-full")
+            options.output_mode = LC3AssembleOptions::FULL_REPRESENTATION_FILE;
         else if (arg[0] == '-') {
             printf("Invalid option %s given.\n", argv[i]);
             goto usage;
