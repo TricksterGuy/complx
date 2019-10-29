@@ -363,8 +363,12 @@ void lc3_back(lc3_state& state)
         {
             if (!state.call_stack.empty())
                 state.call_stack.pop_back();
-            if (changes.subroutine.is_trap && state.lc3_version != 0 && !state.rti_stack.empty())
-                state.rti_stack.pop_back();
+            if (changes.subroutine.is_trap && state.lc3_version != 0)
+            {
+                if (!state.rti_stack.empty())
+                    state.rti_stack.pop_back();
+                state.regs[0x6] = changes.subroutine.r6;
+            }
         }
         else if (changes.changes == LC3_SUBROUTINE_END)
         {

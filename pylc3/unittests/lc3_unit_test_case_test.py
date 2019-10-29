@@ -349,31 +349,31 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         # like so due to this since the fill will happen *after* the code is assembled and loaded.  In either case even
         # if this replacement was still done before assembling data after the label could cause code not to assemble.
         with self.assertRaises(ValueError):
-            self.fillNode(0x3000, next=None, data=3)
+            self.fillNode(0x3000, next=None, data=(3,))
 
         # Ending node of linkedlist if you want.
-        self.fillNode(0x4000, next=None, data=27)
+        self.fillNode(0x4000, next=None, data=(27,))
         self.assertEqual(self._readMem(0x4000), 0)
         self.assertEqual(self._readMem(0x4001), 27)
 
         # Linkedlist node.
-        self.fillNode(0x5000, next=0x4000, data=32)
+        self.fillNode(0x5000, next=0x4000, data=(32,))
         self.assertEqual(self._readMem(0x5000), 0x4000)
         self.assertEqual(self._readMem(0x5001), 32)
 
         # Still a Linkedlist node.
-        self.fillNode(0x5050, next=[0x4000], data=32)
+        self.fillNode(0x5050, next=[0x4000], data=(32,))
         self.assertEqual(self._readMem(0x5050), 0x4000)
         self.assertEqual(self._readMem(0x5051), 32)
 
         # Binary tree node.
-        self.fillNode(0x6000, next=[0x5000, 0x4000], data=102)
+        self.fillNode(0x6000, next=[0x5000, 0x4000], data=(102,))
         self.assertEqual(self._readMem(0x6000), 0x5000)
         self.assertEqual(self._readMem(0x6001), 0x4000)
         self.assertEqual(self._readMem(0x6002), 102)
 
         # What the heck a ternary tree node or maybe a skiplist node, its up to your imagination.
-        self.fillNode(0x7000, next=[0x6000, 0x5000, 0x4000], data=1382)
+        self.fillNode(0x7000, next=[0x6000, 0x5000, 0x4000], data=(1382,))
         self.assertEqual(self._readMem(0x7000), 0x6000)
         self.assertEqual(self._readMem(0x7001), 0x5000)
         self.assertEqual(self._readMem(0x7002), 0x4000)
@@ -1129,9 +1129,9 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.fillValue(0x8000, 33)
         self.fillString(0x9000, "VAVA")
         self.fillArray(0xA000, [1, 32, 729])
-        self.fillNode(0xB000, next=None, data=34)
-        self.fillNode(0xB020, next=0xB000, data=56)
-        self.fillNode(0xB050, next=[0xB000, 0xB001, 0xB002, 0xB003], data=72)
+        self.fillNode(0xB000, next=None, data=(34,))
+        self.fillNode(0xB020, next=0xB000, data=(56,))
+        self.fillNode(0xB050, next=[0xB000, 0xB001, 0xB002, 0xB003], data=(72,))
 
         blob = self.preconditions._formBlob()
 

@@ -87,6 +87,7 @@ enum WARNINGS
     LC3_TURN_OFF_VIA_MCR = 11,
     LC3_PUTSP_INVALID_MEMORY = 12,
     LC3_PUTSP_UNEXPECTED_NUL = 13,
+    LC3_INVALID_PSR_VALUE = 14,
     LC3_WARNINGS               // Must be last.
 };
 
