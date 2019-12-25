@@ -806,7 +806,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         self.runCode(max_executions=110)
         self.assertPc(0x4000)
-        self.assertEqual(self.state.executions, 101)
+        self.assertEqual(self.state.executions, 102)
 
     def testLC3Version0(self):
         snippet = """
