@@ -53,6 +53,17 @@ def _toShort(value):
     return value if value < 32767 else value - 65536
 
 
+class AssertionType(enum.Enum):
+    # Hard assertions indicate fatal errors that can't be recovered from.
+    # Example. File failed to assemble.
+    hard = 0
+    # Soft assertions indicate a nonfatal error, such as an incorrect answer.
+    # They are logged and will increase error count.
+    soft = 1
+    # Warnings are also a type of soft assertion that doesn't increase error count.
+    warning = 2
+
+
 class PreconditionFlag(enum.Enum):
     invalid = 0
     # True Traps Setting Flag. Default OFF
@@ -1050,21 +1061,6 @@ class LC3UnitTestCase(unittest.TestCase):
         expected = _toShort(value)
         self.assertShortEqual(expected, actual, 'MEM[%s] was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (label, expected, _toUShort(expected), actual, _toUShort(actual), self.replay_msg))
 
-    def assertAddress(self, address, value):
-        """Asserts that a value at an address is a certain value.
-
-        This exactly checks if state.memory[address] == value
-        This is different from assertAddress as it doesn't require a label in the assembly code.
-
-        Args:
-            address: Short - Address to check.
-            value: Integer - Expected value.
-        """
-        address = _toUShort(address)
-        actual = self._readMem(address)
-        expected = _toShort(value)
-        self.assertShortEqual(expected, actual, 'MEM[x%04x] was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (address, expected, _toUShort(expected), actual, _toUShort(actual), self.replay_msg))
-
     def assertPointer(self, label, value):
         """Asserts that a value at an address pointed to by label is a certain value.
 
@@ -1119,6 +1115,21 @@ class LC3UnitTestCase(unittest.TestCase):
         expected_str = list(six.u(text))
         expected_str.append(u'\0')
         self.assertEqual(expected_str, actual_str, 'String of characters starting at MEM[%s] was expected to be %s but code produced %s\n%s' % (label, repr(''.join(expected_str)), repr(''.join(actual_str)), self.replay_msg))
+
+    def assertAddress(self, address, value):
+        """Asserts that a value at an address is a certain value.
+
+        This exactly checks if state.memory[address] == value
+        This is different from assertValue as it doesn't require a label in the assembly code.
+
+        Args:
+            address: Short - Address to check.
+            value: Integer - Expected value.
+        """
+        address = _toUShort(address)
+        actual = self._readMem(address)
+        expected = _toShort(value)
+        self.assertShortEqual(expected, actual, 'MEM[x%04x] was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (address, expected, _toUShort(expected), actual, _toUShort(actual), self.replay_msg))
 
     def assertData(self, address, named_tuple, field_names=None):
         """Asserts that an arbitrary data structure starting at the address given is a certain value

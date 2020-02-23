@@ -7,8 +7,8 @@ import lc3_unit_test_case
 from lc3_unit_test_case import DataItem
 
 
-
 # Note this file is not to be used as a template for writing student tests.
+# See https://github.com/TricksterGuy/pylc3-examples for example tests
 
 class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
