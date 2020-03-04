@@ -867,6 +867,36 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertStackManaged(stack=0xF000, return_address=0x8000, old_frame_pointer=0xCAFE)
         self.assertSubroutineCallsMade()
 
+    def testCallSubroutine(self):
+        snippet = """
+        .orig x3000
+            LD R6, STACK
+            LD R0, A
+            LD R1, B
+            ADD R6, R6, -2
+            STR R0, R6, 0
+            STR R1, R6, 1
+            JSR MYSTERY
+            ADD R6, R6, 3
+            HALT
+
+            MYSTERY
+                RET
+
+            A .blkw 1
+            B .blkw 1
+        .end
+        """
+        self.loadCode(snippet)
+        self.setValue("A", -2000)
+        self.setValue("B",-8)
+        self.expectSubroutineCall("MYSTERY", params=[-2000, -8])
+
+        self.runCode()
+        self.assertHalted()
+        self.assertNoWarnings()
+        self.assertSubroutineCallsMade()
+
     def testSubroutineCallWithOptionalNotTaken(self):
         snippet = """
         ;@plugin filename=lc3_multiply
