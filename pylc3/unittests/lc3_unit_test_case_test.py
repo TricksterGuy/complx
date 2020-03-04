@@ -885,6 +885,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
             A .blkw 1
             B .blkw 1
+            STACK .fill xF000
         .end
         """
         self.loadCode(snippet)
