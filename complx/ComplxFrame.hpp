@@ -52,7 +52,6 @@ public:
 
     // File menu event handlers
     void OnLoad(wxCommandEvent& event) override;
-    void OnCleanLoad(wxCommandEvent& event) override;
     void OnAdvancedLoad(wxCommandEvent& event) override;
     void OnReload(wxCommandEvent& event) override;
     void OnQuit(wxCommandEvent& event) override;

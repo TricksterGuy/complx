@@ -170,27 +170,6 @@ void ComplxFrame::OnLoad(wxCommandEvent& event)
     delete dialog;
 }
 
-
-/** OnCleanLoad
-  *
-  * Called when a file needs to be loaded with zero'd memory/registers.
-  */
-void ComplxFrame::OnCleanLoad(wxCommandEvent& event)
-{
-    if (Running()) return;
-    wxFileDialog* dialog = new wxFileDialog(NULL, _("Load .asm file"), wxEmptyString, wxEmptyString, _("LC-3 Assembly Files (*.asm)|*.asm"), wxFD_OPEN|wxFD_FILE_MUST_EXIST|wxFD_CHANGE_DIR);
-    if (dialog->ShowModal() == wxID_OK)
-    {
-        LoadingOptions opts;
-        opts.file = dialog->GetPath().ToStdString();
-        opts.memory = ZEROED;
-        opts.registers = ZEROED;
-        DoLoadFile(opts);
-    }
-
-    delete dialog;
-}
-
 void ComplxFrame::OnAdvancedLoad(wxCommandEvent& event)
 {
     if (Running()) return;
