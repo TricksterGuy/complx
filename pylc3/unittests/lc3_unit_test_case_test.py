@@ -470,10 +470,10 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         snippet = """
         ;@plugin filename=lc3_udiv vector=x80
         .orig x3000
-	        LD R0, A
-	        LD R1, B
-	        UDIV
-	        HALT
+                LD R0, A
+                LD R1, B
+                UDIV
+                HALT
             A .fill 2000
             B .fill 8
         .end
@@ -493,10 +493,10 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         snippet = """
         ;@plugin filename=lc3_udiv vector=x80
         .orig x3000
-	        LD R0, A
-	        LD R1, B
-	        UDIV
-	        HALT
+                LD R0, A
+                LD R1, B
+                UDIV
+                HALT
             A .fill -2000
             B .fill -8
         .end
@@ -593,7 +593,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
     def testSubroutineCallWithParamsInRegisters(self):
         snippet = """
         .orig x4000
-			; x in R0, y in R1, z in R2.
+            ;x in R0, y in R1, z in R2.
             ; ans in R0
             ; def MYADD(x, y, z):
             ;     return x + y + z
@@ -867,7 +867,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertStackManaged(stack=0xF000, return_address=0x8000, old_frame_pointer=0xCAFE)
         self.assertSubroutineCallsMade()
 
-    def testCallSubroutine(self):
+    def testCallSubroutineNegative(self):
         snippet = """
         .orig x3000
             LD R6, STACK
@@ -1211,9 +1211,9 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
                     '\x1A\x04\x00\x00\x008000\x01\x00\x00\x00!\x00'
                     '\x1B\x04\x00\x00\x009000\x04\x00\x00\x00V\x00A\x00V\x00A\x00'
                     '\x1C\x04\x00\x00\x00a000\x03\x00\x00\x00\x01\x00 \x00\xd9\x02'
-                    '\x1D\x04\x00\x00\x00b000\x01\x00\x00\x00\"\x00'
-                    '\x1D\x04\x00\x00\x00b020\x02\x00\x00\x00\x00\xb08\x00'
-                    '\x1D\x04\x00\x00\x00b050\x05\x00\x00\x00\x00\xb0\x01\xb0\x02\xb0\x03\xb0H\x00'
+                    #'\x1D\x04\x00\x00\x00b000\x01\x00\x00\x00\"\x00'
+                    #'\x1D\x04\x00\x00\x00b020\x02\x00\x00\x00\x00\xb08\x00'
+                    #'\x1D\x04\x00\x00\x00b050\x05\x00\x00\x00\x00\xb0\x01\xb0\x02\xb0\x03\xb0H\x00'
                     '\xff')
 
         self.assertEqual(blob, expected_blob)
