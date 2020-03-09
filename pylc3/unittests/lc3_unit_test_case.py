@@ -29,6 +29,11 @@ import unittest
 
 DEFAULT_MAX_EXECUTIONS = 1000000
 
+
+class LC3InternalAssertion(Exception):
+    pass
+
+
 def _toUShort(value):
     """Converts a value into a 16 bit unsigned short.
 
@@ -54,14 +59,17 @@ def _toShort(value):
 
 
 class AssertionType(enum.Enum):
-    # Hard assertions indicate fatal errors that can't be recovered from.
+    # Fatal assertions indicate fatal errors that can't be recovered from.
     # Example. File failed to assemble.
-    hard = 0
+    # Also used when an internal assertion fails.
+    fatal = 0
+    # Hard assertions indicate serious errors. The test will continue, but future assertions will automatically not be tested.
+    hard = 1
     # Soft assertions indicate a nonfatal error, such as an incorrect answer.
     # They are logged and will increase error count.
-    soft = 1
+    soft = 2
     # Warnings are also a type of soft assertion that doesn't increase error count.
-    warning = 2
+    warning = 3
 
 
 class PreconditionFlag(enum.Enum):
@@ -240,6 +248,43 @@ class Preconditions(object):
         return base64.b64encode(self._formBlob())
 
 
+class Postconditions(object):
+    """Represents the things checked at the end of the test
+    
+    Generates base64 string to verify the test in complx."""
+    def __init__(self):
+        # List of (PostconditionFlag, string label, num_params, params)
+        self._data = []
+
+    def _formBlob(self):
+        file = six.BytesIO()
+
+        for id, label, num_params, params in self._data:
+            label = six.b(label)
+
+            file.write(struct.pack('=B', id))
+            file.write(struct.pack('=I', len(label)))
+            file.write(struct.pack('=%ds' % len(label), label))
+            file.write(struct.pack('=I', num_params))
+            params = [param & 0xFFFF for param in params]
+            file.write(struct.pack('=%dH' % num_params, *params))
+
+        file.write(struct.pack('=B', 0xff))
+
+        blob = file.getvalue()
+        file.close()
+
+        return blob
+
+    def describe(self, include_environment=True):
+        """Returns a string describing the postconditions."""
+        return ""
+
+    def encode(self):
+        """Returns a base64 encoded string with the data."""
+        return base64.b64encode(self._formBlob())
+
+
 class LC3UnitTestCase(unittest.TestCase):
     """LC3UnitTestCase class eases testing of LC3 code from within python.
 
@@ -259,6 +304,7 @@ class LC3UnitTestCase(unittest.TestCase):
         self.state = pylc3.LC3State(testing_mode=True)
         self.break_address = None
         self.preconditions = Preconditions()
+        self.postconditions = Postconditions()
         self.enable_plugins = False
         self.true_traps = False
         # Registers values at the start of the test.
@@ -278,12 +324,14 @@ class LC3UnitTestCase(unittest.TestCase):
         self.subroutine_specifications = dict()
         self.passed_assertions = []
         self.failed_assertions = []
+        self._hard_failed = False
         self.warnings = []
 
     def tearDown(self):
         def form_failure_message():
-            return ''
-        #self.assertNonEmpty(self.failed_assertions, form_failure_message())
+            return 'The test failed due to the following checks that failed shown below:\n----\n%s%s' % ('\n'.join(['name: %s Reason: %s' % (name, msg) for name, msg in self.failed_assertions]), self.replay_msg)
+        if self.failed_assertions:
+            self.fail(form_failure_message())
         #self.form_json_test_report()
 
     def init(self, strategy, value):
@@ -305,6 +353,21 @@ class LC3UnitTestCase(unittest.TestCase):
         self.preconditions.addEnvironment(PreconditionFlag.memory_strategy, strategy)
         self.preconditions.addEnvironment(PreconditionFlag.memory_strategy_value, value)
 
+    def _internalAssert(self, name, cond, msg, level=AssertionType.soft, internal=False):
+        name = name if not internal else 'internal'
+        if self._hard_failed:
+            self.failed_assertions.append((name, 'Not checked due to previous failures.'))
+            return
+
+        if cond:
+            if not internal:
+                self.passed_assertions.append(name)
+        else:
+            if level == AssertionType.fatal:
+                raise LC3InternalAssertion(msg)
+            self.failed_assertions.append((name, msg))
+            self._hard_failed = self._hard_failed or level == AssertionType.hard
+
     def loadAsmFile(self, file, lc3_version=0):
         """Loads an assembly file.
 
@@ -316,8 +379,8 @@ class LC3UnitTestCase(unittest.TestCase):
             lc3_version: Integer - which version of the LC-3 to use.
         """
         status = self.state.load(file, disable_plugins=not self.enable_plugins, process_debug_comments=False)
-        assert not status, ('Unable to load file %s\nReason: %s' % (file, status))
-        assert self.state.lc3_version == lc3_version, ('File uses different lc3 version than grader version: %d expected: %d\n' % (self.state.lc3_version, lc3_version))
+        self._internalAssert('assembles', not status, 'Unable to load file %s\nReason: %s' % (file, status), AssertionType.fatal)
+        self._internalAssert('version', self.state.lc3_version == lc3_version, 'File uses different lc3 version than grader version: %d expected: %d\n' % (self.state.lc3_version, lc3_version), AssertionType.hard)
         self.setLC3Version(lc3_version)
 
     def loadPattObjAndSymFile(self, obj_file, sym_file):
@@ -360,7 +423,7 @@ class LC3UnitTestCase(unittest.TestCase):
             The address where the label is located.
         """
         addr = self.state.lookup(label)
-        assert addr != -1, "Label %s was not found in the assembly code." % label
+        self._internalAssert('lookup %s' % label, addr != -1, "Label %s was not found in the assembly code." % label, AssertionType.fatal, internal=True)
         return _toUShort(addr)
 
     def _reverse_lookup(self, address):
@@ -375,7 +438,7 @@ class LC3UnitTestCase(unittest.TestCase):
             The label associated with the address.
         """
         label = self.state.reverse_lookup(_toUShort(address))
-        assert label, "Address %x is not associated with a label." % address
+        self._internalAssert('reverse_lookup %x' % address, label, "Address %x is not associated with a label." % address, AssertionType.fatal, internal=True)
         return label
 
     def _readMem(self, addr, unsigned=False):
@@ -410,7 +473,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Returns:
             The value stored at that address.
         """
-        assert reg >= 0 and reg < 8, 'Invalid register number'
+        self._internalAssert('readReg %x' % reg, reg >= 0 and reg < 8, 'Invalid register number %d' % reg, AssertionType.fatal, internal=True)
         value = self.state.get_register(reg)
         return value if not unsigned else _toUShort(value)
 
@@ -421,7 +484,7 @@ class LC3UnitTestCase(unittest.TestCase):
             addr: Integer - Address to write to.
             value: Integer - Value to write.
         """
-        assert reg >= 0 and reg < 8, 'Invalid register number'
+        self._internalAssert('writeReg %x' % reg, reg >= 0 and reg < 8, 'Invalid register number %d' % reg, AssertionType.fatal, internal=True)
         self.state.set_register(reg, value)
 
     def _writeData(self, address, data):
@@ -452,12 +515,12 @@ class LC3UnitTestCase(unittest.TestCase):
                     i += 3
                 elif t == DataItem.data:
                     address, i = _writeDataInternal(address, data, index=i)
-                    assert address != -1, 'No end of data segment found.'
+                    self._internalAssert('writeData', address != -1, 'No end of data segment found.', AssertionType.fatal, internal=True)
                 elif t == DataItem.end_of_data:
                     return address, i
             return -1, -1
         a, b = _writeDataInternal(address, tuple_to_data(data))
-        assert a == -1, 'Extra end of data segment found.'
+        self._internalAssert('writeData', a == -1, 'Extra end of data segment found.', AssertionType.fatal, internal=True)
 
     def _readData(self, address, data):
         def _readDataInternal(address, dataspec, index=0):
@@ -488,12 +551,12 @@ class LC3UnitTestCase(unittest.TestCase):
                 elif t == DataItem.data:
                     inner_data, address, i = _readDataInternal(address, dataspec, index=i)
                     data.append(inner_data)
-                    assert address != -1, 'No end of data segment found.'
+                    self._internalAssert('readData', address != -1, 'No end of data segment found.', AssertionType.fatal, internal=True)
                 elif t == DataItem.end_of_data:
                     return tuple(data), address, i
             return tuple(data), -1, -1
         result, a, b = _readDataInternal(address, tuple_to_data_spec(data))
-        assert a == -1, 'Extra end of data segment found.'
+        self._internalAssert('readData', a == -1, 'Extra end of data segment found.', AssertionType.fatal, internal=True)
         return result
 
     def setLC3Version(self, version):
@@ -504,7 +567,7 @@ class LC3UnitTestCase(unittest.TestCase):
         0 - Default Version
         1 - 2019 Revision (LEA no longer sets CC / Trap pushes PSR,PC on stack, RTI returns from trap or interrupt)
         """
-        assert version >= 0 and version <= 1, 'Invalid LC-3 Version Given. Valid values are 0 or 1.'
+        self._internalAssert('setLC3Version', version >= 0 and version <= 1, 'Invalid LC-3 Version Given. Valid values are 0 or 1.', AssertionType.fatal, internal=True)
         self.state.lc3_version = version
         self.preconditions.addEnvironment(PreconditionFlag.lc3_version, version)
 
@@ -573,7 +636,7 @@ class LC3UnitTestCase(unittest.TestCase):
             register_number: Index of the register to set.
             value: Integer - Value to write to that register.
         """
-        assert register_number >= 0 and register_number < 8, 'Invalid register number'
+        self._internalAssert('setRegister', register_number >= 0 and register_number < 8, 'Invalid register number given %d' % register_number, AssertionType.fatal, internal=True)
         self.state.set_register(register_number, value)
 
         self.preconditions.addPrecondition(PreconditionFlag.register, str(register_number), value)
@@ -693,14 +756,14 @@ class LC3UnitTestCase(unittest.TestCase):
             for addr, param in enumerate(params, self.state.r6):
                 self._writeMem(addr, param)
             self.state.add_subroutine_info(subroutine, len(params))
-            assert self._subroutine_call_mode is None or self._subroutine_call_mode == SubroutineCallMode.lc3_calling_convention, "Can't mix subroutine call styles in the same test."
+            self._internalAssert('callSubroutine', self._subroutine_call_mode is None or self._subroutine_call_mode == SubroutineCallMode.lc3_calling_convention, "Can't mix subroutine call styles in the same test.", AssertionType.fatal, internal=True)
             self._subroutine_call_mode = SubroutineCallMode.lc3_calling_convention
             self.preconditions.addPrecondition(PreconditionFlag.subroutine, subroutine, [r5, r6, r7] + params)
         elif isinstance(params, dict):
             self.state.r6 = r6
-            assert 5 not in params, 'R5 present in params list in pass by register mode, use kwarg r5 instead.'
-            assert 6 not in params, 'R6 present in params list in pass by register mode, use kwarg r6 instead.'
-            assert 7 not in params, 'R7 present in params list in pass by register mode, use kwarg r7 instead.'
+            self._internalAssert('callSubroutine', 5 not in params, 'R5 present in params list in pass by register mode, use kwarg r5 instead.', AssertionType.fatal, internal=True)
+            self._internalAssert('callSubroutine', 6 not in params, 'R6 present in params list in pass by register mode, use kwarg r6 instead.', AssertionType.fatal, internal=True)
+            self._internalAssert('callSubroutine', 7 not in params, 'R7 present in params list in pass by register mode, use kwarg r7 instead.', AssertionType.fatal, internal=True)
             for register, value in params.items():
                 self._writeReg(register, value)
             self.subroutine_specifications[subroutine] = params.keys()
@@ -708,7 +771,7 @@ class LC3UnitTestCase(unittest.TestCase):
                 params[5] = r5
             params[6] = r6
             params[7] = r7
-            assert self._subroutine_call_mode is None or self._subroutine_call_mode == SubroutineCallMode.pass_by_register, "Can't mix subroutine call styles in the same test."
+            self._internalAssert('callSubroutine', self._subroutine_call_mode is None or self._subroutine_call_mode == SubroutineCallMode.pass_by_register, "Can't mix subroutine call styles in the same test.", AssertionType.fatal, internal=True)
             self._subroutine_call_mode = SubroutineCallMode.pass_by_register
             self.preconditions.addPrecondition(PreconditionFlag.pass_by_regs, subroutine, params)
         self.preconditions.addEnvironment(PreconditionFlag.break_address, r7)
@@ -743,26 +806,26 @@ class LC3UnitTestCase(unittest.TestCase):
         if isinstance(params, list):
             self._addSubroutineInfo(subroutine, len(params))
             inner_value = tuple(params)
-            assert self._subroutine_call_mode is None or self._subroutine_call_mode == SubroutineCallMode.lc3_calling_convention, "Can't mix subroutine call styles in the same test."
+            self._internalAssert('expectSubroutineCall', self._subroutine_call_mode is None or self._subroutine_call_mode == SubroutineCallMode.lc3_calling_convention, "Can't mix subroutine call styles in the same test.", AssertionType.fatal, internal=True)
             self._subroutine_call_mode = SubroutineCallMode.lc3_calling_convention
         elif isinstance(params, dict):
             if subroutine not in self.subroutine_specifications:
                 self.subroutine_specifications[subroutine] = params.keys()
             inner_value = tuple([(k, v) for k, v in params.items()])
-            assert self._subroutine_call_mode is None or self._subroutine_call_mode == SubroutineCallMode.pass_by_register, "Can't mix subroutine call styles in the same test."
+            self._internalAssert('expectSubroutineCall', self._subroutine_call_mode is None or self._subroutine_call_mode == SubroutineCallMode.pass_by_register, "Can't mix subroutine call styles in the same test.", AssertionType.fatal, internal=True)
             self._subroutine_call_mode = SubroutineCallMode.pass_by_register
         else:
-            assert 'Invalid Type for params. Expected (list or dict) Got: %s.' % type(params)
+            self._internalAssert('expectSubroutineCall', False, 'Invalid Type for params. Expected (list or dict) Got: %s.' % type(params), AssertionType.fatal, internal=True)
 
         set_to_add = self.expected_subroutines
         value = (subroutine, inner_value)
         if optional:
             set_to_add = self.optional_subroutines
 
-        assert value not in set_to_add, 'Duplicate subroutine found %s, multiple copies of [subroutine, params] is not supported.' % value
+        self._internalAssert('expectSubroutineCall', value not in set_to_add, 'Duplicate subroutine found %s, multiple copies of [subroutine, params] is not supported.' % str(value), AssertionType.fatal, internal=True)
         set_to_add.add(value)
 
-        assert not (value in self.expected_subroutines and value in self.optional_subroutines), 'Subroutine %s found in both expected and optional subroutine calls.' % value
+        self._internalAssert('expectSubroutineCall', not (value in self.expected_subroutines and value in self.optional_subroutines), 'Subroutine %s found in both expected and optional subroutine calls.' % str(value), AssertionType.fatal, internal=True)
 
     def expectTrapCall(self, vector, params, optional=False):
         """Expects that a trap was made with parameters in registers.
@@ -781,7 +844,7 @@ class LC3UnitTestCase(unittest.TestCase):
             params: Dict of Integer to Integer - Map of Register number to value.
             optional: Mark this as a optional trap call, if this trap call is found it is not checked.
         """
-        assert vector != 0x25, 'Method expectTrapCall called with vector=0x25, use assertHalted instead.'
+        self._internalAssert('expectTrapCall', vector != 0x25, 'Method expectTrapCall called with vector=0x25, use assertHalted instead.', AssertionType.fatal, internal=True)
 
         if vector not in self.trap_specifications:
             self.trap_specifications[vector] = params.keys()
@@ -792,11 +855,11 @@ class LC3UnitTestCase(unittest.TestCase):
         if optional:
             set_to_add = self.optional_traps
 
-        assert value not in set_to_add, 'Duplicate trap found %s, multiple copies of [subroutine, params] is not supported.' % value
+        self._internalAssert('expectTrapCall', value not in set_to_add, 'Duplicate trap found %s, multiple copies of [subroutine, params] is not supported.' % str(value), AssertionType.fatal, internal=True)
 
         set_to_add.add(value)
 
-        assert not (value in self.expected_subroutines and value in self.optional_subroutines), 'Subroutine %s found in both expected and optional subroutine calls.' % value
+        self._internalAssert('expectTrapCall', not (value in self.expected_subroutines and value in self.optional_subroutines), 'Trap %s found in both expected and optional subroutine calls.' % str(value), AssertionType.fatal, internal=True)
 
     def fillValue(self, address, value):
         """Fills a value at an address.
@@ -813,8 +876,7 @@ class LC3UnitTestCase(unittest.TestCase):
             value: Integer - Value to write at that address
         """
         label = self.state.reverse_lookup(address)
-        if label:
-            raise ValueError('fillValue is not to be used on a labelled address, use setValue instead.')
+        self._internalAssert('fillValue', not label, 'fillValue is not to be used on a labelled address, use setValue instead. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
 
         self._writeMem(address, value)
 
@@ -845,8 +907,7 @@ class LC3UnitTestCase(unittest.TestCase):
             ValueError if the address has a label (use setString instead).
         """
         label = self.state.reverse_lookup(address)
-        if label:
-            raise ValueError('fillString is not to be used on a labelled address, use setString instead.')
+        self._internalAssert('fillString', not label, 'fillString is not to be used on a labelled address, use setString instead. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
 
         for addr, elem in enumerate(text, address):
             self._writeMem(addr, ord(elem))
@@ -878,8 +939,7 @@ class LC3UnitTestCase(unittest.TestCase):
             ValueError if the address has a label (use setArray instead).
         """
         label = self.state.reverse_lookup(address)
-        if label:
-            raise ValueError('fillArray is not to be used on a labelled address, use setArray instead.')
+        self._internalAssert('fillArray', not label, 'fillArray is not to be used on a labelled address, use setArray instead. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
 
         for addr, elem in enumerate(arr, address):
             self._writeMem(addr, elem)
@@ -910,8 +970,8 @@ class LC3UnitTestCase(unittest.TestCase):
             data: Tuple - Node data. (See fillData for a more detailed description on the tuple's contents.)
         """
         label = self.state.reverse_lookup(address)
-        if label:
-            raise ValueError('fillNode is not to be used on a labelled address.')
+
+        self._internalAssert('fillNode', not label, 'fillNode is not to be used on a labelled address. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
 
         node_data = []
         size_next = 1
@@ -954,8 +1014,7 @@ class LC3UnitTestCase(unittest.TestCase):
             data: Tuple - Node data.
         """
         label = self.state.reverse_lookup(address)
-        if label:
-            raise ValueError('fillData is not to be used on a labelled address.')
+        self._internalAssert('fillData', not label, 'fillData is not to be used on a labelled address. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
         self._writeData(address, data)
         # TODO write preconditions.
         #self.preconditions.addPrecondition(PreconditionFlag.data, '%04x' % address, data)
@@ -984,17 +1043,23 @@ class LC3UnitTestCase(unittest.TestCase):
         self.state.run(max_executions)
         self.replay_msg = self._generateReplay()
 
-    def _assertShortEqual(self, expected, actual, msg=None):
+    def _assertShortEqual(self, expected, actual, name, msg, level=AssertionType.soft, internal=False):
         """Helper to assert if two 16 bit values are equal."""
-        self.assertEqual(_toUShort(expected), _toUShort(actual), msg=msg)
+        self._internalAssertEqual(_toUShort(expected), _toUShort(actual), name, msg=msg, level=level, internal=internal)
+    
+    def _assertEqual(self, expected, actual, name, msg, level=AssertionType.soft, internal=False):
+        self._internalAssertEqual(expected, actual, name, msg=msg, level=level, internal=internal)
 
-    def assertReturned(self):
+    def _internalAssertEqual(self, expected, actual, name, msg, level=AssertionType.soft, internal=False):
+        self._internalAssert(name, expected == actual, msg=msg, level=level, internal=internal)
+
+    def assertReturned(self, level=AssertionType.hard):
         """Assert that the code successfully returned from a subroutine call.
 
         This is achieved by hitting the breakpoint set at r7 when callSubroutine was called.
         This function should only be used if callSubroutine/callTrap was called.
         """
-        assert self.break_address is not None, "self.assertReturned() should only be used when a previous call to self.callSubroutine() was made."
+        self._internalAssert('assertReturned', self.break_address is not None, "self.assertReturned() should only be used when a previous call to self.callSubroutine() was made.", AssertionType.fatal, internal=True)
         instruction = self.state.disassemble(self.state.pc, 1)
         malformed = '*' in instruction
         failure_msg = 'Code did not return from subroutine correctly.\n'
@@ -1005,10 +1070,10 @@ class LC3UnitTestCase(unittest.TestCase):
         else:
             failure_msg += 'This was probably due to an infinite loop in the code.\n'
         failure_msg += 'This may indicate that your handling of the stack is incorrect or that R7 was clobbered.\n'
-        failure_msg += 'PC: x%04x\nExecuted: %d instructions\nInstruction last on: %s\n%s' % (self.state.pc, self.state.executions, instruction, self.replay_msg)
-        self._assertShortEqual(self.state.pc, self.break_address, failure_msg)
+        failure_msg += 'PC: x%04x\nExecuted: %d instructions\nInstruction last on: %s\n' % (self.state.pc, self.state.executions, instruction)
+        self._assertShortEqual(self.state.pc, self.break_address, 'returned', failure_msg, level=level)
 
-    def assertHalted(self):
+    def assertHalted(self, level=AssertionType.hard):
         """Asserts that the LC3 has been halted normally.
 
         This is achieved by reaching a HALT statement or if true_traps is set and the MCR register's 15 bit is set.
@@ -1021,17 +1086,17 @@ class LC3UnitTestCase(unittest.TestCase):
         failure_msg = 'Code did not halt normally.\n'
         failure_msg += 'This was due to executing data which was interpreted to a malformed instruction.\n' if malformed else ''
         failure_msg += 'This was probably due to an infinite loop in the code.\n' if not malformed else ''
-        failure_msg += 'PC: x%04x\nExecuted: %d instructions\nInstruction last on: %s\n%s' % (self.state.pc, self.state.executions, instruction, self.replay_msg)
+        failure_msg += 'PC: x%04x\nExecuted: %d instructions\nInstruction last on: %s\n' % (self.state.pc, self.state.executions, instruction)
         if self.true_traps:
-            self.assertEqual(state.get_memory(0xFFFE) >> 15 & 1, 0, failure_msg)
+            self._assertEqual(state.get_memory(0xFFFE) >> 15 & 1, 0, 'halted', failure_msg, level=level)
         else:
-            self._assertShortEqual(self.state.get_memory(self.state.pc), 0xF025, failure_msg)
+            self._assertShortEqual(self.state.get_memory(self.state.pc), 0xF025, 'halted', failure_msg, level=level)
 
-    def assertNoWarnings(self):
+    def assertNoWarnings(self, level=AssertionType.warning):
         """Asserts that no warnings were reported during execution of the code."""
-        self.assertFalse(self.state.warnings, 'Code generated warnings shown below:\n----\n%s%s' % (self.state.warnings, self.replay_msg))
+        self._internalAssert('warnings', not self.state.warnings, 'Code generated warnings shown below:\n----\n%s' % self.state.warnings, level=level)
 
-    def assertRegister(self, register_number, value):
+    def assertRegister(self, register_number, value, level=AssertionType.soft):
         """Asserts that a value at a label is a certain value.
 
         This exactly checks if state.memory[label] == value
@@ -1040,12 +1105,12 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address to check.
             value: Integer - Expected value.
         """
-        assert register_number >= 0 and register_number < 8, 'Invalid register number'
+        self._internalAssert('assertRegister %x' % register_number, register_number >= 0 and register_number < 8, 'Invalid register number %d' % register_number, AssertionType.fatal, internal=True)
         actual = self._readReg(register_number)
         expected = _toShort(value)
-        self._assertShortEqual(expected, actual, 'R%d was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (register_number, expected, _toUShort(expected), actual, _toUShort(actual), self.replay_msg))
+        self._assertShortEqual(expected, actual, 'R%d' % register_number, 'R%d was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (register_number, expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
 
-    def assertPc(self, value):
+    def assertPc(self, value, level=AssertionType.soft):
         """Asserts that the PC is a certain value.
 
         This exactly checks if state.pc == value
@@ -1055,9 +1120,9 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         actual = self.state.pc
         expected = _toUShort(value)
-        self._assertShortEqual(expected, actual, 'PC was expected to be x%04x but code produced x%04x\n%s' % (expected, actual, self.replay_msg))
+        self._assertShortEqual(expected, actual, 'PC', 'PC was expected to be x%04x but code produced x%04x\n' % (expected, actual), level)
 
-    def assertValue(self, label, value):
+    def assertValue(self, label, value, level=AssertionType.soft):
         """Asserts that a value at a label is a certain value.
 
         This exactly checks if state.memory[label] == value
@@ -1068,9 +1133,9 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         actual = self._readMem(self._lookup(label))
         expected = _toShort(value)
-        self._assertShortEqual(expected, actual, 'MEM[%s] was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (label, expected, _toUShort(expected), actual, _toUShort(actual), self.replay_msg))
+        self._assertShortEqual(expected, actual, 'value: %s' % label, 'MEM[%s] was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (label, expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
 
-    def assertPointer(self, label, value):
+    def assertPointer(self, label, value, level=AssertionType.soft):
         """Asserts that a value at an address pointed to by label is a certain value.
 
         This exactly checks if state.memory[state.memory[label]] == value
@@ -1081,9 +1146,9 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         actual = self._readMem(self._readMem(self._lookup(label)))
         expected = _toShort(value)
-        self._assertShortEqual(expected, actual, 'MEM[MEM[%s]] was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (label, expected, _toUShort(expected), actual, _toUShort(actual), self.replay_msg))
+        self._assertShortEqual(expected, actual, 'pointer: %s' % label, 'MEM[MEM[%s]] was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (label, expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
 
-    def assertArray(self, label, arr):
+    def assertArray(self, label, arr, level=AssertionType.soft):
         """Asserts that a sequence of values starting at the address pointed to by label are certain values.
 
         This exactly checks if:
@@ -1100,9 +1165,9 @@ class LC3UnitTestCase(unittest.TestCase):
         actual_arr = []
         for addr, _ in enumerate(arr, start_addr):
             actual_arr.append(self._readMem(addr))
-        self.assertEqual(arr, actual_arr, 'Sequence of values starting at MEM[%s] was expected to be %s but code produced %s\n%s' % (label, arr, actual_arr, self.replay_msg))
+        self._assertEqual(arr, actual_arr, 'array: %s' % label, 'Sequence of values starting at MEM[%s] was expected to be %s but code produced %s\n' % (label, arr, actual_arr), level=level)
 
-    def assertString(self, label, text):
+    def assertString(self, label, text, level=AssertionType.soft):
         """Asserts that sequence of characters followed by a NUL terminator starting at the address pointed to by label are certain values.
 
         This exactly checks if:
@@ -1123,9 +1188,9 @@ class LC3UnitTestCase(unittest.TestCase):
         actual_str.append(six.unichr(self._readMem(start_addr + len(text), unsigned=True)))
         expected_str = list(six.u(text))
         expected_str.append(u'\0')
-        self.assertEqual(expected_str, actual_str, 'String of characters starting at MEM[%s] was expected to be %s but code produced %s\n%s' % (label, repr(''.join(expected_str)), repr(''.join(actual_str)), self.replay_msg))
+        self._assertEqual(expected_str, actual_str, 'string: %s' % label, 'String of characters starting at MEM[%s] was expected to be %s but code produced %s\n' % (label, repr(''.join(expected_str)), repr(''.join(actual_str))), level=level)
 
-    def assertAddress(self, address, value):
+    def assertAddress(self, address, value, level=AssertionType.soft):
         """Asserts that a value at an address is a certain value.
 
         This exactly checks if state.memory[address] == value
@@ -1138,9 +1203,9 @@ class LC3UnitTestCase(unittest.TestCase):
         address = _toUShort(address)
         actual = self._readMem(address)
         expected = _toShort(value)
-        self._assertShortEqual(expected, actual, 'MEM[x%04x] was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (address, expected, _toUShort(expected), actual, _toUShort(actual), self.replay_msg))
+        self._assertShortEqual(expected, actual, 'address: x%04x' % address, 'MEM[x%04x] was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (address, expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
 
-    def assertData(self, address, named_tuple, field_names=None):
+    def assertData(self, address, named_tuple, field_names=None, level=AssertionType.soft):
         """Asserts that an arbitrary data structure starting at the address given is a certain value
 
         Args:
@@ -1159,8 +1224,7 @@ class LC3UnitTestCase(unittest.TestCase):
             for v1, v2, field in zip(t1, t2, fields):
                 if v1 != v2:
                     failure_msg += 'Data field: %s was not equal. expected: %s actual: %s\n' % (field, v1, v2)
-            failure_msg += self.replay_msg
-            self.assertEqual(expected, actual, failure_msg)
+            self._assertEqual(expected, actual, 'data: x%04x' % address, failure_msg, level=level)
 
         label = self.state.reverse_lookup(address)
         if label:
@@ -1169,7 +1233,7 @@ class LC3UnitTestCase(unittest.TestCase):
         expected = named_tuple._make(_cstringify_values(list(named_tuple)))
         assertDataHelper(expected, actual, field_names or (named_tuple._fields if hasattr(named_tuple, '_fields') else None))
 
-    def assertConsoleOutput(self, output):
+    def assertConsoleOutput(self, output, level=AssertionType.soft):
         """Asserts that console output is a certain string.
 
         Args:
@@ -1177,9 +1241,9 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         expected = output
         actual = self.state.output
-        self.assertEqual(expected, actual, 'Console output was expected to be %s but code produced %s\n%s' % (repr(expected), repr(actual), self.replay_msg))
+        self._assertEqual(expected, actual, 'console output', 'Console output was expected to be %s but code produced %s\n' % (repr(expected), repr(actual)), level=level)
 
-    def assertReturnValue(self, answer):
+    def assertReturnValue(self, answer, level=AssertionType.soft):
         """Asserts that the correct answer was returned.
 
         This is for verifying that the lc3 calling convention postcondition that memory[r6] == answer
@@ -1189,9 +1253,9 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         expected = _toShort(answer)
         actual = self._readMem(self.state.r6)
-        self._assertShortEqual(expected, actual, 'Return value was expected to be (%d x%04x) but code produced (%d x%04x)\n%s' % (expected, _toUShort(expected), actual, _toUShort(actual), self.replay_msg))
+        self._assertShortEqual(expected, actual, 'return value', 'Return value was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
 
-    def assertRegistersUnchanged(self, registers=None):
+    def assertRegistersUnchanged(self, registers=None, level=AssertionType.soft):
         """Asserts that registers value are the same as the beginning of execution.
 
         This is for verifying that caller saved registers are not clobbered as part of the lc3 calling convention.
@@ -1207,9 +1271,9 @@ class LC3UnitTestCase(unittest.TestCase):
 
         changed_registers = ['R%d' % reg for reg in registers if original_values[reg] != current_values[reg]]
         all_registers = ['R%d' % reg for reg in registers]
-        self.assertFalse(changed_registers, 'Expected %s to be unchanged after program/subroutine execution.\nThese registers have changed %s\n%s' % (all_registers, changed_registers, self.replay_msg))
+        self._internalAssert('registers unchanged', not changed_registers, 'Expected %s to be unchanged after program/subroutine execution.\nThese registers have changed %s\n' % (all_registers, changed_registers), level=level)
 
-    def assertStackManaged(self, stack, return_address, old_frame_pointer):
+    def assertStackManaged(self, stack, return_address, old_frame_pointer, level=AssertionType.soft):
         """Asserts that the stack was managed correctly.
 
         This means that:
@@ -1225,11 +1289,11 @@ class LC3UnitTestCase(unittest.TestCase):
         actual_return_address = self._readMem(self.state.r6 - 1, unsigned=True)
         actual_old_frame_ptr = self._readMem(self.state.r6 - 2, unsigned=True)
 
-        self._assertShortEqual(self.state.r6, stack, 'Calling convention not followed.\nExpected R6 to be decremented by exactly 1 after returning from subroutine it was decremented by: %d\n%s' % (_toUShort(self.state.r6) - (stack + 1), self.replay_msg))
-        self.assertEqual(return_address, actual_return_address, 'Expected return address x%04x not found on stack in correct location code produced x%04x\n%s' % (return_address, actual_return_address, self.replay_msg))
-        self.assertEqual(old_frame_pointer, actual_old_frame_ptr, 'Expected old frame pointer x%04x not found on stack in correct location code produced x%04x\n%s' % (old_frame_pointer, actual_old_frame_ptr, self.replay_msg))
+        self._assertShortEqual(self.state.r6, stack, 'stack', 'Calling convention not followed.\nExpected R6 to be x%04x after returning from subroutine code produced x%04x\n' % (_toUShort(self.state.r6), _toUShort(stack)), level=level)
+        self._assertShortEqual(return_address, actual_return_address, 'return address', 'Expected return address x%04x not found on stack in correct location code produced x%04x\n' % (return_address, actual_return_address), level=level)
+        self._assertShortEqual(old_frame_pointer, actual_old_frame_ptr, 'old frame pointer', 'Expected old frame pointer x%04x not found on stack in correct location code produced x%04x\n' % (old_frame_pointer, actual_old_frame_ptr), level=level)
 
-    def assertSubroutineCallsMade(self):
+    def assertSubroutineCallsMade(self, level=AssertionType.soft):
         """Asserts that the expected subroutine calls were made with no unexpected ones made.
 
         It is required to call expectSubroutineCall in order for this function to work. If it is
@@ -1247,7 +1311,7 @@ class LC3UnitTestCase(unittest.TestCase):
                     subr_strs.append('%s(%s)' % (name, params) if params else trap_name)
                 return ' '.join(subr_strs)
 
-        def subroutineMatches(a, b):
+        def subroutine_matches(a, b):
             a_address, a_params = a
             b_address, b_params = b
             if a_address != b_address:
@@ -1274,14 +1338,14 @@ class LC3UnitTestCase(unittest.TestCase):
         unknown_calls = set()
 
         for subroutine in actual_subroutines:
-            if any(subroutineMatches(subroutine, subr) for subr in self.expected_subroutines):
+            if any(subroutine_matches(subroutine, subr) for subr in self.expected_subroutines):
                 made_calls.add(subroutine)
-            elif any(subroutineMatches(subroutine, subr) for subr in self.optional_subroutines):
+            elif any(subroutine_matches(subroutine, subr) for subr in self.optional_subroutines):
                 optional_calls.add(subroutine)
             else:
                 unknown_calls.add(subroutine)
         for subroutine in self.expected_subroutines:
-            if not any(subroutineMatches(subroutine, subr) for subr in actual_subroutines):
+            if not any(subroutine_matches(subroutine, subr) for subr in actual_subroutines):
                 missing_calls.add(subroutine)
 
         #made_calls = self.expected_subroutines & actual_subroutines
@@ -1295,13 +1359,10 @@ class LC3UnitTestCase(unittest.TestCase):
         status_message += 'Required calls missing: %s\n' % (subroutine_list(missing_calls) if missing_calls else 'none')
         status_message += 'Accepted optional calls made: %s\n' % subroutine_list(optional_calls) if optional_calls else ''
         status_message += 'Unknown subroutine calls made: %s\n' % subroutine_list(unknown_calls) if unknown_calls else ''
-        status_message += self.replay_msg
 
-        self.assertEqual(len(self.expected_subroutines), len(made_calls), status_message)
-        self.assertFalse(missing_calls, status_message)
-        self.assertFalse(unknown_calls, status_message)
+        self._internalAssert('subroutine calls made', len(self.expected_subroutines) == len(made_calls) and not missing_calls and not unknown_calls, status_message, level=level)
 
-    def assertTrapCallsMade(self):
+    def assertTrapCallsMade(self, level=AssertionType.soft):
         """Asserts that the expected traps were called with no unexpected ones made.
 
         It is required to call expectTrapCall for this function to work. If it is
@@ -1334,11 +1395,8 @@ class LC3UnitTestCase(unittest.TestCase):
         status_message += 'Required traps missing: %s\n' % (trap_list(missing_calls) if missing_calls else 'none')
         status_message += 'Accepted optional traps made: %s\n' % trap_list(optional_calls) if optional_calls else ''
         status_message += 'Unknown traps made: %s\n' % trap_list(unknown_calls) if unknown_calls else ''
-        status_message += self.replay_msg
 
-        self.assertEqual(self.expected_traps, made_calls, status_message)
-        self.assertFalse(missing_calls, status_message)
-        self.assertFalse(unknown_calls, status_message)
+        self._internalAssert('trap calls made', len(self.expected_traps) == len(made_calls) and not missing_calls and not unknown_calls, status_message, level=level)
 
     def _generateReplay(self):
         return "\nString to set up this test in complx: %s" % repr(self.preconditions.encode())

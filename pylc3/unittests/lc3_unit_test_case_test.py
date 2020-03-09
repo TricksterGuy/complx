@@ -33,7 +33,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         text_file.write(snippet)
         text_file.close()
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
             self.loadAsmFile("syntax_error.asm")
 
         os.remove("syntax_error.asm")
@@ -267,7 +267,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         # Sanity checks I
         # This is an error as it is a labelled address, setValue should be used here.
-        with self.assertRaises(ValueError):
+        with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
             self.fillValue(0x3005, 2)
 
         self.setValue("A", 2)
@@ -299,7 +299,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         # to put the string) as there is potential to overwrite data past the label. Assembly code should not be setup
         # like so due to this since the fill will happen *after* the code is assembled and loaded.  In either case even
         # if this replacement was still done before assembling data after the label could cause code not to assemble.
-        with self.assertRaises(ValueError):
+        with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
             self.fillString(0x3000, "HELLO")
 
         self.fillString(0x4000, "HELLO")
@@ -325,7 +325,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         # to put the array) as there is potential to overwrite data past the label. Assembly code should not be setup
         # like so due to this since the fill will happen *after* the code is assembled and loaded.  In either case even
         # if this replacement was still done before assembling data after the label could cause code not to assemble.
-        with self.assertRaises(ValueError):
+        with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
             self.fillArray(0x3000, [10, 12, 15])
 
         self.fillArray(0x4000, [10, 12, 15])
@@ -348,7 +348,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         # to put the array) as there is potential to overwrite data past the label. Assembly code should not be setup
         # like so due to this since the fill will happen *after* the code is assembled and loaded.  In either case even
         # if this replacement was still done before assembling data after the label could cause code not to assemble.
-        with self.assertRaises(ValueError):
+        with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
             self.fillNode(0x3000, next=None, data=(3,))
 
         # Ending node of linkedlist if you want.
