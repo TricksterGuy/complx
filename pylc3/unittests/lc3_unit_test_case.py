@@ -356,7 +356,8 @@ class LC3UnitTestCase(unittest.TestCase):
     def _internalAssert(self, name, cond, msg, level=AssertionType.soft, internal=False):
         name = name if not internal else 'internal'
         if self._hard_failed:
-            self.failed_assertions.append((name, 'Not checked due to previous failures.'))
+            if name != 'internal':
+                self.failed_assertions.append((name, 'Not checked due to previous failures.'))
             return
 
         if cond:

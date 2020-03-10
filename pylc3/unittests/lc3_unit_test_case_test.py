@@ -1239,6 +1239,29 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         data = lc3_unit_test_case.tuple_to_data(("Some Student", 76, [100, 52]))
         self.assertEqual(data, [DataItem.string, 12, "Some Student", DataItem.number, 76, DataItem.array, 2, [100, 52]])
 
+    def testHardAssertion(self):
+        snippet = """
+        .orig x3000
+            HALT
+            A .fill 3
+            B .fill 5
+            C .fill 7
+        .end
+        """
+        self.loadCode(snippet)
+        self.runCode(max_executions=1)
+        
+        self.assertValue("A", 2, level=lc3_unit_test_case.AssertionType.hard)
+        self.assertValue("B", 3)
+        self.assertValue("C", 4)
+        
+        self.assertEquals(self.failed_assertions,
+        [('value: A', 'MEM[A] was expected to be (2 x0002) but code produced (3 x0003)\n'),
+         ('value: B', 'Not checked due to previous failures.'),
+         ('value: C', 'Not checked due to previous failures.')])
+        
+        # Clear so that the test doesn't fail during tearDown.
+        self.failed_assertions = []
 
 if __name__ == '__main__':
     unittest.main()
