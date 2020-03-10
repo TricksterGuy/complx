@@ -12,6 +12,17 @@ from lc3_unit_test_case import DataItem
 
 class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
+    def setUp(self):
+        super(LC3UnitTestCaseTest, self).setUp()
+
+    def tearDown(self):
+        self.assertFalse(self.failed_assertions, 'Internal Error at least one assert has failed\n %s' % self.failed_assertions)
+
+    # Overriden to not generate a json file.
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
     def loadCode(self, snippet):
         # This function is test only, Only use loadAsmFile for student code.
         self.state.loadCode(snippet)

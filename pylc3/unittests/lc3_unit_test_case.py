@@ -20,7 +20,9 @@ https://github.com/TricksterGuy/pylc3-examples
 
 import base64
 import enum
+import json
 from .. import pylc3
+import os
 import re
 import six
 import struct
@@ -300,6 +302,34 @@ class LC3UnitTestCase(unittest.TestCase):
     It is also important not use unittest.TestCase assertion methods since these do not
     produce the replay string upon failure.
     """
+
+    failed_assertions_per_test = {}
+    passed_assertions_per_test = {}
+        
+    @classmethod
+    def setUpClass(cls):
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.form_json_test_report()
+
+    @classmethod
+    def form_json_test_report(cls):
+        name = cls.__name__
+        filename = name + '.json'
+        tests = set()
+        tests.update(cls.failed_assertions_per_test.keys())
+        tests.update(cls.passed_assertions_per_test.keys())
+        json_obj = {'results': {name: []}}
+        for test_name in tests:
+            for check_name in cls.passed_assertions_per_test.get(test_name, []):
+                json_obj['results'][name].append({'display-name': '%s/%s' % (test_name, check_name), 'passed': True})
+            for check_name, msg in cls.failed_assertions_per_test.get(test_name, []):
+                json_obj['results'][name].append({'display-name': '%s/%s' % (test_name, check_name), 'passed': False, 'message': msg})
+        with open(filename, 'w') as f:
+            json.dump(json_obj, f)
+
     def setUp(self):
         self.state = pylc3.LC3State(testing_mode=True)
         self.break_address = None
@@ -325,6 +355,7 @@ class LC3UnitTestCase(unittest.TestCase):
         self.passed_assertions = []
         self.failed_assertions = []
         self._hard_failed = False
+        self.display_name = None
         self.warnings = []
 
     def tearDown(self):
@@ -332,7 +363,9 @@ class LC3UnitTestCase(unittest.TestCase):
             return 'The test failed due to the following checks that failed shown below:\n----\n%s%s' % ('\n'.join(['name: %s Reason: %s' % (name, msg) for name, msg in self.failed_assertions]), self.replay_msg)
         if self.failed_assertions:
             self.fail(form_failure_message())
-        #self.form_json_test_report()
+        assert self.display_name is not None, 'Internal error self.display_name needs to be set per test case.'
+        self.failed_assertions_per_test[self.display_name] = self.failed_assertions
+        self.passed_assertions_per_test[self.display_name] = self.passed_assertions
 
     def init(self, strategy, value):
         """Initializes LC3 state memory.
