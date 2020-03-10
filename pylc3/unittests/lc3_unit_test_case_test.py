@@ -1263,5 +1263,29 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         # Clear so that the test doesn't fail during tearDown.
         self.failed_assertions = []
 
+    def testSoftAssertion(self):
+        snippet = """
+        .orig x3000
+            HALT
+            A .fill 3
+            B .fill 5
+            C .fill 7
+        .end
+        """
+        self.loadCode(snippet)
+        self.runCode(max_executions=1)
+
+        self.assertValue("A", 3, level=lc3_unit_test_case.AssertionType.hard)
+        self.assertValue("B", 3)
+        self.assertValue("C", 4)
+
+        self.assertEquals(self.failed_assertions,
+        [('value: B', 'MEM[B] was expected to be (3 x0003) but code produced (5 x0005)\n'),
+         ('value: C', 'MEM[C] was expected to be (4 x0004) but code produced (7 x0007)\n')])
+
+        # Clear so that the test doesn't fail during tearDown.
+        self.failed_assertions = []
+
+
 if __name__ == '__main__':
     unittest.main()
