@@ -131,6 +131,40 @@ class PreconditionFlag(enum.Enum):
     end_of_preconditions = 0xff
 
 
+class PostconditionFlag(enum.Enum):
+    invalid = 0
+    # Halted or Returned from Subroutine Flag.
+    end_state = 1 
+    # Checks a register.
+    register = 2
+    # Checks the PC value.
+    pc = 3
+    # Checks a value at a label.
+    value = 4
+    # Check a value at an address.
+    address = 5 
+    # Check a value at an address pointed to by a label.
+    pointer = 6
+    # Checks a region starting at the address pointed to by label.
+    array = 7
+    # Checks a string starting at the address pointed to by label.
+    string = 8
+    # Checks console output.
+    output = 9
+    # Checks return value for subroutine.
+    return_value = 10
+    # Checks if registers are unchanged.
+    registers_unchanged = 11
+    # Checks if calling convention was followed.
+    calling_convention_followed = 12
+    # Checks for subroutine calls.
+    subroutine_call = 13
+    # Checks for a subroutine/trap using pass by register.
+    pass_by_regs = 14
+
+    end_of_postconditions = 0xff
+
+
 class DataItem(enum.Enum):
     # End of Data.
     end_of_data = 0
@@ -255,8 +289,22 @@ class Postconditions(object):
     
     Generates base64 string to verify the test in complx."""
     def __init__(self):
-        # List of (PostconditionFlag, string label, num_params, params)
+        # List of (PostconditionFlag, char type, <int,string> val, num_params, params)
+        # List of (PostconditionFlag, 0, char bool)
+        # List of (PostconditionFlag, 1, int val, num_params, params)
+        # List of (PostconditionFlag, 2, string label, num_params, params)
         self._data = []
+
+    def add(self, type_id, value, data=None):
+        assert type_id.value <= 14, 'Internal error, Unknown Postcondition Flag.'
+        if data is None:
+            data = []
+        if value is True or value is False:
+            self._data.append((type_id.value, 0, 0 if value is False else 1))
+        elif isinstance(value, int):
+            self._data.append((type_id.value, 1, value, len(data), data))
+        elif isinstance(value, str):
+            self._data.append((type_id.value, 2, value, len(data), data))
 
     def _formBlob(self):
         file = six.BytesIO()
@@ -861,6 +909,12 @@ class LC3UnitTestCase(unittest.TestCase):
 
         self._internalAssert('expectSubroutineCall', not (value in self.expected_subroutines and value in self.optional_subroutines), 'Subroutine %s found in both expected and optional subroutine calls.' % str(value), AssertionType.fatal, internal=True)
 
+        if isinstance(params, list):
+            self.postconditions.add(PostconditionFlag.subroutine_call, subroutine, params)
+        else:
+            data = list(reduce(lambda a, b: a + b, params.items()))
+            self.postconditions.add(PostconditionFlag.pass_by_regs, subroutine, data)
+
     def expectTrapCall(self, vector, params, optional=False):
         """Expects that a trap was made with parameters in registers.
 
@@ -894,6 +948,9 @@ class LC3UnitTestCase(unittest.TestCase):
         set_to_add.add(value)
 
         self._internalAssert('expectTrapCall', not (value in self.expected_subroutines and value in self.optional_subroutines), 'Trap %s found in both expected and optional subroutine calls.' % str(value), AssertionType.fatal, internal=True)
+
+        data = list(reduce(lambda a, b: a + b, params.items()))
+        self.postconditions.add(PostconditionFlag.pass_by_regs, 'x%02x' % vector, data)
 
     def fillValue(self, address, value):
         """Fills a value at an address.
@@ -1106,6 +1163,7 @@ class LC3UnitTestCase(unittest.TestCase):
         failure_msg += 'This may indicate that your handling of the stack is incorrect or that R7 was clobbered.\n'
         failure_msg += 'PC: x%04x\nExecuted: %d instructions\nInstruction last on: %s\n' % (self.state.pc, self.state.executions, instruction)
         self._assertShortEqual(self.state.pc, self.break_address, 'returned', failure_msg, level=level)
+        self.postconditions.add(PostconditionFlag.end_state, False)
 
     def assertHalted(self, level=AssertionType.hard):
         """Asserts that the LC3 has been halted normally.
@@ -1125,6 +1183,7 @@ class LC3UnitTestCase(unittest.TestCase):
             self._assertEqual(state.get_memory(0xFFFE) >> 15 & 1, 0, 'halted', failure_msg, level=level)
         else:
             self._assertShortEqual(self.state.get_memory(self.state.pc), 0xF025, 'halted', failure_msg, level=level)
+        self.postconditions.add(PostconditionFlag.end_state, True)
 
     def assertNoWarnings(self, level=AssertionType.warning):
         """Asserts that no warnings were reported during execution of the code."""
@@ -1143,6 +1202,7 @@ class LC3UnitTestCase(unittest.TestCase):
         actual = self._readReg(register_number)
         expected = _toShort(value)
         self._assertShortEqual(expected, actual, 'R%d' % register_number, 'R%d was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (register_number, expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
+        self.postconditions.add(PostconditionFlag.register, register_number, [value])
 
     def assertPc(self, value, level=AssertionType.soft):
         """Asserts that the PC is a certain value.
@@ -1155,6 +1215,7 @@ class LC3UnitTestCase(unittest.TestCase):
         actual = self.state.pc
         expected = _toUShort(value)
         self._assertShortEqual(expected, actual, 'PC', 'PC was expected to be x%04x but code produced x%04x\n' % (expected, actual), level)
+        self.postconditions.add(PostconditionFlag.pc, 0, [value])
 
     def assertValue(self, label, value, level=AssertionType.soft):
         """Asserts that a value at a label is a certain value.
@@ -1168,6 +1229,7 @@ class LC3UnitTestCase(unittest.TestCase):
         actual = self._readMem(self._lookup(label))
         expected = _toShort(value)
         self._assertShortEqual(expected, actual, 'value: %s' % label, 'MEM[%s] was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (label, expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
+        self.postconditions.add(PostconditionFlag.value, label, [value])
 
     def assertPointer(self, label, value, level=AssertionType.soft):
         """Asserts that a value at an address pointed to by label is a certain value.
@@ -1181,6 +1243,7 @@ class LC3UnitTestCase(unittest.TestCase):
         actual = self._readMem(self._readMem(self._lookup(label)))
         expected = _toShort(value)
         self._assertShortEqual(expected, actual, 'pointer: %s' % label, 'MEM[MEM[%s]] was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (label, expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
+        self.postconditions.add(PostconditionFlag.pointer, label, [value])
 
     def assertArray(self, label, arr, level=AssertionType.soft):
         """Asserts that a sequence of values starting at the address pointed to by label are certain values.
@@ -1200,6 +1263,7 @@ class LC3UnitTestCase(unittest.TestCase):
         for addr, _ in enumerate(arr, start_addr):
             actual_arr.append(self._readMem(addr))
         self._assertEqual(arr, actual_arr, 'array: %s' % label, 'Sequence of values starting at MEM[%s] was expected to be %s but code produced %s\n' % (label, arr, actual_arr), level=level)
+        self.postconditions.add(PostconditionFlag.array, label, arr)
 
     def assertString(self, label, text, level=AssertionType.soft):
         """Asserts that sequence of characters followed by a NUL terminator starting at the address pointed to by label are certain values.
@@ -1223,6 +1287,7 @@ class LC3UnitTestCase(unittest.TestCase):
         expected_str = list(six.u(text))
         expected_str.append(u'\0')
         self._assertEqual(expected_str, actual_str, 'string: %s' % label, 'String of characters starting at MEM[%s] was expected to be %s but code produced %s\n' % (label, repr(''.join(expected_str)), repr(''.join(actual_str))), level=level)
+        self.postconditions.add(PostconditionFlag.string, label, [ord(char) for char in text])
 
     def assertAddress(self, address, value, level=AssertionType.soft):
         """Asserts that a value at an address is a certain value.
@@ -1238,6 +1303,7 @@ class LC3UnitTestCase(unittest.TestCase):
         actual = self._readMem(address)
         expected = _toShort(value)
         self._assertShortEqual(expected, actual, 'address: x%04x' % address, 'MEM[x%04x] was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (address, expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
+        self.postconditions.add(PostconditionFlag.address, 'x%04x' % address, [value])
 
     def assertData(self, address, named_tuple, field_names=None, level=AssertionType.soft):
         """Asserts that an arbitrary data structure starting at the address given is a certain value
@@ -1276,6 +1342,7 @@ class LC3UnitTestCase(unittest.TestCase):
         expected = output
         actual = self.state.output
         self._assertEqual(expected, actual, 'console output', 'Console output was expected to be %s but code produced %s\n' % (repr(expected), repr(actual)), level=level)
+        self.postconditions.add(PostconditionFlag.output, 0, [ord(char) for char in output])
 
     def assertReturnValue(self, answer, level=AssertionType.soft):
         """Asserts that the correct answer was returned.
@@ -1288,6 +1355,7 @@ class LC3UnitTestCase(unittest.TestCase):
         expected = _toShort(answer)
         actual = self._readMem(self.state.r6)
         self._assertShortEqual(expected, actual, 'return value', 'Return value was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
+        self.postconditions.add(PostconditionFlag.return_value, answer)
 
     def assertRegistersUnchanged(self, registers=None, level=AssertionType.soft):
         """Asserts that registers value are the same as the beginning of execution.
@@ -1306,6 +1374,9 @@ class LC3UnitTestCase(unittest.TestCase):
         changed_registers = ['R%d' % reg for reg in registers if original_values[reg] != current_values[reg]]
         all_registers = ['R%d' % reg for reg in registers]
         self._internalAssert('registers unchanged', not changed_registers, 'Expected %s to be unchanged after program/subroutine execution.\nThese registers have changed %s\n' % (all_registers, changed_registers), level=level)
+
+        bits = sum([1 << a for a in registers])
+        self.postconditions.add(PostconditionFlag.registers_unchanged, bits, original_values)
 
     def assertStackManaged(self, stack, return_address, old_frame_pointer, level=AssertionType.soft):
         """Asserts that the stack was managed correctly.
@@ -1326,6 +1397,7 @@ class LC3UnitTestCase(unittest.TestCase):
         self._assertShortEqual(self.state.r6, stack, 'stack', 'Calling convention not followed.\nExpected R6 to be x%04x after returning from subroutine code produced x%04x\n' % (_toUShort(self.state.r6), _toUShort(stack)), level=level)
         self._assertShortEqual(return_address, actual_return_address, 'return address', 'Expected return address x%04x not found on stack in correct location code produced x%04x\n' % (return_address, actual_return_address), level=level)
         self._assertShortEqual(old_frame_pointer, actual_old_frame_ptr, 'old frame pointer', 'Expected old frame pointer x%04x not found on stack in correct location code produced x%04x\n' % (old_frame_pointer, actual_old_frame_ptr), level=level)
+        self.postconditions.add(PostconditionFlag.calling_convention_followed, 0, [stack, return_address, old_frame_pointer])
 
     def assertSubroutineCallsMade(self, level=AssertionType.soft):
         """Asserts that the expected subroutine calls were made with no unexpected ones made.
@@ -1433,4 +1505,4 @@ class LC3UnitTestCase(unittest.TestCase):
         self._internalAssert('trap calls made', len(self.expected_traps) == len(made_calls) and not missing_calls and not unknown_calls, status_message, level=level)
 
     def _generateReplay(self):
-        return "\nString to set up this test in complx: %s" % repr(self.preconditions.encode())
+        return "\nString to set up this test in complx: %s\nString to check results in complx: %s\n" % (repr(self.preconditions.encode()), '')#repr(self.postconditions.encode()))
