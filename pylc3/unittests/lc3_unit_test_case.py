@@ -321,12 +321,12 @@ class LC3UnitTestCase(unittest.TestCase):
         tests = set()
         tests.update(cls.failed_assertions_per_test.keys())
         tests.update(cls.passed_assertions_per_test.keys())
-        json_obj = {'results': {name: []}}
+        json_obj = {name: []}
         for test_name in tests:
             for check_name in cls.passed_assertions_per_test.get(test_name, []):
-                json_obj['results'][name].append({'display-name': '%s/%s' % (test_name, check_name), 'passed': True})
+                json_obj[name].append({'display-name': '%s/%s' % (test_name, check_name), 'passed': True})
             for check_name, msg in cls.failed_assertions_per_test.get(test_name, []):
-                json_obj['results'][name].append({'display-name': '%s/%s' % (test_name, check_name), 'passed': False, 'message': msg})
+                json_obj[name].append({'display-name': '%s/%s' % (test_name, check_name), 'passed': False, 'message': msg})
         with open(filename, 'w') as f:
             json.dump(json_obj, f)
 
