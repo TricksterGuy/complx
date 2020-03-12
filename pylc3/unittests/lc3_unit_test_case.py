@@ -300,7 +300,7 @@ class Postconditions(object):
         if data is None:
             data = []
         if value is True or value is False:
-            self._data.append((type_id.value, 0, 0 if value is False else 1))
+            self._data.append((type_id.value, 0, 0 if value is False else 1, 0, None))
         elif isinstance(value, int):
             self._data.append((type_id.value, 1, value, len(data), data))
         elif isinstance(value, str):
@@ -309,15 +309,28 @@ class Postconditions(object):
     def _formBlob(self):
         file = six.BytesIO()
 
-        for id, label, num_params, params in self._data:
-            label = six.b(label)
-
-            file.write(struct.pack('=B', id))
-            file.write(struct.pack('=I', len(label)))
-            file.write(struct.pack('=%ds' % len(label), label))
-            file.write(struct.pack('=I', num_params))
-            params = [param & 0xFFFF for param in params]
-            file.write(struct.pack('=%dH' % num_params, *params))
+        self._data.sort(key = lambda x: x[0])
+        for id, type, value, num_params, params in self._data:
+            if type == 0:
+                file.write(struct.pack('=B', id))
+                file.write(struct.pack('=B', type))
+                file.write(struct.pack('=I', value))
+            elif type == 1:
+                file.write(struct.pack('=B', id))
+                file.write(struct.pack('=B', type))
+                file.write(struct.pack('=I', value))
+                file.write(struct.pack('=I', num_params))
+                params = [param & 0xFFFF for param in params]
+                file.write(struct.pack('=%dH' % num_params, *params))
+            elif type == 2:
+                value = six.b(value)
+                file.write(struct.pack('=B', id))
+                file.write(struct.pack('=B', type))
+                file.write(struct.pack('=I', len(value)))
+                file.write(struct.pack('=%ds' % len(value), value))
+                file.write(struct.pack('=I', num_params))
+                params = [param & 0xFFFF for param in params]
+                file.write(struct.pack('=%dH' % num_params, *params))
 
         file.write(struct.pack('=B', 0xff))
 
@@ -1355,7 +1368,7 @@ class LC3UnitTestCase(unittest.TestCase):
         expected = _toShort(answer)
         actual = self._readMem(self.state.r6)
         self._assertShortEqual(expected, actual, 'return value', 'Return value was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
-        self.postconditions.add(PostconditionFlag.return_value, answer)
+        self.postconditions.add(PostconditionFlag.return_value, 0, [answer])
 
     def assertRegistersUnchanged(self, registers=None, level=AssertionType.soft):
         """Asserts that registers value are the same as the beginning of execution.
@@ -1376,7 +1389,7 @@ class LC3UnitTestCase(unittest.TestCase):
         self._internalAssert('registers unchanged', not changed_registers, 'Expected %s to be unchanged after program/subroutine execution.\nThese registers have changed %s\n' % (all_registers, changed_registers), level=level)
 
         bits = sum([1 << a for a in registers])
-        self.postconditions.add(PostconditionFlag.registers_unchanged, bits, original_values)
+        self.postconditions.add(PostconditionFlag.registers_unchanged, bits, [original_values[reg] for reg in sorted(registers)])
 
     def assertStackManaged(self, stack, return_address, old_frame_pointer, level=AssertionType.soft):
         """Asserts that the stack was managed correctly.
@@ -1505,4 +1518,4 @@ class LC3UnitTestCase(unittest.TestCase):
         self._internalAssert('trap calls made', len(self.expected_traps) == len(made_calls) and not missing_calls and not unknown_calls, status_message, level=level)
 
     def _generateReplay(self):
-        return "\nString to set up this test in complx: %s\nString to check results in complx: %s\n" % (repr(self.preconditions.encode()), '')#repr(self.postconditions.encode()))
+        return "\nString to set up this test in complx: %s\nString to check results in complx: %s\n" % (repr(self.preconditions.encode()), repr(self.postconditions.encode()))

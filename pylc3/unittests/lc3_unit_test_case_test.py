@@ -1231,6 +1231,60 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         #print self.preconditions.encode()
 
+    def testVerificationString(self):
+        snippet = """
+        .orig x3000
+            AHH .blkw 1
+            BLAH .fill x4000
+            CAWCAW .fill x5000
+            PAPA .fill x6000
+            TATA RET
+        .end
+        """
+        self.init(pylc3.MemoryFillStrategy.fill_with_value, -1)
+        self.expectSubroutineCall('TATA', [6, 7, 8])
+        self.loadCode(snippet)
+
+        # Needed for assertRegistersUnchanged this is usually set by runCode.
+        for id in range(8):
+            self.registers[id] = id * 3
+
+        self.assertHalted(level=lc3_unit_test_case.AssertionType.soft)
+        self.assertRegister(6, 0x5030)
+        self.assertPc(0x3000)
+        self.assertValue('AHH', 0x4000)
+        self.assertAddress(0x4000, 0x3444)
+        self.assertPointer('BLAH', 0x3456)
+        self.assertArray('CAWCAW', [5, 2, 9, 0x3000, 0x5259, 0xFFFF])
+        self.assertString('PAPA', 'MAMA')
+        self.assertConsoleOutput('RAHRAH')
+
+        self.assertSubroutineCallsMade()
+
+        self.assertReturnValue(33)
+        self.assertStackManaged(0xF000, 0xCAFE, 0x8000)
+        self.assertRegistersUnchanged([2, 4, 6, 7])
+
+        # Clear since these assertions failed.
+        self.failed_assertions = []
+
+        expected_blob = self.postconditions._formBlob()
+        blob = (b'\x01\x00\x01\x00\x00\x00'
+                 '\x02\x01\x06\x00\x00\x00\x01\x00\x00\x000P'
+                 '\x03\x01\x00\x00\x00\x00\x01\x00\x00\x00\x000'
+                 '\x04\x02\x03\x00\x00\x00AHH\x01\x00\x00\x00\x00@'
+                 '\x05\x02\x05\x00\x00\x00x4000\x01\x00\x00\x00D4'
+                 '\x06\x02\x04\x00\x00\x00BLAH\x01\x00\x00\x00V4'
+                 '\x07\x02\x06\x00\x00\x00CAWCAW\x06\x00\x00\x00\x05\x00\x02\x00\t\x00\x000YR\xff\xff'
+                 '\x08\x02\x04\x00\x00\x00PAPA\x04\x00\x00\x00M\x00A\x00M\x00A\x00'
+                 '\x09\x01\x00\x00\x00\x00\x06\x00\x00\x00R\x00A\x00H\x00R\x00A\x00H\x00'
+                 '\x0A\x01\x00\x00\x00\x00\x01\x00\x00\x00!\x00'
+                 '\x0B\x01\xd4\x00\x00\x00\x04\x00\x00\x00\x06\x00\x0c\x00\x12\x00\x15\x00'
+                 '\x0C\x01\x00\x00\x00\x00\x03\x00\x00\x00\x00\xf0\xfe\xca\x00\x80'
+                 '\x0D\x02\x04\x00\x00\x00TATA\x03\x00\x00\x00\x06\x00\x07\x00\x08\x00'
+                 '\xff')
+        self.assertEqual(blob, expected_blob)
+
     # -----------------------------------
     # ---- Internal tests begin here ----
     # -----------------------------------
