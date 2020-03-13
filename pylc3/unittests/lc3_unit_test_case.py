@@ -134,33 +134,41 @@ class PreconditionFlag(enum.Enum):
 class PostconditionFlag(enum.Enum):
     invalid = 0
     # Halted or Returned from Subroutine Flag.
-    end_state = 1 
+    end_state = 1
     # Checks a register.
     register = 2
     # Checks the PC value.
     pc = 3
     # Checks a value at a label.
     value = 4
-    # Check a value at an address.
-    address = 5 
     # Check a value at an address pointed to by a label.
-    pointer = 6
+    pointer = 5
     # Checks a region starting at the address pointed to by label.
-    array = 7
+    array = 6
     # Checks a string starting at the address pointed to by label.
-    string = 8
+    string = 7
     # Checks console output.
-    output = 9
+    output = 8
+    # Check a value at a memory address.
+    direct_value = 9
+    # Check a string starting at a memory address.
+    direct_string = 10
+    # Check a sequence of values starting at a memory address.
+    direct_array = 11
+    # Check a node at a memory address
+    node = 12
+    # Checks arbitrary data structure at a memory address.
+    data = 13
     # Checks return value for subroutine.
-    return_value = 10
+    return_value = 14
     # Checks if registers are unchanged.
-    registers_unchanged = 11
+    registers_unchanged = 15
     # Checks if calling convention was followed.
-    calling_convention_followed = 12
+    calling_convention_followed = 16
     # Checks for subroutine calls.
-    subroutine_call = 13
+    subroutine_call = 17
     # Checks for a subroutine/trap using pass by register.
-    pass_by_regs = 14
+    pass_by_regs = 18
 
     end_of_postconditions = 0xff
 
@@ -286,7 +294,7 @@ class Preconditions(object):
 
 class Postconditions(object):
     """Represents the things checked at the end of the test
-    
+
     Generates base64 string to verify the test in complx."""
     def __init__(self):
         # List of (PostconditionFlag, char type, <int,string> val, num_params, params)
@@ -296,7 +304,7 @@ class Postconditions(object):
         self._data = []
 
     def add(self, type_id, value, data=None):
-        assert type_id.value <= 14, 'Internal error, Unknown Postcondition Flag.'
+        assert type_id.value <= 18, 'Internal error, Unknown Postcondition Flag.'
         if data is None:
             data = []
         if value is True or value is False:
@@ -366,7 +374,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
     failed_assertions_per_test = {}
     passed_assertions_per_test = {}
-        
+
     @classmethod
     def setUpClass(cls):
         pass
@@ -970,7 +978,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
         This exactly performs state.memory[address] = value.
 
-        *NOTICE* It is an error to call this function on an labelled address, the reasoning for this is that there is
+        *NOTICE* It is an error to call this function on an labeled address, the reasoning for this is that there is
         the potential to overwrite user data past the end of the string in the original template if the text parameter
         is larger. Use setString for that use case since it avoids that problem by having the string be at a address
         pointed to by a label.
@@ -980,7 +988,7 @@ class LC3UnitTestCase(unittest.TestCase):
             value: Integer - Value to write at that address
         """
         label = self.state.reverse_lookup(address)
-        self._internalAssert('fillValue', not label, 'fillValue is not to be used on a labelled address, use setValue instead. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
+        self._internalAssert('fillValue', not label, 'fillValue is not to be used on a labeled address, use setValue instead. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
 
         self._writeMem(address, value)
 
@@ -996,7 +1004,7 @@ class LC3UnitTestCase(unittest.TestCase):
             state.memory[address + len(text) - 1] = text[len(text) - 1]
             state.memory[address + len(text)] = 0
 
-        *NOTICE* It is an error to call this function on an labelled address, the reasoning for this is that there is
+        *NOTICE* It is an error to call this function on an labeled address, the reasoning for this is that there is
         the potential to overwrite user data past the end of the string in the original template if the text parameter
         is larger. Use setString for that use case since it avoids that problem by having the string be at a address
         pointed to by a label.
@@ -1011,7 +1019,7 @@ class LC3UnitTestCase(unittest.TestCase):
             ValueError if the address has a label (use setString instead).
         """
         label = self.state.reverse_lookup(address)
-        self._internalAssert('fillString', not label, 'fillString is not to be used on a labelled address, use setString instead. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
+        self._internalAssert('fillString', not label, 'fillString is not to be used on a labeled address, use setString instead. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
 
         for addr, elem in enumerate(text, address):
             self._writeMem(addr, ord(elem))
@@ -1028,7 +1036,7 @@ class LC3UnitTestCase(unittest.TestCase):
             [...]
             state.memory[address + len(arr) - 1] = arr[len(arr) - 1]
 
-        *NOTICE* It is an error to call this function on an labelled address, the reasoning for this is that there is
+        *NOTICE* It is an error to call this function on an labeled address, the reasoning for this is that there is
         the potential to overwrite user data past the end of the string in the original template if the parameter
         is larger. Use setArray for that use case since it avoids that problem by having the string be at a address
         pointed to by a label.
@@ -1043,7 +1051,7 @@ class LC3UnitTestCase(unittest.TestCase):
             ValueError if the address has a label (use setArray instead).
         """
         label = self.state.reverse_lookup(address)
-        self._internalAssert('fillArray', not label, 'fillArray is not to be used on a labelled address, use setArray instead. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
+        self._internalAssert('fillArray', not label, 'fillArray is not to be used on a labeled address, use setArray instead. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
 
         for addr, elem in enumerate(arr, address):
             self._writeMem(addr, elem)
@@ -1060,7 +1068,7 @@ class LC3UnitTestCase(unittest.TestCase):
             ...
             state.memory[address + n] = data
 
-        *NOTICE* It is an error to call this function on an labelled address.
+        *NOTICE* It is an error to call this function on an labeled address.
 
         This function is intended to dump an node out in memory.
 
@@ -1075,7 +1083,7 @@ class LC3UnitTestCase(unittest.TestCase):
         """
         label = self.state.reverse_lookup(address)
 
-        self._internalAssert('fillNode', not label, 'fillNode is not to be used on a labelled address. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
+        self._internalAssert('fillNode', not label, 'fillNode is not to be used on a labeled address. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
 
         node_data = []
         size_next = 1
@@ -1107,7 +1115,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
         This exactly performs:
 
-        *NOTICE* It is an error to call this function on an labelled address.
+        *NOTICE* It is an error to call this function on an labeled address.
 
         This function is intended to dump a set of related data out in memory.
 
@@ -1118,7 +1126,7 @@ class LC3UnitTestCase(unittest.TestCase):
             data: Tuple - Node data.
         """
         label = self.state.reverse_lookup(address)
-        self._internalAssert('fillData', not label, 'fillData is not to be used on a labelled address. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
+        self._internalAssert('fillData', not label, 'fillData is not to be used on a labeled address. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
         self._writeData(address, data)
         # TODO write preconditions.
         #self.preconditions.addPrecondition(PreconditionFlag.data, '%04x' % address, data)
@@ -1150,7 +1158,7 @@ class LC3UnitTestCase(unittest.TestCase):
     def _assertShortEqual(self, expected, actual, name, msg, level=AssertionType.soft, internal=False):
         """Helper to assert if two 16 bit values are equal."""
         self._internalAssertEqual(_toUShort(expected), _toUShort(actual), name, msg=msg, level=level, internal=internal)
-    
+
     def _assertEqual(self, expected, actual, name, msg, level=AssertionType.soft, internal=False):
         self._internalAssertEqual(expected, actual, name, msg=msg, level=level, internal=internal)
 
@@ -1302,7 +1310,18 @@ class LC3UnitTestCase(unittest.TestCase):
         self._assertEqual(expected_str, actual_str, 'string: %s' % label, 'String of characters starting at MEM[%s] was expected to be %s but code produced %s\n' % (label, repr(''.join(expected_str)), repr(''.join(actual_str))), level=level)
         self.postconditions.add(PostconditionFlag.string, label, [ord(char) for char in text])
 
-    def assertAddress(self, address, value, level=AssertionType.soft):
+    def assertConsoleOutput(self, output, level=AssertionType.soft):
+        """Asserts that console output is a certain string.
+
+        Args:
+            input: String - Expected console output.
+        """
+        expected = output
+        actual = self.state.output
+        self._assertEqual(expected, actual, 'console output', 'Console output was expected to be %s but code produced %s\n' % (repr(expected), repr(actual)), level=level)
+        self.postconditions.add(PostconditionFlag.output, 0, [ord(char) for char in output])
+
+    def assertValueAt(self, address, value, level=AssertionType.soft):
         """Asserts that a value at an address is a certain value.
 
         This exactly checks if state.memory[address] == value
@@ -1313,10 +1332,73 @@ class LC3UnitTestCase(unittest.TestCase):
             value: Integer - Expected value.
         """
         address = _toUShort(address)
+        label = self.state.reverse_lookup(address)
+        self._internalAssert('fillValue', not label, 'assertValueAt is not to be used on a labeled address, use assertValue instead. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
+
         actual = self._readMem(address)
         expected = _toShort(value)
         self._assertShortEqual(expected, actual, 'address: x%04x' % address, 'MEM[x%04x] was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (address, expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
-        self.postconditions.add(PostconditionFlag.address, 'x%04x' % address, [value])
+        self.postconditions.add(PostconditionFlag.direct_value, 'x%04x' % address, [value])
+
+    def assertArrayAt(self, address, arr, level=AssertionType.soft):
+        """Asserts that a sequence of values starting at the address given are certain values.
+
+        This exactly checks if:
+            state.memory[address] == arr[0]
+            state.memory[address + 1] == arr[1]
+            [...]
+            state.memory[address + len(arr) - 1] == arr[len(arr) - 1]
+
+        *NOTICE* It is an error to call this function on an labeled address, the reasoning for this is that there is
+        the potential to overwrite user data past the end of the array in the original template if the text parameter
+        is larger. Use assertArray for that use case since it avoids that problem by having the string be at a address
+        pointed to by a label.
+
+        Args:
+            address: Short - Starting address of the array to check.
+            arr: Iterable of Integers - Expected values to check sequentially.
+        """
+        start_addr = _toUShort(address)
+        label = self.state.reverse_lookup(start_addr)
+        self._internalAssert('assertArrayAt', not label, 'assertArrayAt is not to be used on a labeled address, use assertArray instead. x%04x has label %s' % (start_addr, label), AssertionType.fatal, internal=True)
+
+        actual_arr = []
+        for addr, _ in enumerate(arr, start_addr):
+            actual_arr.append(self._readMem(addr))
+        self._assertEqual(arr, actual_arr, 'arrayAt: x%04x' % start_addr, 'Sequence of values at MEM[x%04x] was expected to be %s but code produced %s\n' % (start_addr, arr, actual_arr), level=level)
+        self.postconditions.add(PostconditionFlag.direct_array, 'x%04x' % start_addr, arr)
+
+    def assertStringAt(self, address, text, level=AssertionType.soft):
+        """Asserts that sequence of characters followed by a NUL terminator starting at the address pointed to by label are certain values.
+
+        This exactly checks if:
+            state.memory[address] == text[0]
+            state.memory[address + 1] == text[1]
+            [...]
+            state.memory[address + len(text) - 1] == text[len(text) - 1]
+            state.memory[address + len(text)] == 0
+
+        *NOTICE* It is an error to call this function on an labeled address, the reasoning for this is that there is
+        the potential to overwrite user data past the end of the string in the original template if the text parameter
+        is larger. Use setString for that use case since it avoids that problem by having the string be at a address
+        pointed to by a label.
+
+        Args:
+            address: Short - Starting address of the string to check.
+            text: String - Expected characters to check sequentially.
+        """
+        start_addr = _toUShort(address)
+        label = self.state.reverse_lookup(start_addr)
+        self._internalAssert('assertStringAt', not label, 'assertStringAt is not to be used on a labeled address, use assertString instead. x%04x has label %s' % (start_addr, label), AssertionType.fatal, internal=True)
+
+        actual_str = []
+        for addr, _ in enumerate(text, start_addr):
+            actual_str.append(six.unichr(self._readMem(addr, unsigned=True)))
+        actual_str.append(six.unichr(self._readMem(start_addr + len(text), unsigned=True)))
+        expected_str = list(six.u(text))
+        expected_str.append(u'\0')
+        self._assertEqual(expected_str, actual_str, 'stringAt: x%04x' % start_addr, 'String of characters at MEM[x%04x] was expected to be %s but code produced %s\n' % (start_addr, repr(''.join(expected_str)), repr(''.join(actual_str))), level=level)
+        self.postconditions.add(PostconditionFlag.direct_string, 'x%04x' % start_addr, [ord(char) for char in text])
 
     def assertData(self, address, named_tuple, field_names=None, level=AssertionType.soft):
         """Asserts that an arbitrary data structure starting at the address given is a certain value
@@ -1341,21 +1423,10 @@ class LC3UnitTestCase(unittest.TestCase):
 
         label = self.state.reverse_lookup(address)
         if label:
-            raise ValueError('assertData is not to be used on a labelled address.')
+            raise ValueError('assertData is not to be used on a labeled address.')
         actual = named_tuple._make(self._readData(address, named_tuple))
         expected = named_tuple._make(_cstringify_values(list(named_tuple)))
         assertDataHelper(expected, actual, field_names or (named_tuple._fields if hasattr(named_tuple, '_fields') else None))
-
-    def assertConsoleOutput(self, output, level=AssertionType.soft):
-        """Asserts that console output is a certain string.
-
-        Args:
-            input: String - Expected console output.
-        """
-        expected = output
-        actual = self.state.output
-        self._assertEqual(expected, actual, 'console output', 'Console output was expected to be %s but code produced %s\n' % (repr(expected), repr(actual)), level=level)
-        self.postconditions.add(PostconditionFlag.output, 0, [ord(char) for char in output])
 
     def assertReturnValue(self, answer, level=AssertionType.soft):
         """Asserts that the correct answer was returned.

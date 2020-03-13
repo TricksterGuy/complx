@@ -64,6 +64,12 @@ enum PreconditionFlag
     END_OF_INPUT = 0xFF,
 };
 
+
+enum PostconditionFlag
+{
+
+};
+
 using namespace boost::archive::iterators;
 typedef transform_width<binary_from_base64<remove_whitespace<std::string::const_iterator>>, 8, 6> ItBinaryT;
 

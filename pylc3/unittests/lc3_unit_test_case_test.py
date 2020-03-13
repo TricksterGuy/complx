@@ -291,10 +291,12 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertHalted()
         self.assertNoWarnings()
 
-        # TODO rename.
-        self.assertAddress(0x3005, 2)
-        self.assertAddress(0x3006, 3)
-        self.assertAddress(0x3007, 5)
+        with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
+            self.assertValueAt(0x3005, 2)
+
+        self.assertValue("A", 2)
+        self.assertValueAt(0x3006, 3)
+        self.assertValueAt(0x3007, 5)
 
     def testFillString(self):
         # This is not really testing assembly code see the others for more full fledged examples with code snippets.
@@ -1253,11 +1255,14 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertRegister(6, 0x5030)
         self.assertPc(0x3000)
         self.assertValue('AHH', 0x4000)
-        self.assertAddress(0x4000, 0x3444)
         self.assertPointer('BLAH', 0x3456)
         self.assertArray('CAWCAW', [5, 2, 9, 0x3000, 0x5259, 0xFFFF])
         self.assertString('PAPA', 'MAMA')
         self.assertConsoleOutput('RAHRAH')
+
+        self.assertValueAt(0x4000, 0x3444)
+        self.assertStringAt(0x6000, "LALA")
+        self.assertArrayAt(0x8000, [3, 4, 1024])
 
         self.assertSubroutineCallsMade()
 
@@ -1273,15 +1278,17 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
                  '\x02\x01\x06\x00\x00\x00\x01\x00\x00\x000P'
                  '\x03\x01\x00\x00\x00\x00\x01\x00\x00\x00\x000'
                  '\x04\x02\x03\x00\x00\x00AHH\x01\x00\x00\x00\x00@'
-                 '\x05\x02\x05\x00\x00\x00x4000\x01\x00\x00\x00D4'
-                 '\x06\x02\x04\x00\x00\x00BLAH\x01\x00\x00\x00V4'
-                 '\x07\x02\x06\x00\x00\x00CAWCAW\x06\x00\x00\x00\x05\x00\x02\x00\t\x00\x000YR\xff\xff'
-                 '\x08\x02\x04\x00\x00\x00PAPA\x04\x00\x00\x00M\x00A\x00M\x00A\x00'
-                 '\x09\x01\x00\x00\x00\x00\x06\x00\x00\x00R\x00A\x00H\x00R\x00A\x00H\x00'
-                 '\x0A\x01\x00\x00\x00\x00\x01\x00\x00\x00!\x00'
-                 '\x0B\x01\xd4\x00\x00\x00\x04\x00\x00\x00\x06\x00\x0c\x00\x12\x00\x15\x00'
-                 '\x0C\x01\x00\x00\x00\x00\x03\x00\x00\x00\x00\xf0\xfe\xca\x00\x80'
-                 '\x0D\x02\x04\x00\x00\x00TATA\x03\x00\x00\x00\x06\x00\x07\x00\x08\x00'
+                 '\x05\x02\x04\x00\x00\x00BLAH\x01\x00\x00\x00V4'
+                 '\x06\x02\x06\x00\x00\x00CAWCAW\x06\x00\x00\x00\x05\x00\x02\x00\t\x00\x000YR\xff\xff'
+                 '\x07\x02\x04\x00\x00\x00PAPA\x04\x00\x00\x00M\x00A\x00M\x00A\x00'
+                 '\x08\x01\x00\x00\x00\x00\x06\x00\x00\x00R\x00A\x00H\x00R\x00A\x00H\x00'
+                 '\x09\x02\x05\x00\x00\x00x4000\x01\x00\x00\x00D4'
+                 '\x0A\x02\x05\x00\x00\x00x6000\x04\x00\x00\x00L\x00A\x00L\x00A\x00'
+                 '\x0B\x02\x05\x00\x00\x00x8000\x03\x00\x00\x00\x03\x00\x04\x00\x00\x04'
+                 '\x0E\x01\x00\x00\x00\x00\x01\x00\x00\x00!\x00'
+                 '\x0F\x01\xd4\x00\x00\x00\x04\x00\x00\x00\x06\x00\x0c\x00\x12\x00\x15\x00'
+                 '\x10\x01\x00\x00\x00\x00\x03\x00\x00\x00\x00\xf0\xfe\xca\x00\x80'
+                 '\x11\x02\x04\x00\x00\x00TATA\x03\x00\x00\x00\x06\x00\x07\x00\x08\x00'
                  '\xff')
         self.assertEqual(blob, expected_blob)
 
@@ -1315,16 +1322,16 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         """
         self.loadCode(snippet)
         self.runCode(max_executions=1)
-        
+
         self.assertValue("A", 2, level=lc3_unit_test_case.AssertionType.hard)
         self.assertValue("B", 3)
         self.assertValue("C", 4)
-        
+
         self.assertEquals(self.failed_assertions,
         [('value: A', 'MEM[A] was expected to be (2 x0002) but code produced (3 x0003)\n'),
          ('value: B', 'Not checked due to previous failures.'),
          ('value: C', 'Not checked due to previous failures.')])
-        
+
         # Clear so that the test doesn't fail during tearDown.
         self.failed_assertions = []
 
