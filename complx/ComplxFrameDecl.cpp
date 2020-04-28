@@ -17,7 +17,7 @@ class wxFBContextSensitiveHelpSetter
 public:
 wxFBContextSensitiveHelpSetter()
 {
-wxHelpControllerHelpProvider* help = new wxSimpleHelpProvider();
+auto* help = new wxSimpleHelpProvider();
 wxHelpProvider* old = wxHelpProvider::Set( help );
 if (old != 0){
 delete old;
@@ -230,8 +230,12 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menu->Append( menuDebug, _("Debug") );
 
 	menuTest = new wxMenu();
+	wxMenuItem* menuTestStartReplayStringServer;
+	menuTestStartReplayStringServer = new wxMenuItem( menuTest, ID_START_REPLAY_STRING_SERVER, wxString( _("&Start Replay String Server") ) + wxT('\t') + wxT("Ctrl+S"), _("Starts the replay string server to receive replay strings from host."), wxITEM_NORMAL );
+	menuTest->Append( menuTestStartReplayStringServer );
+
 	wxMenuItem* menuTestSetupReplayString;
-	menuTestSetupReplayString = new wxMenuItem( menuTest, ID_SETUP_REPLAY_STRING, wxString( _("&Setup Replay String...") ) + wxT('\t') + wxT("Ctrl+T"), _("Loads a replay string from the pylc3 unit test framework."), wxITEM_NORMAL );
+	menuTestSetupReplayString = new wxMenuItem( menuTest, ID_SETUP_REPLAY_STRING, wxString( _("Se&tup Replay String...") ) + wxT('\t') + wxT("Ctrl+T"), _("Loads a replay string from the pylc3 unit test framework."), wxITEM_NORMAL );
 	menuTest->Append( menuTestSetupReplayString );
 
 	wxMenuItem* menuTestReloadReplayString;
@@ -672,6 +676,7 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuDebug->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnAdvancedBreakpoint ), this, menuDebugAdvanced->GetId());
 	menuDebug->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnBlackbox ), this, menuDebugBlackbox->GetId());
 	menuDebug->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTraceFile ), this, menuDebugTraceFile->GetId());
+	menuTest->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnStartReplayStringServer ), this, menuTestStartReplayStringServer->GetId());
 	menuTest->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnSetupReplayString ), this, menuTestSetupReplayString->GetId());
 	menuTest->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReloadReplayString ), this, menuTestReloadReplayString->GetId());
 	menuTest->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDescribeReplayString ), this, menuTestDescribeReplayString->GetId());

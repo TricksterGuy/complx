@@ -1331,6 +1331,11 @@ void ComplxFrame::OnDestroyView(wxCloseEvent& event)
     frame->Destroy();
 }
 
+void ComplxFrame::OnStartReplayStringServer(wxCommandEvent& event) {
+
+    event.Skip();
+}
+
 void ComplxFrame::OnSetupReplayString(wxCommandEvent& event)
 {
 #ifdef ENABLE_LC3_REPLAY

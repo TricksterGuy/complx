@@ -83,6 +83,7 @@ class ComplxFrameDecl : public wxFrame
 			ID_ADVANCED_BREAKPOINT,
 			ID_ADD_BLACKBOX,
 			ID_TRACE_FILE,
+			ID_START_REPLAY_STRING_SERVER,
 			ID_SETUP_REPLAY_STRING,
 			ID_RELOAD_REPLAY_STRING,
 			ID_DESCRIBE_REPLAY_STRING,
@@ -179,6 +180,7 @@ class ComplxFrameDecl : public wxFrame
 		virtual void OnAdvancedBreakpoint( wxCommandEvent& event ) = 0;
 		virtual void OnBlackbox( wxCommandEvent& event ) = 0;
 		virtual void OnTraceFile( wxCommandEvent& event ) = 0;
+		virtual void OnStartReplayStringServer( wxCommandEvent& event ) = 0;
 		virtual void OnSetupReplayString( wxCommandEvent& event ) = 0;
 		virtual void OnReloadReplayString( wxCommandEvent& event ) = 0;
 		virtual void OnDescribeReplayString( wxCommandEvent& event ) = 0;

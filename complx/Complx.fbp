@@ -728,10 +728,24 @@
                         <property name="bitmap"></property>
                         <property name="checked">0</property>
                         <property name="enabled">1</property>
+                        <property name="help">Starts the replay string server to receive replay strings from host.</property>
+                        <property name="id">ID_START_REPLAY_STRING_SERVER</property>
+                        <property name="kind">wxITEM_NORMAL</property>
+                        <property name="label">&amp;Start Replay String Server</property>
+                        <property name="name">menuTestStartReplayStringServer</property>
+                        <property name="permission">none</property>
+                        <property name="shortcut">Ctrl+S</property>
+                        <property name="unchecked_bitmap"></property>
+                        <event name="OnMenuSelection">OnStartReplayStringServer</event>
+                    </object>
+                    <object class="wxMenuItem" expanded="1">
+                        <property name="bitmap"></property>
+                        <property name="checked">0</property>
+                        <property name="enabled">1</property>
                         <property name="help">Loads a replay string from the pylc3 unit test framework.</property>
                         <property name="id">ID_SETUP_REPLAY_STRING</property>
                         <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">&amp;Setup Replay String...</property>
+                        <property name="label">Se&amp;tup Replay String...</property>
                         <property name="name">menuTestSetupReplayString</property>
                         <property name="permission">none</property>
                         <property name="shortcut">Ctrl+T</property>
