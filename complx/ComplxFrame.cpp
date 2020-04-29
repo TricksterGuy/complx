@@ -12,12 +12,16 @@
 #include <wx/brush.h>
 #include <wx/aboutdlg.h>
 #include <wx/numdlg.h>
+#include <wx/busyinfo.h>
+#include <wx/utils.h>
 #include <wx/config.h>
+#include <wx/socket.h>
 #include <wx/tipdlg.h>
 #include <cassert>
 #include <bitset>
 #include <algorithm>
 #include <iostream>
+#include <memory>
 #include "icon64.xpm"
 
 #include "ComplxFrame.hpp"
@@ -432,9 +436,9 @@ void ComplxFrame::OnActivate(wxActivateEvent& event)
             if (!reload_tests)
             {
                 int answer = wxMessageBox(wxString::Format("%s has been modified.\n"
-                                                           "Do you wish to reload it?\n"
-                                                           "(Note simulation will be reset and breakpoints "
-                                                           "not present in code will not be reloaded.)", asm_file.GetFullName()),
+                                          "Do you wish to reload it?\n"
+                                          "(Note simulation will be reset and breakpoints "
+                                          "not present in code will not be reloaded.)", asm_file.GetFullName()),
                                           "Reload asm file?", wxOK | wxOK_DEFAULT | wxCANCEL);
                 reload_asm = answer == wxOK;
             }
@@ -571,7 +575,7 @@ void ComplxFrame::OnBaseChange(wxMouseEvent& event)
         //if (value > 0 && value <= 255)
         //    mode = BASE_CHAR;
         //else
-            mode = BASE_2;
+        mode = BASE_2;
     }
     //else if (mode == BASE_CHAR)
     //    mode = BASE_2;
@@ -1331,9 +1335,62 @@ void ComplxFrame::OnDestroyView(wxCloseEvent& event)
     frame->Destroy();
 }
 
-void ComplxFrame::OnStartReplayStringServer(wxCommandEvent& event) {
+void ComplxFrame::OnStartReplayStringServer(wxCommandEvent& event)
+{
+#ifdef ENABLE_LC3_REPLAY
+    if (Running())
+        return;
 
-    event.Skip();
+    if (reload_options.file.empty())
+        OnLoad(event);
+
+    if (reload_options.file.empty())
+    {
+        wxMessageBox("An assembly file must be loaded to perform this operation", "Error");
+        return;
+    }
+
+    wxIPV4address address;
+    address.AnyAddress();
+    address.Service(21100);
+    wxSocketServer server(address, wxSOCKET_REUSEADDR);
+    if (!server.IsOk())
+    {
+        wxMessageBox("Unable to start Replay String Server.", "Error");
+        return;
+    }
+
+    wxSocketBase* client = nullptr;
+    {
+        std::unique_ptr<wxBusyInfo> wait(new wxBusyInfo("Waiting for connection..."));
+        std::unique_ptr<wxWindowDisabler> disabler(new wxWindowDisabler());
+
+        if (!server.WaitForAccept(10) || (client = server.Accept(false)) == nullptr)
+        {
+            wait.reset();
+            disabler.reset();
+
+            wxMessageBox("Complx did not receive a replay string from client.", "Error");
+            return;
+        }
+    }
+
+    uint32_t size;
+    client->Read(&size, sizeof(size));
+    size = wxINT32_SWAP_ON_LE(size);
+    if (size <= 1024)
+    {
+        char buf[size+1];
+        client->Read(buf, size);
+        buf[size] = 0;
+        DoSetupReplayString(std::string(buf, size));
+    }
+    else
+    {
+        wxMessageBox("Could not process replay string, length too long.", "Error");
+    }
+    client->Destroy();
+#endif
 }
 
 void ComplxFrame::OnSetupReplayString(wxCommandEvent& event)

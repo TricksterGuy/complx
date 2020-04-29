@@ -10,6 +10,7 @@
 #include <wx/event.h>
 #include <wx/filename.h>
 #include <wx/grid.h>
+#include <wx/socket.h>
 #include <wx/textctrl.h>
 #include <wx/window.h>
 
