@@ -1147,7 +1147,7 @@ void ComplxFrame::OnCallStack(wxCommandEvent& event)
 
 /** OnSubroutineCall
   *
-  * "Calls" a subroutine uses same environment as lc3test
+  * "Calls" a subroutine uses same environment as pyLC3
   */
 void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
 {
@@ -1163,65 +1163,71 @@ void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
     }
 
     CallSubroutineDialog* dialog = new CallSubroutineDialog(this);
-    int stack_location = 0;
-    int subroutine_location = 0;
-    std::vector<short> params;
-    unsigned short halt_statement = 0;
+    int subroutine_location;
+    std::vector<int> params;
 
     if (dialog->ShowModal() != wxID_OK)
         goto end;
 
-    stack_location = lc3_sym_lookup(state, dialog->GetStack());
+    DoLoadFile(reload_options);
+
     subroutine_location = lc3_sym_lookup(state, dialog->GetSubroutine());
-    if (stack_location == -1)
-    {
-        wxMessageBox(wxString::Format("ERROR! Stack location: %s was not found in symbol table", dialog->GetStack()), "Error");
-        goto end;
-    }
     if (subroutine_location == -1)
     {
         wxMessageBox(wxString::Format("ERROR! Subroutine location: %s was not found in symbol table", dialog->GetSubroutine()), "Error");
         goto end;
     }
+
+
     for (const auto& expr : dialog->GetParams())
     {
-        int value_calc;
-        if (lc3_calculate(state, expr, value_calc))
+        int value_calc = 0x10000;
+        if (!expr.empty() && lc3_calculate(state, expr, value_calc))
         {
             wxMessageBox(wxString::Format("ERROR! Parameter %s is a malformed expression", expr), "Error");
             goto end;
         }
-        params.push_back((short)value_calc);
+        params.push_back(value_calc);
     }
-    // Meh... find a halt statement there needs to be somewhere to go afterward.
-    for (unsigned int i = 0x3000; i < 0x10000; i++)
+
+    if (dialog->IsCallingConvention())
     {
-        if ((unsigned short)state.mem[i] == 0xF025)
+        std::map<std::string, short> env;
+        for (const auto& name_expr : dialog->GetEnvironment())
         {
-            halt_statement = i;
-            break;
+            int value_calc;
+            if (lc3_calculate(state, name_expr.second, value_calc))
+            {
+                wxMessageBox(wxString::Format("ERROR! Parameter %s is a malformed expression", name_expr.second), "Error");
+                goto end;
+            }
+            env[name_expr.first] = value_calc;
+        }
+        state.regs[6] = static_cast<unsigned short>(env["STACK"]) - params.size();
+        state.regs[5] = env["R5"];
+        state.regs[7] = env["R7"];
+        for (unsigned int i = 0; i < params.size(); i++)
+            state.mem[static_cast<unsigned short>(state.regs[6]) + i] = params[i];
+    }
+    else
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            if (params[i] != 0x10000)
+                state.regs[i] = params[i];
         }
     }
-    if ((unsigned short)state.mem[halt_statement] != 0xF025)
+
     {
-        wxMessageBox("ERROR! No halt statement found in your program", "Error");
-        goto end;
+        state.pc = static_cast<unsigned short>(subroutine_location);
+        //wxString end_condition = wxString::Format("R7==x%04x", static_cast<unsigned short>(state.regs[7]));
+        lc3_add_break(state, state.regs[7], "END_OF_SUBROUTINE");
+        UpdateRegisters();
+        UpdateMemory();
+        UpdateStatus();
     }
 
-    reload_options.memory = dialog->IsRandomMemory() ? RANDOMIZE : ZEROED;
-    reload_options.registers = dialog->IsRandomRegisters() ? RANDOMIZE : ZEROED;
 
-    DoLoadFile(reload_options);
-
-    state.regs[6] = state.mem[(unsigned short)stack_location] - params.size();
-    state.pc = (unsigned short) subroutine_location;
-    for (unsigned int i = 0; i < params.size(); i++)
-        state.mem[(unsigned short)state.regs[6] + i] = params[i];
-    state.regs[7] = halt_statement;
-
-    UpdateRegisters();
-    UpdateMemory();
-    UpdateStatus();
 
 end:
     delete dialog;
