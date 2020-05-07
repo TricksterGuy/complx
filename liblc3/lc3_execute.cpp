@@ -226,9 +226,13 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
                     if (state.subroutines.find(state.pc) != state.subroutines.end())
                         num_params = state.subroutines[state.pc].num_params;
                     for (unsigned int i = 0; i < num_params; i++)
+                    {
                         call_info.params.push_back(state.mem[call_info.r6 + i]);
+                    }
            	        for (unsigned int i = 0; i < 8; i++)
+                    {
                         call_info.regs[i] = state.regs[i];
+                    }
 
                     state.first_level_calls.push_back(call_info);
                 }
@@ -531,6 +535,9 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
     if (state.true_traps)
     {
         changes.changes = LC3_SUBROUTINE_BEGIN;
+        changes.subroutine.r6 = state.regs[6];
+        changes.subroutine.is_trap = true;
+
         if (state.lc3_version > 0)
         {
             short psr = (short)((state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p);
@@ -550,15 +557,12 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
 
         // PC = MEM[VECTOR]
         state.pc = state.mem[trap.vector];
+        changes.subroutine.address = state.pc;
 
         // If not within an interrupt
-        /// TODO why do I have this check here?
-        if (state.privilege || state.lc3_version != 0)
+        /// TODO should check if there are any interrupts on the rti stack.
+        if (state.privilege || state.lc3_version > 0)
         {
-            changes.changes = LC3_SUBROUTINE_BEGIN;
-            changes.subroutine.address = state.pc;
-            changes.subroutine.r6 = state.regs[0x6];
-            changes.subroutine.is_trap = true;
             if (state.max_call_stack_size != 0)
             {
                 state.call_stack.push_back(changes.subroutine);
