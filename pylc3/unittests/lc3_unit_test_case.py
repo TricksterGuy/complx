@@ -230,6 +230,29 @@ def tuple_to_data_spec(t):
     return expanded
 
 
+def _formDataPreconditions(t):
+    assert isinstance(t, tuple), 'Param is not a tuple, type found: %s' % type(t)
+    l = list(t)
+    expanded = []
+    for item in l:
+        if isinstance(item, int):
+            expanded.append(DataItem.number.value)
+            expanded.append(item)
+        elif isinstance(item, str):
+            expanded.append(DataItem.string.value)
+            expanded.append(len(item))
+            expanded.extend([ord(c) for c in item])
+        elif isinstance(item, list):
+            expanded.append(DataItem.array.value)
+            expanded.append(len(item))
+            expanded.extend(item)
+        elif isinstance(item, tuple):
+            expanded.append(DataItem.data.value)
+            expanded.extend(_formDataPreconditions(item))
+            expanded.append(DataItem.end_of_data.value)
+    return expanded
+
+
 class SubroutineCallMode(enum.Enum):
     """Internal Enum to ensure subroutine call conventions are consistent."""
     lc3_calling_convention = 0
@@ -1078,7 +1101,7 @@ class LC3UnitTestCase(unittest.TestCase):
             address: Short - Address to set.
             next_info: 1) None to indicate leaf node or last node. (Note only one 0 is written in this case).
                        2) Short - Next address.
-                       3) Iterable of Shorts - Next addresses.
+                       3) Iterable of Shorts/None - Next addresses, None to indicate no next address.
             data: Tuple - Node data. (See fillData for a more detailed description on the tuple's contents.)
         """
         label = self.state.reverse_lookup(address)
@@ -1089,20 +1112,20 @@ class LC3UnitTestCase(unittest.TestCase):
         size_next = 1
         if not next:
             self._writeMem(address, 0)
-            node_data = [data]
+            node_data = ([0], data)
         elif isinstance(next, int):
             self._writeMem(address, next)
-            node_data = [next, data]
+            node_data = ([next], data)
         else:
+            next = [elem if elem else 0 for elem in next]
             for addr, elem in enumerate(next, address):
-                self._writeMem(addr, elem)
+                self._writeMem(addr, 0 if elem is None else elem)
             size_next = len(next)
-            node_data = next + [data]
+            node_data = (next, data)
 
         self._writeData(address + size_next, data)
 
-        # TODO write preconditions.
-        #self.preconditions.addPrecondition(PreconditionFlag.node, '%04x' % address, node_data)
+        self.preconditions.addPrecondition(PreconditionFlag.node, '%04x' % address, _formDataPreconditions(node_data))
 
     def fillData(self, address, data):
         """Sets an arbitrary data structure/struct/record at the address given.
@@ -1128,8 +1151,8 @@ class LC3UnitTestCase(unittest.TestCase):
         label = self.state.reverse_lookup(address)
         self._internalAssert('fillData', not label, 'fillData is not to be used on a labeled address. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
         self._writeData(address, data)
-        # TODO write preconditions.
-        #self.preconditions.addPrecondition(PreconditionFlag.data, '%04x' % address, data)
+
+        self.preconditions.addPrecondition(PreconditionFlag.data, '%04x' % address, _formDataPreconditions(data))
 
     def _addSubroutineInfo(self, subroutine, num_params):
         """Adds metadata for a subroutine.
@@ -1338,7 +1361,7 @@ class LC3UnitTestCase(unittest.TestCase):
         actual = self._readMem(address)
         expected = _toShort(value)
         self._assertShortEqual(expected, actual, 'address: x%04x' % address, 'MEM[x%04x] was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (address, expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
-        self.postconditions.add(PostconditionFlag.direct_value, 'x%04x' % address, [value])
+        self.postconditions.add(PostconditionFlag.direct_value, '%04x' % address, [value])
 
     def assertArrayAt(self, address, arr, level=AssertionType.soft):
         """Asserts that a sequence of values starting at the address given are certain values.
@@ -1366,7 +1389,7 @@ class LC3UnitTestCase(unittest.TestCase):
         for addr, _ in enumerate(arr, start_addr):
             actual_arr.append(self._readMem(addr))
         self._assertEqual(arr, actual_arr, 'arrayAt: x%04x' % start_addr, 'Sequence of values at MEM[x%04x] was expected to be %s but code produced %s\n' % (start_addr, arr, actual_arr), level=level)
-        self.postconditions.add(PostconditionFlag.direct_array, 'x%04x' % start_addr, arr)
+        self.postconditions.add(PostconditionFlag.direct_array, '%04x' % start_addr, arr)
 
     def assertStringAt(self, address, text, level=AssertionType.soft):
         """Asserts that sequence of characters followed by a NUL terminator starting at the address pointed to by label are certain values.
@@ -1398,16 +1421,24 @@ class LC3UnitTestCase(unittest.TestCase):
         expected_str = list(six.u(text))
         expected_str.append(u'\0')
         self._assertEqual(expected_str, actual_str, 'stringAt: x%04x' % start_addr, 'String of characters at MEM[x%04x] was expected to be %s but code produced %s\n' % (start_addr, repr(''.join(expected_str)), repr(''.join(actual_str))), level=level)
-        self.postconditions.add(PostconditionFlag.direct_string, 'x%04x' % start_addr, [ord(char) for char in text])
+        self.postconditions.add(PostconditionFlag.direct_string, '%04x' % start_addr, [ord(char) for char in text])
 
-    def assertData(self, address, named_tuple, field_names=None, level=AssertionType.soft):
+    def assertNodeAt(self, address, next, data):
+        """Asserts that a node starting at the address given is a certain value
+
+        Args:
+            address: Address where the node is located.
+        """
+
+    def assertDataAt(self, address, named_tuple, field_names=None, level=AssertionType.soft):
         """Asserts that an arbitrary data structure starting at the address given is a certain value
 
         Args:
-            address: - Address of where the data is located
+            address: - Address where the data is located
             named_tuple: A NamedTuple describing the data and its contents
                          or a tuple with the contents.
-            field_names: If a tuple is given for named_tuple a description of the fields in the tuple.
+            field_names: If a tuple is given for 'named_tuple' a description of the fields in the tuple.
+                         Ignored if named_tuple is a NamedTuple.
         """
         def _cstringify_values(l):
             return [six.u(d) + u'\0' if isinstance(d, str) else d for d in l]

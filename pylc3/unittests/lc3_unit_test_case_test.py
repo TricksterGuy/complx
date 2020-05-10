@@ -1,7 +1,10 @@
 from .. import pylc3
 import collections
+import logging
 import os
 import six
+import struct
+import sys
 import unittest
 import lc3_unit_test_case
 from lc3_unit_test_case import DataItem
@@ -14,6 +17,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
     def setUp(self):
         super(LC3UnitTestCaseTest, self).setUp()
+        self.maxDiff = None
 
     def tearDown(self):
         self.assertFalse(self.failed_assertions, 'Internal Error at least one assert has failed\n %s' % self.failed_assertions)
@@ -477,7 +481,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         Student = collections.namedtuple('Student', ['name', 'num_tests', 'num_homeworks', 'tests', 'homeworks', 'grade'])
         expected = Student('Student', 3, 5, [100, 75, 80], [100, 50, 80, 60, 100], 80)
-        self.assertData(0x4000, expected)
+        self.assertDataAt(0x4000, expected)
 
     def testTrapCall(self):
         snippet = """
@@ -1200,34 +1204,56 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.fillNode(0xB020, next=0xB000, data=(56,))
         self.fillNode(0xB050, next=[0xB000, 0xB001, 0xB002, 0xB003], data=(72,))
 
-        blob = self.preconditions._formBlob()
+        def splitBlob(blob):
+            blobettes = []
+            index = 0
+            while index < len(blob):
+                t = struct.unpack('=B', blob[index])[0]
+                if t < 16:
+                    blobettes.append(blob[index:index+5])
+                    index += 5
+                elif t == 16 or t == 255:
+                    blobettes.append(blob[index])
+                    index += 1
+                else:
+                    start = index
+                    size = struct.unpack('=I', blob[index+1:index+5])[0]
+                    index += 5
+                    index += size
+                    size = struct.unpack('=I', blob[index:index+4])[0]
+                    index += 4 + 2 * size
+                    blobettes.append(blob[start:index])
+            return blobettes
 
-        expected_blob = six.b(
-                    '\x01\x01\x00\x00\x00'
-                    '\x02\x01\x00\x00\x00'
-                    '\x03\x01\x00\x00\x00'
-                    '\x04\x00\x00\x00\x00'
-                    '\x05\x00\x00\x00\x00'
-                    '\x06\xff\xff\xff\xff'
-                    '\x07\x00\x80\x00\x00'
-                    '\x08\x01\x00\x00\x00'
-                    '\x10'
+        blob = splitBlob(self.preconditions._formBlob())
 
-                    '\x11\x01\x00\x00\x004\x01\x00\x00\x00\x01@'
-                    '\x12\x00\x00\x00\x00\x01\x00\x00\x00\x00\x05'
-                    '\x13\x03\x00\x00\x00AHH\x01\x00\x00\x00\x07\x00'
-                    '\x14\x04\x00\x00\x00BLAH\x01\x00\x00\x00\xa6\x02'
-                    '\x15\x06\x00\x00\x00CAWCAW\x05\x00\x00\x00\x05\x00\x02\x00\t\x00\x000\xff\xff'
-                    '\x16\x04\x00\x00\x00PAPA\x04\x00\x00\x00M\x00A\x00M\x00A\x00'
-                    '\x17\x00\x00\x00\x00\x06\x00\x00\x00R\x00A\x00H\x00R\x00A\x00H\x00'
-                    '\x18\x04\x00\x00\x00TATA\x06\x00\x00\x00\x05\x00@@\x00\x80\x02\x00\x05\x00\x07\x00'
-                    '\x1A\x04\x00\x00\x008000\x01\x00\x00\x00!\x00'
-                    '\x1B\x04\x00\x00\x009000\x04\x00\x00\x00V\x00A\x00V\x00A\x00'
-                    '\x1C\x04\x00\x00\x00a000\x03\x00\x00\x00\x01\x00 \x00\xd9\x02'
-                    #'\x1D\x04\x00\x00\x00b000\x01\x00\x00\x00\"\x00'
-                    #'\x1D\x04\x00\x00\x00b020\x02\x00\x00\x00\x00\xb08\x00'
-                    #'\x1D\x04\x00\x00\x00b050\x05\x00\x00\x00\x00\xb0\x01\xb0\x02\xb0\x03\xb0H\x00'
-                    '\xff')
+        expected_blob = [
+                    b'\x01\x01\x00\x00\x00',
+                    b'\x02\x01\x00\x00\x00',
+                    b'\x03\x01\x00\x00\x00',
+                    b'\x04\x00\x00\x00\x00',
+                    b'\x05\x00\x00\x00\x00',
+                    b'\x06\xff\xff\xff\xff',
+                    b'\x07\x00\x80\x00\x00',
+                    b'\x08\x01\x00\x00\x00',
+                    b'\x10',
+
+                    b'\x11\x01\x00\x00\x004\x01\x00\x00\x00\x01@',
+                    b'\x12\x00\x00\x00\x00\x01\x00\x00\x00\x00\x05',
+                    b'\x13\x03\x00\x00\x00AHH\x01\x00\x00\x00\x07\x00',
+                    b'\x14\x04\x00\x00\x00BLAH\x01\x00\x00\x00\xa6\x02',
+                    b'\x15\x06\x00\x00\x00CAWCAW\x05\x00\x00\x00\x05\x00\x02\x00\t\x00\x000\xff\xff',
+                    b'\x16\x04\x00\x00\x00PAPA\x04\x00\x00\x00M\x00A\x00M\x00A\x00',
+                    b'\x17\x00\x00\x00\x00\x06\x00\x00\x00R\x00A\x00H\x00R\x00A\x00H\x00',
+                    b'\x18\x04\x00\x00\x00TATA\x06\x00\x00\x00\x05\x00@@\x00\x80\x02\x00\x05\x00\x07\x00',
+                    b'\x1A\x04\x00\x00\x008000\x01\x00\x00\x00!\x00',
+                    b'\x1B\x04\x00\x00\x009000\x04\x00\x00\x00V\x00A\x00V\x00A\x00',
+                    b'\x1C\x04\x00\x00\x00a000\x03\x00\x00\x00\x01\x00 \x00\xd9\x02',
+                    b'\x1D\x04\x00\x00\x00b000\x07\x00\x00\x00\x03\x00\x01\x00\x00\x00\xff\x00\x01\x00"\x00\x00\x00',
+                    b'\x1D\x04\x00\x00\x00b020\x07\x00\x00\x00\x03\x00\x01\x00\x00\xb0\xff\x00\x01\x008\x00\x00\x00',
+                    b'\x1D\x04\x00\x00\x00b050\n\x00\x00\x00\x03\x00\x04\x00\x00\xb0\x01\xb0\x02\xb0\x03\xb0\xff\x00\x01\x00H\x00\x00\x00',
+                    b'\xff'
+        ]
 
         self.assertEqual(blob, expected_blob)
 
@@ -1263,6 +1289,8 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertValueAt(0x4000, 0x3444)
         self.assertStringAt(0x6000, "LALA")
         self.assertArrayAt(0x8000, [3, 4, 1024])
+        self.assertNodeAt(0x9000, next=0xA000, data=3)
+        self.assertNodeAt(0xA000, next=None, data=37)
 
         self.assertSubroutineCallsMade()
 
@@ -1270,26 +1298,54 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertStackManaged(0xF000, 0xCAFE, 0x8000)
         self.assertRegistersUnchanged([2, 4, 6, 7])
 
+
         # Clear since these assertions failed.
         self.failed_assertions = []
 
-        expected_blob = self.postconditions._formBlob()
-        blob = (b'\x01\x00\x01\x00\x00\x00'
-                 '\x02\x01\x06\x00\x00\x00\x01\x00\x00\x000P'
-                 '\x03\x01\x00\x00\x00\x00\x01\x00\x00\x00\x000'
-                 '\x04\x02\x03\x00\x00\x00AHH\x01\x00\x00\x00\x00@'
-                 '\x05\x02\x04\x00\x00\x00BLAH\x01\x00\x00\x00V4'
-                 '\x06\x02\x06\x00\x00\x00CAWCAW\x06\x00\x00\x00\x05\x00\x02\x00\t\x00\x000YR\xff\xff'
-                 '\x07\x02\x04\x00\x00\x00PAPA\x04\x00\x00\x00M\x00A\x00M\x00A\x00'
-                 '\x08\x01\x00\x00\x00\x00\x06\x00\x00\x00R\x00A\x00H\x00R\x00A\x00H\x00'
-                 '\x09\x02\x05\x00\x00\x00x4000\x01\x00\x00\x00D4'
-                 '\x0A\x02\x05\x00\x00\x00x6000\x04\x00\x00\x00L\x00A\x00L\x00A\x00'
-                 '\x0B\x02\x05\x00\x00\x00x8000\x03\x00\x00\x00\x03\x00\x04\x00\x00\x04'
-                 '\x0E\x01\x00\x00\x00\x00\x01\x00\x00\x00!\x00'
-                 '\x0F\x01\xd4\x00\x00\x00\x04\x00\x00\x00\x06\x00\x0c\x00\x12\x00\x15\x00'
-                 '\x10\x01\x00\x00\x00\x00\x03\x00\x00\x00\x00\xf0\xfe\xca\x00\x80'
-                 '\x11\x02\x04\x00\x00\x00TATA\x03\x00\x00\x00\x06\x00\x07\x00\x08\x00'
-                 '\xff')
+        def splitBlob(blob):
+            blobettes = []
+            index = 0
+            while index < len(blob):
+                id = struct.unpack('=B', blob[index])[0]
+                if id == 0xFF:
+                    blobettes.append(b'\xff')
+                    break
+                start = index
+                type = struct.unpack('=B', blob[index+1])[0]
+                index += 2
+                if type == 0:
+                    index += 4
+                elif type == 1:
+                    index += 4
+                    size = struct.unpack('=I', blob[index:index+4])[0]
+                    index += 4 + 2 * size
+                elif type == 2:
+                    size = struct.unpack('=I', blob[index:index+4])[0]
+                    index += 4 + size
+                    size = struct.unpack('=I', blob[index:index+4])[0]
+                    index += 4 + 2 * size
+                blobettes.append(blob[start:index])
+            return blobettes
+
+        blob = splitBlob(self.postconditions._formBlob())
+        expected_blob = [
+            b'\x01\x00\x01\x00\x00\x00',
+            b'\x02\x01\x06\x00\x00\x00\x01\x00\x00\x000P',
+            b'\x03\x01\x00\x00\x00\x00\x01\x00\x00\x00\x000',
+            b'\x04\x02\x03\x00\x00\x00AHH\x01\x00\x00\x00\x00@',
+            b'\x05\x02\x04\x00\x00\x00BLAH\x01\x00\x00\x00V4',
+            b'\x06\x02\x06\x00\x00\x00CAWCAW\x06\x00\x00\x00\x05\x00\x02\x00\t\x00\x000YR\xff\xff',
+            b'\x07\x02\x04\x00\x00\x00PAPA\x04\x00\x00\x00M\x00A\x00M\x00A\x00',
+            b'\x08\x01\x00\x00\x00\x00\x06\x00\x00\x00R\x00A\x00H\x00R\x00A\x00H\x00',
+            b'\x09\x02\x04\x00\x00\x004000\x01\x00\x00\x00D4',
+            b'\x0A\x02\x04\x00\x00\x006000\x04\x00\x00\x00L\x00A\x00L\x00A\x00',
+            b'\x0B\x02\x04\x00\x00\x008000\x03\x00\x00\x00\x03\x00\x04\x00\x00\x04',
+            b'\x0E\x01\x00\x00\x00\x00\x01\x00\x00\x00!\x00',
+            b'\x0F\x01\xd4\x00\x00\x00\x04\x00\x00\x00\x06\x00\x0c\x00\x12\x00\x15\x00',
+            b'\x10\x01\x00\x00\x00\x00\x03\x00\x00\x00\x00\xf0\xfe\xca\x00\x80',
+            b'\x11\x02\x04\x00\x00\x00TATA\x03\x00\x00\x00\x06\x00\x07\x00\x08\x00',
+            b'\xff'
+        ]
         self.assertEqual(blob, expected_blob)
 
     # -----------------------------------
@@ -1360,4 +1416,5 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
     unittest.main()
