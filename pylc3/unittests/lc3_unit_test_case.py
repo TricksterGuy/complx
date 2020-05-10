@@ -1673,4 +1673,4 @@ class LC3UnitTestCase(unittest.TestCase):
         self._internalAssert('trap calls made', len(self.expected_traps) == len(made_calls) and not missing_calls and not unknown_calls, status_message, level=level)
 
     def _generateReplay(self):
-        return "\nString to set up this test in complx: %s\nString to check results in complx: %s\n" % (repr(self.preconditions.encode()), repr(self.postconditions.encode()))
+        return "\nString to set up this test in complx: %s\nString to check results in complx: %s\nPlease include the full output from this grader in questions to TA's/piazza\n" % (repr(self.preconditions.encode()), repr(self.postconditions.encode()))
