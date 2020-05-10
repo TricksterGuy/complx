@@ -20,7 +20,10 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.maxDiff = None
 
     def tearDown(self):
-        self.assertFalse(self.failed_assertions, 'Internal Error at least one assert has failed\n %s' % self.failed_assertions)
+        def form_failure_message():
+            return 'Internal Error at least one assert has failed\n%s' % ('\n'.join(['name: %s Reason: %s' % (name, msg) for name, msg in self.failed_assertions]))
+        if self.failed_assertions:
+            self.fail(form_failure_message())
 
     # Overriden to not generate a json file.
     @classmethod
@@ -395,6 +398,78 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertEqual(self._readMem(0x7001), 0x5000)
         self.assertEqual(self._readMem(0x7002), 0x4000)
         self.assertEqual(self._readMem(0x7003), 1382)
+
+    def testAssertNodeAt(self):
+        # This is not really testing assembly code see the others for more full fledged examples with code snippets.
+        snippet = """
+        .orig x3000
+            A .blkw 3
+        .end
+        .orig x4000
+            .fill 0
+            .fill 27
+        .end
+        .orig x5000
+            .fill x4000
+            .fill 32
+        .end
+        .orig x5050
+            .fill x4000
+            .fill 32
+        .end
+        .orig x6000
+            .fill x5000
+            .fill x4000
+            .fill 102
+        .end
+        .orig x7000
+            .fill x6000
+            .fill x5000
+            .fill 0
+            .fill x4000
+            .fill 1382
+        .end
+        .orig x8000
+            .fill x8000
+            .fill 1 ; id
+            .fill 123 ; stats
+            .fill 456
+            .stringz "fred" ; name
+            .fill 1 ; extra
+            .fill 2
+            .fill 3
+        .end
+        """
+        self.loadCode(snippet)
+
+        blah = collections.namedtuple('blah', 'num')
+
+        # Sanity checks
+        # This is an error as it is a labelled address, setArray should be used here (on a label with an address
+        # to put the array) as there is potential to overwrite data past the label. Assembly code should not be setup
+        # like so due to this since the fill will happen *after* the code is assembled and loaded.  In either case even
+        # if this replacement was still done before assembling data after the label could cause code not to assemble.
+        with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
+            self.assertNodeAt(0x3000, next=None, data=blah(3))
+
+        # Ending node of linkedlist if you want.
+        self.assertNodeAt(0x4000, next=None, data=blah(27))
+
+        # Linkedlist node.
+        self.assertNodeAt(0x5000, next=0x4000, data=blah(32))
+
+        # Still a Linkedlist node.
+        self.assertNodeAt(0x5050, next=[0x4000], data=blah(32))
+
+        # Binary tree node.
+        self.assertNodeAt(0x6000, next=[0x5000, 0x4000], data=blah(102))
+
+        # What the heck a quaternary tree node or maybe a skiplist node, its up to your imagination.
+        self.assertNodeAt(0x7000, next=[0x6000, 0x5000, None, 0x4000], data=blah(1382))
+
+        # Node with a more complex datastructure for data.
+        person = collections.namedtuple('person', 'id stats name extra')
+        self.assertNodeAt(0x8000, next=[0x8000], data=person(1, [123, 456], 'fred', (1, 2, 3)))
 
     def testFillData(self):
         snippet = """
@@ -1370,6 +1445,95 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         data = lc3_unit_test_case.tuple_to_data(("Some Student", 76, [100, 52]))
         self.assertEqual(data, [DataItem.string, 12, "Some Student", DataItem.number, 76, DataItem.array, 2, [100, 52]])
+
+        data = lc3_unit_test_case.tuple_to_data((1, 'test', [1, 44, -1, 0x8000, 0xFFFF, 32767], (5, ('test2', [44], (8,), 33))))
+        self.assertEqual(data, [
+            DataItem.number, 1,
+            DataItem.string, 4, 'test',
+            DataItem.array, 6, [1, 44, -1, 0x8000, 0xFFFF, 32767],
+
+            DataItem.data,
+                DataItem.number, 5,
+                DataItem.data,
+                    DataItem.string, 5, 'test2',
+                    DataItem.array, 1, [44],
+                    DataItem.data,
+                        DataItem.number, 8,
+                    DataItem.end_of_data,
+                DataItem.number, 33,
+                DataItem.end_of_data,
+            DataItem.end_of_data])
+
+    def testTupleToDataSpec(self):
+        data = lc3_unit_test_case.tuple_to_data_spec((1,))
+        self.assertEqual(data, [DataItem.number])
+
+        data = lc3_unit_test_case.tuple_to_data_spec(("LOL",))
+        self.assertEqual(data, [DataItem.string, 3])
+
+        data = lc3_unit_test_case.tuple_to_data_spec(([1, 2, 3],))
+        self.assertEqual(data, [DataItem.array, 3])
+
+        data = lc3_unit_test_case.tuple_to_data_spec((("LOL",),))
+        self.assertEqual(data, [DataItem.data, DataItem.string, 3, DataItem.end_of_data])
+
+        data = lc3_unit_test_case.tuple_to_data_spec(("Some Student", 76, [100, 52]))
+        self.assertEqual(data, [DataItem.string, 12, DataItem.number, DataItem.array, 2])
+
+        data = lc3_unit_test_case.tuple_to_data_spec((1, 'test', [1, 44, -1, 0x8000, 0xFFFF, 32767], (5, ('test2', [44], (8,), 33))))
+        self.assertEqual(data, [
+            DataItem.number,
+            DataItem.string, 4,
+            DataItem.array, 6,
+
+            DataItem.data,
+                DataItem.number,
+                DataItem.data,
+                    DataItem.string, 5,
+                    DataItem.array, 1,
+                    DataItem.data,
+                        DataItem.number,
+                    DataItem.end_of_data,
+                DataItem.number,
+                DataItem.end_of_data,
+            DataItem.end_of_data])
+
+    def testReadData(self):
+        pass
+
+    def testWriteData(self):
+        data = (1, 'test', [1, 44, -1, 0x8000, 0xFFFF, 32767], (5, ('test2', [44], (8,), 9901)))
+        self._writeData(0x3000, data)
+
+        self.assertEqual(self._readMem(0x3000), 1)
+
+        self.assertEqual(self._readMem(0x3001), ord('t'))
+        self.assertEqual(self._readMem(0x3002), ord('e'))
+        self.assertEqual(self._readMem(0x3003), ord('s'))
+        self.assertEqual(self._readMem(0x3004), ord('t'))
+        self.assertEqual(self._readMem(0x3005), 0)
+
+        self.assertEqual(self._readMem(0x3006), 1)
+        self.assertEqual(self._readMem(0x3007), 44)
+        self.assertEqual(self._readMem(0x3008), -1)
+        self.assertEqual(self._readMem(0x3009), -32768)
+        self.assertEqual(self._readMem(0x300A), -1)
+        self.assertEqual(self._readMem(0x300B), 32767)
+
+        self.assertEqual(self._readMem(0x300C), 5)
+
+        self.assertEqual(self._readMem(0x300D), ord('t'))
+        self.assertEqual(self._readMem(0x300E), ord('e'))
+        self.assertEqual(self._readMem(0x300F), ord('s'))
+        self.assertEqual(self._readMem(0x3010), ord('t'))
+        self.assertEqual(self._readMem(0x3011), ord('2'))
+        self.assertEqual(self._readMem(0x3012), 0)
+
+        self.assertEqual(self._readMem(0x3013), 44)
+
+        self.assertEqual(self._readMem(0x3014), 8)
+
+        self.assertEqual(self._readMem(0x3015), 9901)
 
     def testHardAssertion(self):
         snippet = """

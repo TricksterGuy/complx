@@ -225,7 +225,7 @@ def tuple_to_data_spec(t):
             expanded.append(len(item))
         elif isinstance(item, tuple):
             expanded.append(DataItem.data)
-            expanded.extend(tuple_to_data(item))
+            expanded.extend(tuple_to_data_spec(item))
             expanded.append(DataItem.end_of_data)
     return expanded
 
@@ -644,8 +644,9 @@ class LC3UnitTestCase(unittest.TestCase):
                     address += length
                     i += 3
                 elif t == DataItem.data:
-                    address, i = _writeDataInternal(address, data, index=i)
+                    address, i = _writeDataInternal(address, dataitems, index=i+1)
                     self._internalAssert('writeData', address != -1, 'No end of data segment found.', AssertionType.fatal, internal=True)
+                    i += 1
                 elif t == DataItem.end_of_data:
                     return address, i
             return -1, -1
@@ -679,9 +680,10 @@ class LC3UnitTestCase(unittest.TestCase):
                     address += length
                     i += 2
                 elif t == DataItem.data:
-                    inner_data, address, i = _readDataInternal(address, dataspec, index=i)
+                    inner_data, address, i = _readDataInternal(address, dataspec, index=i+1)
                     data.append(inner_data)
                     self._internalAssert('readData', address != -1, 'No end of data segment found.', AssertionType.fatal, internal=True)
+                    i += 1
                 elif t == DataItem.end_of_data:
                     return tuple(data), address, i
             return tuple(data), -1, -1
@@ -1449,7 +1451,7 @@ class LC3UnitTestCase(unittest.TestCase):
             data: NamedTuple - A NamedTuple describing the data and the contents.
         """
         def assertDataHelper(t1, t2, fields):
-            failure_msg = "Node's data starting at MEM[%s] was not equal.\nNonmatching fields below.\n-------------------------\n"
+            failure_msg = "Node's data starting at MEM[x%04x] was not equal.\nNonmatching fields below.\n-------------------------\n" % (address + size_next)
             if fields is None:
                 fields = ['Item %d' % i for i in range(len(t2))]
             for v1, v2, field in zip(t1, t2, fields):
@@ -1472,13 +1474,16 @@ class LC3UnitTestCase(unittest.TestCase):
         else:
             next_info = [_toUShort(elem) if elem else 0 for elem in next]
             for addr, _ in enumerate(next_info, address):
-                actual_next.append(self._readMem(address, unsigned=True))
+                actual_next.append(self._readMem(addr, unsigned=True))
             size_next = len(next_info)
 
         actual = data._make(self._readData(address + size_next, data))
         expected = data._make(_cstringifyData(data))
 
-        self._assertEqual(next_info, actual_next, 'nodeAtNext: x%04x' % address, "Node's next at MEM[x%04x] was expected to be %s but code produced %s\n" % (address, next_info, actual_next), level=level)
+        def hexify(arr):
+            return ['x%04x' % elem for elem in arr]
+
+        self._assertEqual(next_info, actual_next, 'nodeAtNext: x%04x' % address, "Node's next at MEM[x%04x] was expected to be %s but code produced %s\n" % (address, hexify(next_info), hexify(actual_next)), level=level)
         assertDataHelper(expected, actual, data._fields)
 
         self.postconditions.add(PostconditionFlag.node, '%04x' % address, _formDataPreconditions((next_info, data)))
