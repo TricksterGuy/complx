@@ -253,6 +253,10 @@ def _formDataPreconditions(t):
     return expanded
 
 
+def _cstringifyData(data):
+    return [six.u(d) + u'\0' if isinstance(d, str) else d for d in list(data)]
+
+
 class SubroutineCallMode(enum.Enum):
     """Internal Enum to ensure subroutine call conventions are consistent."""
     lc3_calling_convention = 0
@@ -1423,41 +1427,85 @@ class LC3UnitTestCase(unittest.TestCase):
         self._assertEqual(expected_str, actual_str, 'stringAt: x%04x' % start_addr, 'String of characters at MEM[x%04x] was expected to be %s but code produced %s\n' % (start_addr, repr(''.join(expected_str)), repr(''.join(actual_str))), level=level)
         self.postconditions.add(PostconditionFlag.direct_string, '%04x' % start_addr, [ord(char) for char in text])
 
-    def assertNodeAt(self, address, next, data):
+    def assertNodeAt(self, address, next, data, level=AssertionType.soft):
         """Asserts that a node starting at the address given is a certain value
 
+        This can check nodes of arbitrary type: linked list nodes or n-ary tree nodes
+        This exactly checks if:
+            state.memory[address] == next_info[0]
+            state.memory[address + 1] == next_info[1]
+            ...
+            state.memory[address + n] == data
+
+        *NOTICE* It is an error to call this function on an labeled address.
+
+        It is *greatly* preferred to use this function over assertValueAt/assertArrayAt to improve tooling in the future.
+
         Args:
-            address: Address where the node is located.
+            address: Short - Address where the node is located.
+            next_info: 1) None to indicate leaf node or last node. (Note only one 0 is checked in this case).
+                       2) Short - Next address.
+                       3) Iterable of Shorts/None - Next addresses, None to indicate no next address.
+            data: NamedTuple - A NamedTuple describing the data and the contents.
         """
-
-    def assertDataAt(self, address, named_tuple, field_names=None, level=AssertionType.soft):
-        """Asserts that an arbitrary data structure starting at the address given is a certain value
-
-        Args:
-            address: - Address where the data is located
-            named_tuple: A NamedTuple describing the data and its contents
-                         or a tuple with the contents.
-            field_names: If a tuple is given for 'named_tuple' a description of the fields in the tuple.
-                         Ignored if named_tuple is a NamedTuple.
-        """
-        def _cstringify_values(l):
-            return [six.u(d) + u'\0' if isinstance(d, str) else d for d in l]
-
         def assertDataHelper(t1, t2, fields):
-            failure_msg = 'Data starting at MEM[%s] was not equal.\nNon equal fields below.\n-----------------------\n'
+            failure_msg = "Node's data starting at MEM[%s] was not equal.\nNonmatching fields below.\n-------------------------\n"
             if fields is None:
                 fields = ['Item %d' % i for i in range(len(t2))]
             for v1, v2, field in zip(t1, t2, fields):
                 if v1 != v2:
                     failure_msg += 'Data field: %s was not equal. expected: %s actual: %s\n' % (field, v1, v2)
-            self._assertEqual(expected, actual, 'data: x%04x' % address, failure_msg, level=level)
+            self._assertEqual(t1, t2, 'nodeAtData: x%04x' % (address + size_next), failure_msg, level=level)
+
+        label = self.state.reverse_lookup(address)
+
+        self._internalAssert('assertNodeAt', not label, 'assertNodeAt is not to be used on a labeled address. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
+
+        size_next = 1
+        actual_next = []
+        if not next:
+            actual_next.append(self._readMem(address, unsigned=True))
+            next_info = [0]
+        elif isinstance(next, int):
+            actual_next.append(self._readMem(address, unsigned=True))
+            next_info = [_toUShort(next)]
+        else:
+            next_info = [_toUShort(elem) if elem else 0 for elem in next]
+            for addr, _ in enumerate(next_info, address):
+                actual_next.append(self._readMem(address, unsigned=True))
+            size_next = len(next_info)
+
+        actual = data._make(self._readData(address + size_next, data))
+        expected = data._make(_cstringifyData(data))
+
+        self._assertEqual(next_info, actual_next, 'nodeAtNext: x%04x' % address, "Node's next at MEM[x%04x] was expected to be %s but code produced %s\n" % (address, next_info, actual_next), level=level)
+        assertDataHelper(expected, actual, data._fields)
+
+        self.postconditions.add(PostconditionFlag.node, '%04x' % address, _formDataPreconditions((next_info, data)))
+
+    def assertDataAt(self, address, named_tuple, level=AssertionType.soft):
+        """Asserts that an arbitrary data structure starting at the address given is a certain value
+
+        Args:
+            address: - Address where the data is located
+            named_tuple: A NamedTuple describing the data and its contents.
+        """
+        def assertDataHelper(t1, t2, fields):
+            failure_msg = 'Data starting at MEM[%s] was not equal.\nNonmatching fields below.\n-------------------------\n'
+            if fields is None:
+                fields = ['Item %d' % i for i in range(len(t2))]
+            for v1, v2, field in zip(t1, t2, fields):
+                if v1 != v2:
+                    failure_msg += 'Data field: %s was not equal. expected: %s actual: %s\n' % (field, v1, v2)
+            self._assertEqual(t1, t2, 'data: x%04x' % address, failure_msg, level=level)
 
         label = self.state.reverse_lookup(address)
         if label:
             raise ValueError('assertData is not to be used on a labeled address.')
         actual = named_tuple._make(self._readData(address, named_tuple))
-        expected = named_tuple._make(_cstringify_values(list(named_tuple)))
-        assertDataHelper(expected, actual, field_names or (named_tuple._fields if hasattr(named_tuple, '_fields') else None))
+        expected = named_tuple._make(_cstringifyData(named_tuple))
+        assertDataHelper(expected, actual, named_tuple._fields)
+        self.postconditions.add(PostconditionFlag.data, '%04x' %  address, _formDataPreconditions(named_tuple))
 
     def assertReturnValue(self, answer, level=AssertionType.soft):
         """Asserts that the correct answer was returned.

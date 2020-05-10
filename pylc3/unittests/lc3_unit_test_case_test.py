@@ -1289,8 +1289,10 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertValueAt(0x4000, 0x3444)
         self.assertStringAt(0x6000, "LALA")
         self.assertArrayAt(0x8000, [3, 4, 1024])
-        self.assertNodeAt(0x9000, next=0xA000, data=3)
-        self.assertNodeAt(0xA000, next=None, data=37)
+
+        blah = collections.namedtuple('blah', ['num'])
+        self.assertNodeAt(0x9000, next=0xA000, data=blah(3))
+        self.assertNodeAt(0xA000, next=None, data=blah(37))
 
         self.assertSubroutineCallsMade()
 
@@ -1340,6 +1342,8 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
             b'\x09\x02\x04\x00\x00\x004000\x01\x00\x00\x00D4',
             b'\x0A\x02\x04\x00\x00\x006000\x04\x00\x00\x00L\x00A\x00L\x00A\x00',
             b'\x0B\x02\x04\x00\x00\x008000\x03\x00\x00\x00\x03\x00\x04\x00\x00\x04',
+            b'\x0C\x02\x04\x00\x00\x009000\x07\x00\x00\x00\x03\x00\x01\x00\x00\xa0\xff\x00\x01\x00\x03\x00\x00\x00',
+            b'\x0C\x02\x04\x00\x00\x00a000\x07\x00\x00\x00\x03\x00\x01\x00\x00\x00\xff\x00\x01\x00%\x00\x00\x00',
             b'\x0E\x01\x00\x00\x00\x00\x01\x00\x00\x00!\x00',
             b'\x0F\x01\xd4\x00\x00\x00\x04\x00\x00\x00\x06\x00\x0c\x00\x12\x00\x15\x00',
             b'\x10\x01\x00\x00\x00\x00\x03\x00\x00\x00\x00\xf0\xfe\xca\x00\x80',
