@@ -1499,7 +1499,38 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
             DataItem.end_of_data])
 
     def testReadData(self):
-        pass
+        self._writeMem(0x3000, 1)
+
+        self._writeMem(0x3001, ord('t'))
+        self._writeMem(0x3002, ord('e'))
+        self._writeMem(0x3003, ord('s'))
+        self._writeMem(0x3004, ord('t'))
+        self._writeMem(0x3005, 0)
+
+        self._writeMem(0x3006, 1)
+        self._writeMem(0x3007, 44)
+        self._writeMem(0x3008, -1)
+        self._writeMem(0x3009, -32768)
+        self._writeMem(0x300A, -1)
+        self._writeMem(0x300B, 32767)
+
+        self._writeMem(0x300C, 5)
+
+        self._writeMem(0x300D, ord('t'))
+        self._writeMem(0x300E, ord('e'))
+        self._writeMem(0x300F, ord('s'))
+        self._writeMem(0x3010, ord('t'))
+        self._writeMem(0x3011, ord('2'))
+        self._writeMem(0x3012, 0)
+
+        self._writeMem(0x3013, 44)
+
+        self._writeMem(0x3014, 8)
+
+        self._writeMem(0x3015, 9901)
+        data = self._readData(0x3000, (0, 'xxxx', [0] * 6, (0, ('xxxxx', [0], (0,), 0))))
+
+        self.assertEqual(data, (1, six.u('test\0'), [1, 44, -1, -32768, -1, 32767], (5, (six.u('test2\0'), [44], (8,), 9901))))
 
     def testWriteData(self):
         data = (1, 'test', [1, 44, -1, 0x8000, 0xFFFF, 32767], (5, ('test2', [44], (8,), 9901)))
