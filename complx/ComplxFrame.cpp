@@ -1227,8 +1227,6 @@ void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
         UpdateStatus();
     }
 
-
-
 end:
     delete dialog;
 }
