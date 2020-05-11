@@ -1,4 +1,4 @@
-#include <boost/test/auto_unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -90,6 +90,7 @@ BOOST_FIXTURE_TEST_CASE(TestCustomTrap, LC3Revision2019Test)
     BOOST_CHECK_EQUAL(change.pc, 0x3001);
     BOOST_CHECK_EQUAL(change.subroutine.is_trap, true);
     BOOST_CHECK_EQUAL(change.subroutine.address, 0x1000);
+    BOOST_CHECK_EQUAL(change.subroutine.r6, r6);
 
     BOOST_REQUIRE_EQUAL(state.rti_stack.size(), 1);
     lc3_rti_stack_item item = state.rti_stack.back();

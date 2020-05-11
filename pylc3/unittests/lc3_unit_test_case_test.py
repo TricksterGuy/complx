@@ -1,19 +1,41 @@
-import lc3_unit_test_case
-import unittest
-import six
+from .. import pylc3
+import collections
+import logging
 import os
+import six
+import struct
+import sys
+import unittest
+import lc3_unit_test_case
+from lc3_unit_test_case import DataItem
 
 
 # Note this file is not to be used as a template for writing student tests.
+# See https://github.com/TricksterGuy/pylc3-examples for example tests
 
 class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
+
+    def setUp(self):
+        super(LC3UnitTestCaseTest, self).setUp()
+        self.maxDiff = None
+
+    def tearDown(self):
+        def form_failure_message():
+            return 'Internal Error at least one assert has failed\n%s' % ('\n'.join(['name: %s Reason: %s' % (name, msg) for name, msg in self.failed_assertions]))
+        if self.failed_assertions:
+            self.fail(form_failure_message())
+
+    # Overriden to not generate a json file.
+    @classmethod
+    def tearDownClass(cls):
+        pass
 
     def loadCode(self, snippet):
         # This function is test only, Only use loadAsmFile for student code.
         self.state.loadCode(snippet)
 
     def testInit(self):
-        self.init(lc3_unit_test_case.MemoryFillStrategy.fill_with_value, 0x8000)
+        self.init(pylc3.MemoryFillStrategy.fill_with_value, 0x8000)
         self.assertEqual(self._readMem(0x3005) & 0xFFFF, 0x8000)
 
     def testLoadFailed(self):
@@ -29,7 +51,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         text_file.write(snippet)
         text_file.close()
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
             self.loadAsmFile("syntax_error.asm")
 
         os.remove("syntax_error.asm")
@@ -263,7 +285,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         # Sanity checks I
         # This is an error as it is a labelled address, setValue should be used here.
-        with self.assertRaises(ValueError):
+        with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
             self.fillValue(0x3005, 2)
 
         self.setValue("A", 2)
@@ -275,11 +297,13 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.runCode()
         self.assertHalted()
         self.assertNoWarnings()
-        
-        # TODO rename.
-        self.assertAddress(0x3005, 2)
-        self.assertAddress(0x3006, 3)
-        self.assertAddress(0x3007, 5)
+
+        with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
+            self.assertValueAt(0x3005, 2)
+
+        self.assertValue("A", 2)
+        self.assertValueAt(0x3006, 3)
+        self.assertValueAt(0x3007, 5)
 
     def testFillString(self):
         # This is not really testing assembly code see the others for more full fledged examples with code snippets.
@@ -295,7 +319,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         # to put the string) as there is potential to overwrite data past the label. Assembly code should not be setup
         # like so due to this since the fill will happen *after* the code is assembled and loaded.  In either case even
         # if this replacement was still done before assembling data after the label could cause code not to assemble.
-        with self.assertRaises(ValueError):
+        with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
             self.fillString(0x3000, "HELLO")
 
         self.fillString(0x4000, "HELLO")
@@ -321,7 +345,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         # to put the array) as there is potential to overwrite data past the label. Assembly code should not be setup
         # like so due to this since the fill will happen *after* the code is assembled and loaded.  In either case even
         # if this replacement was still done before assembling data after the label could cause code not to assemble.
-        with self.assertRaises(ValueError):
+        with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
             self.fillArray(0x3000, [10, 12, 15])
 
         self.fillArray(0x4000, [10, 12, 15])
@@ -344,45 +368,204 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         # to put the array) as there is potential to overwrite data past the label. Assembly code should not be setup
         # like so due to this since the fill will happen *after* the code is assembled and loaded.  In either case even
         # if this replacement was still done before assembling data after the label could cause code not to assemble.
-        with self.assertRaises(ValueError):
-            self.fillNode(0x3000, next=None, data=3)
+        with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
+            self.fillNode(0x3000, next=None, data=(3,))
 
         # Ending node of linkedlist if you want.
-        self.fillNode(0x4000, next=None, data=27)
+        self.fillNode(0x4000, next=None, data=(27,))
         self.assertEqual(self._readMem(0x4000), 0)
         self.assertEqual(self._readMem(0x4001), 27)
 
         # Linkedlist node.
-        self.fillNode(0x5000, next=0x4000, data=32)
+        self.fillNode(0x5000, next=0x4000, data=(32,))
         self.assertEqual(self._readMem(0x5000), 0x4000)
         self.assertEqual(self._readMem(0x5001), 32)
 
         # Still a Linkedlist node.
-        self.fillNode(0x5050, next=[0x4000], data=32)
+        self.fillNode(0x5050, next=[0x4000], data=(32,))
         self.assertEqual(self._readMem(0x5050), 0x4000)
         self.assertEqual(self._readMem(0x5051), 32)
-        
+
         # Binary tree node.
-        self.fillNode(0x6000, next=[0x5000, 0x4000], data=102)
+        self.fillNode(0x6000, next=[0x5000, 0x4000], data=(102,))
         self.assertEqual(self._readMem(0x6000), 0x5000)
         self.assertEqual(self._readMem(0x6001), 0x4000)
         self.assertEqual(self._readMem(0x6002), 102)
 
         # What the heck a ternary tree node or maybe a skiplist node, its up to your imagination.
-        self.fillNode(0x7000, next=[0x6000, 0x5000, 0x4000], data=1382)
+        self.fillNode(0x7000, next=[0x6000, 0x5000, 0x4000], data=(1382,))
         self.assertEqual(self._readMem(0x7000), 0x6000)
         self.assertEqual(self._readMem(0x7001), 0x5000)
         self.assertEqual(self._readMem(0x7002), 0x4000)
-        self.assertEqual(self._readMem(0x7003), 1382)        
+        self.assertEqual(self._readMem(0x7003), 1382)
+
+    def testAssertNodeAt(self):
+        # This is not really testing assembly code see the others for more full fledged examples with code snippets.
+        snippet = """
+        .orig x3000
+            A .blkw 3
+        .end
+        .orig x4000
+            .fill 0
+            .fill 27
+        .end
+        .orig x5000
+            .fill x4000
+            .fill 32
+        .end
+        .orig x5050
+            .fill x4000
+            .fill 32
+        .end
+        .orig x6000
+            .fill x5000
+            .fill x4000
+            .fill 102
+        .end
+        .orig x7000
+            .fill x6000
+            .fill x5000
+            .fill 0
+            .fill x4000
+            .fill 1382
+        .end
+        .orig x8000
+            .fill x8000
+            .fill 1 ; id
+            .fill 123 ; stats
+            .fill 456
+            .stringz "fred" ; name
+            .fill 1 ; extra
+            .fill 2
+            .fill 3
+        .end
+        """
+        self.loadCode(snippet)
+
+        blah = collections.namedtuple('blah', 'num')
+
+        # Sanity checks
+        # This is an error as it is a labelled address, setArray should be used here (on a label with an address
+        # to put the array) as there is potential to overwrite data past the label. Assembly code should not be setup
+        # like so due to this since the fill will happen *after* the code is assembled and loaded.  In either case even
+        # if this replacement was still done before assembling data after the label could cause code not to assemble.
+        with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
+            self.assertNodeAt(0x3000, next=None, data=blah(3))
+
+        # Ending node of linkedlist if you want.
+        self.assertNodeAt(0x4000, next=None, data=blah(27))
+
+        # Linkedlist node.
+        self.assertNodeAt(0x5000, next=0x4000, data=blah(32))
+
+        # Still a Linkedlist node.
+        self.assertNodeAt(0x5050, next=[0x4000], data=blah(32))
+
+        # Binary tree node.
+        self.assertNodeAt(0x6000, next=[0x5000, 0x4000], data=blah(102))
+
+        # What the heck a quaternary tree node or maybe a skiplist node, its up to your imagination.
+        self.assertNodeAt(0x7000, next=[0x6000, 0x5000, None, 0x4000], data=blah(1382))
+
+        # Node with a more complex datastructure for data.
+        person = collections.namedtuple('person', 'id stats name extra')
+        self.assertNodeAt(0x8000, next=[0x8000], data=person(1, [123, 456], 'fred', (1, 2, 3)))
+
+    def testFillData(self):
+        snippet = """
+        .orig x3000
+            ;@plugin filename=lc3_udiv vector=x80
+            ;@plugin filename=lc3_multiply
+            LD R0, STUDENT_DATA
+            PUTS
+
+            CHECK LDR R7, R0, 0
+            BRZ DONE
+            ADD R0, R0, 1
+            BR CHECK
+            DONE ADD R2, R0, 1
+
+            LDR R3, R2, 0 ; num tests
+            LDR R4, R2, 1 ; num hws
+            ADD R2, R2, 2
+            AND R0, R0, 0
+            ADD_TEST LDR R5, R2, 0
+            ADD R0, R0, R5
+            ADD R2, R2, 1
+            ADD R3, R3, -1
+            BRP ADD_TEST
+            LD R1, TEST_FACTOR
+            MUL R0, R0, R1
+            ADD R6, R0, 0
+            AND R0, R0, 0
+            ADD_HW LDR R5, R2, 0
+            ADD R0, R0, R5
+            ADD R2, R2, 1
+            ADD R4, R4, -1
+            BRP ADD_HW
+            LD R1, HW_FACTOR
+            MUL R0, R0, R1
+            ADD R0, R0, R6
+            LD R1, HUNNIT
+            UDIV
+            STR R0, R2, 0
+            HALT
+            ; NAME
+            ; TEST GRADES
+            ; HW GRADES
+            STUDENT_DATA .fill x4000
+            TEST_FACTOR .fill 10 ; 10 * 3 = 30
+            HW_FACTOR .fill 14 ; 14 * 5 = 70
+            HUNNIT .fill 100
+        .end
+        """
+        self.loadCode(snippet)
+        # struct Student {
+        #   char* name;
+        #   short num_tests;
+        #   short num_homeworks;
+        #   short tests[];
+        #   short homeworks[];
+        # }
+        self.fillData(0x4000, ("Student", 3, 5, [100, 75, 80], [100, 50, 80, 60, 100]))
+
+        # Sanity Checks
+        self.assertEqual(self._readMem(0x4000), ord('S')) # name = Student
+        self.assertEqual(self._readMem(0x4001), ord('t'))
+        self.assertEqual(self._readMem(0x4002), ord('u'))
+        self.assertEqual(self._readMem(0x4003), ord('d'))
+        self.assertEqual(self._readMem(0x4004), ord('e'))
+        self.assertEqual(self._readMem(0x4005), ord('n'))
+        self.assertEqual(self._readMem(0x4006), ord('t'))
+        self.assertEqual(self._readMem(0x4007), 0)
+        self.assertEqual(self._readMem(0x4008), 3) # num_tests = 3
+        self.assertEqual(self._readMem(0x4009), 5) # num_homeworks = 5
+        self.assertEqual(self._readMem(0x400A), 100) # tests[3] = {100, 75, 80}
+        self.assertEqual(self._readMem(0x400B), 75)
+        self.assertEqual(self._readMem(0x400C), 80)
+        self.assertEqual(self._readMem(0x400D), 100) # homeworks[5] = {100, 50, 80, 60, 100)
+        self.assertEqual(self._readMem(0x400E), 50)
+        self.assertEqual(self._readMem(0x400F), 80)
+        self.assertEqual(self._readMem(0x4010), 60)
+        self.assertEqual(self._readMem(0x4011), 100)
+
+        self.runCode()
+
+        self.assertHalted()
+        self.assertNoWarnings()
+
+        Student = collections.namedtuple('Student', ['name', 'num_tests', 'num_homeworks', 'tests', 'homeworks', 'grade'])
+        expected = Student('Student', 3, 5, [100, 75, 80], [100, 50, 80, 60, 100], 80)
+        self.assertDataAt(0x4000, expected)
 
     def testTrapCall(self):
         snippet = """
         ;@plugin filename=lc3_udiv vector=x80
         .orig x3000
-	        LD R0, A
-	        LD R1, B
-	        UDIV
-	        HALT
+                LD R0, A
+                LD R1, B
+                UDIV
+                HALT
             A .fill 2000
             B .fill 8
         .end
@@ -390,6 +573,29 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.loadCode(snippet)
 
         self.expectTrapCall(0x80, params={0: 2000, 1: 8})
+
+        self.runCode()
+
+        self.assertHalted()
+        self.assertNoWarnings()
+
+        self.assertTrapCallsMade()
+
+    def testTrapCallNegative(self):
+        snippet = """
+        ;@plugin filename=lc3_udiv vector=x80
+        .orig x3000
+                LD R0, A
+                LD R1, B
+                UDIV
+                HALT
+            A .fill -2000
+            B .fill -8
+        .end
+        """
+        self.loadCode(snippet)
+
+        self.expectTrapCall(0x80, params={0: -2000, 1: -8})
 
         self.runCode()
 
@@ -473,6 +679,48 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertReturnValue(211)
         self.assertRegistersUnchanged([5, 7])
         self.assertStackManaged(stack=0xEFFC, return_address=0x8000, old_frame_pointer=0xCAFE)
+        # Checks that no subroutines were called.
+        self.assertSubroutineCallsMade()
+
+    def testSubroutineCallWithParamsInRegisters(self):
+        snippet = """
+        .orig x4000
+            ;x in R0, y in R1, z in R2.
+            ; ans in R0
+            ; def MYADD(x, y, z):
+            ;     return x + y + z
+            MYADD
+                ADD R6, R6, -2
+                STR R5, R6, 0
+                STR R7, R6, 1
+                ADD R5, R6, -1
+                ADD R0, R0, R1
+                ADD R0, R0, R2
+                LDR R5, R6, 0
+                LDR R7, R6, 1
+                ADD R6, R6, 2
+                RET
+        .end
+        """
+        self.loadCode(snippet)
+        self.callSubroutine("MYADD", {0: 7, 1: 81, 2: 123}, r5=0xCAFE, r6=0xF000, r7=0x8000)
+
+        # Sanity checks
+        self.assertEqual(self.state.pc, 0x4000)
+        self.assertEqual(self._lookup("MYADD"), 0x4000)
+        self.assertEqual(self._readReg(0, unsigned=True), 7)
+        self.assertEqual(self._readReg(1, unsigned=True), 81)
+        self.assertEqual(self._readReg(2, unsigned=True), 123)
+        self.assertEqual(self._readReg(5, unsigned=True), 0xCAFE)
+        self.assertEqual(self._readReg(6, unsigned=True), 0xF000)
+        self.assertEqual(self._readReg(7, unsigned=True), 0x8000)
+
+        self.runCode()
+        self.assertReturned()
+        self.assertNoWarnings()
+        self.assertRegister(0, 211)
+        self.assertRegistersUnchanged([1, 2, 5, 7])
+        self.assertStackManaged(stack=0xF000, return_address=0x8000, old_frame_pointer=0xCAFE)
         # Checks that no subroutines were called.
         self.assertSubroutineCallsMade()
 
@@ -584,6 +832,162 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         #self.assertReturnValue(72)
         self.assertRegistersUnchanged([5, 7])
         self.assertStackManaged(stack=0xEFFC, return_address=0x8000, old_frame_pointer=0xCAFE)
+        self.assertSubroutineCallsMade()
+
+    def testSubroutineCallWithParamsAndCallsInRegisters(self):
+        # Psuedocode
+        # X: R0 Y: R1 Z: R2
+        # ANS: R0
+        # int a(int x, int y, int z) {
+        #   return b(x, y) + b(x, z) + b(y, z) + c(x);
+        # }
+        #
+        # X: R3 Y: R4
+        # ANS R3
+        # int b(int x, int y) {
+        #    return x * y;
+        # }
+        #
+        # X: R4
+        # ANS: R2
+        # int c(int x) {
+        #    return x / 2;
+        # }
+        snippet = """
+        ;@plugin filename=lc3_multiply
+        ;@plugin filename=lc3_udiv vector=x80
+
+        .orig x3000
+            A
+                ADD R6, R6, -2
+                STR R5, R6, 0
+                STR R7, R6, 1
+                ADD R5, R6, -1
+                ADD R6, R6, -3
+                STR R2, R6, 0
+                STR R3, R6, 1
+                STR R4, R6, 2
+
+                ADD R3, R0, 0
+                ADD R4, R1, 0
+                JSR B
+
+                ADD R6, R6, -1
+                STR R3, R6, 0
+
+                ADD R3, R0, 0
+                ADD R4, R2, 0
+                JSR B
+
+                ADD R6, R6, -1
+                STR R3, R6, 0
+
+                ADD R3, R1, 0
+                ADD R4, R2, 0
+                JSR B
+
+                ADD R6, R6, -1
+                STR R3, R6, 0
+
+                ADD R4, R0, 0
+                JSR C
+
+                ADD R0, R2, 0
+                LDR R2, R6, 0
+                ADD R0, R0, R2
+                LDR R2, R6, 1
+                ADD R0, R0, R2
+                LDR R2, R6, 2
+                ADD R0, R0, R2
+                ADD R6, R6, 3
+
+                LDR R2, R6, 0
+                LDR R3, R6, 1
+                LDR R4, R6, 2
+                LDR R5, R6, 3
+                LDR R7, R6, 4
+                ADD R6, R6, 5
+                RET
+
+            B
+                ADD R6, R6, -2
+                STR R5, R6, 0
+                STR R7, R6, 1
+                ADD R5, R6, -1
+                MUL R3, R3, R4
+                LDR R5, R6, 0
+                LDR R7, R6, 1
+                ADD R6, R6, 2
+                RET
+
+            C
+                ADD R6, R6, -2
+                STR R5, R6, 0
+                STR R7, R6, 1
+                ADD R5, R6, -1
+                ADD R6, R6, -2
+                STR R0, R6, 0
+                STR R1, R6, 1
+                ADD R0, R4, 0
+                AND R1, R1, 0
+                ADD R1, R1, 2
+                UDIV
+                ADD R2, R0, 0
+                LDR R0, R6, 0
+                LDR R1, R6, 1
+                ADD R6, R6, 2
+                LDR R5, R6, 0
+                LDR R7, R6, 1
+                ADD R6, R6, 2
+                RET
+           .end
+        """
+        self.loadCode(snippet)
+        self.callSubroutine("A", params={0: 3, 1: 5, 2: 7}, r5=0xCAFE, r6=0xF000, r7=0x8000)
+        # For assertSubroutineCallMade.
+        self.expectSubroutineCall("B", params={3: 3, 4: 5})
+        self.expectSubroutineCall("B", params={3: 3, 4: 7})
+        self.expectSubroutineCall("B", params={3: 5, 4: 7})
+        self.expectSubroutineCall("C", params={4: 3})
+        # Don't call expectTrapCall here since A doesn't directly use it. Only the first level calls are logged.
+
+        self.runCode()
+        self.assertReturned()
+        self.assertNoWarnings()
+        self.assertRegister(0, 72)
+        self.assertRegistersUnchanged([1, 2, 3, 4, 5, 6, 7])
+        self.assertStackManaged(stack=0xF000, return_address=0x8000, old_frame_pointer=0xCAFE)
+        self.assertSubroutineCallsMade()
+
+    def testCallSubroutineNegative(self):
+        snippet = """
+        .orig x3000
+            LD R6, STACK
+            LD R0, A
+            LD R1, B
+            ADD R6, R6, -2
+            STR R0, R6, 0
+            STR R1, R6, 1
+            JSR MYSTERY
+            ADD R6, R6, 3
+            HALT
+
+            MYSTERY
+                RET
+
+            A .blkw 1
+            B .blkw 1
+            STACK .fill xF000
+        .end
+        """
+        self.loadCode(snippet)
+        self.setValue("A", -2000)
+        self.setValue("B",-8)
+        self.expectSubroutineCall("MYSTERY", params=[-2000, -8])
+
+        self.runCode()
+        self.assertHalted()
+        self.assertNoWarnings()
         self.assertSubroutineCallsMade()
 
     def testSubroutineCallWithOptionalNotTaken(self):
@@ -779,6 +1183,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         self.runCode(max_executions=10000)
         self.assertPc(0x4000)
+        #self.assertEqual(self.state.executions, 102)
 
     def testProgramWithInterruptsAndDelay(self):
         snippet = """
@@ -806,7 +1211,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         self.runCode(max_executions=110)
         self.assertPc(0x4000)
-        self.assertEqual(self.state.executions, 102)
+        #self.assertEqual(self.state.executions, 102)
 
     def testLC3Version0(self):
         snippet = """
@@ -842,6 +1247,22 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertFalse(self.state.z)
         self.assertFalse(self.state.p)
 
+    def testReplayStringPassByRegs(self):
+        snippet = """
+        .orig x3000
+            TATA RET
+        .end
+        """
+        self.loadCode(snippet)
+        self.callSubroutine("TATA", {0: 3, 4: 5})
+
+        blob = self.preconditions._formBlob()
+
+        expected_blob = b'\x07\x00\x80\x00\x00\x10\x19\x04\x00\x00\x00TATA\n\x00\x00\x00\x00\x00\x03\x00\x04\x00\x05\x00\x05\x00\xfe\xca\x06\x00\x00\xf0\x07\x00\x00\x80\xff'
+
+        self.assertEqual(blob, expected_blob)
+        #print self.preconditions.encode()
+
     def testReplayString(self):
         snippet = """
         .orig x3000
@@ -852,12 +1273,13 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
             TATA RET
         .end
         """
-        self.init(value=-1)
+        self.init(pylc3.MemoryFillStrategy.fill_with_value, -1)
         self.setTrueTraps(True)
         self.setInterrupts(True)
         self.setPluginsEnabled(True)
         self.setStrictExecution(False)
         self.loadCode(snippet)
+        self.setLC3Version(1)
         self.setRegister(4, 0x4001)
         self.setPc(0x500)
         self.setValue("AHH", 7)
@@ -869,44 +1291,365 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.fillValue(0x8000, 33)
         self.fillString(0x9000, "VAVA")
         self.fillArray(0xA000, [1, 32, 729])
-        self.fillNode(0xB000, next=None, data=34)
-        self.fillNode(0xB020, next=0xB000, data=56)
-        self.fillNode(0xB050, next=[0xB000, 0xB001, 0xB002, 0xB003], data=72)
-        self.setLC3Version(1)
+        self.fillNode(0xB000, next=None, data=(34,))
+        self.fillNode(0xB020, next=0xB000, data=(56,))
+        self.fillNode(0xB050, next=[0xB000, 0xB001, 0xB002, 0xB003], data=(72,))
+        self.fillData(0xC000, data=(0x9000, 'test', [44, 55], (72, [1, 2, 3])))
 
-        blob = self.preconditions._formBlob()
+        def splitBlob(blob):
+            blobettes = []
+            index = 0
+            while index < len(blob):
+                t = struct.unpack('=B', blob[index])[0]
+                if t < 16:
+                    blobettes.append(blob[index:index+5])
+                    index += 5
+                elif t == 16 or t == 255:
+                    blobettes.append(blob[index])
+                    index += 1
+                else:
+                    start = index
+                    size = struct.unpack('=I', blob[index+1:index+5])[0]
+                    index += 5
+                    index += size
+                    size = struct.unpack('=I', blob[index:index+4])[0]
+                    index += 4 + 2 * size
+                    blobettes.append(blob[start:index])
+            return blobettes
 
-        expected_blob = six.b(
-                    '\x01\x01\x00\x00\x00'
-                    '\x02\x01\x00\x00\x00'
-                    '\x03\x01\x00\x00\x00'
-                    '\x04\x00\x00\x00\x00'
-                    '\x05\x00\x00\x00\x00'
-                    '\x06\xff\xff\xff\xff'
-                    '\x07\x00\x80\x00\x00'
-                    '\x08\x01\x00\x00\x00'
-                    '\x10'
+        blob = splitBlob(self.preconditions._formBlob())
 
-                    '\x11\x01\x00\x00\x004\x01\x00\x00\x00\x01@'
-                    '\x12\x00\x00\x00\x00\x01\x00\x00\x00\x00\x05'
-                    '\x13\x03\x00\x00\x00AHH\x01\x00\x00\x00\x07\x00'
-                    '\x14\x04\x00\x00\x00BLAH\x01\x00\x00\x00\xa6\x02'
-                    '\x15\x06\x00\x00\x00CAWCAW\x05\x00\x00\x00\x05\x00\x02\x00\t\x00\x000\xff\xff'
-                    '\x16\x04\x00\x00\x00PAPA\x04\x00\x00\x00M\x00A\x00M\x00A\x00'
-                    '\x17\x00\x00\x00\x00\x06\x00\x00\x00R\x00A\x00H\x00R\x00A\x00H\x00'
-                    '\x18\x04\x00\x00\x00TATA\x06\x00\x00\x00\x05\x00@@\x00\x80\x02\x00\x05\x00\x07\x00'
-                    '\x19\x04\x00\x00\x008000\x01\x00\x00\x00!\x00'
-                    '\x1A\x04\x00\x00\x009000\x04\x00\x00\x00V\x00A\x00V\x00A\x00'
-                    '\x1B\x04\x00\x00\x00a000\x03\x00\x00\x00\x01\x00 \x00\xd9\x02'
-                    '\x1C\x04\x00\x00\x00b000\x01\x00\x00\x00\"\x00'
-                    '\x1C\x04\x00\x00\x00b020\x02\x00\x00\x00\x00\xb08\x00'
-                    '\x1C\x04\x00\x00\x00b050\x05\x00\x00\x00\x00\xb0\x01\xb0\x02\xb0\x03\xb0H\x00'
-                    '\xff')
+        expected_blob = [
+                    b'\x01\x01\x00\x00\x00',
+                    b'\x02\x01\x00\x00\x00',
+                    b'\x03\x01\x00\x00\x00',
+                    b'\x04\x00\x00\x00\x00',
+                    b'\x05\x00\x00\x00\x00',
+                    b'\x06\xff\xff\xff\xff',
+                    b'\x07\x00\x80\x00\x00',
+                    b'\x08\x01\x00\x00\x00',
+                    b'\x10',
+
+                    b'\x11\x01\x00\x00\x004\x01\x00\x00\x00\x01@',
+                    b'\x12\x00\x00\x00\x00\x01\x00\x00\x00\x00\x05',
+                    b'\x13\x03\x00\x00\x00AHH\x01\x00\x00\x00\x07\x00',
+                    b'\x14\x04\x00\x00\x00BLAH\x01\x00\x00\x00\xa6\x02',
+                    b'\x15\x06\x00\x00\x00CAWCAW\x05\x00\x00\x00\x05\x00\x02\x00\t\x00\x000\xff\xff',
+                    b'\x16\x04\x00\x00\x00PAPA\x04\x00\x00\x00M\x00A\x00M\x00A\x00',
+                    b'\x17\x00\x00\x00\x00\x06\x00\x00\x00R\x00A\x00H\x00R\x00A\x00H\x00',
+                    b'\x18\x04\x00\x00\x00TATA\x06\x00\x00\x00\x05\x00@@\x00\x80\x02\x00\x05\x00\x07\x00',
+                    b'\x1A\x04\x00\x00\x008000\x01\x00\x00\x00!\x00',
+                    b'\x1B\x04\x00\x00\x009000\x04\x00\x00\x00V\x00A\x00V\x00A\x00',
+                    b'\x1C\x04\x00\x00\x00a000\x03\x00\x00\x00\x01\x00 \x00\xd9\x02',
+                    b'\x1D\x04\x00\x00\x00b000\x07\x00\x00\x00\x03\x00\x01\x00\x00\x00\xff\x00\x01\x00"\x00\x00\x00',
+                    b'\x1D\x04\x00\x00\x00b020\x07\x00\x00\x00\x03\x00\x01\x00\x00\xb0\xff\x00\x01\x008\x00\x00\x00',
+                    b'\x1D\x04\x00\x00\x00b050\n\x00\x00\x00\x03\x00\x04\x00\x00\xb0\x01\xb0\x02\xb0\x03\xb0\xff\x00\x01\x00H\x00\x00\x00',
+                    b'\x1E\x04\x00\x00\x00c000\x15\x00\x00\x00\x01\x00\x00\x90\x02\x00\x04\x00t\x00e\x00s\x00t\x00\x03\x00\x02\x00,\x007\x00\xff\x00\x01\x00H\x00\x03\x00\x03\x00\x01\x00\x02\x00\x03\x00\x00\x00',
+                    b'\xff'
+        ]
 
         self.assertEqual(blob, expected_blob)
 
         #print self.preconditions.encode()
 
+    def testVerificationStringPassByRegs(self):
+        snippet = """
+        .orig x3000
+            TATA RET
+        .end
+        """
+        self.loadCode(snippet)
+        self.expectSubroutineCall('TATA', {0: 6, 1: 7, 4: 8})
+        blob = self.postconditions._formBlob()
+
+        expected_blob = b'\x12\x02\x04\x00\x00\x00TATA\x06\x00\x00\x00\x00\x00\x06\x00\x01\x00\x07\x00\x04\x00\x08\x00\xff'
+
+        self.assertEqual(blob, expected_blob)
+
+    def testVerificationString(self):
+        snippet = """
+        .orig x3000
+            AHH .blkw 1
+            BLAH .fill x4000
+            CAWCAW .fill x5000
+            PAPA .fill x6000
+            TATA RET
+        .end
+        """
+        self.init(pylc3.MemoryFillStrategy.fill_with_value, -1)
+        self.expectSubroutineCall('TATA', [6, 7, 8])
+        self.loadCode(snippet)
+
+        # Needed for assertRegistersUnchanged this is usually set by runCode.
+        for id in range(8):
+            self.registers[id] = id * 3
+
+        self.assertHalted(level=lc3_unit_test_case.AssertionType.soft)
+        self.assertRegister(6, 0x5030)
+        self.assertPc(0x3000)
+        self.assertValue('AHH', 0x4000)
+        self.assertPointer('BLAH', 0x3456)
+        self.assertArray('CAWCAW', [5, 2, 9, 0x3000, 0x5259, 0xFFFF])
+        self.assertString('PAPA', 'MAMA')
+        self.assertConsoleOutput('RAHRAH')
+
+        self.assertValueAt(0x4000, 0x3444)
+        self.assertStringAt(0x6000, "LALA")
+        self.assertArrayAt(0x8000, [3, 4, 1024])
+
+        blah = collections.namedtuple('blah', ['num'])
+        self.assertNodeAt(0x9000, next=0xA000, data=blah(3))
+        self.assertNodeAt(0xA000, next=None, data=blah(37))
+
+        bob = collections.namedtuple('bob', 'addr name arr data')
+        self.assertDataAt(0xC000, bob(0x9000, 'test', [44, 55], (72, [1, 2, 3])))
+
+        self.assertSubroutineCallsMade()
+
+        self.assertReturnValue(33)
+        self.assertStackManaged(0xF000, 0xCAFE, 0x8000)
+        self.assertRegistersUnchanged([2, 4, 6, 7])
+
+
+        # Clear since these assertions failed.
+        self.failed_assertions = []
+
+        def splitBlob(blob):
+            blobettes = []
+            index = 0
+            while index < len(blob):
+                id = struct.unpack('=B', blob[index])[0]
+                if id == 0xFF:
+                    blobettes.append(b'\xff')
+                    break
+                start = index
+                type = struct.unpack('=B', blob[index+1])[0]
+                index += 2
+                if type == 0:
+                    index += 4
+                elif type == 1:
+                    index += 4
+                    size = struct.unpack('=I', blob[index:index+4])[0]
+                    index += 4 + 2 * size
+                elif type == 2:
+                    size = struct.unpack('=I', blob[index:index+4])[0]
+                    index += 4 + size
+                    size = struct.unpack('=I', blob[index:index+4])[0]
+                    index += 4 + 2 * size
+                blobettes.append(blob[start:index])
+            return blobettes
+
+        blob = splitBlob(self.postconditions._formBlob())
+        expected_blob = [
+            b'\x01\x00\x01\x00\x00\x00',
+            b'\x02\x01\x06\x00\x00\x00\x01\x00\x00\x000P',
+            b'\x03\x01\x00\x00\x00\x00\x01\x00\x00\x00\x000',
+            b'\x04\x02\x03\x00\x00\x00AHH\x01\x00\x00\x00\x00@',
+            b'\x05\x02\x04\x00\x00\x00BLAH\x01\x00\x00\x00V4',
+            b'\x06\x02\x06\x00\x00\x00CAWCAW\x06\x00\x00\x00\x05\x00\x02\x00\t\x00\x000YR\xff\xff',
+            b'\x07\x02\x04\x00\x00\x00PAPA\x04\x00\x00\x00M\x00A\x00M\x00A\x00',
+            b'\x08\x01\x00\x00\x00\x00\x06\x00\x00\x00R\x00A\x00H\x00R\x00A\x00H\x00',
+            b'\x09\x02\x04\x00\x00\x004000\x01\x00\x00\x00D4',
+            b'\x0A\x02\x04\x00\x00\x006000\x04\x00\x00\x00L\x00A\x00L\x00A\x00',
+            b'\x0B\x02\x04\x00\x00\x008000\x03\x00\x00\x00\x03\x00\x04\x00\x00\x04',
+            b'\x0C\x02\x04\x00\x00\x009000\x07\x00\x00\x00\x03\x00\x01\x00\x00\xa0\xff\x00\x01\x00\x03\x00\x00\x00',
+            b'\x0C\x02\x04\x00\x00\x00a000\x07\x00\x00\x00\x03\x00\x01\x00\x00\x00\xff\x00\x01\x00%\x00\x00\x00',
+            b'\x0D\x02\x04\x00\x00\x00c000\x15\x00\x00\x00\x01\x00\x00\x90\x02\x00\x04\x00t\x00e\x00s\x00t\x00\x03\x00\x02\x00,\x007\x00\xff\x00\x01\x00H\x00\x03\x00\x03\x00\x01\x00\x02\x00\x03\x00\x00\x00',
+            b'\x0E\x01\x00\x00\x00\x00\x01\x00\x00\x00!\x00',
+            b'\x0F\x01\xd4\x00\x00\x00\x04\x00\x00\x00\x06\x00\x0c\x00\x12\x00\x15\x00',
+            b'\x10\x01\x00\x00\x00\x00\x03\x00\x00\x00\x00\xf0\xfe\xca\x00\x80',
+            b'\x11\x02\x04\x00\x00\x00TATA\x03\x00\x00\x00\x06\x00\x07\x00\x08\x00',
+            b'\xff'
+        ]
+        self.assertEqual(blob, expected_blob)
+
+    # -----------------------------------
+    # ---- Internal tests begin here ----
+    # -----------------------------------
+    def testTupleToData(self):
+        data = lc3_unit_test_case.tuple_to_data((1,))
+        self.assertEqual(data, [DataItem.number, 1])
+
+        data = lc3_unit_test_case.tuple_to_data(("LOL",))
+        self.assertEqual(data, [DataItem.string, 3, "LOL"])
+
+        data = lc3_unit_test_case.tuple_to_data(([1, 2, 3],))
+        self.assertEqual(data, [DataItem.array, 3, [1, 2, 3]])
+
+        data = lc3_unit_test_case.tuple_to_data((("LOL",),))
+        self.assertEqual(data, [DataItem.data, DataItem.string, 3, "LOL", DataItem.end_of_data])
+
+        data = lc3_unit_test_case.tuple_to_data(("Some Student", 76, [100, 52]))
+        self.assertEqual(data, [DataItem.string, 12, "Some Student", DataItem.number, 76, DataItem.array, 2, [100, 52]])
+
+        data = lc3_unit_test_case.tuple_to_data((1, 'test', [1, 44, -1, 0x8000, 0xFFFF, 32767], (5, ('test2', [44], (8,), 33))))
+        self.assertEqual(data, [
+            DataItem.number, 1,
+            DataItem.string, 4, 'test',
+            DataItem.array, 6, [1, 44, -1, 0x8000, 0xFFFF, 32767],
+
+            DataItem.data,
+                DataItem.number, 5,
+                DataItem.data,
+                    DataItem.string, 5, 'test2',
+                    DataItem.array, 1, [44],
+                    DataItem.data,
+                        DataItem.number, 8,
+                    DataItem.end_of_data,
+                DataItem.number, 33,
+                DataItem.end_of_data,
+            DataItem.end_of_data])
+
+    def testTupleToDataSpec(self):
+        data = lc3_unit_test_case.tuple_to_data_spec((1,))
+        self.assertEqual(data, [DataItem.number])
+
+        data = lc3_unit_test_case.tuple_to_data_spec(("LOL",))
+        self.assertEqual(data, [DataItem.string, 3])
+
+        data = lc3_unit_test_case.tuple_to_data_spec(([1, 2, 3],))
+        self.assertEqual(data, [DataItem.array, 3])
+
+        data = lc3_unit_test_case.tuple_to_data_spec((("LOL",),))
+        self.assertEqual(data, [DataItem.data, DataItem.string, 3, DataItem.end_of_data])
+
+        data = lc3_unit_test_case.tuple_to_data_spec(("Some Student", 76, [100, 52]))
+        self.assertEqual(data, [DataItem.string, 12, DataItem.number, DataItem.array, 2])
+
+        data = lc3_unit_test_case.tuple_to_data_spec((1, 'test', [1, 44, -1, 0x8000, 0xFFFF, 32767], (5, ('test2', [44], (8,), 33))))
+        self.assertEqual(data, [
+            DataItem.number,
+            DataItem.string, 4,
+            DataItem.array, 6,
+
+            DataItem.data,
+                DataItem.number,
+                DataItem.data,
+                    DataItem.string, 5,
+                    DataItem.array, 1,
+                    DataItem.data,
+                        DataItem.number,
+                    DataItem.end_of_data,
+                DataItem.number,
+                DataItem.end_of_data,
+            DataItem.end_of_data])
+
+    def testReadData(self):
+        self._writeMem(0x3000, 1)
+
+        self._writeMem(0x3001, ord('t'))
+        self._writeMem(0x3002, ord('e'))
+        self._writeMem(0x3003, ord('s'))
+        self._writeMem(0x3004, ord('t'))
+        self._writeMem(0x3005, 0)
+
+        self._writeMem(0x3006, 1)
+        self._writeMem(0x3007, 44)
+        self._writeMem(0x3008, -1)
+        self._writeMem(0x3009, -32768)
+        self._writeMem(0x300A, -1)
+        self._writeMem(0x300B, 32767)
+
+        self._writeMem(0x300C, 5)
+
+        self._writeMem(0x300D, ord('t'))
+        self._writeMem(0x300E, ord('e'))
+        self._writeMem(0x300F, ord('s'))
+        self._writeMem(0x3010, ord('t'))
+        self._writeMem(0x3011, ord('2'))
+        self._writeMem(0x3012, 0)
+
+        self._writeMem(0x3013, 44)
+
+        self._writeMem(0x3014, 8)
+
+        self._writeMem(0x3015, 9901)
+        data = self._readData(0x3000, (0, 'xxxx', [0] * 6, (0, ('xxxxx', [0], (0,), 0))))
+
+        self.assertEqual(data, (1, six.u('test\0'), [1, 44, -1, -32768, -1, 32767], (5, (six.u('test2\0'), [44], (8,), 9901))))
+
+    def testWriteData(self):
+        data = (1, 'test', [1, 44, -1, 0x8000, 0xFFFF, 32767], (5, ('test2', [44], (8,), 9901)))
+        self._writeData(0x3000, data)
+
+        self.assertEqual(self._readMem(0x3000), 1)
+
+        self.assertEqual(self._readMem(0x3001), ord('t'))
+        self.assertEqual(self._readMem(0x3002), ord('e'))
+        self.assertEqual(self._readMem(0x3003), ord('s'))
+        self.assertEqual(self._readMem(0x3004), ord('t'))
+        self.assertEqual(self._readMem(0x3005), 0)
+
+        self.assertEqual(self._readMem(0x3006), 1)
+        self.assertEqual(self._readMem(0x3007), 44)
+        self.assertEqual(self._readMem(0x3008), -1)
+        self.assertEqual(self._readMem(0x3009), -32768)
+        self.assertEqual(self._readMem(0x300A), -1)
+        self.assertEqual(self._readMem(0x300B), 32767)
+
+        self.assertEqual(self._readMem(0x300C), 5)
+
+        self.assertEqual(self._readMem(0x300D), ord('t'))
+        self.assertEqual(self._readMem(0x300E), ord('e'))
+        self.assertEqual(self._readMem(0x300F), ord('s'))
+        self.assertEqual(self._readMem(0x3010), ord('t'))
+        self.assertEqual(self._readMem(0x3011), ord('2'))
+        self.assertEqual(self._readMem(0x3012), 0)
+
+        self.assertEqual(self._readMem(0x3013), 44)
+
+        self.assertEqual(self._readMem(0x3014), 8)
+
+        self.assertEqual(self._readMem(0x3015), 9901)
+
+    def testHardAssertion(self):
+        snippet = """
+        .orig x3000
+            HALT
+            A .fill 3
+            B .fill 5
+            C .fill 7
+        .end
+        """
+        self.loadCode(snippet)
+        self.runCode(max_executions=1)
+
+        self.assertValue("A", 2, level=lc3_unit_test_case.AssertionType.hard)
+        self.assertValue("B", 3)
+        self.assertValue("C", 4)
+
+        self.assertEquals(self.failed_assertions,
+        [('value: A', 'MEM[A] was expected to be (2 x0002) but code produced (3 x0003)\n'),
+         ('value: B', 'Not checked due to previous failures.'),
+         ('value: C', 'Not checked due to previous failures.')])
+
+        # Clear so that the test doesn't fail during tearDown.
+        self.failed_assertions = []
+
+    def testSoftAssertion(self):
+        snippet = """
+        .orig x3000
+            HALT
+            A .fill 3
+            B .fill 5
+            C .fill 7
+        .end
+        """
+        self.loadCode(snippet)
+        self.runCode(max_executions=1)
+
+        self.assertValue("A", 3, level=lc3_unit_test_case.AssertionType.hard)
+        self.assertValue("B", 3)
+        self.assertValue("C", 4)
+
+        self.assertEquals(self.failed_assertions,
+        [('value: B', 'MEM[B] was expected to be (3 x0003) but code produced (5 x0005)\n'),
+         ('value: C', 'MEM[C] was expected to be (4 x0004) but code produced (7 x0007)\n')])
+
+        # Clear so that the test doesn't fail during tearDown.
+        self.failed_assertions = []
+
 
 if __name__ == '__main__':
+    logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
     unittest.main()

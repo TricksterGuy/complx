@@ -26,7 +26,8 @@ builder = module_builder.module_builder_t(
                         xml_generator_config=xml_generator_config)
 
 # Debugging
-#builder.print_declarations()
+# builder.print_declarations()
+#print dir(builder)
 
 # Whitelist exporting of stuff.
 builder.decls().exclude()
@@ -39,6 +40,7 @@ builder.class_("lc3_blackbox_info").include()
 builder.class_("lc3_subroutine_call_info").include()
 builder.class_("lc3_trap_call_info").include()
 builder.class_("lc3_memory_stats").include()
+builder.enum("MemoryFillStrategy").include()
 
 builder.decl("::std::vector<lc3_subroutine_call_info, std::allocator<lc3_subroutine_call_info> >").include()
 builder.decl("::std::vector<lc3_trap_call_info, std::allocator<lc3_trap_call_info> >").include()

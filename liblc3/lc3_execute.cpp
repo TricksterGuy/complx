@@ -6,20 +6,21 @@
 
 const char* WARNING_MESSAGES[LC3_WARNINGS] =
 {
-    "Reading beyond end of input. Halting",
-    "Writing x%04x to reserved memory at x%04x",
-    "Reading from reserved memory at x%04x",
-    "Unsupported Trap x%02x. Assuming Halt",
-    "Unsupported Instruction x%04x. Halting",
+    "Reading beyond end of input. Halting.",
+    "Writing x%04x to reserved memory at x%04x.",
+    "Reading from reserved memory at x%04x.",
+    "Unsupported Trap x%02x. Assuming Halt.",
+    "Unsupported Instruction x%04x. Halting.",
     "Malformed Instruction x%04x. Halting.",
     "RTI executed in user mode. Halting.",
-    "Trying to write invalid character x%04x",
-    "PUTS called with invalid address x%04x",
-    "Trying to write to the display when its not ready",
-    "Trying to read from the keyboard when its not ready",
-    "Turning off machine via the MCR register",
+    "Trying to write invalid character x%04x.",
+    "PUTS called with invalid address x%04x.",
+    "Trying to write to the display when its not ready.",
+    "Trying to read from the keyboard when its not ready.",
+    "Turning off machine via the MCR register.",
     "PUTSP called with invalid address x%04x",
-    "PUTSP found an unexpected NUL byte at address x%04x",
+    "PUTSP found an unexpected NUL byte at address x%04x.",
+    "Invalid value x%04x loaded into the PSR."
 };
 
 lc3_instr lc3_decode(lc3_state& state, unsigned short data)
@@ -225,7 +226,13 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
                     if (state.subroutines.find(state.pc) != state.subroutines.end())
                         num_params = state.subroutines[state.pc].num_params;
                     for (unsigned int i = 0; i < num_params; i++)
+                    {
                         call_info.params.push_back(state.mem[call_info.r6 + i]);
+                    }
+           	        for (unsigned int i = 0; i < 8; i++)
+                    {
+                        call_info.regs[i] = state.regs[i];
+                    }
 
                     state.first_level_calls.push_back(call_info);
                 }
@@ -311,9 +318,15 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
         }
         else
         {
+            const bool bits[8] = {0, 1, 1, 0, 1, 0, 0, 0};
             // Pop PC and psr
             state.pc = state.mem[state.regs[6]];
-            int psr = state.mem[state.regs[6] + 1];
+            unsigned short psr = state.mem[state.regs[6] + 1];
+            // Invalid PSR check, if the unspecified bits are filled or trying
+            // to set multiple nzp bits warn.
+            if ((psr & 0x78F8) != 0 || bits[psr & 7] != 1)
+                lc3_warning(state, LC3_INVALID_PSR_VALUE, psr, 0);
+
             state.regs[6] += 2;
             state.privilege = (psr >> 15) & 1;
             state.priority = (psr >> 8) & 7;
@@ -522,6 +535,9 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
     if (state.true_traps)
     {
         changes.changes = LC3_SUBROUTINE_BEGIN;
+        changes.subroutine.r6 = state.regs[6];
+        changes.subroutine.is_trap = true;
+
         if (state.lc3_version > 0)
         {
             short psr = (short)((state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p);
@@ -541,15 +557,12 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
 
         // PC = MEM[VECTOR]
         state.pc = state.mem[trap.vector];
+        changes.subroutine.address = state.pc;
 
         // If not within an interrupt
-        /// TODO why do I have this check here?
-        if (state.privilege || state.lc3_version != 0)
+        /// TODO should check if there are any interrupts on the rti stack.
+        if (state.privilege || state.lc3_version > 0)
         {
-            changes.changes = LC3_SUBROUTINE_BEGIN;
-            changes.subroutine.address = state.pc;
-            changes.subroutine.r6 = state.regs[0x6];
-            changes.subroutine.is_trap = true;
             if (state.max_call_stack_size != 0)
             {
                 state.call_stack.push_back(changes.subroutine);
@@ -785,6 +798,7 @@ void lc3_mem_write(lc3_state& state, unsigned short addr, short value, bool priv
         case DEV_PSR:
             if (state.lc3_version > 0) {
                 lc3_warning(state, LC3_RESERVED_MEM_WRITE, addr, 0);
+                /// TODO consider allowing writing to the PSR.
             } else {
                 if (addr >= 0xFE00U && state.address_plugins.find(addr) != state.address_plugins.end())
                     state.address_plugins[addr]->OnWrite(state, addr, value);

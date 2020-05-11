@@ -1,6 +1,6 @@
 #define BOOST_TEST_DYN_LINK 1
 #define BOOST_TEST_MODULE LC3_Test_Suite
-#include <boost/test/auto_unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #include <iostream>
 #include <fstream>
 #include <vector>

@@ -87,6 +87,7 @@ enum WARNINGS
     LC3_TURN_OFF_VIA_MCR = 11,
     LC3_PUTSP_INVALID_MEMORY = 12,
     LC3_PUTSP_UNEXPECTED_NUL = 13,
+    LC3_INVALID_PSR_VALUE = 14,
     LC3_WARNINGS               // Must be last.
 };
 
@@ -402,13 +403,16 @@ typedef struct lc3_subroutine_call
 /** Record of active subroutine call info for each call made */
 typedef struct lc3_subroutine_call_info
 {
+	lc3_subroutine_call_info() : regs(8) {}
     unsigned short address;
     unsigned short r6;
     std::vector<unsigned short> params;
+    // This should be std::array<short, 8> but due to a bug with py++ it doesn't work.
+    std::vector<short> regs;
     // For availability in pylc3 equality operator must be defined.
     bool operator==(const lc3_subroutine_call_info& other) const
     {
-        return address == other.address && r6 == other.r6 && params == other.params;
+        return address == other.address && r6 == other.r6 && params == other.params && regs == other.regs;
     }
 
 } lc3_subroutine_call_info;
@@ -608,7 +612,7 @@ std::string lc3_smart_disassemble(lc3_state& state, unsigned short data);
 /** lc3_disassemble
   *
   * Entry function for disassembling instructions.
-  * If state.strict_execution is enabled will append a ! at the end of the instruction.
+  * If state.strict_execution is enabled will append a * at the end of the instruction.
   *
   * @param state LC3State object.
   * @param data Instruction data.
