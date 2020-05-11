@@ -1261,7 +1261,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         expected_blob = b'\x07\x00\x80\x00\x00\x10\x19\x04\x00\x00\x00TATA\n\x00\x00\x00\x00\x00\x03\x00\x04\x00\x05\x00\x05\x00\xfe\xca\x06\x00\x00\xf0\x07\x00\x00\x80\xff'
 
         self.assertEqual(blob, expected_blob)
-        print self.preconditions.encode()
+        #print self.preconditions.encode()
 
     def testReplayString(self):
         snippet = """
