@@ -10,6 +10,7 @@
 #include <wx/event.h>
 #include <wx/filename.h>
 #include <wx/grid.h>
+#include <wx/socket.h>
 #include <wx/textctrl.h>
 #include <wx/window.h>
 
@@ -52,7 +53,6 @@ public:
 
     // File menu event handlers
     void OnLoad(wxCommandEvent& event) override;
-    void OnCleanLoad(wxCommandEvent& event) override;
     void OnAdvancedLoad(wxCommandEvent& event) override;
     void OnReload(wxCommandEvent& event) override;
     void OnQuit(wxCommandEvent& event) override;
@@ -108,6 +108,7 @@ public:
     void OnTraceFile(wxCommandEvent& event) override;
 
     // Test menu event handlers
+    void OnStartReplayStringServer(wxCommandEvent& event) override;
 	void OnSetupReplayString(wxCommandEvent& event) override;
 	void OnReloadReplayString(wxCommandEvent& event) override;
 	void OnDescribeReplayString(wxCommandEvent& event) override;

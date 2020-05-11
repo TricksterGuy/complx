@@ -12,12 +12,16 @@
 #include <wx/brush.h>
 #include <wx/aboutdlg.h>
 #include <wx/numdlg.h>
+#include <wx/busyinfo.h>
+#include <wx/utils.h>
 #include <wx/config.h>
+#include <wx/socket.h>
 #include <wx/tipdlg.h>
 #include <cassert>
 #include <bitset>
 #include <algorithm>
 #include <iostream>
+#include <memory>
 #include "icon64.xpm"
 
 #include "ComplxFrame.hpp"
@@ -164,27 +168,6 @@ void ComplxFrame::OnLoad(wxCommandEvent& event)
     {
         LoadingOptions opts;
         opts.file = dialog->GetPath().ToStdString();
-        DoLoadFile(opts);
-    }
-
-    delete dialog;
-}
-
-
-/** OnCleanLoad
-  *
-  * Called when a file needs to be loaded with zero'd memory/registers.
-  */
-void ComplxFrame::OnCleanLoad(wxCommandEvent& event)
-{
-    if (Running()) return;
-    wxFileDialog* dialog = new wxFileDialog(NULL, _("Load .asm file"), wxEmptyString, wxEmptyString, _("LC-3 Assembly Files (*.asm)|*.asm"), wxFD_OPEN|wxFD_FILE_MUST_EXIST|wxFD_CHANGE_DIR);
-    if (dialog->ShowModal() == wxID_OK)
-    {
-        LoadingOptions opts;
-        opts.file = dialog->GetPath().ToStdString();
-        opts.memory = ZEROED;
-        opts.registers = ZEROED;
         DoLoadFile(opts);
     }
 
@@ -453,9 +436,9 @@ void ComplxFrame::OnActivate(wxActivateEvent& event)
             if (!reload_tests)
             {
                 int answer = wxMessageBox(wxString::Format("%s has been modified.\n"
-                                                           "Do you wish to reload it?\n"
-                                                           "(Note simulation will be reset and breakpoints "
-                                                           "not present in code will not be reloaded.)", asm_file.GetFullName()),
+                                          "Do you wish to reload it?\n"
+                                          "(Note simulation will be reset and breakpoints "
+                                          "not present in code will not be reloaded.)", asm_file.GetFullName()),
                                           "Reload asm file?", wxOK | wxOK_DEFAULT | wxCANCEL);
                 reload_asm = answer == wxOK;
             }
@@ -592,7 +575,7 @@ void ComplxFrame::OnBaseChange(wxMouseEvent& event)
         //if (value > 0 && value <= 255)
         //    mode = BASE_CHAR;
         //else
-            mode = BASE_2;
+        mode = BASE_2;
     }
     //else if (mode == BASE_CHAR)
     //    mode = BASE_2;
@@ -1164,7 +1147,7 @@ void ComplxFrame::OnCallStack(wxCommandEvent& event)
 
 /** OnSubroutineCall
   *
-  * "Calls" a subroutine uses same environment as lc3test
+  * "Calls" a subroutine uses same environment as pyLC3
   */
 void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
 {
@@ -1180,65 +1163,71 @@ void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
     }
 
     CallSubroutineDialog* dialog = new CallSubroutineDialog(this);
-    int stack_location = 0;
-    int subroutine_location = 0;
-    std::vector<short> params;
-    unsigned short halt_statement = 0;
+    int subroutine_location;
+    std::vector<int> params;
 
     if (dialog->ShowModal() != wxID_OK)
         goto end;
 
-    stack_location = lc3_sym_lookup(state, dialog->GetStack());
+    DoLoadFile(reload_options);
+
     subroutine_location = lc3_sym_lookup(state, dialog->GetSubroutine());
-    if (stack_location == -1)
-    {
-        wxMessageBox(wxString::Format("ERROR! Stack location: %s was not found in symbol table", dialog->GetStack()), "Error");
-        goto end;
-    }
     if (subroutine_location == -1)
     {
         wxMessageBox(wxString::Format("ERROR! Subroutine location: %s was not found in symbol table", dialog->GetSubroutine()), "Error");
         goto end;
     }
+
+
     for (const auto& expr : dialog->GetParams())
     {
-        int value_calc;
-        if (lc3_calculate(state, expr, value_calc))
+        int value_calc = 0x10000;
+        if (!expr.empty() && lc3_calculate(state, expr, value_calc))
         {
             wxMessageBox(wxString::Format("ERROR! Parameter %s is a malformed expression", expr), "Error");
             goto end;
         }
-        params.push_back((short)value_calc);
+        params.push_back(value_calc);
     }
-    // Meh... find a halt statement there needs to be somewhere to go afterward.
-    for (unsigned int i = 0x3000; i < 0x10000; i++)
+
+    if (dialog->IsCallingConvention())
     {
-        if ((unsigned short)state.mem[i] == 0xF025)
+        std::map<std::string, short> env;
+        for (const auto& name_expr : dialog->GetEnvironment())
         {
-            halt_statement = i;
-            break;
+            int value_calc;
+            if (lc3_calculate(state, name_expr.second, value_calc))
+            {
+                wxMessageBox(wxString::Format("ERROR! Parameter %s is a malformed expression", name_expr.second), "Error");
+                goto end;
+            }
+            env[name_expr.first] = value_calc;
+        }
+        state.regs[6] = static_cast<unsigned short>(env["STACK"]) - params.size();
+        state.regs[5] = env["R5"];
+        state.regs[7] = env["R7"];
+        for (unsigned int i = 0; i < params.size(); i++)
+            state.mem[static_cast<unsigned short>(state.regs[6]) + i] = params[i];
+    }
+    else
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            if (params[i] != 0x10000)
+                state.regs[i] = params[i];
         }
     }
-    if ((unsigned short)state.mem[halt_statement] != 0xF025)
+
     {
-        wxMessageBox("ERROR! No halt statement found in your program", "Error");
-        goto end;
+        state.pc = static_cast<unsigned short>(subroutine_location);
+        //wxString end_condition = wxString::Format("R7==x%04x", static_cast<unsigned short>(state.regs[7]));
+        lc3_add_break(state, state.regs[7], "END_OF_SUBROUTINE");
+        UpdateRegisters();
+        UpdateMemory();
+        UpdateStatus();
     }
 
-    reload_options.memory = dialog->IsRandomMemory() ? RANDOMIZE : ZEROED;
-    reload_options.registers = dialog->IsRandomRegisters() ? RANDOMIZE : ZEROED;
 
-    DoLoadFile(reload_options);
-
-    state.regs[6] = state.mem[(unsigned short)stack_location] - params.size();
-    state.pc = (unsigned short) subroutine_location;
-    for (unsigned int i = 0; i < params.size(); i++)
-        state.mem[(unsigned short)state.regs[6] + i] = params[i];
-    state.regs[7] = halt_statement;
-
-    UpdateRegisters();
-    UpdateMemory();
-    UpdateStatus();
 
 end:
     delete dialog;
@@ -1350,6 +1339,64 @@ void ComplxFrame::OnDestroyView(wxCloseEvent& event)
     views.erase(std::find(views.begin(), views.end(), frame));
     frame->Disconnect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(ComplxFrame::OnDestroyView), NULL, this);
     frame->Destroy();
+}
+
+void ComplxFrame::OnStartReplayStringServer(wxCommandEvent& event)
+{
+#ifdef ENABLE_LC3_REPLAY
+    if (Running())
+        return;
+
+    if (reload_options.file.empty())
+        OnLoad(event);
+
+    if (reload_options.file.empty())
+    {
+        wxMessageBox("An assembly file must be loaded to perform this operation", "Error");
+        return;
+    }
+
+    wxIPV4address address;
+    address.AnyAddress();
+    address.Service(21100);
+    wxSocketServer server(address, wxSOCKET_REUSEADDR);
+    if (!server.IsOk())
+    {
+        wxMessageBox("Unable to start Replay String Server.", "Error");
+        return;
+    }
+
+    wxSocketBase* client = nullptr;
+    {
+        std::unique_ptr<wxBusyInfo> wait(new wxBusyInfo("Waiting for connection..."));
+        std::unique_ptr<wxWindowDisabler> disabler(new wxWindowDisabler());
+
+        if (!server.WaitForAccept(10) || (client = server.Accept(false)) == nullptr)
+        {
+            wait.reset();
+            disabler.reset();
+
+            wxMessageBox("Complx did not receive a replay string from client.", "Error");
+            return;
+        }
+    }
+
+    uint32_t size;
+    client->Read(&size, sizeof(size));
+    size = wxINT32_SWAP_ON_LE(size);
+    if (size <= 1024)
+    {
+        char buf[size+1];
+        client->Read(buf, size);
+        buf[size] = 0;
+        DoSetupReplayString(std::string(buf, size));
+    }
+    else
+    {
+        wxMessageBox("Could not process replay string, length too long.", "Error");
+    }
+    client->Destroy();
+#endif
 }
 
 void ComplxFrame::OnSetupReplayString(wxCommandEvent& event)

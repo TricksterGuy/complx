@@ -1,12 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Jan 23 2018)
+// C++ code generated with wxFormBuilder (version Oct 26 2018)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
 ///////////////////////////////////////////////////////////////////////////
 
-#ifndef __COMPLXFRAMEDECL_H__
-#define __COMPLXFRAMEDECL_H__
+#pragma once
 
 #include <wx/artprov.h>
 #include <wx/xrc/xmlres.h>
@@ -37,16 +36,15 @@ class MemoryGrid;
 ///////////////////////////////////////////////////////////////////////////////
 /// Class ComplxFrameDecl
 ///////////////////////////////////////////////////////////////////////////////
-class ComplxFrameDecl : public wxFrame 
+class ComplxFrameDecl : public wxFrame
 {
 	private:
-	
+
 	protected:
 		enum
 		{
 			ID_LOAD = 1000,
 			ID_RELOAD,
-			ID_CLEAN_LOAD,
 			ID_ADVANCED_LOAD,
 			ID_QUIT,
 			ID_NEW_VIEW,
@@ -85,6 +83,7 @@ class ComplxFrameDecl : public wxFrame
 			ID_ADVANCED_BREAKPOINT,
 			ID_ADD_BLACKBOX,
 			ID_TRACE_FILE,
+			ID_START_REPLAY_STRING_SERVER,
 			ID_SETUP_REPLAY_STRING,
 			ID_RELOAD_REPLAY_STRING,
 			ID_DESCRIBE_REPLAY_STRING,
@@ -94,7 +93,7 @@ class ComplxFrameDecl : public wxFrame
 			ID_TIPS,
 			ID_ABOUT
 		};
-		
+
 		wxMenuBar* menu;
 		wxMenu* menuFile;
 		wxMenu* menuView;
@@ -138,13 +137,12 @@ class ComplxFrameDecl : public wxFrame
 		wxTextCtrl* cctext;
 		wxTextCtrl* pctext;
 		wxStatusBar* statusBar;
-		
+
 		// Virtual event handlers, overide them in your derived class
 		virtual void OnActivate( wxActivateEvent& event ) = 0;
 		virtual void OnIdle( wxIdleEvent& event ) = 0;
 		virtual void OnLoad( wxCommandEvent& event ) = 0;
 		virtual void OnReload( wxCommandEvent& event ) = 0;
-		virtual void OnCleanLoad( wxCommandEvent& event ) = 0;
 		virtual void OnAdvancedLoad( wxCommandEvent& event ) = 0;
 		virtual void OnQuit( wxCommandEvent& event ) = 0;
 		virtual void OnNewView( wxCommandEvent& event ) = 0;
@@ -182,6 +180,7 @@ class ComplxFrameDecl : public wxFrame
 		virtual void OnAdvancedBreakpoint( wxCommandEvent& event ) = 0;
 		virtual void OnBlackbox( wxCommandEvent& event ) = 0;
 		virtual void OnTraceFile( wxCommandEvent& event ) = 0;
+		virtual void OnStartReplayStringServer( wxCommandEvent& event ) = 0;
 		virtual void OnSetupReplayString( wxCommandEvent& event ) = 0;
 		virtual void OnReloadReplayString( wxCommandEvent& event ) = 0;
 		virtual void OnDescribeReplayString( wxCommandEvent& event ) = 0;
@@ -196,14 +195,13 @@ class ComplxFrameDecl : public wxFrame
 		virtual void OnBaseChange( wxMouseEvent& event ) = 0;
 		virtual void OnBaseChangeContext( wxMouseEvent& event ) = 0;
 		virtual void OnRegisterChanged( wxCommandEvent& event ) = 0;
-		
-	
+
+
 	public:
-		
+
 		ComplxFrameDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Complx LC-3 Simulator"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 704,576 ), long style = wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER|wxTAB_TRAVERSAL );
-		
+
 		~ComplxFrameDecl();
-	
+
 };
 
-#endif //__COMPLXFRAMEDECL_H__

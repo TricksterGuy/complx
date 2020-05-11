@@ -681,7 +681,7 @@ int lc3_peek_char(lc3_state& state, std::istream& file)
 
 int lc3_write_char(lc3_state& state, std::ostream& file, int chr)
 {
-    if (chr > 255 || !(isgraph(chr) || isspace(chr)))
+    if (chr > 255 || !(isgraph(chr) || isspace(chr) || chr == '\b'))
         lc3_warning(state, LC3_INVALID_CHARACTER_WRITE, chr, 0);
     return state.writer(state, file, chr);
 }

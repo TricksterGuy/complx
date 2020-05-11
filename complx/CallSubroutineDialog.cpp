@@ -3,31 +3,60 @@
 
 extern lc3_state state;
 
-const std::string CallSubroutineDialog::GetSubroutine() const
+std::string CallSubroutineDialog::GetSubroutine() const
 {
     return subroutine->GetStringSelection().ToStdString();
 }
 
-const std::string CallSubroutineDialog::GetStack() const
-{
-    return stack->GetValue().ToStdString();
-}
-
-const std::vector<std::string> CallSubroutineDialog::GetParams() const
+std::vector<std::string> CallSubroutineDialog::GetParams() const
 {
     std::vector<std::string> param_list;
-    tokenize(params->GetValue().ToStdString(), param_list, ",");
+    if (IsCallingConvention())
+    {
+        tokenize(params->GetValue().ToStdString(), param_list, ",");
+    }
+    else
+    {
+        param_list.push_back(r0Value->GetValue().ToStdString());
+        param_list.push_back(r1Value->GetValue().ToStdString());
+        param_list.push_back(r2Value->GetValue().ToStdString());
+        param_list.push_back(r3Value->GetValue().ToStdString());
+        param_list.push_back(r4Value->GetValue().ToStdString());
+        param_list.push_back(r5Value->GetValue().ToStdString());
+        param_list.push_back(r6Value->GetValue().ToStdString());
+        param_list.push_back(r7Value->GetValue().ToStdString());
+    }
     return param_list;
 }
 
-bool CallSubroutineDialog::IsRandomRegisters() const
+std::map<std::string, std::string> CallSubroutineDialog::GetEnvironment() const
 {
-    return randomRegisters->IsChecked();
+    std::map<std::string, std::string> env;
+    env["STACK"] = stack->GetValue().ToStdString();
+    env["R5"] = r5ValueLCC->GetValue().ToStdString();
+    env["R7"] = r7ValueLCC->GetValue().ToStdString();
+    return env;
 }
 
-bool CallSubroutineDialog::IsRandomMemory() const
+bool CallSubroutineDialog::IsCallingConvention() const
 {
-    return randomMemory->IsChecked();
+    return subroutineMode->GetSelection() == 0;
+}
+
+void CallSubroutineDialog::OnSubroutineModeChange(wxCommandEvent& event)
+{
+    if (subroutineMode->GetSelection() == 0)
+    {
+        passByRegistersPanel->Show(false);
+        callingConventionPanel->Show(true);
+    }
+    else
+    {
+        passByRegistersPanel->Show(true);
+        callingConventionPanel->Show(false);
+    }
+    passByRegistersPanel->Layout();
+    Layout();
 }
 
 void CallSubroutineDialog::SetupSubroutines()
