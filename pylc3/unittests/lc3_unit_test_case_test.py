@@ -1351,6 +1351,20 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         #print self.preconditions.encode()
 
+    def testVerificationStringPassByRegs(self):
+        snippet = """
+        .orig x3000
+            TATA RET
+        .end
+        """
+        self.loadCode(snippet)
+        self.expectSubroutineCall('TATA', {0: 6, 1: 7, 4: 8})
+        blob = self.postconditions._formBlob()
+
+        expected_blob = b'\x12\x02\x04\x00\x00\x00TATA\x06\x00\x00\x00\x00\x00\x06\x00\x01\x00\x07\x00\x04\x00\x08\x00\xff'
+
+        self.assertEqual(blob, expected_blob)
+
     def testVerificationString(self):
         snippet = """
         .orig x3000
