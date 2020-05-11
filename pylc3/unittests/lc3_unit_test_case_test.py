@@ -1247,6 +1247,21 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertFalse(self.state.z)
         self.assertFalse(self.state.p)
 
+    def testReplayStringPassByRegs(self):
+        snippet = """
+        .orig x3000
+            TATA RET
+        .end
+        """
+        self.loadCode(snippet)
+        self.callSubroutine("TATA", {0: 3, 4: 5})
+
+        blob = self.preconditions._formBlob()
+
+        expected_blob = b'\x07\x00\x80\x00\x00\x10\x19\x04\x00\x00\x00TATA\n\x00\x00\x00\x00\x00\x03\x00\x04\x00\x05\x00\x05\x00\xfe\xca\x06\x00\x00\xf0\x07\x00\x00\x80\xff'
+
+        self.assertEqual(blob, expected_blob)
+
     def testReplayString(self):
         snippet = """
         .orig x3000

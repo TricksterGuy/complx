@@ -869,7 +869,6 @@ class LC3UnitTestCase(unittest.TestCase):
 
         Args:
             subroutine: String - Label pointing at the start of the subroutine.
-            params: List of Integer - (LC-3 Calling Convention Style) Parameters to the subroutine. If passing by registers this should be empty.
             params: List of Integer - (LC-3 Calling Convention Style) Parameters to the subroutine
                     Dict of Integer to Integer - (Pass by Register Style) Map of Register number to value. (Do not set R5-R7 in this dictionary).
             r5: Integer - Dummy value to store in r5 (frame pointer) for the test.
@@ -905,7 +904,8 @@ class LC3UnitTestCase(unittest.TestCase):
             params[7] = r7
             self._internalAssert('callSubroutine', self._subroutine_call_mode is None or self._subroutine_call_mode == SubroutineCallMode.pass_by_register, "Can't mix subroutine call styles in the same test.", AssertionType.fatal, internal=True)
             self._subroutine_call_mode = SubroutineCallMode.pass_by_register
-            self.preconditions.addPrecondition(PreconditionFlag.pass_by_regs, subroutine, params)
+            data = list(six.moves.reduce(lambda a, b: a + b, params.items()))
+            self.preconditions.addPrecondition(PreconditionFlag.pass_by_regs, subroutine, data)
         self.preconditions.addEnvironment(PreconditionFlag.break_address, r7)
 
     # TODO Add callTrap, support both lc-3 and the 2019 revision.
@@ -962,7 +962,7 @@ class LC3UnitTestCase(unittest.TestCase):
         if isinstance(params, list):
             self.postconditions.add(PostconditionFlag.subroutine_call, subroutine, params)
         else:
-            data = list(reduce(lambda a, b: a + b, params.items()))
+            data = list(six.moves.reduce(lambda a, b: a + b, params.items()))
             self.postconditions.add(PostconditionFlag.pass_by_regs, subroutine, data)
 
     def expectTrapCall(self, vector, params, optional=False):
