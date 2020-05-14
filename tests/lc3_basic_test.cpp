@@ -14,6 +14,7 @@ struct LC3BasicTest
     LC3BasicTest()
     {
         lc3_init(state, false, false);
+        state.lc3_version = 0;
     }
 };
 
