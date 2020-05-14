@@ -498,7 +498,7 @@ class LC3UnitTestCase(unittest.TestCase):
             self.failed_assertions.append((name, msg))
             self._hard_failed = self._hard_failed or level == AssertionType.hard
 
-    def loadAsmFile(self, file, lc3_version=0):
+    def loadAsmFile(self, file, lc3_version=1):
         """Loads an assembly file.
 
         Will assert if the file failed to assemble.
