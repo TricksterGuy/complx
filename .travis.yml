@@ -1,5 +1,5 @@
 sudo: required
-dist: xenial
+dist: bionic
 language: cpp
 matrix:
   include:
@@ -7,19 +7,18 @@ matrix:
   - compiler: gcc
 before_install:
 - sudo apt-get update -qq
-- sudo apt-get install -y libboost-test-dev castxml python-pip libpython-dev libboost-python-dev
-  libboost-serialization-dev
+- sudo apt-get install -y libboost-test-dev castxml python-pip libpython-dev libboost-python-dev libboost-serialization-dev
 - sudo pip install wheel setuptools unittest2 pygccxml pyplusplus terminaltables
 - sudo pip install -r pylc3/requirements.txt
 - sudo pip install -r pylc3/requirements-build.txt
 script:
 - mkdir build && cd build
-- cmake -DENABLE_TESTS=ON -DENABLE_PYLC3=ON -DENABLE_COMPLX=OFF -DENABLE_AS2OBJ=OFF
-  ..
+- cmake -DENABLE_TESTS=ON -DENABLE_PYLC3=ON -DENABLE_COMPLX=OFF -DENABLE_AS2OBJ=OFF ..
 - make
 - sudo make install
 - sudo ldconfig
 - ctest -VV
+- cd ..
 deploy:
   provider: launchpad
   slug: "~tricksterguy87/complx-tools/+git/master"

@@ -458,7 +458,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
     def tearDown(self):
         def form_failure_message():
-            return 'The test failed due to the following checks that failed shown below:\n----\n%s%s' % ('\n'.join(['name: %s Reason: %s' % (name, msg) for name, msg in self.failed_assertions]), self.replay_msg)
+            return 'The test failed due to the following assertions shown below:\n----\nTest case: %s\n----\n%s%s' % (self.display_name, '\n'.join(['Name: %s Reason: %s' % (name, msg) for name, msg in self.failed_assertions]), self.replay_msg)
         if self.failed_assertions:
             self.fail(form_failure_message())
         assert self.display_name is not None, 'Internal error self.display_name needs to be set per test case.'
