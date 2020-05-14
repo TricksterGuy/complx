@@ -351,7 +351,7 @@ BOOST_FIXTURE_TEST_CASE(LC3DefaultVersionTest, LC3Revision2019Test)
     lc3_init(state, false, false);
     lc3_assemble(state, file, options);
 
-    BOOST_CHECK_EQUAL(state.lc3_version, 0);
+    BOOST_CHECK_EQUAL(state.lc3_version, 1);
 }
 
 BOOST_FIXTURE_TEST_CASE(LC3VersionTest, LC3Revision2019Test)
