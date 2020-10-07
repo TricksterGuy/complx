@@ -415,6 +415,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
     @classmethod
     def form_json_test_report(cls):
+        name = cls.__name__
         filename = 'results.json'
         tests = set()
         tests.update(cls.failed_assertions_per_test.keys())
