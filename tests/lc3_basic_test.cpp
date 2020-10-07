@@ -1248,7 +1248,7 @@ BOOST_FIXTURE_TEST_CASE(TestTrapInstructions, LC3BasicTest)
 BOOST_FIXTURE_TEST_CASE(TestTrueTraps, LC3BasicTest)
 {
     std::istringstream file(
-        ";@version 0"
+        ";@version 0\n"
         ".orig x3000\n"
         "OUT\n"
         "IN\n"
