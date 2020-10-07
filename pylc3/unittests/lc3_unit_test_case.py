@@ -415,8 +415,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
     @classmethod
     def form_json_test_report(cls):
-        name = cls.__name__
-        filename = name + '.json'
+        filename = 'results.json'
         tests = set()
         tests.update(cls.failed_assertions_per_test.keys())
         tests.update(cls.passed_assertions_per_test.keys())
@@ -459,11 +458,11 @@ class LC3UnitTestCase(unittest.TestCase):
     def tearDown(self):
         def form_failure_message():
             return 'The test failed due to the following assertions shown below:\n----\nTest case: %s\n----\n%s%s' % (self.display_name, '\n'.join(['Name: %s Reason: %s' % (name, msg) for name, msg in self.failed_assertions]), self.replay_msg)
+        self.failed_assertions_per_test[self.display_name] = self.failed_assertions
+        self.passed_assertions_per_test[self.display_name] = self.passed_assertions
         if self.failed_assertions:
             self.fail(form_failure_message())
         assert self.display_name is not None, 'Internal error self.display_name needs to be set per test case.'
-        self.failed_assertions_per_test[self.display_name] = self.failed_assertions
-        self.passed_assertions_per_test[self.display_name] = self.passed_assertions
 
     def init(self, strategy, value):
         """Initializes LC3 state memory.

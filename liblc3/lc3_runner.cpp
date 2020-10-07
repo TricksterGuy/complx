@@ -115,7 +115,7 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     }
 
     // Add LC3 OS
-    memcpy(state.mem, lc3_os.data(), lc3_os.size() * sizeof(unsigned short));
+    memcpy(state.mem, lc3_osv2.data(), lc3_osv2.size() * sizeof(unsigned short));
 
     // Clear plugins
     lc3_remove_plugins(state);
