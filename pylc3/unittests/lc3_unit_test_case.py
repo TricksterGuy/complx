@@ -498,7 +498,7 @@ class LC3UnitTestCase(unittest.TestCase):
         else:
             if level == AssertionType.fatal:
                 raise LC3InternalAssertion(msg)
-            self.failed_assertions.append((name, msg))
+            self.failed_assertions.append(name, '%s%s' % (msg, self.replay_msg))
             self._hard_failed = self._hard_failed or level == AssertionType.hard
 
     def loadAsmFile(self, file, lc3_version=1):
@@ -509,7 +509,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
         This function generates two assertions.
             assembles - Fatal. Did the program assemble.
-            version - Hard. Does the program use the correct version of the lc-3. 
+            version - Hard. Does the program use the correct version of the lc-3.
 
         Args:
             file: String - Full path to the assembly file to load.
