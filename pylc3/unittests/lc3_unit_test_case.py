@@ -455,6 +455,7 @@ class LC3UnitTestCase(unittest.TestCase):
         self.failed_assertions = []
         self._hard_failed = False
         self.display_name = None
+        self.replay_msg = 'Code did not assemble or test issue.'
 
     def tearDown(self):
         def form_failure_message():
