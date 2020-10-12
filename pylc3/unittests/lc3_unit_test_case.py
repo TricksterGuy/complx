@@ -498,6 +498,7 @@ class LC3UnitTestCase(unittest.TestCase):
                 self.passed_assertions.append(name)
         else:
             if level == AssertionType.fatal:
+                self.failed_assertions.append((name, msg))
                 raise LC3InternalAssertion(msg)
             self.failed_assertions.append((name, '%s%s' % (msg, self.replay_msg)))
             self._hard_failed = self._hard_failed or level == AssertionType.hard
