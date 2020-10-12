@@ -1642,9 +1642,12 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertValue("B", 3)
         self.assertValue("C", 4)
 
-        self.assertEquals(self.failed_assertions,
-        [('value: B', 'MEM[B] was expected to be (3 x0003) but code produced (5 x0005)\n'),
-         ('value: C', 'MEM[C] was expected to be (4 x0004) but code produced (7 x0007)\n')])
+        names = [tup[0] for tup in self.failed_assertions]
+        msgs = [tup[1] for tup in self.failed_assertions]
+
+        self.assertEquals(names, ['value: B', 'value: C'])
+        self.assertIn(msgs[0], 'MEM[B] was expected to be (3 x0003) but code produced (5 x0005)\n')
+        self.assertIn(msgs[1], 'MEM[C] was expected to be (4 x0004) but code produced (7 x0007)\n')
 
         # Clear so that the test doesn't fail during tearDown.
         self.failed_assertions = []
