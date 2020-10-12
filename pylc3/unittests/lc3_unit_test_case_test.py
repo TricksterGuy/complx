@@ -288,6 +288,9 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
             self.fillValue(0x3005, 2)
 
+        # Clear so that the test doesn't fail during tearDown.
+        self.failed_assertions = []
+
         self.setValue("A", 2)
         self.fillValue(0x3006, 3)
 
@@ -300,6 +303,9 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
             self.assertValueAt(0x3005, 2)
+
+        # Clear so that the test doesn't fail during tearDown.
+        self.failed_assertions = []
 
         self.assertValue("A", 2)
         self.assertValueAt(0x3006, 3)
@@ -321,6 +327,9 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         # if this replacement was still done before assembling data after the label could cause code not to assemble.
         with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
             self.fillString(0x3000, "HELLO")
+
+        # Clear so that the test doesn't fail during tearDown.
+        self.failed_assertions = []
 
         self.fillString(0x4000, "HELLO")
 
@@ -348,6 +357,9 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
             self.fillArray(0x3000, [10, 12, 15])
 
+        # Clear so that the test doesn't fail during tearDown.
+        self.failed_assertions = []
+
         self.fillArray(0x4000, [10, 12, 15])
 
         self.assertEqual(self._readMem(0x4000), 10)
@@ -370,6 +382,9 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         # if this replacement was still done before assembling data after the label could cause code not to assemble.
         with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
             self.fillNode(0x3000, next=None, data=(3,))
+
+        # Clear so that the test doesn't fail during tearDown.
+        self.failed_assertions = []
 
         # Ending node of linkedlist if you want.
         self.fillNode(0x4000, next=None, data=(27,))
@@ -451,6 +466,9 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         # if this replacement was still done before assembling data after the label could cause code not to assemble.
         with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
             self.assertNodeAt(0x3000, next=None, data=blah(3))
+
+        # Clear so that the test doesn't fail during tearDown.
+        self.failed_assertions = []
 
         # Ending node of linkedlist if you want.
         self.assertNodeAt(0x4000, next=None, data=blah(27))
