@@ -54,6 +54,9 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
             self.loadAsmFile("syntax_error.asm")
 
+        # Clear so that the test doesn't fail during tearDown.
+        self.failed_assertions = []
+
         os.remove("syntax_error.asm")
 
     def testLoadPatt(self):
