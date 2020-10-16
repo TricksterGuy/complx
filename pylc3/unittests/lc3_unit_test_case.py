@@ -1675,6 +1675,8 @@ class LC3UnitTestCase(unittest.TestCase):
     def assertStackManaged(self, stack, return_address, old_frame_pointer, level=AssertionType.soft):
         """Asserts that the stack was managed correctly.
 
+        This function should be called only for lc3 calling convention format subroutines.
+
         This means that:
             The stack_pointer (r6) was decremented by 1.
             The stack contents are [answer, return_address, old_frame_pointer] in that order.
