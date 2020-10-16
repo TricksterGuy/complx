@@ -1692,11 +1692,12 @@ class LC3UnitTestCase(unittest.TestCase):
             old_frame_pointer: Integer - Expected Old Frame Pointer.
             level: AssertionType. Assertion level override.
         """
+        # TODO rework this function, should not require any arguments and should be precalculated from callSubroutine.
 
         actual_return_address = self._readMem(self.state.r6 - 1, unsigned=True)
         actual_old_frame_ptr = self._readMem(self.state.r6 - 2, unsigned=True)
 
-        self._assertShortEqual(self.state.r6, stack, 'stack', 'Calling convention not followed.\nExpected R6 to be x%04x after returning from subroutine code produced x%04x\n' % (_toUShort(self.state.r6), _toUShort(stack)), level=level)
+        self._assertShortEqual(self.state.r6, stack, 'stack', 'Calling convention not followed.\nExpected R6 to be x%04x after returning from subroutine code produced x%04x\n' % (_toUShort(stack), _toUShort(self.state.r6)), level=level)
         self._assertShortEqual(return_address, actual_return_address, 'return address', 'Expected return address x%04x not found on stack in correct location code produced x%04x\n' % (return_address, actual_return_address), level=level)
         self._assertShortEqual(old_frame_pointer, actual_old_frame_ptr, 'old frame pointer', 'Expected old frame pointer x%04x not found on stack in correct location code produced x%04x\n' % (old_frame_pointer, actual_old_frame_ptr), level=level)
         self.postconditions.add(PostconditionFlag.calling_convention_followed, 0, [stack, return_address, old_frame_pointer])
