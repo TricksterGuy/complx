@@ -58,6 +58,7 @@ enum LC3_API LC3AssembleExceptionTypes
     MALFORMED_STRING,
     EXTRA_INPUT,
     PLUGIN_FAILED_TO_LOAD,
+    INVALID_LC3_VERSION,
 };
 
 /** Exception class for assembler errors */
@@ -100,6 +101,19 @@ struct LC3_API LC3AssembleOptions
     bool enable_warnings = false;
     bool disable_plugins = false;
     bool process_debug_comments = true;
+    enum OutputMode {
+        // Non readable object file.
+        OBJECT_FILE = 0,
+        // Machine langauge ASCII in binary.
+        BINARY_FILE = 1,
+        // Machine language ASCII in hex.
+        HEXADECIMAL_FILE = 2,
+        // Output data in all formats.
+        FULL_REPRESENTATION_FILE = 3,
+    };
+    // Only for calls to lc3_assemble that produce file output.
+    OutputMode output_mode = OBJECT_FILE;
+
 };
 
 /** Contextual information pass among assemble/parser functions */

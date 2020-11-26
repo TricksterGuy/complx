@@ -82,6 +82,7 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     state.executions = 0;
     state.interrupt_enabled = 0;
     state.strict_execution = 1;
+    state.lc3_version = 1;
 
     // Clear subroutine info
     state.max_call_stack_size = -1;
@@ -110,11 +111,6 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     // Clear memory
     if (randomize_memory)
     {
-        // Necessary since lc3_randomize only randomizes if a location is 0.
-        // This is a problem if we don't do this, since memory is dirty from
-        // a previous call to lc3_randomize, so just zero out everything here.
-        /// TODO rewrite so this isn't an issue.  Mainly the LC3 OS is the issue here and not clobbering memory that should be zero'd there.
-        memset(state.mem, 0, 65536 * sizeof(short));
         lc3_randomize(state);
     }
     else
@@ -124,7 +120,7 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     }
 
     // Add LC3 OS
-    memcpy(state.mem, lc3_os, LC3_OS_SIZE * sizeof(unsigned short));
+    memcpy(state.mem, lc3_osv2.data(), lc3_osv2.size() * sizeof(unsigned short));
 
     // Clear plugins
     lc3_remove_plugins(state);
@@ -158,6 +154,20 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     state.trace.reset(nullptr);
 
     state.in_lc3test = false;
+}
+
+void lc3_set_version(lc3_state& state, int version)
+{
+    if (version >=0 && version <= 1)
+    {
+        state.lc3_version = version;
+        const std::array<unsigned short, 0x300>& os = (version == 0) ? lc3_os : lc3_osv2;
+        memcpy(state.mem, os.data(), os.size() * sizeof(unsigned short));
+    }
+    else
+    {
+        fprintf(stderr, "Invalid lc3 version: %d. Valid values are 0 or 1\n", version);
+    }
 }
 
 void lc3_remove_plugins(lc3_state& state)
@@ -296,6 +306,7 @@ void lc3_step(lc3_state& state)
     interrupt.executions = state.executions;
     if (state.max_stack_size != 0)
         state.undo_stack.push_back(interrupt);
+    state.rti_stack.push_back(lc3_rti_stack_item{true});
 
     // Another breakpoint test
     lc3_break_test(state, &interrupt);
@@ -319,10 +330,13 @@ void lc3_back(lc3_state& state)
         state.pc = changes.pc;
         state.regs[0x7] = changes.r7;
 
+        state.privilege = changes.privilege;
         state.n = changes.n;
         state.z = changes.z;
         state.p = changes.p;
         state.halted = changes.halted;
+        state.savedusp = changes.savedusp;
+        state.savedssp = changes.savedssp;
 
         if (changes.changes == LC3_REGISTER_CHANGE)
         {
@@ -354,6 +368,12 @@ void lc3_back(lc3_state& state)
         {
             if (!state.call_stack.empty())
                 state.call_stack.pop_back();
+            if (changes.subroutine.is_trap && state.lc3_version != 0)
+            {
+                if (!state.rti_stack.empty())
+                    state.rti_stack.pop_back();
+                state.regs[0x6] = changes.subroutine.r6;
+            }
         }
         else if (changes.changes == LC3_SUBROUTINE_END)
         {

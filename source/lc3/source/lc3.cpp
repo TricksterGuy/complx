@@ -688,7 +688,7 @@ int lc3_peek_char(lc3_state& state, std::istream& file)
 
 int lc3_write_char(lc3_state& state, std::ostream& file, int chr)
 {
-    if (chr > 255 || !(isgraph(chr) || isspace(chr)))
+    if (chr > 255 || !(isgraph(chr) || isspace(chr) || chr == '\b'))
         lc3_warning(state, LC3_INVALID_CHARACTER_WRITE, chr, 0);
     return state.writer(state, file, chr);
 }
@@ -711,22 +711,16 @@ int lc3_write_str(lc3_state& state, int (*writer)(lc3_state& state, std::ostream
 
 void lc3_randomize(lc3_state& state)
 {
+    const std::array<unsigned short, 0x300>& os = (state.lc3_version == 0) ? lc3_os : lc3_osv2;
     // If true traps is set overwrite overwrite overwrite!
     if (state.true_traps)
     {
         // Add LC3 OS
-        memcpy(state.mem, lc3_os, LC3_OS_SIZE * sizeof(unsigned short));
-    }
-    // Stage 1 don't clobber the TVT or IVT
-    // Stage 2 system memory only overwrite 0's
-    for (int i = 0x200; i < 0x3000; i++)
-    {
-        if (!state.mem[i])
-            state.mem[i] = lc3_random(state);
+        memcpy(state.mem, os.data(), os.size() * sizeof(unsigned short));
     }
 
     // Stage 3 write over it all (even device registers).
-    for (int i = 0x3000; i <= 0xFFFF; i++)
-        state.mem[i] = lc3_random(state);
+    for (int i = os.size(); i <= 0xFFFF; i++)
+        state.mem[i] = lc3_random();
 }
 

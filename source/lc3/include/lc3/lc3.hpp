@@ -68,6 +68,8 @@ enum LC3_API DEVICES
     DEV_KBDR = 0xFE02,
     DEV_DSR  = 0xFE04,
     DEV_DDR  = 0xFE06,
+    // LC3 revision 2019.
+    DEV_PSR = 0xFFFC,
     DEV_MCR  = 0xFFFE
 };
 
@@ -88,6 +90,7 @@ enum LC3_API WARNINGS
     LC3_TURN_OFF_VIA_MCR = 11,
     LC3_PUTSP_INVALID_MEMORY = 12,
     LC3_PUTSP_UNEXPECTED_NUL = 13,
+    LC3_INVALID_PSR_VALUE = 14,
     LC3_WARNINGS               // Must be last.
 };
 
@@ -326,7 +329,7 @@ enum LC3_API lc3_change_t
     LC3_SUBROUTINE_BEGIN = 4,
     LC3_SUBROUTINE_END = 5,
     LC3_INTERRUPT_BEGIN = 6,    // Signals begin of interrupt can't backstep past this. (this will be in the undo stack while the interrupt is handled)
-    LC3_INTERRUPT_END = 7,      // Signals end of interrupt (this will never be in the undo stack)
+    LC3_INTERRUPT_END = 7,      // Signals end of interrupt (or end of trap in lc-3 revision) (this will never be in the undo stack)
     LC3_INTERRUPT = 8,          // Signals a processed interrupt. (LC3_INTERRUPT_BEGIN changes to this after its processed.
 };
 
@@ -404,13 +407,16 @@ struct LC3_API lc3_subroutine_call
 /** Record of active subroutine call info for each call made */
 struct LC3_API lc3_subroutine_call_info
 {
+	lc3_subroutine_call_info() : regs(8) {}
     unsigned short address;
     unsigned short r6;
     std::vector<unsigned short> params;
+    // This should be std::array<short, 8> but due to a bug with py++ it doesn't work.
+    std::vector<short> regs;
     // For availability in pylc3 equality operator must be defined.
     bool operator==(const lc3_subroutine_call_info& other) const
     {
-        return address == other.address && r6 == other.r6 && params == other.params;
+        return address == other.address && r6 == other.r6 && params == other.params && regs == other.regs;
     }
 
 };
@@ -457,6 +463,7 @@ struct LC3_API lc3_state_change
 {
     unsigned short pc;
     short r7; /* In the case of fake traps two registers can be modified. So we have a special place for r7*/
+    unsigned char privilege:1;
     unsigned char n:1;
     unsigned char z:1;
     unsigned char p:1;
@@ -464,11 +471,19 @@ struct LC3_API lc3_state_change
     unsigned char changes:4;
     unsigned short location;
     unsigned short value;
+    unsigned short savedusp;
+    unsigned short savedssp;
     unsigned int warnings;
     unsigned int executions;            // Only used for changes = LC3_INTERRUPT(_BEGIN) otherwise we know its changed by 1.
     lc3_subroutine_call subroutine;     // Only used for changes = LC3_SUBROUTINE_*
     std::vector<lc3_change_info> info;  // Only used for changes = LC3_MULTI_CHANGE
 };
+
+// Stack of RTI-able items for lc-3 revision.
+typedef struct lc3_rti_stack_item
+{
+    bool is_interrupt;
+} lc3_rti_stack_item;
 
 struct lc3_state;
 
@@ -488,6 +503,7 @@ struct LC3_API lc3_state
     unsigned char true_traps:1;
     unsigned char interrupt_enabled:1;
     unsigned char strict_execution:1;
+    int lc3_version;
     unsigned int warnings;
     unsigned int executions;
 
@@ -528,6 +544,8 @@ struct LC3_API lc3_state
     unsigned int max_call_stack_size;
     // Subroutine debugging info (again see note above)
     std::deque<lc3_subroutine_call> call_stack;
+    // RTI stack to find out if the current RTI instruction targets a trap or an interrupt.
+    std::deque<lc3_rti_stack_item> rti_stack;
     // First layer of calls for testing student code. (In case of multi recursion).
     std::vector<lc3_subroutine_call_info> first_level_calls;
     // First layer of trap calls (In case of multi recursion).
@@ -572,6 +590,33 @@ struct LC3_API lc3_state
     // The only effect is that it records the first level subroutine/trap calls.
     bool in_lc3test;
 };
+
+/** lc3_basic_disassemble
+  *
+  * Disassemble the data passed in.
+  * @param state LC3State object.
+  * @param data Instruction data.
+  * @return The disassembled instruction as a string.
+  */
+std::string lc3_basic_disassemble(lc3_state& state, unsigned short data);
+/** lc3_disassemble
+  *
+  * Disassemble the data passed in with label information
+  * This utilizes symbol table information in its output.
+  * @param state LC3State object.
+  * @param data Instruction data.
+  * @return The disassembled instruction as a string.
+  */
+std::string lc3_normal_disassemble(lc3_state& state, unsigned short data);
+/** lc3_smart_disassemble
+  *
+  * Disassembles the instruction into something a little more high level.
+  * This utilizes symbol table information in its output.
+  * @param state LC3State object.
+  * @param data Instruction data.
+  * @return The disassembled instruction as a string.
+  */
+std::string lc3_smart_disassemble(lc3_state& state, unsigned short data);
 
 /** lc3_disassemble
   *

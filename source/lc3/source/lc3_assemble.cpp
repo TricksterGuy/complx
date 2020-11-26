@@ -45,6 +45,7 @@ unsigned short lc3_assemble_one(lc3_state& state, LC3AssembleContext& context);
 
 void process_debug_info(lc3_state& state, const debug_statement& statement, bool enable_debug_statements);
 void process_plugin_info(lc3_state& state, const LC3AssembleContext& context);
+void process_version_info(lc3_state& state, const LC3AssembleContext& context);
 void parse_params(const std::string& line, std::map<std::string, std::string>& params);
 
 std::string LC3AssembleException::what() const throw()
@@ -135,6 +136,9 @@ std::string LC3AssembleException::what() const throw()
             break;
         case PLUGIN_FAILED_TO_LOAD:
             stream << "Plugin failed to load" << line_str << "\n" << params[0];
+            break;
+        case INVALID_LC3_VERSION:
+            stream << "Invalid LC3 Version " << params[0] << line_str;
             break;
         case UNKNOWN_ERROR:
             // fall through
@@ -361,6 +365,10 @@ void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>&
         if (comment.size() > 2 && comment.substr(1, 7) == std::string("@plugin") && !context.options.disable_plugins)
         {
             process_plugin_info(state, context);
+        }
+        else if (comment.size() > 2 && comment.substr(1, 8) == std::string("@version"))
+        {
+            process_version_info(state, context);
         }
         else if (comment.size() > 2 && comment[1] == '@')
         {
@@ -772,6 +780,110 @@ void lc3_assemble(lc3_state& state, std::istream& file, const LC3AssembleOptions
     lc3_assemble(state, file, ranges, options);
 }
 
+bool lc3_assemble_object_writer(const std::string& filename, const lc3_state& state, const std::vector<code_range>& ranges)
+{
+    std::string obj_file = filename + ".obj";
+    std::ofstream obj(obj_file.c_str(), std::ios::binary);
+    if (!obj.good()) return false;
+
+    for (const auto& range : ranges)
+    {
+        if (range.size == 0) continue;
+
+        short lol = htons(range.location);
+        obj.write((char*)(&lol), sizeof(short));
+        lol = htons(range.size);
+        obj.write((char*)(&lol), sizeof(short));
+        for (unsigned int j = 0; j < range.size; j++)
+        {
+            lol = htons(state.mem[range.location + j]);
+            obj.write((char*)(&lol), sizeof(short));
+        }
+    }
+
+    return true;
+}
+
+bool lc3_assemble_binary_writer(const std::string& filename, const lc3_state& state, const std::vector<code_range>& ranges)
+{
+    std::string obj_file = filename + ".bin";
+    std::ofstream obj(obj_file.c_str(), std::ios::binary);
+    if (!obj.good())
+        return false;
+
+    for (const auto& range : ranges)
+    {
+        if (range.size == 0)
+            continue;
+
+        obj << "x" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << range.location  << std::endl << std::nouppercase;
+        obj << std::dec << range.size << std::endl;
+
+        for (unsigned int j = 0; j < range.size; j++)
+            obj << std::bitset<16>(state.mem[range.location + j]) << std::endl;
+
+        obj << std::endl;
+    }
+
+    return true;
+}
+
+bool lc3_assemble_hexadecimal_writer(const std::string& filename, const lc3_state& state, const std::vector<code_range>& ranges)
+{
+    std::string obj_file = filename + ".hex";
+    std::ofstream obj(obj_file.c_str(), std::ios::binary);
+    if (!obj.good())
+        return false;
+
+    for (const auto& range : ranges)
+    {
+        if (range.size == 0)
+            continue;
+
+        obj << "x" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << range.location  << std::endl << std::nouppercase;
+        obj << std::dec << range.size << std::endl;
+        for (unsigned int j = 0; j < range.size; j++)
+        {
+            obj << "x" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << state.mem[range.location + j] << std::endl << std::nouppercase;
+        }
+        obj << std::endl;
+    }
+
+    return true;
+}
+
+bool lc3_assemble_full_writer(const std::string& filename, lc3_state& state, const std::vector<code_range>& ranges)
+{
+    std::string obj_file = filename + ".txt";
+    std::ofstream obj(obj_file.c_str(), std::ios::binary);
+    if (!obj.good())
+        return false;
+
+    unsigned short pc = state.pc;
+    for (const auto& range : ranges)
+    {
+        if (range.size == 0)
+            continue;
+
+        for (unsigned int j = 0; j < range.size; j++)
+        {
+            unsigned short address = range.location + j;
+            state.pc = address + 1;
+            short data = state.mem[range.location + j];
+            unsigned short udata = static_cast<unsigned short>(data);
+            obj << "x" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << address << std::nouppercase << "\t";
+            obj << "x" << std::hex << std::uppercase << std::setw(4) << udata << std::dec << std::nouppercase << std::setfill(' ') << "\t";
+            obj << std::setw(6) << data << "\t";
+            obj << std::bitset<16>(udata) << "\t";
+            obj << lc3_sym_rev_lookup(const_cast<lc3_state&>(state), address) << "\t";
+            obj << lc3_disassemble(const_cast<lc3_state&>(state), udata, 1) << std::endl;
+        }
+    }
+    state.pc = pc;
+
+    return true;
+}
+
 bool lc3_assemble(const std::string& filename, const std::string& output_prefix, const LC3AssembleOptions& options)
 {
     lc3_state state;
@@ -794,26 +906,19 @@ bool lc3_assemble(const std::string& filename, const std::string& output_prefix,
         }
     }
 
-    std::string obj_file = prefix + ".obj";
-    std::ofstream obj(obj_file.c_str(), std::ios::binary);
-    if (!obj.good()) return false;
-
-    for (unsigned int i = 0; i < ranges.size(); i++)
+    switch (options.output_mode)
     {
-        code_range range = ranges[i];
-        if (range.size == 0) continue;
-        short lol = htons(range.location);
-        obj.write((char*)(&lol), sizeof(short));
-        lol = htons(range.size);
-        obj.write((char*)(&lol), sizeof(short));
-        for (unsigned int j = 0; j < range.size; j++)
-        {
-            lol = htons(state.mem[range.location + j]);
-            obj.write((char*)(&lol), sizeof(short));
-        }
+        case LC3AssembleOptions::OBJECT_FILE:
+            return lc3_assemble_object_writer(prefix, state, ranges);
+        case LC3AssembleOptions::BINARY_FILE:
+            return lc3_assemble_binary_writer(prefix, state, ranges);
+        case LC3AssembleOptions::HEXADECIMAL_FILE:
+            return lc3_assemble_hexadecimal_writer(prefix, state, ranges);
+        case LC3AssembleOptions::FULL_REPRESENTATION_FILE:
+            return lc3_assemble_full_writer(prefix, state, ranges);
+        default:
+            return lc3_assemble_object_writer(prefix, state, ranges);
     }
-
-    return true;
 }
 
 /** process_plugin_info
@@ -830,23 +935,29 @@ void process_plugin_info(lc3_state& state, const LC3AssembleContext& context)
     std::map<std::string, std::string> params;
     parse_params(plugin_params, params);
 
-    if (params.find("filename") == params.end())
-    {
-        THROW(LC3AssembleException(line, "No plugin filename given", PLUGIN_FAILED_TO_LOAD, context.lineno));
-        return;
-    }
+    if (!lc3_install_plugin(state, params["filename"], params))
+        THROW(LC3AssembleException(line, params["filename"], PLUGIN_FAILED_TO_LOAD, context.lineno));
 
-    std::string filename = params.at("filename");
-    params.erase("filename");
+}
 
-    try
-    {
-        lc3_install_plugin(state, filename, params);
-    }
-    catch (const LC3PluginException& e)
-    {
-        THROW(LC3AssembleException(line, e.what(), PLUGIN_FAILED_TO_LOAD, context.lineno));
-    }
+/** process_version_info
+  *
+  * Process version statements,
+  */
+void process_version_info(lc3_state& state, const LC3AssembleContext& context)
+{
+    // version <version>
+    std::string line = context.line.substr(2);
+    size_t index = line.find_first_of(" \t");
+    std::string version = (index == std::string::npos) ? "" : line.substr(index + 1);
+    trim(version);
+
+    if (version == "1")
+        lc3_set_version(state, 1);
+    else if (version == "0")
+        lc3_set_version(state, 0);
+    else
+        THROW(LC3AssembleException(line, version, INVALID_LC3_VERSION, context.lineno));
 }
 
 bool lc3_add_break(const std::string& symbol, const std::string& label = "", const std::string& condition = "1", int times = -1);

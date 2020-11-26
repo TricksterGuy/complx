@@ -8,20 +8,21 @@
 
 const char* WARNING_MESSAGES[LC3_WARNINGS] =
 {
-    "Reading beyond end of input. Halting",
-    "Writing x%04x to reserved memory at x%04x",
-    "Reading from reserved memory at x%04x",
-    "Unsupported Trap x%02x. Assuming Halt",
-    "Unsupported Instruction x%04x. Halting",
+    "Reading beyond end of input. Halting.",
+    "Writing x%04x to reserved memory at x%04x.",
+    "Reading from reserved memory at x%04x.",
+    "Unsupported Trap x%02x. Assuming Halt.",
+    "Unsupported Instruction x%04x. Halting.",
     "Malformed Instruction x%04x. Halting.",
     "RTI executed in user mode. Halting.",
-    "Trying to write invalid character x%04x",
-    "PUTS called with invalid address x%04x",
-    "Trying to write to the display when its not ready",
-    "Trying to read from the keyboard when its not ready",
-    "Turning off machine via the MCR register",
+    "Trying to write invalid character x%04x.",
+    "PUTS called with invalid address x%04x.",
+    "Trying to write to the display when its not ready.",
+    "Trying to read from the keyboard when its not ready.",
+    "Turning off machine via the MCR register.",
     "PUTSP called with invalid address x%04x",
-    "PUTSP found an unexpected NUL byte at address x%04x",
+    "PUTSP found an unexpected NUL byte at address x%04x.",
+    "Invalid value x%04x loaded into the PSR."
 };
 
 lc3_instr lc3_decode(lc3_state& state, unsigned short data)
@@ -117,6 +118,7 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
     lc3_state_change changes;
     changes.pc = state.pc;
     changes.r7 = state.regs[0x7];
+    changes.privilege = state.privilege;
     changes.n = state.n;
     changes.z = state.z;
     changes.p = state.p;
@@ -124,6 +126,8 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
     changes.changes = LC3_NO_CHANGE;
     changes.location = 0xFFFF;
     changes.value = 0xFFFF;
+    changes.savedusp = state.savedusp;
+    changes.savedssp = state.savedssp;
     changes.warnings = state.warnings;
 
     changes.subroutine.address = 0x0;
@@ -227,7 +231,13 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
                         if (state.subroutines.find(state.pc) != state.subroutines.end())
                             num_params = state.subroutines[state.pc].num_params;
                         for (unsigned int i = 0; i < num_params; i++)
-                            call_info.params.push_back(state.mem[call_info.r6 + i]);
+			{
+				call_info.params.push_back(state.mem[call_info.r6 + i]);
+			}
+           	        for (unsigned int i = 0; i < 8; i++)
+			{
+				call_info.regs[i] = state.regs[i];
+			}
 
                         state.first_level_calls.push_back(call_info);
                     }
@@ -313,9 +323,15 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
             }
             else
             {
-                // Pop PC and psr
-                state.pc = state.mem[state.regs[6]];
-                int psr = state.mem[state.regs[6] + 1];
+            const bool bits[8] = {0, 1, 1, 0, 1, 0, 0, 0};
+            // Pop PC and psr
+            state.pc = state.mem[state.regs[6]];
+            unsigned short psr = state.mem[state.regs[6] + 1];
+            // Invalid PSR check, if the unspecified bits are filled or trying
+            // to set multiple nzp bits warn.
+            if ((psr & 0x78F8) != 0 || bits[psr & 7] != 1)
+                lc3_warning(state, LC3_INVALID_PSR_VALUE, psr, 0);
+
                 state.regs[6] += 2;
                 state.privilege = (psr >> 15) & 1;
                 state.priority = (psr >> 8) & 7;
@@ -323,10 +339,23 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
                 state.z = (psr >> 1) & 1;
                 state.p = psr & 1;
 
-                if (state.privilege)
-                    state.regs[6] = state.savedusp;
+            if (state.privilege) {
+                state.savedssp = state.regs[6];
+                state.regs[6] = state.savedusp;
+            }
 
+            // Determine if this RTI is for an interrupt or a trap.
+            // If not lc3 2019 revision this should always be true.
+            bool in_interrupt = state.lc3_version == 0;
+            if (!state.rti_stack.empty())
+            {
+                lc3_rti_stack_item item = state.rti_stack.back();
+                state.rti_stack.pop_back();
+                in_interrupt = item.is_interrupt;
+            }
 
+            if (in_interrupt)
+            {
                 if (!state.interrupt_vector_stack.empty())
                 {
                     state.interrupt_vector = state.interrupt_vector_stack.back();
@@ -339,6 +368,16 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
 
                 changes.changes = LC3_INTERRUPT_END; // second flag.
             }
+            else
+            {
+                changes.changes = LC3_SUBROUTINE_END;
+                if (!state.call_stack.empty())
+                {
+                    changes.subroutine = state.call_stack.back();
+                    state.call_stack.pop_back();
+                }
+            }
+        }
             break;
         case NOT_INSTR:
             // Invalid instruction check
@@ -408,6 +447,8 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
             changes.value = state.regs[changes.location];
 
             state.regs[changes.location] = state.pc + instruction.mem.offset.pc_offset;
+        // In the 2019 revision of LC-3 LEA no longer sets condition codes.
+        if (state.lc3_version == 0)
             lc3_setcc(state, state.regs[changes.location]);
             break;
         case TRAP_INSTR:
@@ -419,10 +460,15 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
                 lc3_warning(state, LC3_MALFORMED_INSTRUCTION, state.mem[state.pc], 0);
             }
             else
+        {
+            if (state.lc3_version == 0)
             {
                 // R7's going to change save it But again its already saved.
                 // Save Return Address
                 state.regs[0x7] = state.pc;
+            }
+
+            // Return information is done via the stack in the lc3 revision.
 
                 // Execute the trap
                 lc3_trap(state, changes, instruction.trap);
@@ -450,11 +496,7 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
                     state.pc--;
                 }
             }
-            break;
-        default:
-            // Shouldn't happen
-            state.halted = 1;
-            state.pc--;
+        break;
     }
 
     // Post processing.  If it is a register change and the register is r7
@@ -491,16 +533,34 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
     if (state.true_traps)
     {
         changes.changes = LC3_SUBROUTINE_BEGIN;
+        changes.subroutine.r6 = state.regs[6];
+        changes.subroutine.is_trap = true;
+
+        if (state.lc3_version > 0)
+        {
+            short psr = (short)((state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p);
+            // If we are in user mode we must switch usp/ssp
+            if (state.privilege)
+            {
+                state.savedusp = state.regs[6];
+                state.regs[6] = state.savedssp;
+            }
+
+            state.privilege = 0;
+            state.regs[6] -= 2;
+            state.mem[(unsigned short)state.regs[6]] = state.pc;
+            state.mem[(unsigned short)(state.regs[6] + 1)] = psr;
+            state.rti_stack.push_back(lc3_rti_stack_item{false});
+        }
+
         // PC = MEM[VECTOR]
         state.pc = state.mem[trap.vector];
+        changes.subroutine.address = state.pc;
 
         // If not within an interrupt
-        if (state.privilege)
+        /// TODO should check if there are any interrupts on the rti stack.
+        if (state.privilege || state.lc3_version > 0)
         {
-            changes.changes = LC3_SUBROUTINE_BEGIN;
-            changes.subroutine.address = state.pc;
-            changes.subroutine.r6 = state.regs[0x6];
-            changes.subroutine.is_trap = true;
             if (state.max_call_stack_size != 0)
             {
                 state.call_stack.push_back(changes.subroutine);
@@ -665,6 +725,19 @@ short lc3_mem_read(lc3_state& state, unsigned short addr, bool privileged)
             if (!kernel_mode)
                 lc3_warning(state, LC3_RESERVED_MEM_READ, addr, 0);
             break;
+        case DEV_PSR:
+            if (state.lc3_version > 0)
+            {
+                state.mem[DEV_PSR] = (short)((state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p);
+            } else
+            {
+                if (addr >= 0xFE00U && state.address_plugins.find(addr) != state.address_plugins.end())
+                    return state.address_plugins[addr]->OnRead(state, addr);
+                else if (!kernel_mode)
+                    // Warn if reading from reserved memory if you aren't in kernel mode
+                    lc3_warning(state, LC3_RESERVED_MEM_READ, addr, 0);
+            }
+            break;
         case DEV_MCR:
             state.mem[DEV_MCR] = (short)(1 << 15);
             break;
@@ -724,6 +797,17 @@ void lc3_mem_write(lc3_state& state, unsigned short addr, short value, bool priv
                 lc3_warning(state, LC3_DISPLAY_NOT_READY, 0, 0);
             }
             break;
+        case DEV_PSR:
+            if (state.lc3_version > 0) {
+                lc3_warning(state, LC3_RESERVED_MEM_WRITE, addr, 0);
+                /// TODO consider allowing writing to the PSR.
+            } else {
+                if (addr >= 0xFE00U && state.address_plugins.find(addr) != state.address_plugins.end())
+                    state.address_plugins[addr]->OnWrite(state, addr, value);
+                else if (!kernel_mode)
+                    lc3_warning(state, LC3_RESERVED_MEM_WRITE, value, addr);
+            }
+            break;
         case DEV_MCR:
             if (!(value & 0x8000))
             {
@@ -778,7 +862,7 @@ void lc3_warning(lc3_state& state, const std::string& msg)
     std::string message;
 
     unsigned short addr = state.pc - 1;
-    std::string instr = lc3_disassemble(state, state.mem[addr], state.pc, 1);
+    std::string instr = lc3_disassemble(state, state.mem[addr]);
 
     sprintf(warning, "Warning at x%04x (instruction - %s): %s", addr, instr.c_str(), msg.c_str());
 
