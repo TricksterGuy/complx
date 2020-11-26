@@ -1,10 +1,12 @@
 #include "lc3/lc3_assemble.hpp"
 
 #include <algorithm>
+#include <bitset>
 #include <cassert>
 #include <cerrno>
 #include <cmath>
 #include <cstring>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 
@@ -935,9 +937,23 @@ void process_plugin_info(lc3_state& state, const LC3AssembleContext& context)
     std::map<std::string, std::string> params;
     parse_params(plugin_params, params);
 
-    if (!lc3_install_plugin(state, params["filename"], params))
-        THROW(LC3AssembleException(line, params["filename"], PLUGIN_FAILED_TO_LOAD, context.lineno));
+    if (params.find("filename") == params.end())
+    {
+        THROW(LC3AssembleException(line, "No plugin filename given", PLUGIN_FAILED_TO_LOAD, context.lineno));
+        return;
+    }
 
+    std::string filename = params.at("filename");
+    params.erase("filename");
+
+    try
+    {
+        lc3_install_plugin(state, filename, params);
+    }
+    catch (const LC3PluginException& e)
+    {
+        THROW(LC3AssembleException(line, e.what(), PLUGIN_FAILED_TO_LOAD, context.lineno));
+    }
 }
 
 /** process_version_info

@@ -1,4 +1,4 @@
-#include "lc3_os.hpp"
+#include "lc3/lc3_os.hpp"
 
 std::array<unsigned short, 0x300> lc3_os =
 {

@@ -721,6 +721,6 @@ void lc3_randomize(lc3_state& state)
 
     // Stage 3 write over it all (even device registers).
     for (int i = os.size(); i <= 0xFFFF; i++)
-        state.mem[i] = lc3_random();
+        state.mem[i] = lc3_random(state);
 }
 
