@@ -93,7 +93,7 @@ std::string LC3AssembleException::what() const throw()
             stream << "Invalid register " << params[0] << line_str;
             break;
         case INVALID_INSTRUCTION:
-            stream << "Invalid instruction " << params[0] << line_str;
+            stream << "Invalid instruction \"" << params[0] << "\"" << line_str;
             break;
         case INVALID_DIRECTIVE:
             stream << "Invalid assembler directive " << params[0] << line_str;
