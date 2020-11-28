@@ -1,10 +1,17 @@
+
+#
+# External dependencies
+#
+
+# find_package(THIRDPARTY REQUIRED)
+
+
 #
 # Library name and options
 #
 
 # Target name
 set(target lc3)
-set(target_objlib ${target}_objlib)
 
 # Exit here if required dependencies are not met
 message(STATUS "Lib ${target}")
@@ -12,6 +19,7 @@ message(STATUS "Lib ${target}")
 # Set API export file and macro
 string(MAKE_C_IDENTIFIER ${target} target_id)
 string(TOUPPER ${target_id} target_id)
+set(feature_file         "include/${target}/${target}_features.h")
 set(export_file          "include/${target}/${target}_export.h")
 set(template_export_file "include/${target}/${target}_api.h")
 set(export_macro         "${target_id}_API")
@@ -49,6 +57,7 @@ set(sources
     ${source_path}/lc3_execute.cpp
     ${source_path}/lc3_expressions.cpp
     ${source_path}/lc3_os.cpp
+    ${source_path}/lc3_osv2.cpp
     ${source_path}/lc3_params.cpp
     ${source_path}/lc3_parser.cpp
     ${source_path}/lc3_plugin.cpp
@@ -66,84 +75,13 @@ source_group_by_path(${source_path}  "\\\\.cpp$|\\\\.c$|\\\\.h$|\\\\.hpp$"
 
 
 #
-# Create object library
-#
-
-add_library(${target_objlib}
-    OBJECT
-    ${sources}
-    ${headers}
-)
-
-
-#
-# Project options
-#
-
-set_target_properties(${target_objlib}
-    PROPERTIES
-    ${DEFAULT_PROJECT_OPTIONS}
-    POSITION_INDEPENDENT_CODE 1
-    FOLDER "${IDE_FOLDER}"
-)
-
-
-#
-# Include directories
-#
-
-target_include_directories(${target_objlib}
-    PRIVATE
-    ${PROJECT_BINARY_DIR}/source/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_BINARY_DIR}/include
-
-    PUBLIC
-    ${DEFAULT_INCLUDE_DIRECTORIES}
-
-    INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
-
-#
-# Compile definitions
-#
-
-target_compile_definitions(${target_objlib}
-    PRIVATE
-
-    PUBLIC
-    SHARED_LIBRARY_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}"
-    ${DEFAULT_COMPILE_DEFINITIONS}
-
-    INTERFACE
-)
-
-
-#
-# Compile options
-#
-
-target_compile_options(${target_objlib}
-    PRIVATE
-
-    PUBLIC
-    ${DEFAULT_COMPILE_OPTIONS}
-
-    INTERFACE
-)
-
-
-#
-# Create shared library
+# Create library
 #
 
 # Build library
 add_library(${target}
-    SHARED
-    $<TARGET_OBJECTS:${target}_objlib>
+    ${sources}
+    ${headers}
 )
 
 # Create namespaced alias
@@ -151,6 +89,27 @@ add_library(${META_PROJECT_NAME}::${target} ALIAS ${target})
 
 # Export library for downstream projects
 export(TARGETS ${target} NAMESPACE ${META_PROJECT_NAME}:: FILE ${PROJECT_BINARY_DIR}/cmake/${target}/${target}-export.cmake)
+
+# Create feature detection header
+# Compilers: https://cmake.org/cmake/help/v3.1/variable/CMAKE_LANG_COMPILER_ID.html#variable:CMAKE_%3CLANG%3E_COMPILER_ID
+# Feature: https://cmake.org/cmake/help/v3.1/prop_gbl/CMAKE_CXX_KNOWN_FEATURES.html
+
+# Check for availability of module; use pre-generated version if not found
+if (WriterCompilerDetectionHeaderFound)
+    write_compiler_detection_header(
+        FILE ${feature_file}
+        PREFIX ${target_id}
+        COMPILERS AppleClang Clang GNU MSVC
+        FEATURES cxx_alignas cxx_alignof cxx_constexpr cxx_final cxx_noexcept cxx_nullptr cxx_sizeof_member cxx_thread_local
+        VERSION 3.2
+    )
+else()
+    file(
+        COPY ${PROJECT_SOURCE_DIR}/source/codegeneration/${target}_features.h
+        DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/include/${target}
+        USE_SOURCE_PERMISSIONS
+    )
+endif()
 
 # Create API export header
 generate_export_header(${target}
@@ -205,16 +164,39 @@ target_link_libraries(${target}
 
     PUBLIC
     ${DEFAULT_LIBRARIES}
-    dl
 
     INTERFACE
 )
 
 
-if(WIN32)
-    # Needed for htons
-    target_link_libraries(${target} PUBLIC ws2_32)
-endif(WIN32)
+#
+# Compile definitions
+#
+
+target_compile_definitions(${target}
+    PRIVATE
+
+    PUBLIC
+    $<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:${target_id}_STATIC_DEFINE>
+    SHARED_LIBRARY_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    ${DEFAULT_COMPILE_DEFINITIONS}
+
+    INTERFACE
+)
+
+
+#
+# Compile options
+#
+
+target_compile_options(${target}
+    PRIVATE
+
+    PUBLIC
+    ${DEFAULT_COMPILE_OPTIONS}
+
+    INTERFACE
+)
 
 
 #
@@ -226,9 +208,15 @@ target_link_libraries(${target}
 
     PUBLIC
     ${DEFAULT_LINKER_OPTIONS}
+    dl
 
     INTERFACE
 )
+
+if(WIN32)
+    # Needed for htons
+    target_link_libraries(${target} PUBLIC ws2_32)
+endif(WIN32)
 
 
 #
@@ -273,95 +261,4 @@ install(EXPORT ${target}-export
     NAMESPACE   ${META_PROJECT_NAME}::
     DESTINATION ${INSTALL_CMAKE}/${target}
     COMPONENT   dev
-)
-
-
-#
-# Begin Test Only Static Library
-#
-
-set(target_testlib ${target}_testlib)
-
-if(NOT OPTION_BUILD_TESTS)
-    message(STATUS "TestLib ${target_testlib} skipped: Not building tests")
-    return()
-else()
-    message(STATUS "Testlib ${target_testlib}")
-endif()
-
-# Build library
-add_library(${target_testlib}
-    STATIC
-    $<TARGET_OBJECTS:${target}_objlib>
-)
-
-# Create namespaced alias
-add_library(${META_PROJECT_NAME}::${target_testlib} ALIAS ${target_testlib})
-
-# Export library for downstream projects
-export(TARGETS ${target_testlib} NAMESPACE ${META_PROJECT_NAME}:: FILE ${PROJECT_BINARY_DIR}/cmake/${target}/${target_testlib}-export.cmake)
-
-#
-# Project options
-#
-
-set_target_properties(${target_testlib}
-    PROPERTIES
-    ${DEFAULT_PROJECT_OPTIONS}
-    FOLDER "${IDE_FOLDER}"
-)
-
-
-#
-# Include directories
-#
-
-target_include_directories(${target_testlib}
-    PRIVATE
-    ${PROJECT_BINARY_DIR}/source/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_BINARY_DIR}/include
-
-    PUBLIC
-    ${DEFAULT_INCLUDE_DIRECTORIES}
-
-    INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
-
-
-#
-# Libraries
-#
-
-target_link_libraries(${target_testlib}
-    PRIVATE
-
-    PUBLIC
-    ${DEFAULT_LIBRARIES}
-    dl
-
-    INTERFACE
-)
-
-
-if(WIN32)
-    # Needed for htons
-    target_link_libraries(${target_testlib} PUBLIC ws2_32)
-endif(WIN32)
-
-
-#
-# Linker options
-#
-
-target_link_libraries(${target_testlib}
-    PRIVATE
-
-    PUBLIC
-    ${DEFAULT_LINKER_OPTIONS}
-
-    INTERFACE
 )

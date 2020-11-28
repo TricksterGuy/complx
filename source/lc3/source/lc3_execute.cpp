@@ -323,14 +323,14 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
             }
             else
             {
-            const bool bits[8] = {0, 1, 1, 0, 1, 0, 0, 0};
-            // Pop PC and psr
-            state.pc = state.mem[state.regs[6]];
-            unsigned short psr = state.mem[state.regs[6] + 1];
-            // Invalid PSR check, if the unspecified bits are filled or trying
-            // to set multiple nzp bits warn.
-            if ((psr & 0x78F8) != 0 || bits[psr & 7] != 1)
-                lc3_warning(state, LC3_INVALID_PSR_VALUE, psr, 0);
+                const bool bits[8] = {0, 1, 1, 0, 1, 0, 0, 0};
+                // Pop PC and psr
+                state.pc = state.mem[state.regs[6]];
+                unsigned short psr = state.mem[state.regs[6] + 1];
+                // Invalid PSR check, if the unspecified bits are filled or trying
+                // to set multiple nzp bits warn.
+                if ((psr & 0x78F8) != 0 || bits[psr & 7] != 1)
+                    lc3_warning(state, LC3_INVALID_PSR_VALUE, psr, 0);
 
                 state.regs[6] += 2;
                 state.privilege = (psr >> 15) & 1;
@@ -339,45 +339,45 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
                 state.z = (psr >> 1) & 1;
                 state.p = psr & 1;
 
-            if (state.privilege) {
-                state.savedssp = state.regs[6];
-                state.regs[6] = state.savedusp;
-            }
+                if (state.privilege) {
+                    state.savedssp = state.regs[6];
+                    state.regs[6] = state.savedusp;
+                }
 
-            // Determine if this RTI is for an interrupt or a trap.
-            // If not lc3 2019 revision this should always be true.
-            bool in_interrupt = state.lc3_version == 0;
-            if (!state.rti_stack.empty())
-            {
-                lc3_rti_stack_item item = state.rti_stack.back();
-                state.rti_stack.pop_back();
-                in_interrupt = item.is_interrupt;
-            }
-
-            if (in_interrupt)
-            {
-                if (!state.interrupt_vector_stack.empty())
+                // Determine if this RTI is for an interrupt or a trap.
+                // If not lc3 2019 revision this should always be true.
+                bool in_interrupt = state.lc3_version == 0;
+                if (!state.rti_stack.empty())
                 {
-                    state.interrupt_vector = state.interrupt_vector_stack.back();
-                    state.interrupt_vector_stack.pop_back();
+                    lc3_rti_stack_item item = state.rti_stack.back();
+                    state.rti_stack.pop_back();
+                    in_interrupt = item.is_interrupt;
+                }
+
+                if (in_interrupt)
+                {
+                    if (!state.interrupt_vector_stack.empty())
+                    {
+                        state.interrupt_vector = state.interrupt_vector_stack.back();
+                        state.interrupt_vector_stack.pop_back();
+                    }
+                    else
+                    {
+                        state.interrupt_vector = -1;
+                    }
+
+                    changes.changes = LC3_INTERRUPT_END; // second flag.
                 }
                 else
                 {
-                    state.interrupt_vector = -1;
-                }
-
-                changes.changes = LC3_INTERRUPT_END; // second flag.
-            }
-            else
-            {
-                changes.changes = LC3_SUBROUTINE_END;
-                if (!state.call_stack.empty())
-                {
-                    changes.subroutine = state.call_stack.back();
-                    state.call_stack.pop_back();
+                    changes.changes = LC3_SUBROUTINE_END;
+                    if (!state.call_stack.empty())
+                    {
+                        changes.subroutine = state.call_stack.back();
+                        state.call_stack.pop_back();
+                    }
                 }
             }
-        }
             break;
         case NOT_INSTR:
             // Invalid instruction check
@@ -447,9 +447,9 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
             changes.value = state.regs[changes.location];
 
             state.regs[changes.location] = state.pc + instruction.mem.offset.pc_offset;
-        // In the 2019 revision of LC-3 LEA no longer sets condition codes.
-        if (state.lc3_version == 0)
-            lc3_setcc(state, state.regs[changes.location]);
+            // In the 2019 revision of LC-3 LEA no longer sets condition codes.
+            if (state.lc3_version == 0)
+                lc3_setcc(state, state.regs[changes.location]);
             break;
         case TRAP_INSTR:
             // Invalid instruction check
@@ -496,7 +496,13 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
                     state.pc--;
                 }
             }
-        break;
+            break;
+        default:
+            // shouldn't happen.
+            lc3_warning(state, LC3_UNSUPPORTED_INSTRUCTION, instruction.data.opcode << 12 | instruction.data.data, 0);
+            state.halted = 1;
+            state.pc--;
+            break;
     }
 
     // Post processing.  If it is a register change and the register is r7

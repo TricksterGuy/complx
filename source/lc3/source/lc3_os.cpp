@@ -1,7 +1,7 @@
 #include "lc3/lc3_os.hpp"
 
 std::array<unsigned short, 0x300> lc3_os =
-{
+{{
     0x0200,
     0x0200,
     0x0200,
@@ -770,4 +770,4 @@ std::array<unsigned short, 0x300> lc3_os =
     0x0000,
     0x0000,
     0x0000,
-};
+}};
