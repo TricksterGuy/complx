@@ -16,17 +16,16 @@ wxString AskForAssemblyFile()
     std::unique_ptr<wxFileDialog> dialog(new wxFileDialog(NULL, _("Load .asm file"), wxEmptyString, wxEmptyString, _("LC-3 Assembly Files (*.asm)|*.asm"), wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR));
     if (dialog->ShowModal() == wxID_OK)
         return dialog->GetPath();
-
     return wxEmptyString;
 }
 
 }
 
-
 ComplxFrame::ComplxFrame() : ComplxFrameDecl(nullptr), state(new lc3_state()), memory_view_model(new MemoryViewDataModel(std::ref(*state)))
 {
     EventLog l(__func__);
 
+    InitializeOutput();
     InitializeLC3State();
     InitializeMemoryView();
     InitializeStatePropGrid();
@@ -52,7 +51,7 @@ void ComplxFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
     LoadingOptions options;
     options.file = file;
 
-    // Success failure logs handled in DoLoadFile.
+    // Success/failure logs handled in DoLoadFile.
     if (DoLoadFile(options))
         reload_options = options;
 }
@@ -98,7 +97,6 @@ void ComplxFrame::OnStateChange(wxPropertyGridEvent& event)
     auto* property = event.GetProperty();
     auto property_type = reinterpret_cast<uintptr_t>(property->GetClientData());
 
-
     if (property_type == PropertyType::Register)
     {
         auto* register_property = dynamic_cast<RegisterProperty*>(property);
@@ -126,13 +124,16 @@ void ComplxFrame::InitializeLC3State()
     state->default_seed = time(NULL);
     InfoLog("Random Seed %u", state->default_seed);
     lc3_init(*state);
+    state->output = output.get();
+    state->warning = warning.get();
+    state->trace = trace.get();
 }
 
 void ComplxFrame::InitializeMemoryView()
 {
     memoryView->UpdateRef(std::ref(*state));
     memoryView->AssociateModel(memory_view_model.get());
-    memoryView->ScrollTo(0x3000);
+    memoryView->ScrollTo(state->pc);
 }
 
 void ComplxFrame::InitializeStatePropGrid()
@@ -164,6 +165,15 @@ void ComplxFrame::InitializeStatePropGrid()
     statePropGridManager->GetGrid()->CenterSplitter();
 }
 
+void ComplxFrame::InitializeOutput()
+{
+    output.reset(new std::ostream(consoleText));
+    warning.reset(new std::ostream(warningText));
+    trace.reset(new std::ostream(traceText));
+    logging.reset(new std::ostream(loggingText));
+    logger->SetLogTarget(*logging);
+}
+
 bool ComplxFrame::DoLoadFile(const LoadingOptions& opts)
 {
     std::unique_ptr<lc3_state> new_state(new lc3_state());
@@ -174,6 +184,7 @@ bool ComplxFrame::DoLoadFile(const LoadingOptions& opts)
     short fill_registers = opts.registers;
     short fill_memory = opts.memory;
 
+    new_state->default_seed = (opts.has_random_seed) ? opts.random_seed : state->default_seed;
     lc3_init(*new_state, randomize_registers, randomize_memory, fill_registers, fill_memory);
     new_state->pc = opts.pc;
 

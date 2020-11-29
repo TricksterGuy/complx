@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Dec 27 2018)
+// C++ code generated with wxFormBuilder (version Oct 26 2018)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -20,6 +20,7 @@ class MemoryView;
 #include <wx/font.h>
 #include <wx/colour.h>
 #include <wx/settings.h>
+#include <wx/button.h>
 #include <wx/aui/aui.h>
 #include <wx/aui/auibar.h>
 #include <wx/sizer.h>
@@ -35,8 +36,9 @@ class MemoryView;
 
 ///////////////////////////////////////////////////////////////////////////
 
-#define ID_STEP 1000
-#define ID_BACK 1001
+#define ID_ADVANCED_LOAD 1000
+#define ID_STEP 1001
+#define ID_BACK 1002
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class ComplxFrameDecl
@@ -56,6 +58,16 @@ class ComplxFrameDecl : public wxFrame
 		wxMenu* menuHelp;
 		wxPanel* toolbarPanel;
 		wxAuiToolBar* m_auiToolBar1;
+		wxButton* m_button2;
+		wxButton* m_button3;
+		wxButton* m_button4;
+		wxButton* m_button5;
+		wxButton* m_button6;
+		wxButton* m_button7;
+		wxButton* m_button8;
+		wxAuiToolBar* m_auiToolBar2;
+		wxButton* m_button10;
+		wxButton* m_button11;
 		wxPanel* memoryPanel;
 		MemoryView* memoryView;
 		wxPanel* statePanel;
@@ -63,14 +75,14 @@ class ComplxFrameDecl : public wxFrame
 		wxPropertyGridPage* statePropGrid;
 		wxPGProperty* registers;
 		wxAuiNotebook* infoNotebook;
-		wxPanel* console;
-		wxTextCtrl* m_textCtrl1;
-		wxTextCtrl* m_textCtrl2;
-		wxPanel* warnings;
-		wxTextCtrl* warningsText;
-		wxPanel* trace;
+		wxPanel* consolePanel;
+		wxTextCtrl* consoleText;
+		wxTextCtrl* consoleInputText;
+		wxPanel* warningPanel;
+		wxTextCtrl* warningText;
+		wxPanel* tracePanel;
 		wxTextCtrl* traceText;
-		wxPanel* logging;
+		wxPanel* loggingPanel;
 		wxTextCtrl* loggingText;
 		wxStatusBar* m_statusBar2;
 
@@ -85,7 +97,7 @@ class ComplxFrameDecl : public wxFrame
 
 	public:
 
-		ComplxFrameDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Complx"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1024,800 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		ComplxFrameDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Complx2"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1024,800 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		wxAuiManager m_mgr;
 
 		~ComplxFrameDecl();

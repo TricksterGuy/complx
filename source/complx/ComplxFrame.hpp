@@ -36,6 +36,7 @@ private:
     void InitializeLC3State();
     void InitializeMemoryView();
     void InitializeStatePropGrid();
+    void InitializeOutput();
 
     /** Do the work of assembling a file. */
     bool DoLoadFile(const LoadingOptions& options);
@@ -56,6 +57,12 @@ private:
     RegisterProperty* pc_property;
     ProcessStatusRegisterProperty* cc_property;
     std::array<RegisterProperty*, 8> register_properties;
+
+    /** Streams for output */
+    std::unique_ptr<std::ostream> output;
+    std::unique_ptr<std::ostream> warning;
+    std::unique_ptr<std::ostream> trace;
+    std::unique_ptr<std::ostream> logging;
 };
 
 

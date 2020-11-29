@@ -17,9 +17,9 @@ struct LoadingOptions
 {
     /** File to load. */
     wxString file = wxEmptyString;
-    /** Last modification time for the file */
+    /** Last modification time for the file. */
     wxDateTime file_modification_time = wxInvalidDateTime;
-    /** Replay string */
+    /** Replay string. */
     wxString replay_string = wxEmptyString;
     /** Console input. */
     wxString console_input = wxEmptyString;
@@ -29,12 +29,16 @@ struct LoadingOptions
     ValueInitializationMethod memory = RANDOMIZE;
     /** Initial value of the PC. */
     unsigned short pc = 0x3000;
-    /** Override true traps setting */
+    /** Override true traps setting. */
     bool true_traps = false;
-    /** Override interrupts setting */
+    /** Override interrupts setting. */
     bool interrupts = false;
-    /** Override strict execution setting */
+    /** Override strict execution setting. */
     bool strict_execution = true;
+    /** Override default random seed. */
+    bool has_random_seed = false;
+    /** Random seed to use. */
+    unsigned int random_seed = 0;
 };
 
 #endif

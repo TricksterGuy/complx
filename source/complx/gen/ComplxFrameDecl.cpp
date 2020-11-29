@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Dec 27 2018)
+// C++ code generated with wxFormBuilder (version Oct 26 2018)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -27,6 +27,10 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	wxMenuItem* menuFileReload;
 	menuFileReload = new wxMenuItem( menuFile, wxID_REFRESH, wxString( wxT("&Reload") ) + wxT('\t') + wxT("Ctrl+R"), wxT("Reloads current asm file under same conditions"), wxITEM_NORMAL );
 	menuFile->Append( menuFileReload );
+
+	wxMenuItem* menuFileAdvancedLoad;
+	menuFileAdvancedLoad = new wxMenuItem( menuFile, ID_ADVANCED_LOAD, wxString( wxT("&Advanced Load") ) , wxT("Opens dialog for loading program under special conditions."), wxITEM_NORMAL );
+	menuFile->Append( menuFileAdvancedLoad );
 
 	wxMenuItem* menuFileExit;
 	menuFileExit = new wxMenuItem( menuFile, wxID_EXIT, wxString( wxT("&Exit") ) + wxT('\t') + wxT("Alt+F4"), wxT("Exits the Program"), wxITEM_NORMAL );
@@ -66,12 +70,35 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	m_mgr.AddPane( toolbarPanel, wxAuiPaneInfo() .Top() .CaptionVisible( false ).CloseButton( false ).PaneBorder( false ).Dock().Resizable().FloatingSize( wxDefaultSize ).BestSize( wxSize( -1,48 ) ).Layer( 10 ).ToolbarPane() );
 
 	wxBoxSizer* bSizer111;
-	bSizer111 = new wxBoxSizer( wxVERTICAL );
+	bSizer111 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_auiToolBar1 = new wxAuiToolBar( toolbarPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT );
+	m_auiToolBar1 = new wxAuiToolBar( toolbarPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_GRIPPER|wxAUI_TB_HORZ_LAYOUT );
+	m_button2 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Run"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_auiToolBar1->AddControl( m_button2 );
+	m_button3 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Step"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_auiToolBar1->AddControl( m_button3 );
+	m_button4 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Back"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_auiToolBar1->AddControl( m_button4 );
+	m_button5 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Step Over"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_auiToolBar1->AddControl( m_button5 );
+	m_button6 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Back Over"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_auiToolBar1->AddControl( m_button6 );
+	m_button7 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Step Out"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_auiToolBar1->AddControl( m_button7 );
+	m_button8 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Rewind"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_auiToolBar1->AddControl( m_button8 );
 	m_auiToolBar1->Realize();
 
 	bSizer111->Add( m_auiToolBar1, 1, wxALL|wxEXPAND, 5 );
+
+	m_auiToolBar2 = new wxAuiToolBar( toolbarPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT );
+	m_button10 = new wxButton( m_auiToolBar2, wxID_ANY, wxT("Breakpoint"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_auiToolBar2->AddControl( m_button10 );
+	m_button11 = new wxButton( m_auiToolBar2, wxID_ANY, wxT("Watchpoint"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_auiToolBar2->AddControl( m_button11 );
+	m_auiToolBar2->Realize();
+
+	bSizer111->Add( m_auiToolBar2, 1, wxALL|wxALIGN_BOTTOM|wxEXPAND, 5 );
 
 
 	toolbarPanel->SetSizer( bSizer111 );
@@ -112,65 +139,65 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	infoNotebook = new wxAuiNotebook( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_NB_DEFAULT_STYLE );
 	m_mgr.AddPane( infoNotebook, wxAuiPaneInfo() .Bottom() .PinButton( true ).Dock().Resizable().FloatingSize( wxDefaultSize ).BestSize( wxSize( -1,256 ) ) );
 
-	console = new wxPanel( infoNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	consolePanel = new wxPanel( infoNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer11;
 	bSizer11 = new wxBoxSizer( wxVERTICAL );
 
-	m_textCtrl1 = new wxTextCtrl( console, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxTE_WORDWRAP );
-	m_textCtrl1->Enable( false );
+	consoleText = new wxTextCtrl( consolePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxTE_WORDWRAP );
+	consoleText->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
 
-	bSizer11->Add( m_textCtrl1, 1, wxEXPAND|wxTOP|wxRIGHT|wxLEFT, 5 );
+	bSizer11->Add( consoleText, 1, wxEXPAND|wxTOP|wxRIGHT|wxLEFT, 5 );
 
-	m_textCtrl2 = new wxTextCtrl( console, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer11->Add( m_textCtrl2, 0, wxALL|wxEXPAND, 5 );
+	consoleInputText = new wxTextCtrl( consolePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	consoleInputText->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
+
+	bSizer11->Add( consoleInputText, 0, wxALL|wxEXPAND, 5 );
 
 
-	console->SetSizer( bSizer11 );
-	console->Layout();
-	bSizer11->Fit( console );
-	infoNotebook->AddPage( console, wxT("Console"), true, wxNullBitmap );
-	warnings = new wxPanel( infoNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	consolePanel->SetSizer( bSizer11 );
+	consolePanel->Layout();
+	bSizer11->Fit( consolePanel );
+	infoNotebook->AddPage( consolePanel, wxT("Console"), false, wxNullBitmap );
+	warningPanel = new wxPanel( infoNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer13;
 	bSizer13 = new wxBoxSizer( wxVERTICAL );
 
-	warningsText = new wxTextCtrl( warnings, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
-	warningsText->Enable( false );
-
-	bSizer13->Add( warningsText, 1, wxALL|wxEXPAND, 5 );
+	warningText = new wxTextCtrl( warningPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxTE_WORDWRAP );
+	bSizer13->Add( warningText, 1, wxALL|wxEXPAND, 5 );
 
 
-	warnings->SetSizer( bSizer13 );
-	warnings->Layout();
-	bSizer13->Fit( warnings );
-	infoNotebook->AddPage( warnings, wxT("Warnings"), false, wxNullBitmap );
-	trace = new wxPanel( infoNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	warningPanel->SetSizer( bSizer13 );
+	warningPanel->Layout();
+	bSizer13->Fit( warningPanel );
+	infoNotebook->AddPage( warningPanel, wxT("Warnings"), false, wxNullBitmap );
+	tracePanel = new wxPanel( infoNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer14;
 	bSizer14 = new wxBoxSizer( wxVERTICAL );
 
-	traceText = new wxTextCtrl( trace, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY );
-	traceText->Enable( false );
+	traceText = new wxTextCtrl( tracePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxTE_WORDWRAP );
+	traceText->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
 
 	bSizer14->Add( traceText, 1, wxEXPAND, 5 );
 
 
-	trace->SetSizer( bSizer14 );
-	trace->Layout();
-	bSizer14->Fit( trace );
-	infoNotebook->AddPage( trace, wxT("Trace"), false, wxNullBitmap );
-	logging = new wxPanel( infoNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	tracePanel->SetSizer( bSizer14 );
+	tracePanel->Layout();
+	bSizer14->Fit( tracePanel );
+	infoNotebook->AddPage( tracePanel, wxT("Trace"), false, wxNullBitmap );
+	loggingPanel = new wxPanel( infoNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer15;
 	bSizer15 = new wxBoxSizer( wxVERTICAL );
 
-	loggingText = new wxTextCtrl( logging, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY );
-	loggingText->Enable( false );
+	loggingText = new wxTextCtrl( loggingPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxTE_WORDWRAP );
+	loggingText->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
 
 	bSizer15->Add( loggingText, 1, wxEXPAND, 5 );
 
 
-	logging->SetSizer( bSizer15 );
-	logging->Layout();
-	bSizer15->Fit( logging );
-	infoNotebook->AddPage( logging, wxT("Logging"), false, wxNullBitmap );
+	loggingPanel->SetSizer( bSizer15 );
+	loggingPanel->Layout();
+	bSizer15->Fit( loggingPanel );
+	infoNotebook->AddPage( loggingPanel, wxT("Logging"), true, wxNullBitmap );
 
 	m_statusBar2 = this->CreateStatusBar( 1, wxSTB_SIZEGRIP, wxID_ANY );
 
