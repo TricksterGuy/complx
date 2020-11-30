@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <deque>
 #include <fstream>
+#include <functional>
 #include <list>
 #include <map>
 #include <memory>
@@ -514,12 +515,15 @@ struct LC3_API lc3_state
 
     // Stream for input
     std::istream* input;
-    int (*reader)(lc3_state& state, std::istream& file); // Function to read and consume one character from stream
-    int (*peek)(lc3_state& state, std::istream& file); // Function to peek at next character in stream
+    // Function to read and consume one character from stream
+    std::function<int(lc3_state&, std::istream&)> reader;
+    // Function to peek at next character in stream
+    std::function<int(lc3_state&, std::istream&)> peek;
 
     // Stream for output
     std::ostream* output;
-    int (*writer)(lc3_state& state, std::ostream& file, int); // Function to write one character to stream
+    // Function to write one character to stream
+    std::function<int(lc3_state&, std::ostream&)> writer;
 
     // Stream for warnings
     std::ostream* warning;
