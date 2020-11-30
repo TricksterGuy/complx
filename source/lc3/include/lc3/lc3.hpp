@@ -523,7 +523,7 @@ struct LC3_API lc3_state
     // Stream for output
     std::ostream* output;
     // Function to write one character to stream
-    std::function<int(lc3_state&, std::ostream&)> writer;
+    std::function<int(lc3_state&, std::ostream&, int)> writer;
 
     // Stream for warnings
     std::ostream* warning;
