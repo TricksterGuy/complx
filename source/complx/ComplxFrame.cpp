@@ -78,6 +78,7 @@ void ComplxFrame::OnExit(wxCommandEvent& WXUNUSED(event))
 void ComplxFrame::OnStep(wxCommandEvent& WXUNUSED(event))
 {
     EventLog l(__func__);
+    PreExecute();
     InfoLog("Stepping 1 instruction");
     lc3_step(*state);
     PostExecute();
@@ -86,6 +87,7 @@ void ComplxFrame::OnStep(wxCommandEvent& WXUNUSED(event))
 void ComplxFrame::OnBack(wxCommandEvent& WXUNUSED(event))
 {
     EventLog l(__func__);
+    PreExecute();
     InfoLog("Stepping back 1 instruction");
     lc3_back(*state);
     PostExecute();
@@ -122,11 +124,16 @@ void ComplxFrame::OnStateChange(wxPropertyGridEvent& event)
 void ComplxFrame::InitializeLC3State()
 {
     state->default_seed = time(NULL);
+
     InfoLog("Random Seed %u", state->default_seed);
+
     lc3_init(*state);
+
     state->output = output.get();
     state->warning = warning.get();
     state->trace = trace.get();
+    state->reader = std::bind(&ComplxFrame::ConsoleRead, this, std::placeholders::_1, std::placeholders::_2);
+    state->peek = std::bind(&ComplxFrame::ConsolePeek, this, std::placeholders::_1, std::placeholders::_2);
 }
 
 void ComplxFrame::InitializeMemoryView()
@@ -242,6 +249,11 @@ void ComplxFrame::PostLoadFile()
     memoryView->ScrollTo(state->pc);
 }
 
+void ComplxFrame::PreExecute()
+{
+    TransferDataFromWindow();
+}
+
 void ComplxFrame::PostExecute()
 {
     memoryView->Refresh();
@@ -252,3 +264,33 @@ void ComplxFrame::PostExecute()
     pc_property->RefreshDisplayedValue();
     cc_property->RefreshDisplayedValue();
 }
+
+int ComplxFrame::ConsoleRead(lc3_state& state, std::istream&)
+{
+    if (consoleInput.IsEmpty())
+    {
+        lc3_warning(state, LC3_OUT_OF_INPUT, 0, 0);
+        state.pc--;
+        state.halted = true;
+        return -1;
+    }
+    int ret = consoleInput[0];
+    consoleInput = consoleInput.Mid(1);
+    InfoLog("Read Character %c value: %d", static_cast<char>(ret), ret);
+    TransferDataToWindow();
+    return ret;
+}
+
+int ComplxFrame::ConsolePeek(lc3_state& state, std::istream&)
+{
+    if (consoleInput.IsEmpty())
+    {
+        lc3_warning(state, LC3_OUT_OF_INPUT, 0, 0);
+        state.pc--;
+        state.halted = true;
+        return -1;
+    }
+    InfoLog("Peek Character %c value: %d", static_cast<char>(consoleInput[0]), consoleInput[0]);
+    return consoleInput[0];
+}
+

@@ -151,6 +151,8 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	consoleInputText = new wxTextCtrl( consolePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	consoleInputText->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
 
+	consoleInputText->SetValidator( wxTextValidator( wxFILTER_ASCII, &consoleInput ) );
+
 	bSizer11->Add( consoleInputText, 0, wxALL|wxEXPAND, 5 );
 
 

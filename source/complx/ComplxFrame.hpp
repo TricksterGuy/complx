@@ -31,6 +31,8 @@ public:
     // State Event Handling
     void OnStateChange(wxPropertyGridEvent& event) override;
 
+    // Misc Event Handlers
+
 private:
     // Initialization
     void InitializeLC3State();
@@ -42,15 +44,21 @@ private:
     bool DoLoadFile(const LoadingOptions& options);
     /** Updates all objects referring to the now stale lc3_state object */
     void PostLoadFile();
-    /** Called when the display needs to be updated after executing instructions */
+    /** Called to read data from textctrls before executing instructions. */
+    void PreExecute();
+    /** Called when the display needs to be updated after executing instructions. */
     void PostExecute();
+
+    /** Console input functions */
+    int ConsoleRead(lc3_state& state, std::istream& file);
+    int ConsolePeek(lc3_state& state, std::istream& file);
 
     std::unique_ptr<lc3_state> state;
 
     /** Options used when reloading assembly files */
     LoadingOptions reload_options;
 
-    /** Backing data for Memory VIew */
+    /** Backing data for Memory View */
     wxObjectDataPtr<MemoryViewDataModel> memory_view_model;
 
     /** State Property Grid Properties */

@@ -30,6 +30,7 @@ class MemoryView;
 #include <wx/propgrid/manager.h>
 #include <wx/propgrid/advprops.h>
 #include <wx/textctrl.h>
+#include <wx/valtext.h>
 #include <wx/aui/auibook.h>
 #include <wx/statusbr.h>
 #include <wx/frame.h>
@@ -96,6 +97,7 @@ class ComplxFrameDecl : public wxFrame
 
 
 	public:
+		wxString consoleInput;
 
 		ComplxFrameDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Complx2"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1024,800 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		wxAuiManager m_mgr;
