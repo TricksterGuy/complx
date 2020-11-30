@@ -26,6 +26,9 @@ public:
     void SetLogTarget(std::reference_wrapper<std::ostream> stream) { out = stream; }
     void SetLogLevel(LogLevel level) { log_level = level; }
     void SetLogTime(bool logging_time) { log_time = logging_time; }
+    const std::ostream& GetLogTarget() const { return out; }
+    LogLevel GetLogLevel() const { return log_level; }
+    bool GetLogTime() const { return log_time; }
 protected:
     std::reference_wrapper<std::ostream> out;
     LogLevel log_level;

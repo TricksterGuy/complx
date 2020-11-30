@@ -151,7 +151,7 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     state.total_reads = 0;
     state.total_writes = 0;
 
-    state.trace.reset(nullptr);
+    state.trace = nullptr;
 
     state.in_lc3test = false;
 }

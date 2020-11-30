@@ -584,7 +584,7 @@ struct LC3_API lc3_state
     unsigned long total_writes;
 
     // Trace logging
-    std::unique_ptr<std::ostream> trace;
+    std::ostream* trace;
 
     // test_only mode
     // The only effect is that it records the first level subroutine/trap calls.
