@@ -702,7 +702,7 @@ int lc3_do_write_char(lc3_state&, std::ostream& file, int chr)
     return (!file.good()) ? -1 : 0;
 }
 
-int lc3_write_str(lc3_state& state, int (*writer)(lc3_state& state, std::ostream& file, int), std::ostream& file, const std::string& str)
+int lc3_write_str(lc3_state& state, std::function<int(lc3_state&, std::ostream&, int)> writer, std::ostream& file, const std::string& str)
 {
     for (unsigned int i = 0; i < str.size(); i++)
     {

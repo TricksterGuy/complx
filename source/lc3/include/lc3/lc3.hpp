@@ -702,7 +702,7 @@ int lc3_do_write_char(lc3_state& state, std::ostream& file, int chr);
   * @param str String to write.
   * @return Zero on success nonzero on failure.
   */
-int lc3_write_str(lc3_state& state, int (*writer)(lc3_state& state, std::ostream& file, int), std::ostream& file, const std::string& str);
+int lc3_write_str(lc3_state& state, std::function<int(lc3_state&, std::ostream&, int)> writer, std::ostream& file, const std::string& str);
 
 /** lc3_set_true_traps
   *
