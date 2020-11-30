@@ -668,6 +668,7 @@ int lc3_read_char(lc3_state& state, std::istream& file)
     if (!file.good())
     {
         lc3_warning(state, LC3_OUT_OF_INPUT, 0, 0);
+        state.pc--;
         state.halted = true;
         return -1;
     }
@@ -680,6 +681,7 @@ int lc3_peek_char(lc3_state& state, std::istream& file)
     if (!file.good())
     {
         lc3_warning(state, LC3_OUT_OF_INPUT, 0, 0);
+        state.pc--;
         state.halted = true;
         return -1;
     }
