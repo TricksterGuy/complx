@@ -20,6 +20,11 @@ IMPLEMENT_APP(ComplxApp)
 
 bool ComplxApp::OnInit()
 {
+#if wxUSE_ON_FATAL_EXCEPTION
+    wxHandleFatalExceptions();
+#endif
+
+    logger->SetLogTarget(initial_logging_stream);
     logger->SetLogLevel(LogLevel::VERBOSE);
 
     EventLog l(__func__);
@@ -42,3 +47,12 @@ int ComplxApp::OnExit()
     return 0;
 }
 
+void ComplxApp::OnFatalException()
+{
+
+}
+
+void ComplxApp::OnUnhandledException()
+{
+
+}

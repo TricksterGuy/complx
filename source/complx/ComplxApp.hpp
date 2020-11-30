@@ -12,14 +12,19 @@
 
 #include <wx/app.h>
 #include <wx/frame.h>
+#include <sstream>
 
 class ComplxApp : public wxApp
 {
 public:
     bool OnInit() override;
     int OnExit() override;
+    void OnFatalException() override;
+    void OnUnhandledException() override;
+
 private:
     wxFrame* frame = nullptr;
+    std::stringstream initial_logging_stream;
 };
 
 #endif

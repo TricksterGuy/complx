@@ -171,6 +171,10 @@ void ComplxFrame::InitializeOutput()
     warning.reset(new std::ostream(warningText));
     trace.reset(new std::ostream(traceText));
     logging.reset(new std::ostream(loggingText));
+
+    // Copy initial logs to the logging textctrl. And switch to logging to the textctrl.
+    const std::stringstream& old = dynamic_cast<const std::stringstream&>(logger->GetLogTarget());
+    *logging << (old.str());
     logger->SetLogTarget(*logging);
 }
 
