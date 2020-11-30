@@ -34,6 +34,7 @@ ComplxFrame::ComplxFrame() : ComplxFrameDecl(nullptr), state(new lc3_state()), m
 ComplxFrame::~ComplxFrame()
 {
     EventLog l(__func__);
+    logger->SetLogTarget(std::cerr);
 }
 
 void ComplxFrame::OnLoad(wxCommandEvent& WXUNUSED(event))
