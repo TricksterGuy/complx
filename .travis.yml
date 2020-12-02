@@ -1,0 +1,16 @@
+sudo: required
+dist: bionic
+language: cpp
+matrix:
+  include:
+  - os: linux
+  - compiler: gcc
+before_install:
+- sudo apt-get update -qq
+- sudo apt-get install -y libboost-test-dev libboost-serialization-dev
+script:
+- ./configure test
+- ./configure test
+- cd build-test
+- make test
+- cd ..
