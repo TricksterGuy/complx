@@ -9,10 +9,12 @@
 struct LC3BasicTest
 {
     lc3_state state;
+    std::stringstream warnings;
 
     LC3BasicTest()
     {
         lc3_init(state, false, false);
+        state.warning = &warnings;
         state.lc3_version = 0;
     }
 };
@@ -223,6 +225,7 @@ BOOST_FIXTURE_TEST_CASE(MalformedInstructionTest, LC3BasicTest)
         BOOST_CHECK_EQUAL(change.pc, 0x3000);
         BOOST_CHECK(!change.halted);
         lc3_init(state, false, false);
+        state.warning = &warnings;
     }
 }
 

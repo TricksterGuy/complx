@@ -9,12 +9,14 @@
 struct LC3Revision2019Test
 {
     lc3_state state;
+    std::stringstream warnings;
     LC3AssembleOptions options;
 
     LC3Revision2019Test()
     {
         lc3_init(state, false, false);
         lc3_set_version(state, 1);
+        state.warning = &warnings;
         options.multiple_errors = false;
     }
 };
