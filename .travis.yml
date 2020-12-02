@@ -12,5 +12,7 @@ script:
 - ./configure test
 - ./configure test
 - cd build-test
+- sudo make install
+- sudo ldconfig
 - make test
 - cd ..

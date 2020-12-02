@@ -79,7 +79,6 @@ target_link_libraries(${target}
 target_compile_definitions(${target}
     PRIVATE
     ${DEFAULT_COMPILE_DEFINITIONS}
-    PLUGIN_INSTALL_DIR="${CMAKE_BINARY_DIR}"
     BOOST_TEST_DYN_LINK=1
 )
 
