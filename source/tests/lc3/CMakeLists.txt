@@ -22,6 +22,7 @@ set(sources
     lc3_assemble_test.cpp
     lc3_basic_test.cpp
     lc3_parser_test.cpp
+    lc3_revision_2019_test.cpp
 )
 
 
