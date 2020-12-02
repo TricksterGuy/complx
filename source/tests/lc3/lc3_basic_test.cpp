@@ -1,9 +1,10 @@
 #define BOOST_TEST_MODULE LC3_Test_Suite
-#include <boost/test/auto_unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <lc3.hpp>
+#include <lc3/ExpressionEvaluator.hpp>
 
 struct LC3BasicTest
 {
@@ -12,10 +13,10 @@ struct LC3BasicTest
     LC3BasicTest()
     {
         lc3_init(state, false, false);
+        state.lc3_version = 0;
     }
 };
 
-#define IS_EXCEPTION(type) [](const LC3CalculateException& e) {return e.what().find(type) != std::string::npos;}
 
 unsigned char allinstrs[] = {
   0x30, 0x00, 0x00, 0x12, 0x0e, 0x01, 0x10, 0x42, 0x10, 0x62, 0x21, 0xff,
@@ -287,7 +288,7 @@ BOOST_FIXTURE_TEST_CASE(InstructionBasicDisassembleTest, LC3BasicTest)
         "RTI",
         "ERROR",
         "NOP ('0') *",
-        "NOP"
+        "NOP",
     };
 
     // BRN 3
@@ -1245,6 +1246,156 @@ BOOST_FIXTURE_TEST_CASE(TestTrapInstructions, LC3BasicTest)
     BOOST_CHECK_EQUAL(val, answers[2]);
 }
 
+BOOST_FIXTURE_TEST_CASE(TestTrueTraps, LC3BasicTest)
+{
+    std::istringstream file(
+        ";@version 0\n"
+        ".orig x3000\n"
+        "OUT\n"
+        "IN\n"
+        "GETC\n"
+        "LEA R0, HW\n"
+        "PUTS\n"
+        "LEA R0, PUTSP_STR\n"
+        "PUTSP\n"
+        "HALT\n"
+        "HW .stringz \"HELLO WORLD\"\n"
+        "PUTSP_STR .fill x3130\n"
+        ".fill x3332\n"
+        ".fill x3534\n"
+        ".fill x3736\n"
+        ".fill x3938\n"
+        ".fill x0030\n"
+        ".fill x0000\n"
+        ".end"
+    );
+
+    try
+    {
+        LC3AssembleOptions options;
+        options.multiple_errors = false;
+        lc3_assemble(state, file, options);
+    }
+    catch (LC3AssembleException e)
+    {
+        BOOST_FAIL(e.what());
+    }
+
+    lc3_set_true_traps(state, true);
+
+    std::istringstream proginput("BC");
+    std::ostringstream progoutput;
+
+    state.input = &proginput;
+    state.output = &progoutput;
+
+    short r1 = state.regs[1];
+    short r2 = state.regs[2];
+    short r3 = state.regs[3];
+    short r4 = state.regs[4];
+    short r5 = state.regs[5];
+    short r6 = state.regs[6];
+
+    // OUT;
+    state.regs[0] = 65;
+    lc3_next_line(state);
+    BOOST_REQUIRE_EQUAL(state.pc, 0x3001);
+    BOOST_CHECK_EQUAL(state.regs[0], 65);
+    BOOST_CHECK_EQUAL(state.regs[1], r1);
+    BOOST_CHECK_EQUAL(state.regs[2], r2);
+    BOOST_CHECK_EQUAL(state.regs[3], r3);
+    BOOST_CHECK_EQUAL(state.regs[4], r4);
+    BOOST_CHECK_EQUAL(state.regs[5], r5);
+    BOOST_CHECK_EQUAL(state.regs[6], r6);
+    BOOST_CHECK_EQUAL(state.regs[7], 0x3001);
+
+    // IN
+    lc3_next_line(state);
+    BOOST_CHECK_EQUAL(state.regs[0], 66);
+    BOOST_CHECK_EQUAL(state.regs[1], r1);
+    BOOST_CHECK_EQUAL(state.regs[2], r2);
+    BOOST_CHECK_EQUAL(state.regs[3], r3);
+    BOOST_CHECK_EQUAL(state.regs[4], r4);
+    BOOST_CHECK_EQUAL(state.regs[5], r5);
+    BOOST_CHECK_EQUAL(state.regs[6], r6);
+    BOOST_CHECK_EQUAL(state.regs[7], 0x3002);
+
+    // GETC
+    lc3_next_line(state);
+    BOOST_CHECK_EQUAL(state.regs[0], 67);
+    BOOST_CHECK_EQUAL(state.regs[1], r1);
+    BOOST_CHECK_EQUAL(state.regs[2], r2);
+    BOOST_CHECK_EQUAL(state.regs[3], r3);
+    BOOST_CHECK_EQUAL(state.regs[4], r4);
+    BOOST_CHECK_EQUAL(state.regs[5], r5);
+    BOOST_CHECK_EQUAL(state.regs[6], r6);
+    BOOST_CHECK_EQUAL(state.regs[7], 0x3003);
+
+    // LEA R0, HELLOWORLD; PUTS;
+    lc3_next_line(state);
+    lc3_next_line(state);
+    BOOST_CHECK_EQUAL(state.regs[0], 0x3008);
+    BOOST_CHECK_EQUAL(state.regs[1], r1);
+    BOOST_CHECK_EQUAL(state.regs[2], r2);
+    BOOST_CHECK_EQUAL(state.regs[3], r3);
+    BOOST_CHECK_EQUAL(state.regs[4], r4);
+    BOOST_CHECK_EQUAL(state.regs[5], r5);
+    BOOST_CHECK_EQUAL(state.regs[6], r6);
+    BOOST_CHECK_EQUAL(state.regs[7], 0x3005);
+
+    // LEA R0, PUTSPSTR; PUTSP;
+    lc3_next_line(state);
+    lc3_next_line(state);
+    BOOST_CHECK_EQUAL(state.regs[0], 0x3014);
+    BOOST_CHECK_EQUAL(state.regs[1], r1);
+    BOOST_CHECK_EQUAL(state.regs[2], r2);
+    BOOST_CHECK_EQUAL(state.regs[3], r3);
+    BOOST_CHECK_EQUAL(state.regs[4], r4);
+    BOOST_CHECK_EQUAL(state.regs[5], r5);
+    BOOST_CHECK_EQUAL(state.regs[6], r6);
+    BOOST_CHECK_EQUAL(state.regs[7], 0x3007);
+
+    // HALT
+    lc3_next_line(state);
+    BOOST_CHECK_EQUAL(state.halted, 0x1);
+    BOOST_CHECK_EQUAL(state.regs[0], 0x3014);
+    BOOST_CHECK_EQUAL(state.regs[1], r1);
+    BOOST_CHECK_EQUAL(state.regs[2], r2);
+    BOOST_CHECK_EQUAL(state.regs[3], r3);
+    BOOST_CHECK_EQUAL(state.regs[4], r4);
+    BOOST_CHECK_EQUAL(state.regs[5], r5);
+    BOOST_CHECK_EQUAL(state.regs[6], r6);
+    BOOST_CHECK_EQUAL(state.mem[0xFFFE], 0);
+
+    state.input = &std::cin;
+    state.output = &std::cout;
+
+    std::istringstream verify(progoutput.str());
+    BOOST_CHECK_EQUAL(verify.get(), 'A');
+
+    const std::string answers[3] = {"Input character: ", "HELLO WORLD", "01234567890"};
+    char str[18];
+    std::string val;
+
+    verify.get(str, 18);
+    str[17] = 0;
+    val = str;
+    BOOST_CHECK_EQUAL(val, answers[0]);
+
+    BOOST_CHECK_EQUAL(verify.get(), 66);
+
+    verify.get(str, 12);
+    str[12] = 0;
+    val = str;
+    BOOST_CHECK_EQUAL(val, answers[1]);
+
+    verify.get(str, 12);
+    str[12] = 0;
+    val = str;
+    BOOST_CHECK_EQUAL(val, answers[2]);
+}
+
+
 BOOST_FIXTURE_TEST_CASE(TestDeviceRegisters, LC3BasicTest)
 {
     const unsigned char devreg[] = {
@@ -1329,7 +1480,9 @@ BOOST_FIXTURE_TEST_CASE(TestSymbolTable, LC3BasicTest)
 
     BOOST_CHECK_EQUAL(lc3_calculate(state, "*LOL_LOL + R0 + R1 + R2+R3 + R4 + R5 + R6 + R7"), state.mem[0x3000]);
     BOOST_CHECK_EQUAL(lc3_calculate(state, "&LOL_LOL + LOL_LOL"), 0);
-    BOOST_CHECK_EXCEPTION(lc3_calculate(state, "NOTHERE"), LC3CalculateException, IS_EXCEPTION("Undefined symbol"));
+
+    auto undefined_symbol = [](const LC3CalculateException& e) {return e.get_id() == ExpressionEvaluator::eval_undefinedsymbol;};
+    BOOST_CHECK_EXCEPTION(lc3_calculate(state, "NOTHERE"), LC3CalculateException, undefined_symbol);
     // References
     BOOST_CHECK_EQUAL(lc3_calculate(state, "R0[0] + R1[0] + R2[0] + R3[0] + R4[0] + R5[0] + R6[0] + R7[0] + MEM[0] + LOL_LOL[0]"), state.mem[0x3000]);
     BOOST_CHECK_EQUAL(lc3_calculate(state, "PC + PC[0]"), state.pc);
@@ -1513,3 +1666,165 @@ BOOST_FIXTURE_TEST_CASE(InitRandomTest, LC3BasicTest)
 
     BOOST_CHECK_EQUAL(first, second);
 }
+
+BOOST_FIXTURE_TEST_CASE(TestCustomTrapV0, LC3BasicTest)
+{
+    std::istringstream file(
+        ".orig x30\n"
+        ".fill x1000\n"
+        ".end\n\n"
+
+        ".orig x1000\n"
+        "AND R0, R0, 0\n"
+        "RET\n"
+        ".end\n\n"
+
+        ".orig x3000\n"
+        "TRAP x30\n"
+        ".end\n\n"
+    );
+    try
+    {
+        LC3AssembleOptions options;
+        options.multiple_errors = false;
+        lc3_assemble(state, file, options);
+    }
+    catch (LC3AssembleException e)
+    {
+        BOOST_FAIL(e.what());
+    }
+
+    lc3_set_true_traps(state, true);
+    state.n = 0;
+    state.z = 0;
+    state.p = 1;
+
+    BOOST_REQUIRE_EQUAL(state.privilege, 1);
+    // ========
+    // TRAP x30
+    // ========
+    short r6 = state.regs[6];
+
+    lc3_step(state);
+    // PSR check.
+    BOOST_CHECK_EQUAL(state.privilege, 1);
+    BOOST_CHECK_EQUAL(state.n, 0);
+    BOOST_CHECK_EQUAL(state.z, 0);
+    BOOST_CHECK_EQUAL(state.p, 1);
+
+    BOOST_CHECK_EQUAL(state.pc, 0x1000);
+    BOOST_CHECK_EQUAL(state.regs[6], r6);
+    BOOST_CHECK_EQUAL(state.regs[7], 0x3001);
+
+    // Internal state checks
+    BOOST_REQUIRE_EQUAL(state.undo_stack.size(), 1);
+    lc3_state_change change = state.undo_stack.back();
+    BOOST_CHECK_EQUAL(change.changes, LC3_SUBROUTINE_BEGIN);
+    BOOST_CHECK_EQUAL(change.privilege, 1);
+    BOOST_CHECK_EQUAL(change.pc, 0x3001);
+    BOOST_CHECK_EQUAL(change.subroutine.is_trap, true);
+    BOOST_CHECK_EQUAL(change.subroutine.address, 0x1000);
+
+    BOOST_REQUIRE(state.rti_stack.empty());
+
+    BOOST_REQUIRE_EQUAL(state.call_stack.size(), 1);
+    lc3_subroutine_call call = state.call_stack.back();
+    BOOST_CHECK_EQUAL(call.address, 0x1000);
+    BOOST_CHECK_EQUAL(call.is_trap, true);
+
+    // =============
+    // AND R0, R0, 0
+    // =============
+    lc3_step(state);
+    BOOST_CHECK_EQUAL(state.regs[0], 0);
+    BOOST_CHECK_EQUAL(state.pc, 0x1001);
+    BOOST_CHECK_EQUAL(state.n, 0);
+    BOOST_CHECK_EQUAL(state.z, 1);
+    BOOST_CHECK_EQUAL(state.p, 0);
+
+    // ===
+    // RET
+    // ===
+    lc3_step(state);
+    BOOST_CHECK_EQUAL(state.privilege, 1);
+    BOOST_CHECK_EQUAL(state.n, 0);
+    BOOST_CHECK_EQUAL(state.z, 1);
+    BOOST_CHECK_EQUAL(state.p, 0);
+
+    BOOST_CHECK_EQUAL(state.pc, 0x3001);
+    BOOST_CHECK_EQUAL(state.regs[6], r6);
+
+    // Internal state checks
+    BOOST_REQUIRE_EQUAL(state.undo_stack.size(), 3);
+    change = state.undo_stack.back();
+    BOOST_CHECK_EQUAL(change.changes, LC3_SUBROUTINE_END);
+    BOOST_CHECK_EQUAL(change.privilege, 1);
+    BOOST_CHECK_EQUAL(change.pc, 0x1002);
+
+    BOOST_CHECK(state.rti_stack.empty());
+    BOOST_CHECK(state.call_stack.empty());
+}
+
+BOOST_FIXTURE_TEST_CASE(TestCustomMultiTrapV0, LC3BasicTest)
+{
+    std::istringstream file(
+        ";@version 0\n"
+        ".orig x30\n"
+        ".fill x1000\n"
+        ".fill x1010\n"
+        ".fill x1020\n"
+        ".end\n\n"
+
+        ".orig x1000\n"
+        "AND R0, R0, 0\n"
+        "TRAP x31\n"
+        "RTI\n"
+        ".end\n\n"
+
+        ".orig x1010\n"
+        "ADD R0, R0, -1\n"
+        "TRAP x32\n"
+        "RTI\n"
+        ".end\n\n"
+
+        ".orig x1020\n"
+        "RTI\n"
+        ".end\n\n"
+
+        ".orig x3000\n"
+        "TRAP x30\n"
+        ".end\n\n"
+    );
+    try
+    {
+        LC3AssembleOptions options;
+        options.multiple_errors = false;
+        lc3_assemble(state, file, options);
+    }
+    catch (LC3AssembleException e)
+    {
+        BOOST_FAIL(e.what());
+    }
+
+    lc3_set_true_traps(state, true);
+    state.n = 0;
+    state.z = 0;
+    state.p = 1;
+
+    BOOST_REQUIRE_EQUAL(state.privilege, 1);
+    lc3_run(state, 5); // x1020.
+
+    BOOST_CHECK_EQUAL(state.pc, 0x1020);
+
+    // Internal state checks
+    BOOST_CHECK(state.rti_stack.empty());
+    BOOST_CHECK_EQUAL(state.call_stack.size(), 3);
+
+    BOOST_CHECK_EQUAL(state.call_stack[0].address, 0x1000);
+    BOOST_CHECK_EQUAL(state.call_stack[0].is_trap, true);
+    BOOST_CHECK_EQUAL(state.call_stack[1].address, 0x1010);
+    BOOST_CHECK_EQUAL(state.call_stack[1].is_trap, true);
+    BOOST_CHECK_EQUAL(state.call_stack[2].address, 0x1020);
+    BOOST_CHECK_EQUAL(state.call_stack[2].is_trap, true);
+}
+

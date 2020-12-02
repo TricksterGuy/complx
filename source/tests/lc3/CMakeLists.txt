@@ -69,7 +69,7 @@ target_link_libraries(${target}
     PRIVATE
     ${DEFAULT_LIBRARIES}
     ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-    ${META_PROJECT_NAME}::lc3_testlib
+    ${META_PROJECT_NAME}::lc3
 
 )
 
