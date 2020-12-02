@@ -1,6 +1,6 @@
 #define BOOST_TEST_MODULE LC3_Plugin_Test
 #define BOOST_TEST_ALTERNATIVE_INIT_API
-#include <boost/test/auto_unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -299,6 +299,7 @@ BOOST_FIXTURE_TEST_CASE(TestTrapPluginAssembleFailure2, LC3PluginTest)
 
 int main(int argc, char* argv[], char* envp[])
 {
+    (void) envp;
     lc3_set_plugin_install_dir(".");
     return boost::unit_test_framework::unit_test_main(init_unit_test, argc, argv);
 }

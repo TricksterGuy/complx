@@ -190,6 +190,8 @@ std::pair<unsigned short, int> write_data(lc3_state& state, unsigned short addre
                 break;
             case DataItem::EndData:
                 return std::make_pair(address, i);
+            default:
+                break;
         }
     }
     return std::make_pair(-1, -1);
@@ -240,6 +242,8 @@ std::pair<std::string, int> describe_data(const std::vector<short>& params, int 
             case DataItem::EndData:
                 out << ")";
                 return std::make_pair(out.str(), i);
+            default:
+                break;
         }
         if (static_cast<size_t>(i) != params.size() && static_cast<DataItem>(params[i]) != DataItem::EndData)
             out << ", ";

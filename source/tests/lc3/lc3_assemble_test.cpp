@@ -1,5 +1,5 @@
 //#define BOOST_TEST_MODULE AssembleTest
-#include <boost/test/auto_unit_test.hpp>
+#include <boost/test/unit_test.hpp>
 #include <iostream>
 #include <fstream>
 #include <sstream>
