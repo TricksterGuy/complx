@@ -10,7 +10,7 @@ find_package(${META_PROJECT_NAME} REQUIRED HINTS "${CMAKE_CURRENT_SOURCE_DIR}/..
 #
 
 # Target name
-set(target lc3_plugin_test)
+set(target lc3_plugins_test)
 message(STATUS "Test ${target}")
 
 
@@ -19,7 +19,7 @@ message(STATUS "Test ${target}")
 #
 
 set(sources
-    lc3_plugin_test.cpp
+    lc3_plugins_test.cpp
 )
 
 
@@ -79,8 +79,8 @@ target_link_libraries(${target}
 target_compile_definitions(${target}
     PRIVATE
     ${DEFAULT_COMPILE_DEFINITIONS}
-    #BOOST_TEST_DYN_LINK=1
     PLUGIN_INSTALL_DIR="${CMAKE_BINARY_DIR}"
+    BOOST_TEST_DYN_LINK=1
 )
 
 

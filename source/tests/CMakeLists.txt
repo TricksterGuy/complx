@@ -34,13 +34,13 @@ endif()
 function(add_test_without_ctest target)
     add_subdirectory(${target})
 
-    if(NOT TARGET ${target})
+    if(NOT TARGET ${target}_test)
         return()
     endif()
 
-    add_dependencies(test ${target})
+    add_dependencies(test ${target}_test)
     add_custom_command(TARGET test POST_BUILD
-        COMMAND $<TARGET_FILE:${target}> --gtest_output=xml:gtests-${target}.xml
+        COMMAND $<TARGET_FILE:${target}_test>
     )
 
     generate_coverage_report(${target})
@@ -67,5 +67,5 @@ set_target_properties(test PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD 1)
 #
 
 add_test_without_ctest(lc3)
-add_test_without_ctest(plugins)
+add_test_without_ctest(lc3_plugins)
 add_test_without_ctest(lc3_replay)

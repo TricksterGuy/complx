@@ -1,5 +1,4 @@
 #define BOOST_TEST_MODULE LC3_Plugin_Test
-#define BOOST_TEST_ALTERNATIVE_INIT_API
 #include <boost/test/unit_test.hpp>
 #include <iostream>
 #include <fstream>
@@ -295,11 +294,4 @@ BOOST_FIXTURE_TEST_CASE(TestTrapPluginAssembleFailure2, LC3PluginTest)
 
     std::stringstream file(asm_file);
     BOOST_CHECK_EXCEPTION(lc3_assemble(state, file, options), LC3AssembleException, IS_EXCEPTION(PLUGIN_FAILED_TO_LOAD));
-}
-
-int main(int argc, char* argv[], char* envp[])
-{
-    (void) envp;
-    lc3_set_plugin_install_dir(".");
-    return boost::unit_test_framework::unit_test_main(init_unit_test, argc, argv);
 }
