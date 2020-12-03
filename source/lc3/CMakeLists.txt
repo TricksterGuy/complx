@@ -12,6 +12,7 @@
 
 # Target name
 set(target lc3)
+set(PLUGIN_INSTALL_DIRECTORY "${CMAKE_INSTALL_LIBDIR}" CACHE STRING "Install directory for lc3 plugins")
 
 # Exit here if required dependencies are not met
 message(STATUS "Lib ${target}")
@@ -179,6 +180,8 @@ target_compile_definitions(${target}
     PUBLIC
     $<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:${target_id}_STATIC_DEFINE>
     SHARED_LIBRARY_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}"
+    PLUGIN_INSTALL_PREFIX="${OPTION_PLUGIN_INSTALL_DIRECTORY}"
+
     ${DEFAULT_COMPILE_DEFINITIONS}
 
     INTERFACE
