@@ -100,7 +100,7 @@ void lc3_install_plugin(lc3_state& state, const std::string& filename, const std
     // If failed to follow format (needs a creation and destruction function) not valid
     if (mkr == nullptr || dstry == nullptr)
     {
-        printf("error: " "Plugin does not have correct creation/destruction functions or not found.\n");
+        printf("error: %s. Plugin does not have correct creation/destruction functions or not found.\n", dlerror());
         throw LC3PluginException(filename, full_path, "Plugin does not have correct creation/destruction functions or not found.");
     }
 
