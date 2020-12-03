@@ -99,13 +99,19 @@ void lc3_install_plugin(lc3_state& state, const std::string& filename, const std
 
     // If failed to follow format (needs a creation and destruction function) not valid
     if (mkr == nullptr || dstry == nullptr)
+    {
+        printf("error: " "Plugin does not have correct creation/destruction functions or not found.\n");
         throw LC3PluginException(filename, full_path, "Plugin does not have correct creation/destruction functions or not found.");
+    }
 
     Plugin* plugin = mkr(PluginParams(filename, full_path, params));
 
     // If failed to create reject
     if (plugin == nullptr)
+    {
+        printf("Could not instantiate plugin\n");
         throw LC3PluginException(filename, full_path, "Could not instantiate plugin");
+    }
 
     if (state.in_lc3test && !plugin->AvailableInLC3Test())
     {
@@ -128,6 +134,7 @@ void lc3_install_plugin(lc3_state& state, const std::string& filename, const std
         stream << " was ";
         stream << plugin->GetMajorVersion() << "." << plugin->GetMinorVersion();
 
+        printf("%s\n", stream.str().c_str());
         throw LC3PluginException(filename, full_path, stream.str());
     }
 
