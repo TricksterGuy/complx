@@ -173,7 +173,7 @@ target_link_libraries(${target}
 #
 # Compile definitions
 #
-
+message("${PLUGIN_INSTALL_DIRECTORY}")
 target_compile_definitions(${target}
     PRIVATE
 
