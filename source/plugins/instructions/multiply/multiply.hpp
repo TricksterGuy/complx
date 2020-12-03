@@ -30,8 +30,8 @@ enum MUL_DISASSEMBLE_CASES
     MUL_TWO_REGS = 6,	// MUL RX, RY, RZ
 };
 
-extern "C" LC3_API Plugin* create_plugin(const PluginParams& params);
-extern "C" LC3_API void destroy_plugin(Plugin* ptr);
+extern "C" Plugin* create_plugin(const PluginParams& params);
+extern "C" void destroy_plugin(Plugin* ptr);
 
 #endif
 
