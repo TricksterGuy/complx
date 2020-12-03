@@ -85,10 +85,14 @@ void lc3_install_plugin(lc3_state& state, const std::string& filename, const std
 #endif
     }
 
+    printf("plugin_path: %s\n", full_path.c_str());
     void *hndl = dlopen(full_path.c_str(), RTLD_NOW);
     // Failed to load.
     if(hndl == nullptr)
+    {
+        printf("error: %s\n", dlerror());
         throw LC3PluginException(filename, full_path, dlerror());
+    }
 
     PluginCreateFunc mkr = (PluginCreateFunc) dlsym(hndl, "create_plugin");
     PluginDestroyFunc dstry = (PluginDestroyFunc) dlsym(hndl, "destroy_plugin");
