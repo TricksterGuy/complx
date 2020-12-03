@@ -9,10 +9,10 @@ std::string time_to_string(const std::chrono::system_clock::time_point& time_poi
     std::chrono::system_clock::time_point time_point_sec = std::chrono::system_clock::from_time_t(time_secs);
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(time_point - time_point_sec);
 
-    char buffer[128];
-    strftime(buffer, 128, "%H:%M:%S", localtime(&time_secs));
+    char buffer[64];
+    strftime(buffer, 64, "%H:%M:%S", localtime(&time_secs));
     char currentTime[128] = "";
-    snprintf(currentTime, 128, "%s.%03d", buffer, (int)ms.count());
+    snprintf(currentTime, 128, "%s.%03d", buffer, static_cast<char>(ms.count()));
 
     return currentTime;
 }

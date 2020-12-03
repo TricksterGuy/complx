@@ -2,7 +2,7 @@
 # Options
 #
 
-option(ENABLE_BWLCD_PLUGIN "Enable the Black White LCD Plugin" ON)
+option(OPTION_ENABLE_BWLCD_PLUGIN "Enable the Black White LCD Plugin" ON)
 
 
 #
@@ -22,11 +22,12 @@ include(${wxWidgets_USE_FILE})
 set(target lc3_bwlcd)
 
 # Exit here if required dependencies are not met
-if (NOT ENABLE_BWLCD_PLUGIN)
+if (NOT OPTION_ENABLE_BWLCD_PLUGIN)
     message(STATUS "Plugin ${target} disabled")
     return()
 elseif (NOT wxWidgets_FOUND)
     message(STATUS "Plugin ${target} skipped: wxWidgets not found")
+    return()
 else()
     message(STATUS "Plugin ${target}")
 endif()
