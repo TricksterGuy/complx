@@ -174,3 +174,15 @@ perform_health_checks(
 )
 
 generate_coverage_report(${target})
+
+#
+# Deployment
+#
+
+# Library
+install(TARGETS ${target}
+    EXPORT  "${target}-export"            COMPONENT dev
+    RUNTIME DESTINATION ${INSTALL_BIN}    COMPONENT runtime
+    LIBRARY DESTINATION ${INSTALL_SHARED} COMPONENT runtime
+    ARCHIVE DESTINATION ${INSTALL_LIB}    COMPONENT dev
+)
