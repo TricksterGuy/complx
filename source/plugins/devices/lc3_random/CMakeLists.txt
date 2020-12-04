@@ -2,7 +2,7 @@
 # Options
 #
 
-option(ENABLE_SECOND_TIMER_PLUGIN "Enable the Second Timer Plugin" OFF)
+option(OPTION_ENABLE_RANDOM_PLUGIN "Enable the Random Value Plugin" ON)
 
 
 #
@@ -10,10 +10,18 @@ option(ENABLE_SECOND_TIMER_PLUGIN "Enable the Second Timer Plugin" OFF)
 #
 
 # Target name
-set(target lc3_second_timer)
+set(target lc3_random)
+
+# Set API export file and macro
+string(MAKE_C_IDENTIFIER ${target} target_id)
+string(TOUPPER ${target_id} target_id)
+set(feature_file         "include/${target}/${target}_features.h")
+set(export_file          "include/${target}/${target}_export.h")
+set(template_export_file "include/${target}/${target}_api.h")
+set(export_macro         "${target_id}_API")
 
 # Exit here if required dependencies are not met
-if (NOT ENABLE_SECOND_TIMER_PLUGIN)
+if (NOT OPTION_ENABLE_RANDOM_PLUGIN)
     message(STATUS "Plugin ${target} disabled")
     return()
 else()
@@ -29,11 +37,11 @@ set(include_path "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(source_path  "${CMAKE_CURRENT_SOURCE_DIR}/source")
 
 set(headers
-    second_timer.hpp
+    random.hpp
 )
 
 set(sources
-    second_timer.cpp
+    random.cpp
 )
 
 # Group source files
@@ -60,6 +68,17 @@ add_library(${target}
 add_library(${META_PROJECT_NAME}::${target} ALIAS ${target})
 
 
+# Create API export header
+generate_export_header(${target}
+    EXPORT_FILE_NAME  ${export_file}
+    EXPORT_MACRO_NAME ${export_macro}
+)
+generate_template_export_header(${target}
+    ${target_id}
+    ${template_export_file}
+)
+
+#
 # Project options
 #
 
@@ -67,6 +86,8 @@ set_target_properties(${target}
     PROPERTIES
     ${DEFAULT_PROJECT_OPTIONS}
     FOLDER "${IDE_FOLDER}"
+    VERSION ${META_VERSION}
+    SOVERSION ${META_VERSION_MAJOR}
 )
 
 
@@ -108,7 +129,6 @@ target_link_libraries(${target}
 #
 # Compile definitions
 #
-
 target_compile_definitions(${target}
     PRIVATE
 
@@ -158,6 +178,7 @@ perform_health_checks(
 )
 
 generate_coverage_report(${target})
+
 
 #
 # Deployment

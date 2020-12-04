@@ -2,11 +2,12 @@
 #define PINGER_HPP
 
 #include <lc3.hpp>
+#include <lc3_pinger/lc3_pinger_api.h>
 
 #define PINGER_MAJOR_VERSION 1
 #define PINGER_MINOR_VERSION 6
 
-class LC3_API PingerPlugin : public Plugin
+class PingerPlugin : public Plugin
 {
 public:
     PingerPlugin(unsigned short ping_interval, unsigned int prio, unsigned char vec);
@@ -18,8 +19,11 @@ private:
     unsigned char int_vector;
 };
 
-extern "C" LC3_API Plugin* create_plugin(const PluginParams& params);
-extern "C" LC3_API void destroy_plugin(Plugin* ptr);
+extern "C"
+{
+    LC3_PINGER_API Plugin* create_plugin(const PluginParams& params);
+    LC3_PINGER_API void destroy_plugin(Plugin* ptr);
+}
 
 #endif
 

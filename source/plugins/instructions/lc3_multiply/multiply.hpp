@@ -2,6 +2,7 @@
 #define MULTIPLY_HPP
 
 #include <lc3.hpp>
+#include <lc3_multiply/lc3_multiply_api.h>
 
 #define MULTIPLY_MAJOR_VERSION 1
 #define MULTIPLY_MINOR_VERSION 6
@@ -30,8 +31,11 @@ enum MUL_DISASSEMBLE_CASES
     MUL_TWO_REGS = 6,	// MUL RX, RY, RZ
 };
 
-extern "C" Plugin* create_plugin(const PluginParams& params);
-extern "C" void destroy_plugin(Plugin* ptr);
+extern "C"
+{
+    LC3_MULTIPLY_API Plugin* create_plugin(const PluginParams& params);
+    LC3_MULTIPLY_API void destroy_plugin(Plugin* ptr);
+}
 
 #endif
 

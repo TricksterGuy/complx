@@ -1,3 +1,3 @@
-add_subdirectory(bwlcd)
-add_subdirectory(colorlcd)
-add_subdirectory(pinger)
+add_subdirectory(lc3_bwlcd)
+add_subdirectory(lc3_colorlcd)
+add_subdirectory(lc3_pinger)

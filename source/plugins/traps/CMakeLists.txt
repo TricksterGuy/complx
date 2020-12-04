@@ -1,1 +1,1 @@
-add_subdirectory(udiv)
+add_subdirectory(lc3_udiv)

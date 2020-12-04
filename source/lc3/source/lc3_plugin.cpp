@@ -85,33 +85,23 @@ void lc3_install_plugin(lc3_state& state, const std::string& filename, const std
 #endif
     }
 
-    printf("plugin_path: %s %s\n", full_path.c_str(), PLUGIN_INSTALL_DIR.c_str());
     void *hndl = dlopen(full_path.c_str(), RTLD_NOW);
     // Failed to load.
     if(hndl == nullptr)
-    {
-        printf("error: %s\n", dlerror());
         throw LC3PluginException(filename, full_path, dlerror());
-    }
 
     PluginCreateFunc mkr = (PluginCreateFunc) dlsym(hndl, "create_plugin");
     PluginDestroyFunc dstry = (PluginDestroyFunc) dlsym(hndl, "destroy_plugin");
 
     // If failed to follow format (needs a creation and destruction function) not valid
     if (mkr == nullptr || dstry == nullptr)
-    {
-        printf("error: %s. Plugin does not have correct creation/destruction functions or not found.\n", dlerror());
         throw LC3PluginException(filename, full_path, "Plugin does not have correct creation/destruction functions or not found.");
-    }
 
     Plugin* plugin = mkr(PluginParams(filename, full_path, params));
 
     // If failed to create reject
     if (plugin == nullptr)
-    {
-        printf("Could not instantiate plugin\n");
         throw LC3PluginException(filename, full_path, "Could not instantiate plugin");
-    }
 
     if (state.in_lc3test && !plugin->AvailableInLC3Test())
     {
@@ -134,7 +124,6 @@ void lc3_install_plugin(lc3_state& state, const std::string& filename, const std
         stream << " was ";
         stream << plugin->GetMajorVersion() << "." << plugin->GetMinorVersion();
 
-        printf("%s\n", stream.str().c_str());
         throw LC3PluginException(filename, full_path, stream.str());
     }
 

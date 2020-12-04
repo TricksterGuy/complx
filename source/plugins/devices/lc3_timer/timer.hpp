@@ -4,6 +4,7 @@
 #include <ctime>
 
 #include <lc3.hpp>
+#include <lc3_timer/lc3_timer_api.h>
 
 #define TIMER_MAJOR_VERSION 1
 #define TIMER_MINOR_VERSION 6
@@ -20,8 +21,11 @@ public:
     time_t time;
 };
 
-extern "C" Plugin* create_plugin(const std::map<std::string, std::string>& params);
-extern "C" void destroy_plugin(Plugin* ptr);
+extern "C"
+{
+    LC3_TIMER_API Plugin* create_plugin(const PluginParams& params);
+    LC3_TIMER_API void destroy_plugin(Plugin* ptr);
+}
 
 #endif
 

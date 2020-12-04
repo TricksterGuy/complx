@@ -2,16 +2,7 @@
 # Options
 #
 
-option(OPTION_ENABLE_BWLCD_PLUGIN "Enable the Black White LCD Plugin" ON)
-
-
-#
-# External dependencies
-#
-
-set(wxWidgets_USE_LIBS core base)
-find_package(wxWidgets)
-include(${wxWidgets_USE_FILE})
+option(OPTION_ENABLE_MULTIPLY_PLUGIN "Enable the Multiply Instruction Plugin" ON)
 
 
 #
@@ -19,14 +10,19 @@ include(${wxWidgets_USE_FILE})
 #
 
 # Target name
-set(target lc3_bwlcd)
+set(target lc3_multiply)
+
+# Set API export file and macro
+string(MAKE_C_IDENTIFIER ${target} target_id)
+string(TOUPPER ${target_id} target_id)
+set(feature_file         "include/${target}/${target}_features.h")
+set(export_file          "include/${target}/${target}_export.h")
+set(template_export_file "include/${target}/${target}_api.h")
+set(export_macro         "${target_id}_API")
 
 # Exit here if required dependencies are not met
-if (NOT OPTION_ENABLE_BWLCD_PLUGIN)
+if (NOT OPTION_ENABLE_MULTIPLY_PLUGIN)
     message(STATUS "Plugin ${target} disabled")
-    return()
-elseif (NOT wxWidgets_FOUND)
-    message(STATUS "Plugin ${target} skipped: wxWidgets not found")
     return()
 else()
     message(STATUS "Plugin ${target}")
@@ -41,13 +37,11 @@ set(include_path "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(source_path  "${CMAKE_CURRENT_SOURCE_DIR}/source")
 
 set(headers
-    bwlcd.hpp
-    bwlcdgui.h
+    multiply.hpp
 )
 
 set(sources
-    bwlcd.cpp
-    bwlcdgui.cpp
+    multiply.cpp
 )
 
 # Group source files
@@ -74,6 +68,17 @@ add_library(${target}
 add_library(${META_PROJECT_NAME}::${target} ALIAS ${target})
 
 
+# Create API export header
+generate_export_header(${target}
+    EXPORT_FILE_NAME  ${export_file}
+    EXPORT_MACRO_NAME ${export_macro}
+)
+generate_template_export_header(${target}
+    ${target_id}
+    ${template_export_file}
+)
+
+#
 # Project options
 #
 
@@ -81,6 +86,8 @@ set_target_properties(${target}
     PROPERTIES
     ${DEFAULT_PROJECT_OPTIONS}
     FOLDER "${IDE_FOLDER}"
+    VERSION ${META_VERSION}
+    SOVERSION ${META_VERSION_MAJOR}
 )
 
 
@@ -93,7 +100,6 @@ target_include_directories(${target}
     ${PROJECT_BINARY_DIR}/source/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_BINARY_DIR}/include
-    ${wxWidgets_INCLUDE_DIRS}
 
     PUBLIC
     ${DEFAULT_INCLUDE_DIRECTORIES}
@@ -114,7 +120,6 @@ target_link_libraries(${target}
 
     PUBLIC
     ${DEFAULT_LIBRARIES}
-    ${wxWidgets_LIBRARIES}
     ${META_PROJECT_NAME}::lc3
 
     INTERFACE
@@ -124,7 +129,6 @@ target_link_libraries(${target}
 #
 # Compile definitions
 #
-
 target_compile_definitions(${target}
     PRIVATE
 
@@ -174,6 +178,7 @@ perform_health_checks(
 )
 
 generate_coverage_report(${target})
+
 
 #
 # Deployment

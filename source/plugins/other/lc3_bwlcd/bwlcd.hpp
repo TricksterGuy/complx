@@ -2,6 +2,7 @@
 #define BWLCD_HPP
 
 #include <lc3.hpp>
+#include <lc3_bwlcd/lc3_bwlcd_api.h>
 
 #include <wx/wx.h>
 
@@ -28,7 +29,7 @@ private:
     unsigned int on;
 };
 
-class LC3_API BWLCDPlugin : public wxEvtHandler, public Plugin
+class BWLCDPlugin : public wxEvtHandler, public Plugin
 {
 public:
     BWLCDPlugin(unsigned short width, unsigned short height, unsigned short initaddr, unsigned short startaddr, unsigned int offcolor = 0xa0b0a0, unsigned int oncolor = 0x606860);
@@ -50,8 +51,11 @@ private:
 
 };
 
-extern "C" LC3_API Plugin* create_plugin(const PluginParams& params);
-extern "C" LC3_API void destroy_plugin(Plugin* ptr);
+extern "C"
+{
+    LC3_BWLCD_API Plugin* create_plugin(const PluginParams& params);
+    LC3_BWLCD_API void destroy_plugin(Plugin* ptr);
+}
 
 #endif
 

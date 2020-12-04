@@ -2,6 +2,7 @@
 #define COLORLCD_HPP
 
 #include <lc3.hpp>
+#include <lc3_colorlcd/lc3_colorlcd_api.h>
 
 #include <wx/wx.h>
 #include <wx/timer.h>
@@ -28,7 +29,7 @@ private:
     unsigned short startaddr;
 };
 
-class LC3_API ColorLCDPlugin : public wxEvtHandler, public Plugin
+class ColorLCDPlugin : public wxEvtHandler, public Plugin
 {
 public:
     ColorLCDPlugin(unsigned short width, unsigned short height, unsigned short initaddr, unsigned short startaddr);
@@ -48,7 +49,10 @@ private:
 
 };
 
-extern "C" LC3_API Plugin* create_plugin(const PluginParams& params);
-extern "C" LC3_API void destroy_plugin(Plugin* ptr);
+extern "C"
+{
+    LC3_COLORLCD_API Plugin* create_plugin(const PluginParams& params);
+    LC3_COLORLCD_API void destroy_plugin(Plugin* ptr);
+}
 
 #endif

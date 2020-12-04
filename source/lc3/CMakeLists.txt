@@ -3,8 +3,6 @@
 # External dependencies
 #
 
-# find_package(THIRDPARTY REQUIRED)
-
 
 #
 # Library name and options
@@ -172,7 +170,6 @@ target_link_libraries(${target}
 #
 # Compile definitions
 #
-message("${INSTALL_SHARED}")
 target_compile_definitions(${target}
     PRIVATE
 
