@@ -7,9 +7,6 @@ jobs:
       compiler: gcc
     - os: linux
       compiler: clang
-before_install:
-  - sudo apt update -qq
-  - sudo apt install -y libboost-test-dev libboost-serialization-dev
 script:
   - ./configure test
   - ./configure test
@@ -17,3 +14,10 @@ script:
   - sudo make install
   - sudo ldconfig
   - make test
+addons:
+  apt:
+    update: true
+    packages:
+    - cmake
+    - libboost-test-dev
+    - libboost-serialization-dev
