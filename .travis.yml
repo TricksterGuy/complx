@@ -1,6 +1,6 @@
-sudo: required
 dist: focal
 language: cpp
+os: linux
 jobs:
   include:
     - os: linux
@@ -8,8 +8,8 @@ jobs:
     - os: linux
       compiler: clang
 before_install:
-  - apt update -qq
-  - apt install -y libboost-test-dev libboost-serialization-dev
+  - sudo apt update -qq
+  - sudo apt install -y libboost-test-dev libboost-serialization-dev
 script:
   - ./configure test
   - ./configure test
