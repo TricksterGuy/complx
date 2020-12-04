@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cerrno>
 #include <cmath>
+#include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <sstream>
@@ -153,7 +154,7 @@ std::string process_str(const std::string& str, const LC3AssembleContext& contex
                 /// \777 in a C program compiles normally, but with a warning.
                 if (parsed_num > 0xFF)
                     WARN(LC3AssembleException("", str, MALFORMED_STRING, context.lineno));
-                out << ((char)parsed_num);
+                out << (static_cast<char>(parsed_num));
                 break;
             default:
                 THROW(LC3AssembleException("", str, MALFORMED_STRING, context.lineno));
@@ -342,7 +343,7 @@ int get_imm(const std::string& value, int bits, bool is_num, bool is_signed, con
         std::stringstream gbitstr;
 
         ebitstr << bits;
-        gbitstr << (unsigned int)(log2(abs(d)) + 2);
+        gbitstr << static_cast<int>(log2(std::abs(d)) + 2);
         params.push_back(value);
         params.push_back(ebitstr.str());
         params.push_back(gbitstr.str());
@@ -421,7 +422,7 @@ short check_value(long value, int bits, bool is_num, bool signed_check, const LC
         ebitstr << bits;
         if (!value) value++;
         // Calculate number of bits remember this calculation is for 2's complement
-        gbitstr << (unsigned int)(log2(abs(value)) + 2);
+        gbitstr << static_cast<int>(log2(std::abs(value)) + 2);
         params.push_back(context.tokens[context.tokens.size() - 1]);
         params.push_back(ebitstr.str());
         params.push_back(gbitstr.str());
@@ -441,7 +442,7 @@ short check_value(long value, int bits, bool is_num, bool signed_check, const LC
 
         if (!value) value++;
 
-        gbitstr << (unsigned int)(log2(abs(value)) + 1);
+        gbitstr << static_cast<int>(log2(std::abs(value)) + 1);
         params.push_back(context.tokens[context.tokens.size() - 1]);
         params.push_back(ebitstr.str());
         params.push_back(gbitstr.str());
