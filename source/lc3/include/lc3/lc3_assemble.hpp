@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "lc3/lc3.hpp"
-#include "lc3/lc3_parser.hpp"
 
 /** Code ranges present in the .asm file when assembled.
   * Each .orig .end pair will translate into an object of this type.

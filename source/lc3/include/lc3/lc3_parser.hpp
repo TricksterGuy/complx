@@ -7,8 +7,6 @@
 #include "lc3/lc3.hpp"
 #include "lc3/lc3_assemble.hpp"
 
-class LC3AssembleContext;
-
 #define THROW(exception) do \
 { \
     if (context.options.multiple_errors) \
