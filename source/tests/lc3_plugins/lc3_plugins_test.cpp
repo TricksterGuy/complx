@@ -102,7 +102,7 @@ BOOST_FIXTURE_TEST_CASE(TestInstructionPluginDisassemble, LC3PluginTest)
     };
 
     std::stringstream file(asm_file);
-    /*BOOST_REQUIRE_NO_THROW(*/lc3_assemble(state, file, options)/*)*/;
+    BOOST_REQUIRE_NO_THROW(lc3_assemble(state, file, options));
 
     BOOST_REQUIRE(state.instructionPlugin != nullptr);
 

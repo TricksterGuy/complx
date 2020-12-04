@@ -77,15 +77,10 @@ void lc3_install_plugin(lc3_state& state, const std::string& filename, const std
     std::string full_path = realfilename;
 
     if (!PLUGIN_INSTALL_DIR.empty())
-    {
-#ifdef _WIN32
-        full_path = PLUGIN_INSTALL_DIR + "\\" + realfilename;
-#else
         full_path = PLUGIN_INSTALL_DIR + "/" + realfilename;
-#endif
-    }
 
     void *hndl = dlopen(full_path.c_str(), RTLD_NOW);
+
     // Failed to load.
     if(hndl == nullptr)
         throw LC3PluginException(filename, full_path, dlerror());
