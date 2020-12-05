@@ -7,6 +7,8 @@ jobs:
       compiler: gcc
     - os: linux
       compiler: clang
+    - os: macosx
+      compiler: clang
 script:
   - ./configure test
   - ./configure test
@@ -21,3 +23,8 @@ addons:
     - cmake
     - libboost-test-dev
     - libboost-serialization-dev
+  homebrew:
+    packages:
+    - cmake
+    - pkg-config
+    - boost
