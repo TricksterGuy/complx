@@ -12,6 +12,13 @@
 #error "-DSHARED_LIBRARY_SUFFIX must be set to the suffix of dynamic libraries on this system."
 #endif
 
+#ifdef NDEBUG
+static std::string FILENAME_SUFFIX = "";
+#else
+static std::string FILENAME_SUFFIX = "d";
+#endif
+
+
 #ifdef PLUGIN_INSTALL_PREFIX
 static std::string PLUGIN_INSTALL_DIR = PLUGIN_INSTALL_PREFIX;
 #else
@@ -73,7 +80,7 @@ std::list<RLEColorEntry> InstructionPlugin::GetInstructionColoring(unsigned shor
 
 void lc3_install_plugin(lc3_state& state, const std::string& filename, const std::map<std::string, std::string>& params)
 {
-    std::string realfilename = "lib" + filename + SHARED_LIBRARY_SUFFIX;
+    std::string realfilename = "lib" + filename + FILENAME_SUFFIX + SHARED_LIBRARY_SUFFIX;
     std::string full_path = realfilename;
 
     if (!PLUGIN_INSTALL_DIR.empty())
