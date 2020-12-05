@@ -7,7 +7,7 @@
 #define UDIV_MAJOR_VERSION 1
 #define UDIV_MINOR_VERSION 6
 
-class UdivPlugin : public TrapFunctionPlugin
+class LC3_UDIV_API UdivPlugin : public TrapFunctionPlugin
 {
 public:
     UdivPlugin(unsigned char vector) : TrapFunctionPlugin(UDIV_MAJOR_VERSION, UDIV_MINOR_VERSION, "Division and Modulus Trap", vector) {}

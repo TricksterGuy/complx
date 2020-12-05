@@ -29,7 +29,7 @@ private:
     unsigned short startaddr;
 };
 
-class ColorLCDPlugin : public wxEvtHandler, public Plugin
+class LC3_COLORLCD_API ColorLCDPlugin : public wxEvtHandler, public Plugin
 {
 public:
     ColorLCDPlugin(unsigned short width, unsigned short height, unsigned short initaddr, unsigned short startaddr);

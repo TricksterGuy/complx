@@ -9,7 +9,7 @@
 #define RANDOM_MAJOR_VERSION 1
 #define RANDOM_MINOR_VERSION 6
 
-class RandomPlugin : public Plugin
+class LC3_RANDOM_API RandomPlugin : public Plugin
 {
 public:
     RandomPlugin(unsigned short address, unsigned int seed);

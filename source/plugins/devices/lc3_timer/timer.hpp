@@ -10,7 +10,7 @@
 #define TIMER_MINOR_VERSION 6
 
 ///TODO complete this plugin
-class TimerPlugin : public Plugin
+class LC3_TIMER_API TimerPlugin : public Plugin
 {
 public:
     TimerPlugin(unsigned short address, unsigned char vector);

@@ -7,7 +7,7 @@
 #define MULTIPLY_MAJOR_VERSION 1
 #define MULTIPLY_MINOR_VERSION 6
 
-class MultiplyPlugin : public InstructionPlugin
+class LC3_MULTIPLY_API MultiplyPlugin : public InstructionPlugin
 {
 public:
     MultiplyPlugin() : InstructionPlugin(MULTIPLY_MAJOR_VERSION, MULTIPLY_MINOR_VERSION, "Multiplication Plugin") {}

@@ -7,7 +7,7 @@
 #define PINGER_MAJOR_VERSION 1
 #define PINGER_MINOR_VERSION 6
 
-class PingerPlugin : public Plugin
+class LC3_PINGER_API PingerPlugin : public Plugin
 {
 public:
     PingerPlugin(unsigned short ping_interval, unsigned int prio, unsigned char vec);

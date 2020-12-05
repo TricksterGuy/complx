@@ -8,7 +8,7 @@
 #define SECOND_TIMER_MINOR_VERSION 6
 
 ///TODO complete this plugin
-class SecondTimerPlugin : public Plugin
+class LC3_SECOND_TIMER_API SecondTimerPlugin : public Plugin
 {
 public:
     SecondTimerPlugin(unsigned short vector);

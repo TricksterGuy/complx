@@ -29,7 +29,7 @@ private:
     unsigned int on;
 };
 
-class BWLCDPlugin : public wxEvtHandler, public Plugin
+class LC3_BWLCD_API BWLCDPlugin : public wxEvtHandler, public Plugin
 {
 public:
     BWLCDPlugin(unsigned short width, unsigned short height, unsigned short initaddr, unsigned short startaddr, unsigned int offcolor = 0xa0b0a0, unsigned int oncolor = 0x606860);
