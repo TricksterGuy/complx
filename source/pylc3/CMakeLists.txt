@@ -1,3 +1,10 @@
+option(OPTION_ENABLE_PYLC3 OFF)
+
+if (NOT OPTION_ENABLE_PYL3)
+  message(STATUS "Lib pylc3 disabled")
+  return()
+endif()
+
 include_directories(${complx-tools_SOURCE_DIR}/lc3test)
 include_directories(${complx-tools_SOURCE_DIR}/liblc3)
 include_directories(${complx-tools_SOURCE_DIR}/logging)
