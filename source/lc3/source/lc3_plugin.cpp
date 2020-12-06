@@ -86,7 +86,7 @@ void lc3_install_plugin(lc3_state& state, const std::string& filename, const std
     if (!PLUGIN_INSTALL_DIR.empty())
         full_path = PLUGIN_INSTALL_DIR + "/" + realfilename;
 
-    void *hndl = dlopen(full_path.c_str(), RTLD_NOW);
+    void *hndl = dlopen(full_path.c_str(), RTLD_NOW | RTLD_GLOBAL);
 
     // Failed to load.
     if(hndl == nullptr)
