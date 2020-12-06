@@ -1,6 +1,7 @@
 #define BOOST_TEST_MODULE LC3_Test_Suite
 #include <boost/test/unit_test.hpp>
 #include <iostream>
+#include <istream>
 #include <fstream>
 #include <vector>
 #include <lc3.hpp>

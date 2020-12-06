@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <dlfcn.h>
 #include <iostream>
+#include <istream>
 
 #include "lc3/lc3_debug.hpp"
 #include "lc3/lc3_execute.hpp"

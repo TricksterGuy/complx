@@ -1,6 +1,7 @@
 #ifndef LC3_PARSER_HPP
 #define LC3_PARSER_HPP
 
+#include <exception>
 #include <string>
 #include <vector>
 

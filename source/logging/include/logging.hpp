@@ -5,6 +5,7 @@
 #include <cstdarg>
 #include <functional>
 #include <iostream>
+#include <istream>
 #include <memory>
 
 enum class LogLevel

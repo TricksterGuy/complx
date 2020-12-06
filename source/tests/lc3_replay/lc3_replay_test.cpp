@@ -1,12 +1,14 @@
 #define BOOST_TEST_MODULE LC3_Replay_Test
-#include <boost/test/unit_test.hpp>
-
-#include <iostream>
-#include <fstream>
-#include <vector>
 
 #include <lc3.hpp>
 #include <lc3_replay.hpp>
+
+#include <boost/test/unit_test.hpp>
+
+#include <iostream>
+#include <istream>
+#include <fstream>
+#include <vector>
 
 void split(const std::string& s, char delimiter, std::vector<std::string>& tokens)
 {

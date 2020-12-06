@@ -1,7 +1,7 @@
-//#define BOOST_TEST_MODULE AssembleTest
 #include <boost/test/unit_test.hpp>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <istream>
 #include <sstream>
 #include <vector>
 #include <lc3.hpp>

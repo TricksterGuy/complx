@@ -8,6 +8,7 @@
 #include <cstring>
 #include <iomanip>
 #include <iostream>
+#include <istream>
 #include <sstream>
 
 #ifdef __linux__

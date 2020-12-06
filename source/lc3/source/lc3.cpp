@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <istream>
 #include <sstream>
 
 #include "lc3/lc3_execute.hpp"

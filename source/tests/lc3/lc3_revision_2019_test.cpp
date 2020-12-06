@@ -1,8 +1,9 @@
+#include <lc3.hpp>
 #include <boost/test/unit_test.hpp>
 #include <iostream>
+#include <istream>
 #include <fstream>
 #include <vector>
-#include <lc3.hpp>
 
 #define IS_EXCEPTION(type) [](const LC3AssembleException& e) {/*fprintf(stderr, "Exception: %s\n", e.what().c_str()); */return e.get_id() == type;}
 
