@@ -12,7 +12,7 @@ std::string time_to_string(const std::chrono::system_clock::time_point& time_poi
     char buffer[64];
     strftime(buffer, 64, "%H:%M:%S", localtime(&time_secs));
     char currentTime[128] = "";
-    snprintf(currentTime, 128, "%s.%03d", buffer, static_cast<char>(ms.count()));
+    snprintf(currentTime, 128, "%s.%03d", buffer, static_cast<unsigned char>(ms.count()));
 
     return currentTime;
 }
@@ -45,7 +45,6 @@ inline const char* GetLogAbbrev(LogLevel level)
 
 inline const char* GetLogColor(LogLevel level)
 {
-#ifndef _WIN32
     switch(level)
     {
         case LogLevel::FATAL:
@@ -61,20 +60,11 @@ inline const char* GetLogColor(LogLevel level)
         default:
             return "";
     }
-#else
-    // Unused parameter
-    (void) level;
-    return "";
-#endif
 }
 
 inline const char* EndLogColor()
 {
-#ifndef _WIN32
     return "\033[0m";
-#else
-    return "";
-#endif
 }
 
 void AbstractLogger::Log(LogLevel level, const char* format, va_list ap)
@@ -86,7 +76,11 @@ void AbstractLogger::Log(LogLevel level, const char* format, va_list ap)
     {
         std::ostream& stream = out.get();
         std::chrono::time_point<std::chrono::system_clock> time_now(std::chrono::system_clock::now());
-        stream << GetLogColor(level) << GetLogAbbrev(level) << "[" << time_to_string(time_now) << "]" << EndLogColor();
+        if (log_color)
+            stream << GetLogColor(level);
+        stream << GetLogAbbrev(level) << "[" << time_to_string(time_now) << "]";
+        if (log_color)
+            stream << EndLogColor();
     }
 
     DoLog(level, format, ap);

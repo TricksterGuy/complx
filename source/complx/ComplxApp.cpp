@@ -26,6 +26,7 @@ bool ComplxApp::OnInit()
 
     logger->SetLogTarget(initial_logging_stream);
     logger->SetLogLevel(LogLevel::VERBOSE);
+    logger->SetLogColor(false);
 
     EventLog l(__func__);
 
