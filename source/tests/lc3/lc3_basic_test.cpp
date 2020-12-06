@@ -238,13 +238,11 @@ BOOST_FIXTURE_TEST_CASE(MalformedInstructionDisassemble, LC3BasicTest)
     for (unsigned int i = 0; i < malformed_instructions.size(); i++)
     {
         BOOST_TEST_MESSAGE("data = x" << std::hex << malformed_instructions[i]);
-        std::string disassemble = lc3_disassemble(state, malformed_instructions[i], -1, 0);
-        BOOST_CHECK_EQUAL(disassemble, answers[i]);
+        BOOST_CHECK_EQUAL(lc3_disassemble(state, malformed_instructions[i], -1, 0), answers[i]);
     }
 
     // This should not be considered malformed
-    std::string disassemble = lc3_disassemble(state, 0x0E00, -1, 0);
-    BOOST_CHECK_EQUAL(disassemble, "NOP");
+    BOOST_CHECK_EQUAL(lc3_disassemble(state, 0x0E00, -1, 0), "NOP");
 }
 
 
@@ -1279,7 +1277,7 @@ BOOST_FIXTURE_TEST_CASE(TestTrueTraps, LC3BasicTest)
         options.multiple_errors = false;
         lc3_assemble(state, file, options);
     }
-    catch (LC3AssembleException e)
+    catch (const LC3AssembleException& e)
     {
         BOOST_FAIL(e.what());
     }
@@ -1612,7 +1610,7 @@ BOOST_FIXTURE_TEST_CASE(InstructionBasicAssembleTest, LC3BasicTest)
             //BOOST_TEST_MESSAGE(instruction.c_str());
             BOOST_CHECK_EQUAL(assembled,  answers[i]);
         }
-        catch (LC3AssembleException e)
+        catch (const LC3AssembleException& e)
         {
             BOOST_FAIL(e.what());
         }
@@ -1638,7 +1636,7 @@ BOOST_FIXTURE_TEST_CASE(InstructionAssembleTest, LC3BasicTest)
         options.multiple_errors = false;
         lc3_assemble(state, file, options);
     }
-    catch (LC3AssembleException e)
+    catch (const LC3AssembleException& e)
     {
         BOOST_FAIL(e.what());
     }
@@ -1692,7 +1690,7 @@ BOOST_FIXTURE_TEST_CASE(TestCustomTrapV0, LC3BasicTest)
         options.multiple_errors = false;
         lc3_assemble(state, file, options);
     }
-    catch (LC3AssembleException e)
+    catch (const LC3AssembleException& e)
     {
         BOOST_FAIL(e.what());
     }
@@ -1804,7 +1802,7 @@ BOOST_FIXTURE_TEST_CASE(TestCustomMultiTrapV0, LC3BasicTest)
         options.multiple_errors = false;
         lc3_assemble(state, file, options);
     }
-    catch (LC3AssembleException e)
+    catch (const LC3AssembleException& e)
     {
         BOOST_FAIL(e.what());
     }

@@ -14,7 +14,7 @@ class set_width;
 class BinaryStreamReader
 {
 public:
-    BinaryStreamReader(std::istream& _stream, uint32_t _flags = READ_SIZES) : stream(_stream), flags(_flags), width(0) {}
+    explicit BinaryStreamReader(std::istream& _stream, uint32_t _flags = READ_SIZES) : stream(_stream), flags(_flags), width(0) {}
     BinaryStreamReader& operator>>(bool& val);
     BinaryStreamReader& operator>>(char& val);
     BinaryStreamReader& operator>>(unsigned char& val);

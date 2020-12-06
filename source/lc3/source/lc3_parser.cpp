@@ -604,7 +604,6 @@ bool is_register_or_imm(const std::string& token)
         //if ((isalpha(token[0]) && token.size() > 1 && token[0] == 'b' && token[0] == 'x') || token[0] == '#')
         if (token.size() > 1 && (token[0] == 'b' || token[0] == 'x'))
         {
-            number = true;
             if (token[0] == 'x')
             {
                 for (unsigned int i = 1; i < token.size(); i++)

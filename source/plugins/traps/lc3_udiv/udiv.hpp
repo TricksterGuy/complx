@@ -10,7 +10,7 @@
 class LC3_UDIV_API UdivPlugin : public TrapFunctionPlugin
 {
 public:
-    UdivPlugin(unsigned char vector) : TrapFunctionPlugin(UDIV_MAJOR_VERSION, UDIV_MINOR_VERSION, "Division and Modulus Trap", vector) {}
+    explicit UdivPlugin(unsigned char vector) : TrapFunctionPlugin(UDIV_MAJOR_VERSION, UDIV_MINOR_VERSION, "Division and Modulus Trap", vector) {}
     std::string GetTrapName() const override {return "UDIV";}
     void OnExecute(lc3_state& state, lc3_state_change& changes) override;
 };

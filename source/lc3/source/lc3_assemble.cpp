@@ -725,8 +725,8 @@ symbolcheckdone:
                 std::string processed = process_str(rest, context);
                 int size = processed.size() + 1;
 
-                for (int i = 0; i < size - 1; i++)
-                    state.mem[context.address + i] = processed[i];
+                for (int j = 0; j < size - 1; j++)
+                    state.mem[context.address + j] = processed[j];
                 state.mem[context.address + size - 1] = 0;
 
                 context.address += size;
@@ -1210,7 +1210,6 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
             unsigned short address;
             std::string name = "";
             std::string params_str = "";
-            std::vector<std::string> params;
 
             std::vector<std::string> pieces;
             tokenize(debug_params, pieces, " \t");
@@ -1241,8 +1240,9 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
                 lc3_add_subroutine(state, address, name, atoi(params_str.c_str()));
             else
             {
-                tokenize(params_str, params, ",");
-                lc3_add_subroutine(state, address, name, params);
+                std::vector<std::string> subro_params;
+                tokenize(params_str, subro_params, ",");
+                lc3_add_subroutine(state, address, name, subro_params);
             }
         }
     }

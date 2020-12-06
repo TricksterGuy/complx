@@ -347,7 +347,7 @@ std::string lc3_smart_disassemble(lc3_state& state, unsigned short instruction, 
             // If no flags are on or offset == 0 its a NOP
             if (!(instr.br.n || instr.br.z || instr.br.p) || offset == 0)
             {
-                if (!(instr.br.n || instr.br.z || instr.br.p) && offset <= 256)
+                if (!(instr.br.n || instr.br.z || instr.br.p)/* && offset <= 256*/)
                 {
                     if (isprint(offset))
                     {

@@ -408,7 +408,7 @@ struct LC3_API lc3_subroutine_call
 /** Record of active subroutine call info for each call made */
 struct LC3_API lc3_subroutine_call_info
 {
-	lc3_subroutine_call_info() : regs(8) {}
+	lc3_subroutine_call_info() : address(0), r6(0), regs(8) {}
     unsigned short address;
     unsigned short r6;
     std::vector<unsigned short> params;

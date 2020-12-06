@@ -38,7 +38,7 @@ protected:
 class Logger : public AbstractLogger
 {
 public:
-    virtual void DoLog(LogLevel level, const char* format, va_list ap);
+    void DoLog(LogLevel level, const char* format, va_list ap) override;
 };
 
 extern std::unique_ptr<AbstractLogger> logger;

@@ -446,7 +446,7 @@ int EvaluateOperand(string token, int& error)
     if (token[0] == 'x' || token[0] == 'X')
     {
         std::string hex = "0" + token;
-        int d = (int)strtol(hex.c_str(), &errstr, 0);
+        d = (int)strtol(hex.c_str(), &errstr, 0);
         if (!(*errstr)) return d;
     }
 
