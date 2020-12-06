@@ -544,7 +544,7 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
 
         if (state.lc3_version > 0)
         {
-            short psr = (short)((state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p);
+            short psr = (state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p;
             // If we are in user mode we must switch usp/ssp
             if (state.privilege)
             {
@@ -724,7 +724,7 @@ short lc3_mem_read(lc3_state& state, unsigned short addr, bool privileged)
             /// Unless the code polls from both status registers at the same time...
             if (lc3_random(state) % 4 < 1)
             {
-                state.mem[DEV_DSR] = (short)(1 << 15);
+                state.mem[DEV_DSR] = static_cast<short>(1 << 15);
             }
             break;
         case DEV_DDR:
@@ -734,7 +734,7 @@ short lc3_mem_read(lc3_state& state, unsigned short addr, bool privileged)
         case DEV_PSR:
             if (state.lc3_version > 0)
             {
-                state.mem[DEV_PSR] = (short)((state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p);
+                state.mem[DEV_PSR] = (state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p;
             } else
             {
                 if (addr >= 0xFE00U && state.address_plugins.find(addr) != state.address_plugins.end())
@@ -745,7 +745,7 @@ short lc3_mem_read(lc3_state& state, unsigned short addr, bool privileged)
             }
             break;
         case DEV_MCR:
-            state.mem[DEV_MCR] = (short)(1 << 15);
+            state.mem[DEV_MCR] = static_cast<short>(1 << 15);
             break;
         default:
             // Hey does a plugin handle this address

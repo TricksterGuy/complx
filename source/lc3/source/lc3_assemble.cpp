@@ -741,7 +741,6 @@ symbolcheckdone:
             {
                 unsigned short locs = get_imm(param, 16, true, false, context);
                 // blkw should not emit anything to memory
-                //memset(state.mem + context.address, 0, locs * sizeof(short));
                 context.address += locs;
             }
         }
@@ -794,13 +793,13 @@ bool lc3_assemble_object_writer(const std::string& filename, const lc3_state& st
         if (range.size == 0) continue;
 
         short lol = htons(range.location);
-        obj.write((char*)(&lol), sizeof(short));
+        obj.write(reinterpret_cast<char*>(&lol), sizeof(short));
         lol = htons(range.size);
-        obj.write((char*)(&lol), sizeof(short));
+        obj.write(reinterpret_cast<char*>(&lol), sizeof(short));
         for (unsigned int j = 0; j < range.size; j++)
         {
             lol = htons(state.mem[range.location + j]);
-            obj.write((char*)(&lol), sizeof(short));
+            obj.write(reinterpret_cast<char*>(&lol), sizeof(short));
         }
     }
 

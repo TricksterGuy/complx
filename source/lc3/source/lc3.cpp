@@ -630,7 +630,7 @@ int lc3_load(lc3_state& state, std::istream& file, int (*reader)(std::istream&))
 
         for (unsigned short i = 0; i < addr_size; i++)
             // Put it in memory
-            state.mem[addr_start + i] = (short)(reader(file) & 0xFFFF);
+            state.mem[addr_start + i] = static_cast<short>(reader(file));
 
         read_data = reader(file);
     }
@@ -657,7 +657,7 @@ int lc3_reader_obj(std::istream& file)
 {
     unsigned short data;
     // Read two bytes
-    file.read((char*) &data, sizeof(data));
+    file.read(reinterpret_cast<char*>(&data), sizeof(data));
     if (file.eof()) return -1;
     // Convert to LSB
     return ((data >> 8) & 0xFF) | ((data & 0xFF) << 8);

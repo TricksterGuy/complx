@@ -90,7 +90,7 @@ bool PluginParams::has_key(const std::string& key) const
 
 std::string PluginParams::get_value(const std::string& key) const
 {
-    std::map<std::string, std::string>::const_iterator x = params.find(key);
+    auto x = params.find(key);
 
     if (x == params.end())
         return "";

@@ -450,7 +450,7 @@ short check_value(long value, int bits, bool is_num, bool signed_check, const LC
         THROW(LC3AssembleException(context.line, params, is_num ? NUMBER_OVERFLOW : OFFSET_OVERFLOW, context.lineno));
     }
 
-    return (short) (value & ((1 << bits) - 1));
+    return value & ((1 << bits) - 1);
 }
 
 /** get_cc_flags
@@ -464,19 +464,19 @@ void get_cc_flags(const std::string& opcode, bool& n, bool& z, bool& p, const LC
 
     n = z = p = false;
 
-    if (flags == std::string("N"))
+    if (flags == "N")
         n = true;
-    else if (flags == std::string("NZ"))
+    else if (flags == "NZ")
         n = z = true;
-    else if (flags == std::string("NP"))
+    else if (flags == "NP")
         n = p = true;
-    else if (flags == std::string("NZP") || flags == std::string(""))
+    else if (flags.empty() || flags == "NZP")
         n = z = p = true;
-    else if (flags == std::string("Z"))
+    else if (flags == "Z")
         z = true;
-    else if (flags == std::string("ZP"))
+    else if (flags == "ZP")
         z = p = true;
-    else if (flags == std::string("P"))
+    else if (flags == "P")
         p = true;
     else
     {
