@@ -3,6 +3,7 @@
 
 #include <lc3.hpp>
 
+#include <array>
 #include <vector>
 
 #include "MemoryView.hpp"
