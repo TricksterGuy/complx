@@ -20,7 +20,7 @@ Plugin* create_plugin(const PluginParams& params)
     params.read_bool("randomseed", random_seed);
 
     if (random_seed)
-        seed = time(NULL);
+        seed = time(nullptr);
 
     instance.reset(new RandomPlugin(address, seed));
 

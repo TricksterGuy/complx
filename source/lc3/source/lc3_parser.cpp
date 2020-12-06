@@ -122,7 +122,7 @@ std::string process_str(const std::string& str, const LC3AssembleContext& contex
                         i++;
                         buf[1] = str[i];
                     }
-                    num = strtol(buf, NULL, 16);
+                    num = strtol(buf, nullptr, 16);
                 }
                 else
                 {
@@ -151,7 +151,7 @@ std::string process_str(const std::string& str, const LC3AssembleContext& contex
                         buf[2] = str[i];
                     }
                 }
-                parsed_num = strtol(buf, NULL, 8);
+                parsed_num = strtol(buf, nullptr, 8);
                 /// \777 in a C program compiles normally, but with a warning.
                 if (parsed_num > 0xFF)
                     WARN(LC3AssembleException("", str, MALFORMED_STRING, context.lineno));
@@ -183,7 +183,7 @@ int get_opcode(const std::string& opinstr, int& specialop, const LC3AssembleCont
     int opcode;
     specialop = 0;
 
-    std::transform(instr.begin(), instr.end(), instr.begin(), (int(*)(int)) std::toupper);
+    std::transform(instr.begin(), instr.end(), instr.begin(),static_cast<int (*)(int)>(std::toupper));
     std::string ccflags = instr.size() >= 2 ? instr.substr(2) : "";
     std::string isbr = instr.substr(0, 2);
 
@@ -253,7 +253,7 @@ int get_opcode(const std::string& opinstr, int& specialop, const LC3AssembleCont
         // Hey test for trap special names
         for (std::map<unsigned char, TrapFunctionPlugin*>::const_iterator i = context.state->trapPlugins.begin(); i != context.state->trapPlugins.end(); ++i)
         {
-            if (i->second != NULL && instr == i->second->GetTrapName())
+            if (i->second != nullptr && instr == i->second->GetTrapName())
             {
                 // Good Good You are a trap...
                 specialop = i->second->GetTrapVector();
@@ -282,7 +282,7 @@ int get_opcode(const std::string& opinstr, int& specialop, const LC3AssembleCont
 short get_register(const std::string& regstr, const LC3AssembleContext& context)
 {
     std::string reg = regstr;
-    std::transform(reg.begin(), reg.end(), reg.begin(), (int(*)(int))std::toupper);
+    std::transform(reg.begin(), reg.end(), reg.begin(), static_cast<int (*)(int)>(std::toupper));
     int regnum = -1;
 
     if (reg[0] == 'R' && isdigit(reg[1]) && reg.size() == 2)
@@ -460,7 +460,7 @@ short check_value(long value, int bits, bool is_num, bool signed_check, const LC
 void get_cc_flags(const std::string& opcode, bool& n, bool& z, bool& p, const LC3AssembleContext& context)
 {
     std::string flags = opcode.substr(2);
-    std::transform(flags.begin(), flags.end(), flags.begin(), (int(*)(int)) std::toupper);
+    std::transform(flags.begin(), flags.end(), flags.begin(), static_cast<int (*)(int)>(std::toupper));
 
     n = z = p = false;
 

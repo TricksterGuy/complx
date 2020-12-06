@@ -6,7 +6,7 @@
 wxDEFINE_EVENT(wxEVT_COMMAND_CREATE_DISPLAY, wxThreadEvent);
 wxDEFINE_EVENT(wxEVT_COMMAND_DESTROY_DISPLAY, wxThreadEvent);
 
-static std::unique_ptr<Plugin> instance = NULL;
+static std::unique_ptr<Plugin> instance;
 
 Plugin* create_plugin(const PluginParams& params)
 {
@@ -20,10 +20,10 @@ Plugin* create_plugin(const PluginParams& params)
     startaddr = params.read_ushort_required("startaddr");
     initaddr = params.read_ushort_required("initaddr");
 
-    /*if (wxTheApp == NULL)
+    /*if (wxTheApp == nullptr)
     {
         fprintf(stderr, "[ERROR] Using this plugin with the command line version of the simulator is not supported at this time\n");
-        return NULL;
+        return nullptr;
     }*/
 
     instance.reset(new ColorLCDPlugin(width, height, initaddr, startaddr));
@@ -39,7 +39,7 @@ void destroy_plugin(Plugin* ptr)
 
 ColorLCDPlugin::ColorLCDPlugin(unsigned short _width, unsigned short _height, unsigned short _initaddr, unsigned short _startaddr) :
     Plugin(COLORLCD_MAJOR_VERSION, COLORLCD_MINOR_VERSION, LC3_OTHER, "Color LCD Display"), width(_width),
-    height(_height), initaddr(_initaddr), startaddr(_startaddr), lcd(NULL),
+    height(_height), initaddr(_initaddr), startaddr(_startaddr), lcd(nullptr),
     lcd_initializing(false)
 {
     BindAddress(initaddr);
@@ -64,7 +64,7 @@ void ColorLCDPlugin::InitDisplay(wxThreadEvent& event)
 void ColorLCDPlugin::DestroyDisplay(wxThreadEvent& WXUNUSED(event))
 {
     delete lcd;
-    lcd = NULL;
+    lcd = nullptr;
 }
 
 void ColorLCDPlugin::OnWrite(lc3_state& state, unsigned short address, short value)
@@ -72,26 +72,26 @@ void ColorLCDPlugin::OnWrite(lc3_state& state, unsigned short address, short val
     if (address == initaddr)
     {
         unsigned short data = value;
-        if (data == 0x8000U && lcd == NULL)
+        if (data == 0x8000U && lcd == nullptr)
         {
             wxThreadEvent* evt = new wxThreadEvent(wxEVT_COMMAND_CREATE_DISPLAY);
             evt->SetPayload<lc3_state*>(&state);
             wxQueueEvent(this, evt);
             lcd_initializing = true;
         }
-        else if (data == 0x8000U && (lcd != NULL || lcd_initializing))
+        else if (data == 0x8000U && (lcd != nullptr || lcd_initializing))
         {
             lc3_warning(state, "ColorLCD already initialized!");
         }
-        else if (data == 0 && lcd == NULL)
+        else if (data == 0 && lcd == nullptr)
         {
             lc3_warning(state, "ColorLCD is destroyed already!");
         }
-        else if (data == 0 && (lcd != NULL || lcd_initializing))
+        else if (data == 0 && (lcd != nullptr || lcd_initializing))
         {
             wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_DESTROY_DISPLAY));
         }
-        else if (static_cast<unsigned short>(state.mem[address]) == 0x8000U && data != 0x8000U && (lcd != NULL || lcd_initializing))
+        else if (static_cast<unsigned short>(state.mem[address]) == 0x8000U && data != 0x8000U && (lcd != nullptr || lcd_initializing))
         {
             wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_DESTROY_DISPLAY));
         }
@@ -102,7 +102,7 @@ void ColorLCDPlugin::OnWrite(lc3_state& state, unsigned short address, short val
     }
     else if (address >= startaddr && address < startaddr + width * height && !lcd_initializing)
     {
-        if (lcd == NULL)
+        if (lcd == nullptr)
             lc3_warning(state, "Writing to LCD while its not initialized!");
     }
 
@@ -115,7 +115,7 @@ ColorLCD::ColorLCD(wxWindow* top, int _width, int _height, unsigned short _start
     //Centre();
     // 60 fps.
     timer.Start(1000.0 / 60);
-    Connect(timer.GetId(), wxEVT_TIMER, wxTimerEventHandler(ColorLCD::OnUpdate), NULL, this);
+    Connect(timer.GetId(), wxEVT_TIMER, wxTimerEventHandler(ColorLCD::OnUpdate), nullptr, this);
     int x, y;
     GetParent()->GetScreenPosition(&x, &y);
     Move(x - GetSize().GetX(), y);
@@ -129,7 +129,7 @@ void ColorLCD::OnUpdate(wxTimerEvent& WXUNUSED(event))
 void ColorLCD::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
     /// @note see bwlcd.cpp
-    if (state == NULL) return;
+    if (state == nullptr) return;
 
     wxPaintDC dc(displayPanel);
     dc.SetPen(wxNullPen);

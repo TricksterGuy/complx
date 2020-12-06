@@ -91,7 +91,7 @@ int get_mem(bool /*hasref*/, int ref)
 
 int lc3_get_symbol(const std::string& symbol, bool hasref, int ref, int& error)
 {
-    assert(calc_state != NULL);
+    assert(calc_state != nullptr);
 
     int addr = lc3_sym_lookup(*calc_state, symbol);
 
@@ -154,7 +154,7 @@ int lc3_calculate(lc3_state& state, const std::string& expr)
     int result = 0;
     int error = Calculate(expr, result);
 
-    calc_state = NULL;
+    calc_state = nullptr;
 
     if (error)
         throw LC3CalculateException(expr, error);

@@ -441,12 +441,12 @@ int EvaluateOperand(string token, int& error)
 
     // Handle numerals
     char *errstr;
-    int d = (int)strtol(token.c_str(), &errstr, 0);
+    int d = strtol(token.c_str(), &errstr, 0);
     if (!(*errstr)) return d;
     if (token[0] == 'x' || token[0] == 'X')
     {
         std::string hex = "0" + token;
-        d = (int)strtol(hex.c_str(), &errstr, 0);
+        d = strtol(hex.c_str(), &errstr, 0);
         if (!(*errstr)) return d;
     }
 

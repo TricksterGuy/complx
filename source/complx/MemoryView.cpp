@@ -36,7 +36,7 @@ MemoryView::MemoryView(wxWindow* parent, wxWindowID id, const wxPoint& pos, cons
     AppendTextColumn("Comment",         MemoryComment,          wxDATAVIEW_CELL_INERT,      -1,     wxALIGN_LEFT,   cell_flags);
 
 
-    Connect(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, wxDataViewEventHandler(MemoryView::OnContextMenu), NULL, this);
+    Connect(wxEVT_COMMAND_DATAVIEW_ITEM_CONTEXT_MENU, wxDataViewEventHandler(MemoryView::OnContextMenu), nullptr, this);
     Connect(MemoryMenuBreakpoint,   wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryView::OnBreakpoint));
     Connect(MemoryMenuTemporary,    wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryView::OnTemporaryBreakpoint));
     Connect(MemoryMenuWatchpoint,   wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryView::OnWatchpoint));

@@ -671,7 +671,7 @@ std::string lc3_describe_replay(const std::string& replay_string)
                 description << describe_data(params).first << std::endl;
                 break;
             default:
-                error << "Unknown tag found id: " << ((int)id);
+                error << "Unknown tag found id: " << static_cast<int>(id);
                 throw error.str();
         }
     }

@@ -173,7 +173,7 @@ void lc3_set_version(lc3_state& state, int version)
 
 void lc3_remove_plugins(lc3_state& state)
 {
-    state.instructionPlugin = NULL;
+    state.instructionPlugin = nullptr;
     state.plugins.clear();
     state.address_plugins.clear();
     state.trapPlugins.clear();
@@ -189,16 +189,16 @@ void lc3_remove_plugins(lc3_state& state)
     state.filePlugin.clear();
 
     // Set up "dummy plugins" to sit on reserved addresses
-    state.trapPlugins[0x20] = NULL;
-    state.trapPlugins[0x21] = NULL;
-    state.trapPlugins[0x22] = NULL;
-    state.trapPlugins[0x23] = NULL;
-    state.trapPlugins[0x24] = NULL;
-    state.trapPlugins[0x25] = NULL;
+    state.trapPlugins[0x20] = nullptr;
+    state.trapPlugins[0x21] = nullptr;
+    state.trapPlugins[0x22] = nullptr;
+    state.trapPlugins[0x23] = nullptr;
+    state.trapPlugins[0x24] = nullptr;
+    state.trapPlugins[0x25] = nullptr;
 
-    state.address_plugins[0xFE00] = NULL;
-    state.address_plugins[0xFE02] = NULL;
-    state.address_plugins[0xFFFE] = NULL;
+    state.address_plugins[0xFE00] = nullptr;
+    state.address_plugins[0xFE02] = nullptr;
+    state.address_plugins[0xFFFE] = nullptr;
 }
 
 void lc3_run(lc3_state& state)
@@ -640,10 +640,10 @@ bool lc3_signal_interrupt_once(lc3_state& state, int priority, int vector)
 
 void lc3_tick_plugins(lc3_state& state)
 {
-    if (state.instructionPlugin != NULL)
+    if (state.instructionPlugin != nullptr)
         state.instructionPlugin->OnTick(state);
     for (std::map<unsigned char, TrapFunctionPlugin*>::const_iterator i = state.trapPlugins.begin(); i != state.trapPlugins.end(); ++i)
-        if (i->second != NULL)
+        if (i->second != nullptr)
             i->second->OnTick(state);
     for (unsigned int i = 0; i < state.plugins.size(); i++)
         state.plugins[i]->OnTick(state);
@@ -651,10 +651,10 @@ void lc3_tick_plugins(lc3_state& state)
 
 void lc3_tock_plugins(lc3_state& state)
 {
-    if (state.instructionPlugin != NULL)
+    if (state.instructionPlugin != nullptr)
         state.instructionPlugin->OnTock(state);
     for (std::map<unsigned char, TrapFunctionPlugin*>::const_iterator i = state.trapPlugins.begin(); i != state.trapPlugins.end(); ++i)
-        if (i->second != NULL)
+        if (i->second != nullptr)
             i->second->OnTock(state);
     for (unsigned int i = 0; i < state.plugins.size(); i++)
         state.plugins[i]->OnTock(state);

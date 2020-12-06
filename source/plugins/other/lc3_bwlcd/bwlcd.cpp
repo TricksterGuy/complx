@@ -24,10 +24,10 @@ Plugin* create_plugin(const PluginParams& params)
     params.read_uint("oncolor", oncolor);
     params.read_uint("offcolor", offcolor);
 
-    /*if (wxTheApp == NULL)
+    /*if (wxTheApp == nullptr)
     {
         fprintf(stderr, "[ERROR] Using this plugin with the command line version of the simulator is not supported at this time\n");
-        return NULL;
+        return nullptr;
     }*/
 
     instance.reset(new BWLCDPlugin(width, height, initaddr, startaddr, offcolor, oncolor));
@@ -44,7 +44,7 @@ void destroy_plugin(Plugin* ptr)
 BWLCDPlugin::BWLCDPlugin(unsigned short _width, unsigned short _height, unsigned short _initaddr,
                          unsigned short _startaddr, unsigned int _offcolor, unsigned int _oncolor) :
     Plugin(BWLCD_MAJOR_VERSION, BWLCD_MINOR_VERSION, LC3_OTHER, "Black & White LCD Display"), width(_width),
-    height(_height), initaddr(_initaddr), startaddr(_startaddr), offcolor(_offcolor), oncolor(_oncolor), lcd(NULL),
+    height(_height), initaddr(_initaddr), startaddr(_startaddr), offcolor(_offcolor), oncolor(_oncolor), lcd(nullptr),
     lcd_initializing(false)
 {
     BindAddress(initaddr);
@@ -69,7 +69,7 @@ void BWLCDPlugin::InitDisplay(wxThreadEvent& WXUNUSED(event))
 void BWLCDPlugin::DestroyDisplay(wxThreadEvent& WXUNUSED(event))
 {
     delete lcd;
-    lcd = NULL;
+    lcd = nullptr;
 }
 
 void BWLCDPlugin::OnWrite(lc3_state& state, unsigned short address, short value)
@@ -77,26 +77,26 @@ void BWLCDPlugin::OnWrite(lc3_state& state, unsigned short address, short value)
     if (address == initaddr)
     {
         unsigned short data = value;
-        if (data == 0x8000U && lcd == NULL)
+        if (data == 0x8000U && lcd == nullptr)
         {
             wxThreadEvent* evt = new wxThreadEvent(wxEVT_COMMAND_CREATE_DISPLAY);
             evt->SetPayload<lc3_state*>(&state);
             wxQueueEvent(this, evt);
             lcd_initializing = true;
         }
-        else if (data == 0x8000U && (lcd != NULL || lcd_initializing))
+        else if (data == 0x8000U && (lcd != nullptr || lcd_initializing))
         {
             lc3_warning(state, "BWLCD already initialized!");
         }
-        else if (data == 0 && lcd == NULL)
+        else if (data == 0 && lcd == nullptr)
         {
             lc3_warning(state, "BWLCD is destroyed already!");
         }
-        else if (data == 0 && (lcd != NULL || lcd_initializing))
+        else if (data == 0 && (lcd != nullptr || lcd_initializing))
         {
             wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_DESTROY_DISPLAY));
         }
-        else if (static_cast<unsigned short>(state.mem[address]) == 0x8000U && data != 0x8000U && (lcd != NULL || lcd_initializing))
+        else if (static_cast<unsigned short>(state.mem[address]) == 0x8000U && data != 0x8000U && (lcd != nullptr || lcd_initializing))
         {
             wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_DESTROY_DISPLAY));
         }
@@ -107,7 +107,7 @@ void BWLCDPlugin::OnWrite(lc3_state& state, unsigned short address, short value)
     }
     else if (address >= startaddr && address < startaddr + width * height && !lcd_initializing)
     {
-        if (lcd == NULL)
+        if (lcd == nullptr)
             lc3_warning(state, "Writing to LCD while its not initialized!");
     }
 
@@ -116,7 +116,7 @@ void BWLCDPlugin::OnWrite(lc3_state& state, unsigned short address, short value)
 
 
 BWLCD::BWLCD(wxWindow* top, int _width, int _height, unsigned short _startaddr, unsigned int _off, unsigned int _on) :
-    BWLCDGUI(top), state(NULL), width(_width), height(_height), startaddr(_startaddr), off(_off), on(_on)
+    BWLCDGUI(top), state(nullptr), width(_width), height(_height), startaddr(_startaddr), off(_off), on(_on)
 {
     int x, y;
     GetParent()->GetScreenPosition(&x, &y);
@@ -133,7 +133,7 @@ void BWLCD::OnUpdate(wxThreadEvent& event)
 
 void BWLCD::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
-    if (state == NULL) return;
+    if (state == nullptr) return;
 
     wxPaintDC dc(displayPanel);
     dc.SetPen(wxNullPen);

@@ -525,7 +525,7 @@ symbolcheckdone:
         {
             unsigned int paramcheck = 2;
             std::string directive = tokens[0];
-            std::transform(directive.begin(), directive.end(), directive.begin(), (int (*)(int))std::tolower);
+            std::transform(directive.begin(), directive.end(), directive.begin(), static_cast<int (*)(int)>(std::tolower));
             std::string param = tokens.size() > 1 ? tokens[1] : "";
 
             if (directive.compare(".orig") == 0)
@@ -714,7 +714,7 @@ symbolcheckdone:
             std::string directive = tokens[0];
             std::string rest = line.substr(line.find(directive) + directive.size());
             trim(rest);
-            std::transform(directive.begin(), directive.end(), directive.begin(), (int (*)(int))std::tolower);
+            std::transform(directive.begin(), directive.end(), directive.begin(), static_cast<int (*)(int)>(std::tolower));
 
             if (directive.compare(".orig") == 0)
             {
@@ -996,7 +996,7 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
     // subro[utine] address=address name=name num_params=0
     // subro[utine] address name num_params
     std::string type = statement.line.substr(0, 5);
-    std::transform(type.begin(), type.end(), type.begin(), (int(*)(int))std::tolower);
+    std::transform(type.begin(), type.end(), type.begin(), static_cast<int (*)(int)>(std::tolower));
 
     LC3AssembleContext dummy;
     dummy.address = 0;

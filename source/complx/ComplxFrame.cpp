@@ -13,7 +13,7 @@ namespace
 
 wxString AskForAssemblyFile()
 {
-    std::unique_ptr<wxFileDialog> dialog(new wxFileDialog(NULL, _("Load .asm file"), wxEmptyString, wxEmptyString, _("LC-3 Assembly Files (*.asm)|*.asm"), wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR));
+    std::unique_ptr<wxFileDialog> dialog(new wxFileDialog(nullptr, _("Load .asm file"), wxEmptyString, wxEmptyString, _("LC-3 Assembly Files (*.asm)|*.asm"), wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_CHANGE_DIR));
     if (dialog->ShowModal() == wxID_OK)
         return dialog->GetPath();
     return wxEmptyString;
@@ -124,7 +124,7 @@ void ComplxFrame::OnStateChange(wxPropertyGridEvent& event)
 
 void ComplxFrame::InitializeLC3State()
 {
-    state->default_seed = time(NULL);
+    state->default_seed = time(nullptr);
 
     InfoLog("Random Seed %u", state->default_seed);
 
