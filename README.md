@@ -1,6 +1,6 @@
 complx
 ======
-[![Travis CI Build Status](https://travis-ci.org/TricksterGuy/complx.svg?branch=master)](https://travis-ci.org/TricksterGuy/complx)
+[![Travis CI Build Status](https://travis-ci.com/TricksterGuy/complx.svg?branch=master)](https://travis-ci.com/TricksterGuy/complx)
 
 Extensible LC-3 Simulator written in C++.  Includes a Graphical User Interface and Command Line Interface simulator, Assembler, [Python Bindings](https://pypi.org/project/pyLC3), and Python Autograder (Examples)[https://github.com/TricksterGuy/pylc3-examples]. Mainly used in CS2110 at Georgia Tech.  Maintained by Brandon (bwhitehead0308 [AT] gmail [DOT] com).
 
