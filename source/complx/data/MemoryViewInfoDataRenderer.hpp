@@ -18,7 +18,7 @@ public:
 private:
     void DoRender(wxDC& dc, wxRect rect) const;
     // See MemoryViewInfoState enum
-    int64_t state;
+    long state;
 };
 
 

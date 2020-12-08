@@ -48,7 +48,7 @@ void MemoryViewDataModel::GetValueByRow(wxVariant& variant, unsigned int row, un
 
     uint16_t addr = row; //ViewToAddress(row;
     int16_t data = state.mem[addr];
-    int64_t info = 0;
+    long info = 0;
 
     switch(column)
     {

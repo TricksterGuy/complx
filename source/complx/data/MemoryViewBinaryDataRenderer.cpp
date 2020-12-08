@@ -123,7 +123,7 @@ wxWindow* MemoryViewBinaryDataRenderer::CreateEditorCtrl(wxWindow* parent, wxRec
 
 bool MemoryViewBinaryDataRenderer::GetValueFromEditorCtrl(wxWindow* editor, wxVariant& value)
 {
-    int64_t binary;
+    long binary;
 
     auto* text = dynamic_cast<wxTextCtrl*>(editor);
     wxASSERT(text);
