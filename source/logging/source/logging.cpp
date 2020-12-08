@@ -50,7 +50,6 @@ inline const char* GetLogColor(LogLevel level)
         case LogLevel::FATAL:
             return "\033[1;31m";
         case LogLevel::DEBUG:
-            return "\033[1;33m";
         case LogLevel::WARNING:
             return "\033[1;33m";
         case LogLevel::INFO:

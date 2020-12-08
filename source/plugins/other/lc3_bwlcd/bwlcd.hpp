@@ -17,14 +17,14 @@ wxDECLARE_EVENT(wxEVT_COMMAND_DESTROY_DISPLAY, wxThreadEvent);
 class BWLCD : public BWLCDGUI
 {
 public:
-    BWLCD(wxWindow* top, int width, int height, unsigned short startaddr, unsigned int off, unsigned int on);
+    BWLCD(wxWindow* top, int width, int height, uint16_t startaddr, unsigned int off, unsigned int on);
     void OnUpdate(wxThreadEvent& event);
     void OnPaint(wxPaintEvent& event) override;
 private:
     lc3_state* state;
     int width;
     int height;
-    unsigned short startaddr;
+    uint16_t startaddr;
     unsigned int off;
     unsigned int on;
 };
@@ -32,18 +32,18 @@ private:
 class LC3_BWLCD_API BWLCDPlugin : public wxEvtHandler, public Plugin
 {
 public:
-    BWLCDPlugin(unsigned short width, unsigned short height, unsigned short initaddr, unsigned short startaddr, unsigned int offcolor = 0xa0b0a0, unsigned int oncolor = 0x606860);
+    BWLCDPlugin(uint16_t width, uint16_t height, uint16_t initaddr, uint16_t startaddr, unsigned int offcolor = 0xa0b0a0, unsigned int oncolor = 0x606860);
     ~BWLCDPlugin();
-    void OnWrite(lc3_state& state, unsigned short address, short value) override;
+    void OnWrite(lc3_state& state, uint16_t address, int16_t value) override;
     void InitDisplay(wxThreadEvent& event);
     void UpdateDisplay(wxThreadEvent& event);
     void DestroyDisplay(wxThreadEvent& event);
     bool AvailableInLC3Test() const override {return false;}
 private:
-    unsigned short width;
-    unsigned short height;
-    unsigned short initaddr;
-    unsigned short startaddr;
+    uint16_t width;
+    uint16_t height;
+    uint16_t initaddr;
+    uint16_t startaddr;
     unsigned int offcolor;
     unsigned int oncolor;
     BWLCD* lcd;

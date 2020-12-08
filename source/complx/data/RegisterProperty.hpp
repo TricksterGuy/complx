@@ -34,7 +34,7 @@ public:
         Default = AllowHexadecimal | AllowDecimal,
     };
 
-    RegisterProperty(const wxString& property, std::reference_wrapper<short> register_value, unsigned int display_base = Decimal, unsigned int flags = Default);
+    RegisterProperty(const wxString& property, std::reference_wrapper<int16_t> register_value, unsigned int display_base = Decimal, unsigned int settings = Default);
     ~RegisterProperty() {}
 
     /** Refreshes the Property Grid Property's value. */
@@ -46,13 +46,13 @@ public:
     /** Updates the LC3 State's register value via member variable value. */
     void UpdateRegisterValue();
     /** Updates the reference wrapper. Usually done after loading a new assembly file. */
-    void UpdateRef(std::reference_wrapper<short> new_value);
+    void UpdateRef(std::reference_wrapper<int16_t> new_value);
 
 private:
     /** Name of the register. */
     const wxString name;
     /** Reference to the register's value. */
-    std::reference_wrapper<short> value;
+    std::reference_wrapper<int16_t> value;
     /** @see Base Display base of the register. */
     unsigned int base;
     /** @see Flags Flags for this RegisterProperty. */

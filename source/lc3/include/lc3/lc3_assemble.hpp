@@ -1,8 +1,8 @@
 #ifndef LC3_ASSEMBLE_HPP
 #define LC3_ASSEMBLE_HPP
 
-#include <string>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 #include "lc3/lc3.hpp"
@@ -58,10 +58,11 @@ enum LC3_API LC3AssembleExceptionTypes
     EXTRA_INPUT,
     PLUGIN_FAILED_TO_LOAD,
     INVALID_LC3_VERSION,
+    MULTIPLE_ERRORS, // Used for multiple error messages when multiple_errors is set.
 };
 
 /** Exception class for assembler errors */
-class LC3_API LC3AssembleException
+class LC3_API LC3AssembleException : public std::exception
 {
 public:
     /** Constructor
@@ -71,8 +72,7 @@ public:
       * @param errorid Error ID. @see LC3AssembleExceptionTypes
       * @param linenum Line number.
       */
-    LC3AssembleException(const std::string& line_str, const std::vector<std::string>& args, int errorid = UNKNOWN_ERROR, int linenum = -1) throw() :
-        line(line_str), params(args), id(errorid), lineno(linenum) {}
+    LC3AssembleException(const std::string& line_str, const std::vector<std::string>& args, int errorid = UNKNOWN_ERROR, int linenum = -1) noexcept;
     /** Constructor
       *
       * @param line_str line causing the error.
@@ -80,12 +80,15 @@ public:
       * @param errorid Error ID. @see LC3AssembleExceptionTypes
       * @param linenum Line number.
       */
-    LC3AssembleException(const std::string& line_str, const std::string& param, int errorid = UNKNOWN_ERROR, int linenum = -1) throw() :
-        line(line_str), params(1, param), id(errorid), lineno(linenum) {}
-    ~LC3AssembleException() throw() {}
-    std::string what() const throw();
+    LC3AssembleException(const std::string& line_str, const std::string& param, int errorid = UNKNOWN_ERROR, int linenum = -1) noexcept;
+    explicit LC3AssembleException(const std::list<LC3AssembleException>& exceptions_list) noexcept;
+    const char* what() const noexcept override { return msg.c_str(); }
     int get_id() const {return id;}
 private:
+    std::string form_exception_message() const noexcept;
+    std::list<LC3AssembleException> exceptions;
+
+    std::string msg;
     std::string line;
     std::vector<std::string> params;
     int id;
@@ -119,11 +122,11 @@ struct LC3_API LC3AssembleOptions
 struct LC3_API LC3AssembleContext
 {
     std::vector<std::string> tokens;
-    mutable std::vector<LC3AssembleException> exceptions;
-    std::string line = "";
+    mutable std::list<LC3AssembleException> exceptions;
+    std::string line;
     lc3_state* state = nullptr;
     int lineno = -1;
-    unsigned short address = 0x0000;
+    uint16_t address = 0;
     LC3AssembleOptions options;
 };
 
@@ -138,7 +141,7 @@ struct LC3_API LC3AssembleContext
   * @return The assembled data.
   * @throw LC3AssembleException on error
   */
-unsigned short LC3_API lc3_assemble_one(lc3_state& state, unsigned short address, const std::string& line, int lineno = -1, const LC3AssembleOptions& options = LC3AssembleOptions());
+uint16_t LC3_API lc3_assemble_one(lc3_state& state, uint16_t address, const std::string& line, int lineno = -1, const LC3AssembleOptions& options = LC3AssembleOptions());
 /** lc3_assemble
   *
   * Assembles a file into the LC3State object given.

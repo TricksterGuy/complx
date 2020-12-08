@@ -10,7 +10,7 @@
 class LC3_PINGER_API PingerPlugin : public Plugin
 {
 public:
-    PingerPlugin(unsigned short ping_interval, unsigned int prio, unsigned char vec);
+    PingerPlugin(uint16_t ping_interval, unsigned int prio, unsigned char vec);
     void OnTick(lc3_state& state) override;
 private:
     unsigned int interval;

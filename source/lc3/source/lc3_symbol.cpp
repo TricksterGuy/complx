@@ -23,7 +23,7 @@ int lc3_load_sym(lc3_state& state, std::istream& file)
     while (!line.empty())
     {
         std::string sym_name;
-        unsigned short location;
+        uint16_t location = 0;
 
         std::stringstream ss(line);
         ss >> sym_name;
@@ -40,23 +40,23 @@ int lc3_load_sym(lc3_state& state, std::istream& file)
 
 int lc3_sym_lookup(lc3_state& state, const std::string& symbol)
 {
-    std::map<std::string, unsigned short>::iterator i = state.symbols.find(symbol);
+    auto i = state.symbols.find(symbol);
 
     if (i == state.symbols.end()) return -1;
 
     return i->second;
 }
 
-const std::string lc3_sym_rev_lookup(lc3_state& state, unsigned short addr)
+std::string lc3_sym_rev_lookup(lc3_state& state, uint16_t addr)
 {
-    std::map<unsigned short, std::string>::iterator i = state.rev_symbols.find(addr);
+    auto i = state.rev_symbols.find(addr);
 
     if (i == state.rev_symbols.end()) return "";
 
     return i->second;
 }
 
-bool lc3_sym_add(lc3_state& state, const std::string& symbol, unsigned short addr)
+bool lc3_sym_add(lc3_state& state, const std::string& symbol, uint16_t addr)
 {
     bool ret = (state.symbols.find(symbol) == state.symbols.end());
     state.symbols[symbol] = addr;
@@ -73,7 +73,7 @@ void lc3_sym_delete(lc3_state& state, const std::string& symbol)
     lc3_sym_delete(state, addr);
 }
 
-void lc3_sym_delete(lc3_state& state, unsigned short addr)
+void lc3_sym_delete(lc3_state& state, uint16_t addr)
 {
     std::string symbol = lc3_sym_rev_lookup(state, addr);
 

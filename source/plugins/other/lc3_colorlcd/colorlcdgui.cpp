@@ -9,7 +9,7 @@
 
 ///////////////////////////////////////////////////////////////////////////
 
-COLORLCDGUI::COLORLCDGUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+COLORLCDGUI::COLORLCDGUI( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, int64_t style ) : wxDialog( parent, id, title, pos, size, style )
 {
     this->SetSizeHints( wxSize( -1,-1 ), wxDefaultSize );
 

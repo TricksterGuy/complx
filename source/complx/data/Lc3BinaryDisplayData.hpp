@@ -15,12 +15,12 @@ class Lc3BinaryDisplayData : public wxObject
 {
 public:
     Lc3BinaryDisplayData() : instruction(0), binary('0', 16) {}
-    Lc3BinaryDisplayData(unsigned short instr, const wxString& bin, const std::list<RLEColorEntry> c) : instruction(instr), binary(bin), colors(c) {}
-    ~Lc3BinaryDisplayData() {}
-    Lc3BinaryDisplayData& operator=(const Lc3BinaryDisplayData& other);
+    Lc3BinaryDisplayData(uint16_t instr, const wxString& bin, const std::list<RLEColorEntry> c) : instruction(instr), binary(bin), colors(c) {}
+    ~Lc3BinaryDisplayData() override = default;
+    Lc3BinaryDisplayData& operator=(const Lc3BinaryDisplayData& other) = default;
     bool operator==(const Lc3BinaryDisplayData& other) const;
     bool operator!=(const Lc3BinaryDisplayData& other) const { return !(*this == other); }
-    unsigned short instruction;
+    uint16_t instruction;
     wxString binary;
     std::list<RLEColorEntry> colors;
 
@@ -28,7 +28,7 @@ public:
 };
 DECLARE_VARIANT_OBJECT(Lc3BinaryDisplayData)
 
-Lc3BinaryDisplayData ConstructBinaryDisplayData(unsigned short instruction, const InstructionPlugin* instruction_plugin);
+Lc3BinaryDisplayData ConstructBinaryDisplayData(uint16_t instruction, const InstructionPlugin* instruction_plugin);
 
 
 

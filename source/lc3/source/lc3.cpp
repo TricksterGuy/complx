@@ -10,9 +10,9 @@
 
 #include "lc3/lc3_execute.hpp"
 #include "lc3/lc3_expressions.hpp"
+#include "lc3/lc3_os.hpp"
 #include "lc3/lc3_plugin.hpp"
 #include "lc3/lc3_symbol.hpp"
-#include "lc3/lc3_os.hpp"
 
 const char* BASIC_DISASSEMBLE_LOOKUP[16][2] =
 {
@@ -79,10 +79,10 @@ const char* ADV_DISASSEMBLE_LOOKUP[16][8] =
     {"GETC", "OUT", "PUTS", "IN", "PUTSP", "HALT", "TRAP x%02x"},
 };
 
-std::string lc3_basic_disassemble(lc3_state& state, unsigned short data, unsigned short /* unused pc */)
+std::string lc3_basic_disassemble(lc3_state& state, uint16_t data, uint16_t /* unused pc */)
 {
     lc3_instr instr = lc3_decode(state, data);
-    unsigned int opcode = instr.data.opcode;
+    uint32_t opcode = instr.data.opcode;
     char buf[128];
 
 
@@ -185,12 +185,12 @@ std::string lc3_basic_disassemble(lc3_state& state, unsigned short data, unsigne
     return buf;
 }
 
-std::string lc3_normal_disassemble(lc3_state& state, unsigned short data, unsigned short pc)
+std::string lc3_normal_disassemble(lc3_state& state, uint16_t data, uint16_t pc)
 {
     lc3_instr instr = lc3_decode(state, data);
-    unsigned int opcode = instr.data.opcode;
+    uint32_t opcode = instr.data.opcode;
     char buf[128];
-    int offset;
+    int32_t offset;
     std::string label;
 
     switch(opcode)
@@ -331,12 +331,12 @@ std::string lc3_normal_disassemble(lc3_state& state, unsigned short data, unsign
     return buf;
 }
 
-std::string lc3_smart_disassemble(lc3_state& state, unsigned short instruction, unsigned short pc)
+std::string lc3_smart_disassemble(lc3_state& state, uint16_t instruction, uint16_t pc)
 {
     lc3_instr instr = lc3_decode(state, instruction);
-    int offset;
-    unsigned int opcode = instr.data.opcode;
-    int data;
+    int32_t offset;
+    uint32_t opcode = instr.data.opcode;
+    int32_t data;
     std::string label;
     char buf[128];
 
@@ -534,7 +534,7 @@ std::string lc3_smart_disassemble(lc3_state& state, unsigned short instruction, 
                 if (state.trapPlugins.find(data) != state.trapPlugins.end())
                     return state.trapPlugins[data]->GetTrapName();
                 else
-                    sprintf(buf, ADV_DISASSEMBLE_LOOKUP[opcode][TRAP_OTHER], (unsigned char)data);
+                    sprintf(buf, ADV_DISASSEMBLE_LOOKUP[opcode][TRAP_OTHER], static_cast<uint8_t>(data));
             }
             break;
         case RTI_INSTR:
@@ -553,9 +553,9 @@ std::string lc3_smart_disassemble(lc3_state& state, unsigned short instruction, 
     return buf;
 }
 
-std::string lc3_disassemble(lc3_state& state, unsigned short data, int pc, int level)
+std::string lc3_disassemble(lc3_state& state, uint16_t data, int32_t pc, int32_t level)
 {
-    unsigned short address = (pc == -1) ? state.pc : static_cast<unsigned short>(pc);
+    uint16_t address = (pc == -1) ? state.pc : static_cast<uint16_t>(pc);
 
     std::string instr;
     switch(level)
@@ -615,22 +615,22 @@ std::string lc3_disassemble(lc3_state& state, unsigned short data, int pc, int l
     return instr;
 }
 
-int lc3_load(lc3_state& state, std::istream& file, int (*reader)(std::istream&))
+int32_t lc3_load(lc3_state& state, std::istream& file, int32_t (*reader)(std::istream&))
 {
     if (!file.good()) return -1;
 
-    int read_data = reader(file);
+    int32_t read_data = reader(file);
 
     // Until the reader runs out of data
     while (read_data >= 0)
     {
         // Get Address Start from Reader
-        unsigned short addr_start = read_data & 0xFFFF;
-        unsigned short addr_size = reader(file) & 0xFFFF;
+        uint16_t addr_start = read_data;
+        uint16_t addr_size = reader(file);
 
-        for (unsigned short i = 0; i < addr_size; i++)
+        for (uint16_t i = 0; i < addr_size; i++)
             // Put it in memory
-            state.mem[addr_start + i] = static_cast<short>(reader(file));
+            state.mem[addr_start + i] = static_cast<int16_t>(reader(file));
 
         read_data = reader(file);
     }
@@ -638,7 +638,7 @@ int lc3_load(lc3_state& state, std::istream& file, int (*reader)(std::istream&))
     return 0;
 }
 
-int lc3_reader_hex(std::istream& file)
+int32_t lc3_reader_hex(std::istream& file)
 {
     std::string line;
     // Read one line
@@ -647,15 +647,15 @@ int lc3_reader_hex(std::istream& file)
 
     // Interpret as hex
     std::stringstream ss(line);
-    unsigned int result;
-    if(!(ss>>std::hex>>result)) return -1;
+    uint32_t result;
+    if (!(ss >> std::hex >> result)) return -1;
 
     return result;
 }
 
-int lc3_reader_obj(std::istream& file)
+int32_t lc3_reader_obj(std::istream& file)
 {
-    unsigned short data;
+    uint16_t data;
     // Read two bytes
     file.read(reinterpret_cast<char*>(&data), sizeof(data));
     if (file.eof()) return -1;
@@ -663,9 +663,9 @@ int lc3_reader_obj(std::istream& file)
     return ((data >> 8) & 0xFF) | ((data & 0xFF) << 8);
 }
 
-int lc3_read_char(lc3_state& state, std::istream& file)
+int32_t lc3_read_char(lc3_state& state, std::istream& file)
 {
-    char c = file.get();
+    int8_t c = file.get();
     if (!file.good())
     {
         lc3_warning(state, LC3_OUT_OF_INPUT, 0, 0);
@@ -676,9 +676,9 @@ int lc3_read_char(lc3_state& state, std::istream& file)
     return c;
 }
 
-int lc3_peek_char(lc3_state& state, std::istream& file)
+int32_t lc3_peek_char(lc3_state& state, std::istream& file)
 {
-    char c = file.peek();
+    int8_t c = file.peek();
     if (!file.good())
     {
         lc3_warning(state, LC3_OUT_OF_INPUT, 0, 0);
@@ -689,41 +689,41 @@ int lc3_peek_char(lc3_state& state, std::istream& file)
     return c;
 }
 
-int lc3_write_char(lc3_state& state, std::ostream& file, int chr)
+int32_t lc3_write_char(lc3_state& state, std::ostream& file, int32_t chr)
 {
     if (chr > 255 || !(isgraph(chr) || isspace(chr) || chr == '\b'))
         lc3_warning(state, LC3_INVALID_CHARACTER_WRITE, chr, 0);
     return state.writer(state, file, chr);
 }
 
-int lc3_do_write_char(lc3_state&, std::ostream& file, int chr)
+int32_t lc3_do_write_char(lc3_state&, std::ostream& file, int32_t chr)
 {
     if (!file.good()) return -1;
-    file.put((char) chr);
+    file.put(static_cast<int8_t>(chr));
     return (!file.good()) ? -1 : 0;
 }
 
-int lc3_write_str(lc3_state& state, std::function<int(lc3_state&, std::ostream&, int)> writer, std::ostream& file, const std::string& str)
+int32_t lc3_write_str(lc3_state& state, const std::function<int32_t(lc3_state&, std::ostream&, int32_t)>& writer, std::ostream& file, const std::string& str)
 {
-    for (unsigned int i = 0; i < str.size(); i++)
+    for (const auto& c : str)
     {
-        if (writer(state, file, str[i])) return -1;
+        if (writer(state, file, c)) return -1;
     }
     return 0;
 }
 
 void lc3_randomize(lc3_state& state)
 {
-    const std::array<unsigned short, 0x300>& os = (state.lc3_version == 0) ? lc3_os : lc3_osv2;
+    const std::array<uint16_t, 0x300>& os = (state.lc3_version == 0) ? lc3_os : lc3_osv2;
     // If true traps is set overwrite overwrite overwrite!
     if (state.true_traps)
     {
         // Add LC3 OS
-        memcpy(state.mem, os.data(), os.size() * sizeof(unsigned short));
+        memcpy(state.mem, os.data(), os.size() * sizeof(uint16_t));
     }
 
     // Stage 3 write over it all (even device registers).
-    for (int i = os.size(); i <= 0xFFFF; i++)
+    for (uint32_t i = os.size(); i <= 0xFFFF; i++)
         state.mem[i] = lc3_random(state);
 }
 

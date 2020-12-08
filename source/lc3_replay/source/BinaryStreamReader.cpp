@@ -30,13 +30,13 @@ BinaryStreamReader& BinaryStreamReader::operator>>(unsigned char& val)
     return *this;
 }
 
-BinaryStreamReader& BinaryStreamReader::operator>>(short& val)
+BinaryStreamReader& BinaryStreamReader::operator>>(int16_t& val)
 {
     stream.read(reinterpret_cast<char*>(&val), sizeof(val));
     return *this;
 }
 
-BinaryStreamReader& BinaryStreamReader::operator>>(unsigned short& val)
+BinaryStreamReader& BinaryStreamReader::operator>>(uint16_t& val)
 {
     stream.read(reinterpret_cast<char*>(&val), sizeof(val));
     return *this;

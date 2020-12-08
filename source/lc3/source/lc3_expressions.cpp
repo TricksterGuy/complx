@@ -8,14 +8,14 @@
 
 using namespace ExpressionEvaluator;
 
-static int lc3_get_symbol(const std::string& symbol, bool has_ref, int ref, int& error);
+static int lc3_get_symbol(const std::string& symbol, bool hasref, int ref, int& error);
 
 static lc3_state* calc_state;
 
 int get_r0(bool hasref, int ref)
 {
     if (hasref)
-        return calc_state->mem[(unsigned short)(calc_state->regs[0] + ref)];
+        return calc_state->mem[static_cast<uint16_t>(calc_state->regs[0] + ref)];
     else
         return calc_state->regs[0];
 }
@@ -23,7 +23,7 @@ int get_r0(bool hasref, int ref)
 int get_r1(bool hasref, int ref)
 {
     if (hasref)
-        return calc_state->mem[(unsigned short)(calc_state->regs[1] + ref)];
+        return calc_state->mem[static_cast<uint16_t>(calc_state->regs[1] + ref)];
     else
         return calc_state->regs[1];
 }
@@ -31,7 +31,7 @@ int get_r1(bool hasref, int ref)
 int get_r2(bool hasref, int ref)
 {
     if (hasref)
-        return calc_state->mem[(unsigned short)(calc_state->regs[2] + ref)];
+        return calc_state->mem[static_cast<uint16_t>(calc_state->regs[2] + ref)];
     else
         return calc_state->regs[2];
 }
@@ -39,7 +39,7 @@ int get_r2(bool hasref, int ref)
 int get_r3(bool hasref, int ref)
 {
     if (hasref)
-        return calc_state->mem[(unsigned short)(calc_state->regs[3] + ref)];
+        return calc_state->mem[static_cast<uint16_t>(calc_state->regs[3] + ref)];
     else
         return calc_state->regs[3];
 }
@@ -47,7 +47,7 @@ int get_r3(bool hasref, int ref)
 int get_r4(bool hasref, int ref)
 {
     if (hasref)
-        return calc_state->mem[(unsigned short)(calc_state->regs[4] + ref)];
+        return calc_state->mem[static_cast<uint16_t>(calc_state->regs[4] + ref)];
     else
         return calc_state->regs[4];
 }
@@ -55,7 +55,7 @@ int get_r4(bool hasref, int ref)
 int get_r5(bool hasref, int ref)
 {
     if (hasref)
-        return calc_state->mem[(unsigned short)(calc_state->regs[5] + ref)];
+        return calc_state->mem[static_cast<uint16_t>(calc_state->regs[5] + ref)];
     else
         return calc_state->regs[5];
 }
@@ -63,7 +63,7 @@ int get_r5(bool hasref, int ref)
 int get_r6(bool hasref, int ref)
 {
     if (hasref)
-        return calc_state->mem[(unsigned short)(calc_state->regs[6] + ref)];
+        return calc_state->mem[static_cast<uint16_t>(calc_state->regs[6] + ref)];
     else
         return calc_state->regs[6];
 }
@@ -71,7 +71,7 @@ int get_r6(bool hasref, int ref)
 int get_r7(bool hasref, int ref)
 {
     if (hasref)
-        return calc_state->mem[(unsigned short)(calc_state->regs[7] + ref)];
+        return calc_state->mem[static_cast<uint16_t>(calc_state->regs[7] + ref)];
     else
         return calc_state->regs[7];
 }
@@ -79,14 +79,14 @@ int get_r7(bool hasref, int ref)
 int get_pc(bool hasref, int ref)
 {
     if (hasref)
-        return calc_state->mem[(unsigned short)(calc_state->pc + ref)];
+        return calc_state->mem[static_cast<uint16_t>(calc_state->pc + ref)];
     else
         return calc_state->pc;
 }
 
 int get_mem(bool /*hasref*/, int ref)
 {
-    return calc_state->mem[(unsigned short) ref];
+    return calc_state->mem[static_cast<uint16_t>(ref)];
 }
 
 int lc3_get_symbol(const std::string& symbol, bool hasref, int ref, int& error)
@@ -103,12 +103,17 @@ int lc3_get_symbol(const std::string& symbol, bool hasref, int ref, int& error)
     error = 0;
 
     if (hasref)
-        return calc_state->mem[(unsigned short)(addr + ref)];
+        return calc_state->mem[static_cast<uint16_t>(addr + ref)];
     else
-        return (unsigned short)addr;
+        return static_cast<uint16_t>(addr);
 }
 
-std::string LC3CalculateException::what() const throw()
+LC3CalculateException::LC3CalculateException(const std::string& expr, unsigned int error_id) : expression(expr), id(error_id)
+{
+    message = form_error_message();
+}
+
+std::string LC3CalculateException::form_error_message() const noexcept
 {
     std::stringstream stream("Error evaluating expression ");
 
@@ -162,7 +167,7 @@ int lc3_calculate(lc3_state& state, const std::string& expr)
     return result;
 }
 
-void lc3_init_eval(void)
+void lc3_init_eval()
 {
     symbol_table["R0"] =  {EVAL_FUNCTION, {get_r0}};
     symbol_table["r0"] =  {EVAL_FUNCTION, {get_r0}};

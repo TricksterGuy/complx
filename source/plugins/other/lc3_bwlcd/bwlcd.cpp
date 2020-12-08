@@ -14,13 +14,13 @@ Plugin* create_plugin(const PluginParams& params)
     if (instance)
         return instance.get();
 
-    unsigned short width, height, startaddr, initaddr;
+    uint16_t width, height, startaddr, initaddr;
     unsigned int oncolor = 0x606860, offcolor = 0xa0b0a0;
 
-    width = params.read_ushort_required("width");
-    height = params.read_ushort_required("height");
-    startaddr = params.read_ushort_required("startaddr");
-    initaddr = params.read_ushort_required("initaddr");
+    width = params.read_uint16_t_required("width");
+    height = params.read_uint16_t_required("height");
+    startaddr = params.read_uint16_t_required("startaddr");
+    initaddr = params.read_uint16_t_required("initaddr");
     params.read_uint("oncolor", oncolor);
     params.read_uint("offcolor", offcolor);
 
@@ -30,7 +30,7 @@ Plugin* create_plugin(const PluginParams& params)
         return nullptr;
     }*/
 
-    instance.reset(new BWLCDPlugin(width, height, initaddr, startaddr, offcolor, oncolor));
+    instance = std::make_unique<BWLCDPlugin>(width, height, initaddr, startaddr, offcolor, oncolor);
 
     return instance.get();
 }
@@ -41,8 +41,8 @@ void destroy_plugin(Plugin* ptr)
         instance.reset();
 }
 
-BWLCDPlugin::BWLCDPlugin(unsigned short _width, unsigned short _height, unsigned short _initaddr,
-                         unsigned short _startaddr, unsigned int _offcolor, unsigned int _oncolor) :
+BWLCDPlugin::BWLCDPlugin(uint16_t _width, uint16_t _height, uint16_t _initaddr,
+                         uint16_t _startaddr, unsigned int _offcolor, unsigned int _oncolor) :
     Plugin(BWLCD_MAJOR_VERSION, BWLCD_MINOR_VERSION, LC3_OTHER, "Black & White LCD Display"), width(_width),
     height(_height), initaddr(_initaddr), startaddr(_startaddr), offcolor(_offcolor), oncolor(_oncolor), lcd(nullptr),
     lcd_initializing(false)
@@ -72,11 +72,11 @@ void BWLCDPlugin::DestroyDisplay(wxThreadEvent& WXUNUSED(event))
     lcd = nullptr;
 }
 
-void BWLCDPlugin::OnWrite(lc3_state& state, unsigned short address, short value)
+void BWLCDPlugin::OnWrite(lc3_state& state, uint16_t address, int16_t value)
 {
     if (address == initaddr)
     {
-        unsigned short data = value;
+        uint16_t data = value;
         if (data == 0x8000U && lcd == nullptr)
         {
             wxThreadEvent* evt = new wxThreadEvent(wxEVT_COMMAND_CREATE_DISPLAY);
@@ -96,7 +96,7 @@ void BWLCDPlugin::OnWrite(lc3_state& state, unsigned short address, short value)
         {
             wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_DESTROY_DISPLAY));
         }
-        else if (static_cast<unsigned short>(state.mem[address]) == 0x8000U && data != 0x8000U && (lcd != nullptr || lcd_initializing))
+        else if (static_cast<uint16_t>(state.mem[address]) == 0x8000U && data != 0x8000U && (lcd != nullptr || lcd_initializing))
         {
             wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_DESTROY_DISPLAY));
         }
@@ -115,7 +115,7 @@ void BWLCDPlugin::OnWrite(lc3_state& state, unsigned short address, short value)
 }
 
 
-BWLCD::BWLCD(wxWindow* top, int _width, int _height, unsigned short _startaddr, unsigned int _off, unsigned int _on) :
+BWLCD::BWLCD(wxWindow* top, int _width, int _height, uint16_t _startaddr, unsigned int _off, unsigned int _on) :
     BWLCDGUI(top), state(nullptr), width(_width), height(_height), startaddr(_startaddr), off(_off), on(_on)
 {
     int x, y;

@@ -12,11 +12,11 @@ class LC3_MULTIPLY_API MultiplyPlugin : public InstructionPlugin
 public:
     MultiplyPlugin() : InstructionPlugin(MULTIPLY_MAJOR_VERSION, MULTIPLY_MINOR_VERSION, "Multiplication Plugin") {}
     std::string GetOpcode() const override;
-    unsigned short DoAssembleOne(lc3_state& state, LC3AssembleContext& context) override;
-    void OnDecode(lc3_state& state, unsigned short data, lc3_instr& instr) override;
+    uint16_t DoAssembleOne(lc3_state& state, LC3AssembleContext& context) override;
+    void OnDecode(lc3_state& state, uint16_t data, lc3_instr& instr) override;
     void OnExecute(lc3_state& state, lc3_instr& instruction, lc3_state_change& changes) override;
     std::string OnDisassemble(lc3_state& state, lc3_instr& instr, unsigned int level) override;
-    std::list<RLEColorEntry> GetInstructionColoring(unsigned short instr) const override;
+    std::list<RLEColorEntry> GetInstructionColoring(uint16_t instr) const override;
 };
 
 

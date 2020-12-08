@@ -12,7 +12,7 @@
   * @param register_fill_value ignored if randomize_registers is true otherwise sets registers to this value.
   * @param memory_fill_value ignored if randomize_memory is true otherwise sets memory to this value (except for TVT, IVT and lc3 os code).
   */
-void LC3_API lc3_init(lc3_state& state, bool randomize_registers = true, bool randomize_memory = true, short register_fill_value = 0, short memory_fill_value = 0);
+void LC3_API lc3_init(lc3_state& state, bool randomize_registers = true, bool randomize_memory = true, int16_t register_fill_value = 0, int16_t memory_fill_value = 0);
 /** lc3_set_version
   * Sets the lc3's version should be done after lc3_init.
   * This function will overwrite the LC3OS code with the proper OS for that version.

@@ -14,14 +14,15 @@ int get_r7(bool, int);
 int get_pc(bool, int);
 int get_mem(bool, int);
 
-class LC3_API LC3CalculateException
+class LC3_API LC3CalculateException : public std::exception
 {
 public:
-    LC3CalculateException(const std::string& expr, unsigned int error_id) : expression(expr), id(error_id) {}
-    ~LC3CalculateException() throw() {}
-    std::string what() const throw();
+    LC3CalculateException(const std::string& expr, unsigned int error_id);
+    const char* what() const noexcept override { return message.c_str(); }
     unsigned int get_id() const { return id; }
 private:
+    std::string form_error_message() const noexcept;
+    std::string message;
     std::string expression;
     unsigned int id;
 };
@@ -40,8 +41,7 @@ int LC3_API lc3_calculate(lc3_state& state, const std::string& expr);
 /** lc3_int_eval
   *
   * Initializes expression evaluator for symbols.
-  * Users should not need to call this directly.
   */
-void lc3_init_eval(void);
+void lc3_init_eval();
 
 #endif

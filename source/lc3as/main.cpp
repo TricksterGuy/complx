@@ -38,7 +38,7 @@ usage:
             goto usage;
         }
         else
-            params.push_back(argv[i]);
+            params.emplace_back(argv[i]);
     }
 
     if (params.empty())
@@ -60,18 +60,11 @@ usage:
     {
         lc3_assemble(filename, outfile_prefix, options);
     }
-    catch (std::vector<LC3AssembleException> e)
+    catch (const LC3AssembleException& e)
     {
-        for (const auto& ex : e)
-            printf("%s\n", ex.what().c_str());
+        printf("%s\n", e.what());
         return EXIT_FAILURE;
     }
-    catch (LC3AssembleException e)
-    {
-        printf("%s\n", e.what().c_str());
-        return EXIT_FAILURE;
-    }
-
 
     return EXIT_SUCCESS;
 }

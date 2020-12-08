@@ -5,8 +5,8 @@
 #include <string>
 
 #include "lc3/lc3.hpp"
-#include "lc3/lc3_parser.hpp"
 #include "lc3/lc3_params.hpp"
+#include "lc3/lc3_parser.hpp"
 
 enum LC3_API PluginTypes
 {
@@ -44,7 +44,9 @@ public:
       * And if the plugin is capable of sending interrupts and its interrupt vector if it is capable
       */
     Plugin(unsigned int mymajor, unsigned int myminor, unsigned int _type = INVALID, const std::string& desc = "");
-    virtual ~Plugin() {}
+    virtual ~Plugin() = default;
+    Plugin& operator=(const Plugin& other) = delete;
+    Plugin(const Plugin& other) = delete;
 
     /** Gets Major Version */
     unsigned int GetMajorVersion() const {return major;}
@@ -57,7 +59,7 @@ public:
     /** Is this plugin capable of sending interrupts to lc3 */
     bool CanInterrupt() const {return !interrupts.empty();}
     /** Get the bound addresses the plugin will intercept reads/writes from */
-    const std::set<unsigned short>& GetBoundAddresses() const {return addresses;}
+    const std::set<uint16_t>& GetBoundAddresses() const {return addresses;}
     /** Get the bound interrupt vectors the plugin will send from */
     const std::set<unsigned char>& GetBoundInterrupts() const {return interrupts;}
     /** Able to run in lc3_test */
@@ -71,7 +73,7 @@ public:
       * @param address Address to be read from.
       * @return the data at that address, or some value dynamically.
       */
-    virtual short OnRead(lc3_state& state, unsigned short address) {return state.mem[address];}
+    virtual int16_t OnRead(lc3_state& state, uint16_t address) {return state.mem[address];}
     /** OnWrite
       *
       * Called when a memory address is about to be written to allowing you to do whatever you want with the value.
@@ -80,7 +82,7 @@ public:
       * @param address Address to written to.
       * @param value Value to write at address.
       */
-    virtual void OnWrite(lc3_state& state, unsigned short address, short value) {state.mem[address] = value;}
+    virtual void OnWrite(lc3_state& state, uint16_t address, int16_t value) {state.mem[address] = value;}
     /** OnTick
       *
       * Called at the beginning of the instruction execution cycle exactly before an instruction is fetched.
@@ -111,7 +113,7 @@ protected:
       * This should only be called in your Plugin's constructor.
       * @param address Address to subscribe to.
       */
-    void BindAddress(unsigned short address);
+    void BindAddress(uint16_t address);
     /** BindNAddresses
       *
       * Bind the plugin to subscribe for updates for address range [address, address + length).
@@ -120,7 +122,7 @@ protected:
       * @param address Starting address to subscribe to.
       * @param length Number of address to subscribe to starting from address.
       */
-    void BindNAddresses(unsigned short address, unsigned short length);
+    void BindNAddresses(uint16_t address, uint16_t length);
     /** BindInterrupt
       *
       * Bind the plugin to use an Interrupt Vector.
@@ -131,14 +133,12 @@ protected:
     void BindInterrupt(unsigned char int_vector);
 
 private:
-    Plugin& operator=(const Plugin& other);
-    Plugin(const Plugin& other);
     unsigned int major;
     unsigned int minor;
     unsigned int type;
     std::string desc;
-    bool locked;
-    std::set<unsigned short> addresses;
+    bool locked = false;
+    std::set<uint16_t> addresses;
     std::set<unsigned char> interrupts;
 };
 
@@ -155,7 +155,7 @@ class LC3_API TrapFunctionPlugin : public Plugin
 {
 public:
     TrapFunctionPlugin(unsigned int major, unsigned int minor, const std::string& desc, unsigned char vector);
-    virtual ~TrapFunctionPlugin() {}
+    ~TrapFunctionPlugin() override = default;
     /** Gets special trap name so saying TrapName in assembly code automatically assembles to 0xF0<VECTOR8> */
     virtual std::string GetTrapName() const = 0;
     /** Gets trap vector plugin is bound to */
@@ -215,7 +215,7 @@ class LC3_API InstructionPlugin : public Plugin
 {
 public:
     InstructionPlugin(unsigned int major, unsigned int minor, const std::string& desc);
-    virtual ~InstructionPlugin() {}
+    ~InstructionPlugin() override = default;
     /** A note to the assembler what the opcode of the new instruction is called */
     virtual std::string GetOpcode() const = 0;
     /** DoAssembleOne
@@ -226,7 +226,7 @@ public:
       * @param state LC3State object.
       * @param context LC3AssembleContext.
       */
-    virtual unsigned short DoAssembleOne(lc3_state& state, LC3AssembleContext& context) = 0;
+    virtual uint16_t DoAssembleOne(lc3_state& state, LC3AssembleContext& context) = 0;
     /** OnDecode
       *
       * Called when the new instruction is decoded.
@@ -235,7 +235,7 @@ public:
       * @param data Bits to decode.
       * @param instr lc3_instr object to fill in.
       */
-    virtual void OnDecode(lc3_state& state, unsigned short data, lc3_instr& instr) = 0;
+    virtual void OnDecode(lc3_state& state, uint16_t data, lc3_instr& instr) = 0;
     /** OnExecute
       *
       * Called when the new instruction is executed.
@@ -262,13 +262,13 @@ public:
       * @param instr decoded bits for the instruction.
       * @return A vector containing several color entries.
       */
-    virtual std::list<RLEColorEntry> GetInstructionColoring(unsigned short instr) const;
+    virtual std::list<RLEColorEntry> GetInstructionColoring(uint16_t instr) const;
 };
 
 /** Typedef of function that handles creation of a plugin */
-typedef Plugin* (*PluginCreateFunc)(const PluginParams&);
+using PluginCreateFunc = std::function<Plugin*(const PluginParams&)>;
 /** Typedef of function that handles destroying a plugin */
-typedef void (*PluginDestroyFunc)(Plugin*);
+using PluginDestroyFunc = std::function<void(Plugin*)>;
 
 
 struct PluginInfo

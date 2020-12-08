@@ -154,13 +154,13 @@ std::string base64_decode(const std::string& str)
     }
 }
 
-std::pair<unsigned short, int> write_data(lc3_state& state, unsigned short address, const std::vector<short>& params, int i = 0)
+std::pair<uint16_t, int> write_data(lc3_state& state, uint16_t address, const std::vector<int16_t>& params, int i = 0)
 {
     while (static_cast<size_t>(i) < params.size())
     {
-        DataItem type = static_cast<DataItem>(params[i]);
-        short length = 0;
-        std::pair<unsigned short, int> address_i;
+        auto type = static_cast<DataItem>(params[i]);
+        int16_t length = 0;
+        std::pair<uint16_t, int> address_i;
         switch(type)
         {
             case DataItem::Number:
@@ -198,15 +198,15 @@ std::pair<unsigned short, int> write_data(lc3_state& state, unsigned short addre
 }
 
 
-std::pair<std::string, int> describe_data(const std::vector<short>& params, int i = 0)
+std::pair<std::string, int> describe_data(const std::vector<int16_t>& params, int i = 0)
 {
     std::stringstream out;
 
     out << "(";
     while (static_cast<size_t>(i) < params.size())
     {
-        DataItem type = static_cast<DataItem>(params[i]);
-        short length = 0;
+        auto type = static_cast<DataItem>(params[i]);
+        int16_t length = 0;
         std::pair<std::string, int> str_i;
         switch(type)
         {
@@ -252,7 +252,7 @@ std::pair<std::string, int> describe_data(const std::vector<short>& params, int 
     return std::make_pair(out.str(), -1);
 }
 
-std::string describe_node(const std::vector<short>& params)
+std::string describe_node(const std::vector<int16_t>& params)
 {
     if (static_cast<DataItem>(params[0]) != DataItem::Array)
         return "invalid-node";
@@ -310,7 +310,7 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
         unsigned int value;
 
         bstream >> raw_id;
-        PreconditionFlag id = static_cast<PreconditionFlag>(raw_id);
+        auto id = static_cast<PreconditionFlag>(raw_id);
 
         if (!bstream.Ok())
             throw "Error reading replay string.";
@@ -354,7 +354,7 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
         }
     }
 
-    short random_value;
+    int16_t random_value;
     switch (memory_strategy)
     {
         case 0:
@@ -399,10 +399,10 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
         unsigned char raw_id;
 
         std::string label;
-        std::vector<short> params;
+        std::vector<int16_t> params;
 
         bstream >> raw_id;
-        PreconditionFlag id = static_cast<PreconditionFlag>(raw_id);
+        auto id = static_cast<PreconditionFlag>(raw_id);
 
         if (!bstream.Ok())
             throw "Error reading replay string.";
@@ -417,7 +417,7 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
         if (!bstream.Ok())
             throw "Error reading replay string.";
 
-        unsigned short address;
+        uint16_t address;
         int address_calc;
         switch (id)
         {
@@ -433,7 +433,7 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
                     error << "Symbol " << label << " not found, perhaps you don't have the correct file loaded?";
                     throw error.str();
                 }
-                address = static_cast<unsigned short>(address_calc);
+                address = static_cast<uint16_t>(address_calc);
                 break;
             case PreconditionFlag::DIRECT_SET:
             case PreconditionFlag::DIRECT_STRING:
@@ -446,7 +446,7 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
                     error << "Address " << label << " not inside range for an address.";
                     throw error.str();
                 }
-                address = static_cast<unsigned short>(address_calc);
+                address = static_cast<uint16_t>(address_calc);
                 break;
             default:
                 address = 0;
@@ -465,18 +465,18 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
                 state.mem[address] = params[0];
                 break;
             case PreconditionFlag::POINTER:
-                state.mem[static_cast<unsigned short>(state.mem[address])] = params[0];
+                state.mem[static_cast<uint16_t>(state.mem[address])] = params[0];
                 break;
             case PreconditionFlag::STRING:
-                state.mem[static_cast<unsigned short>(state.mem[address] + params.size())] = 0;
+                state.mem[static_cast<uint16_t>(state.mem[address] + params.size())] = 0;
                 // fall through
             case PreconditionFlag::ARRAY:
                 for (unsigned int i = 0; i < params.size(); i++)
-                    state.mem[static_cast<unsigned short>(state.mem[address]) + i] = params[i];
+                    state.mem[static_cast<uint16_t>(state.mem[address]) + i] = params[i];
                 break;
             case PreconditionFlag::INPUT:
-                for (unsigned int i = 0; i < params.size(); i++)
-                    newinput.put(params[i] & 0xff);
+                for (const auto& param : params)
+                    newinput.put(param & 0xff);
                 break;
             case PreconditionFlag::SUBROUTINE:
                 state.pc = address;
@@ -484,7 +484,7 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
                 state.regs[6] = params[1] - (params.size() - 3);
                 state.regs[7] = params[2];
                 for (unsigned int i = 3; i < params.size(); i++)
-                    state.mem[static_cast<unsigned short>(state.regs[6] + (i - 3))] = params[i];
+                    state.mem[static_cast<uint16_t>(state.regs[6] + (i - 3))] = params[i];
                 break;
             case PreconditionFlag::PASS_BY_REGS:
                 state.pc = address;
@@ -530,7 +530,7 @@ std::string lc3_describe_replay(const std::string& replay_string)
         unsigned int value;
 
         bstream >> raw_id;
-        PreconditionFlag id = static_cast<PreconditionFlag>(raw_id);
+        auto id = static_cast<PreconditionFlag>(raw_id);
 
         if (id == PreconditionFlag::END_OF_ENVIRONMENT)
             break;
@@ -576,10 +576,10 @@ std::string lc3_describe_replay(const std::string& replay_string)
         unsigned char raw_id;
 
         std::string label;
-        std::vector<short> params;
+        std::vector<int16_t> params;
 
         bstream >> raw_id;
-        PreconditionFlag id = static_cast<PreconditionFlag>(raw_id);
+        auto id = static_cast<PreconditionFlag>(raw_id);
 
         if (id == PreconditionFlag::END_OF_INPUT)
             break;

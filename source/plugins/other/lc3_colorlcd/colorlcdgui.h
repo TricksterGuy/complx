@@ -41,7 +41,7 @@ protected:
 
 public:
 
-    COLORLCDGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Display"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxCAPTION|wxDIALOG_NO_PARENT|wxRESIZE_BORDER );
+    COLORLCDGUI( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Display"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, int64_t style = wxCAPTION|wxDIALOG_NO_PARENT|wxRESIZE_BORDER );
     ~COLORLCDGUI();
 
 };

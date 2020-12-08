@@ -18,7 +18,7 @@ wxDECLARE_EVENT(wxEVT_COMMAND_DESTROY_DISPLAY, wxThreadEvent);
 class ColorLCD : public COLORLCDGUI
 {
 public:
-    ColorLCD(wxWindow* top, int width, int height, unsigned short startaddr, lc3_state* state);
+    ColorLCD(wxWindow* top, int width, int height, uint16_t startaddr, lc3_state* state);
     virtual void OnUpdate(wxTimerEvent& event);
     void OnPaint(wxPaintEvent& event) override;
 private:
@@ -26,24 +26,24 @@ private:
     lc3_state* state;
     int width;
     int height;
-    unsigned short startaddr;
+    uint16_t startaddr;
 };
 
 class LC3_COLORLCD_API ColorLCDPlugin : public wxEvtHandler, public Plugin
 {
 public:
-    ColorLCDPlugin(unsigned short width, unsigned short height, unsigned short initaddr, unsigned short startaddr);
-    ~ColorLCDPlugin();
-    void OnWrite(lc3_state& state, unsigned short address, short value) override;
+    ColorLCDPlugin(uint16_t width, uint16_t height, uint16_t initaddr, uint16_t startaddr);
+    ~ColorLCDPlugin() override;
+    void OnWrite(lc3_state& state, uint16_t address, int16_t value) override;
     void InitDisplay(wxThreadEvent& event);
     void UpdateDisplay(wxThreadEvent& event);
     void DestroyDisplay(wxThreadEvent& event);
     bool AvailableInLC3Test() const override {return false;}
 private:
-    unsigned short width;
-    unsigned short height;
-    unsigned short initaddr;
-    unsigned short startaddr;
+    uint16_t width;
+    uint16_t height;
+    uint16_t initaddr;
+    uint16_t startaddr;
     ColorLCD* lcd;
     bool lcd_initializing;
 

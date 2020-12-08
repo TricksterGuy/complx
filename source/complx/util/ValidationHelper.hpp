@@ -6,6 +6,6 @@
 bool ValidateHexValue(const wxString& str);
 bool ValidateDecimalValue(const wxString& str);
 
-short ParseValueOrDie(const wxString& str);
+int16_t ParseValueOrDie(const wxString& str);
 
 #endif

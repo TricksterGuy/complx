@@ -26,7 +26,7 @@ BOOST_FIXTURE_TEST_CASE(TestLea, LC3Revision2019Test)
 {
     lc3_instr instr;
     // LEA R0, #-1      : op, reg, pc_offset
-    memoryoffset_instr lea = memoryoffset_instr({LEA_INSTR, 0, -1});
+    memoryoffset_instruction lea = memoryoffset_instruction({LEA_INSTR, 0, -1});
     instr.mem.offset = lea;
     state.n = 1;
     state.z = 0;

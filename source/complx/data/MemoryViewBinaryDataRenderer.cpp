@@ -90,10 +90,10 @@ wxWindow* MemoryViewBinaryDataRenderer::CreateEditorCtrl(wxWindow* parent, wxRec
     Lc3BinaryDisplayData data;
     data << variant;
 
-    wxTextCtrl* ctrl = new wxTextCtrl(parent, wxID_ANY, data.binary,
-                                      labelRect.GetPosition(),
-                                      labelRect.GetSize(),
-                                      wxTE_PROCESS_ENTER);
+    auto* ctrl = new wxTextCtrl(parent, wxID_ANY, data.binary,
+                                labelRect.GetPosition(),
+                                labelRect.GetSize(),
+                                wxTE_PROCESS_ENTER);
 
     wxTextValidator validator(wxFILTER_INCLUDE_CHAR_LIST);
     validator.SetCharIncludes("01");
@@ -123,15 +123,15 @@ wxWindow* MemoryViewBinaryDataRenderer::CreateEditorCtrl(wxWindow* parent, wxRec
 
 bool MemoryViewBinaryDataRenderer::GetValueFromEditorCtrl(wxWindow* editor, wxVariant& value)
 {
-    long binary;
+    int64_t binary;
 
-    wxTextCtrl* text = dynamic_cast<wxTextCtrl*>(editor);
+    auto* text = dynamic_cast<wxTextCtrl*>(editor);
     wxASSERT(text);
 
     bool ret = text->GetValue().ToCLong(&binary, 2);
     wxASSERT(ret);
 
-    Lc3BinaryDisplayData data(static_cast<unsigned short>(binary), wxEmptyString, std::list<RLEColorEntry>());
+    Lc3BinaryDisplayData data(static_cast<uint16_t>(binary), wxEmptyString, std::list<RLEColorEntry>());
 
     value << data;
 

@@ -1,25 +1,25 @@
 #ifndef EXPRESSION_EVALUATOR_HPP
 #define EXPRESSION_EVALUATOR_HPP
 
+#include <map>
 #include <stack>
 #include <string>
-#include <map>
 
 namespace ExpressionEvaluator
 {
 
-    typedef union eval_value
+    union eval_value
     {
         int (*func)(bool, int);
         int value;
-    } eval_value;
+    };
 
-    typedef struct eval_type
+    struct eval_type
     {
         int type;
         eval_value eval;
 
-    } eval_type;
+    };
 
     extern std::map<std::string, eval_type> symbol_table;
     extern int (*OnUndefinedSymbol)(const std::string& symbol, bool hasref, int ref, int& error);
@@ -41,7 +41,7 @@ namespace ExpressionEvaluator
         EVAL_FUNCTION = 1
     };
 
-    int Calculate(std::string expr, int &r);
+    int Calculate(const std::string& expr, int &r);
 
 }
 

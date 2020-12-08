@@ -22,7 +22,7 @@ InstructionColoring boColoring   = {{"DR_COLOR", 96, 0, 0, 3},         {"SR_COLO
 InstructionColoring defColoring  = {{"UNUSED_BITS_COLOR", 0, 0, 0, 12}                                                                                                             };
 InstructionColoring dataColoring = {{"UNUSED_BITS_COLOR", 0, 0, 0, 16}};
 
-wxString FormBinary(unsigned short value)
+wxString FormBinary(uint16_t value)
 {
     std::stringstream binary;
     std::bitset<16> b = value;
@@ -30,7 +30,7 @@ wxString FormBinary(unsigned short value)
     return binary.str();
 }
 
-std::list<RLEColorEntry> ConstructRLEColorEntries(unsigned short instruction,  const InstructionPlugin* instruction_plugin)
+std::list<RLEColorEntry> ConstructRLEColorEntries(uint16_t instruction,  const InstructionPlugin* instruction_plugin)
 {
     // Data. Two cases.
     //  1) If BR instruction and NZP bits are 0.
@@ -40,7 +40,7 @@ std::list<RLEColorEntry> ConstructRLEColorEntries(unsigned short instruction,  c
 
     std::list<RLEColorEntry> colors;
 
-    unsigned short opcode = instruction >> 12;
+    uint16_t opcode = instruction >> 12;
     switch (opcode)
     {
         case BR_INSTR:
@@ -99,23 +99,12 @@ std::list<RLEColorEntry> ConstructRLEColorEntries(unsigned short instruction,  c
 IMPLEMENT_DYNAMIC_CLASS(Lc3BinaryDisplayData, wxObject)
 IMPLEMENT_VARIANT_OBJECT(Lc3BinaryDisplayData)
 
-Lc3BinaryDisplayData& Lc3BinaryDisplayData::operator=(const Lc3BinaryDisplayData& other)
-{
-    if (this != &other)
-    {
-        instruction = other.instruction;
-        binary = other.binary;
-        colors = other.colors;
-    }
-    return *this;
-}
-
 bool Lc3BinaryDisplayData::operator==(const Lc3BinaryDisplayData& other) const
 {
     return instruction == other.instruction && binary == other.binary && colors == other.colors;
 }
 
-Lc3BinaryDisplayData ConstructBinaryDisplayData(unsigned short instruction, const InstructionPlugin* instruction_plugin)
+Lc3BinaryDisplayData ConstructBinaryDisplayData(uint16_t instruction, const InstructionPlugin* instruction_plugin)
 {
     wxString binary = FormBinary(instruction);
     std::list<RLEColorEntry> colors = ConstructRLEColorEntries(instruction, instruction_plugin);

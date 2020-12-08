@@ -1,8 +1,8 @@
 #include "lc3/lc3_plugin.hpp"
 
 #include <algorithm>
-#include <sstream>
 #include <dlfcn.h>
+#include <sstream>
 
 // Ugh macros that expand to gnu_dev_major/minor.  Undefined!
 #undef major
@@ -13,7 +13,7 @@
 #endif
 
 #ifdef NDEBUG
-static std::string FILENAME_SUFFIX = "";
+static std::string FILENAME_SUFFIX;
 #else
 static std::string FILENAME_SUFFIX = "d";
 #endif
@@ -22,7 +22,7 @@ static std::string FILENAME_SUFFIX = "d";
 #ifdef PLUGIN_INSTALL_PREFIX
 static std::string PLUGIN_INSTALL_DIR = PLUGIN_INSTALL_PREFIX;
 #else
-static std::string PLUGIN_INSTALL_DIR = "";
+static std::string PLUGIN_INSTALL_DIR;
 #endif
 
 void lc3_set_plugin_install_dir(const std::string& dir)
@@ -36,19 +36,19 @@ Plugin::Plugin(unsigned int mymajor, unsigned int myminor, unsigned int _type, c
 
 }
 
-void Plugin::BindAddress(unsigned short address)
+void Plugin::BindAddress(uint16_t address)
 {
     addresses.insert(address);
 }
 
-void Plugin::BindNAddresses(unsigned short address, unsigned short length)
+void Plugin::BindNAddresses(uint16_t address, uint16_t length)
 {
     if (address + length >= 0x10000U)
     {
         fprintf(stderr, "BindNAddresses address range (x%04x, x%05x) outside memory. Ignoring...\n", address, static_cast<int>(address) + length);
         return;
     }
-    for (unsigned short i = address; i < address + length; i++)
+    for (uint16_t i = address; i < address + length; i++)
         BindAddress(i);
 }
 
@@ -69,7 +69,7 @@ InstructionPlugin::InstructionPlugin(unsigned int major, unsigned int minor, con
 
 }
 
-std::list<RLEColorEntry> InstructionPlugin::GetInstructionColoring(unsigned short) const
+std::list<RLEColorEntry> InstructionPlugin::GetInstructionColoring(uint16_t) const
 {
     // By default do nothing. The GUI will fill this with the default unused bits color.
     std::list<RLEColorEntry> answer;
@@ -90,8 +90,10 @@ void lc3_install_plugin(lc3_state& state, const std::string& filename, const std
     if(hndl == nullptr)
         throw LC3PluginException(filename, full_path, dlerror());
 
-    PluginCreateFunc mkr = (PluginCreateFunc) dlsym(hndl, "create_plugin");
-    PluginDestroyFunc dstry = (PluginDestroyFunc) dlsym(hndl, "destroy_plugin");
+    using RawPluginCreateFunc = Plugin*(const PluginParams&);
+    PluginCreateFunc mkr = reinterpret_cast<RawPluginCreateFunc*>(dlsym(hndl, "create_plugin"));
+    using RawPluginDestroyFunc = void(Plugin*);
+    PluginDestroyFunc dstry = reinterpret_cast<RawPluginDestroyFunc*>(dlsym(hndl, "destroy_plugin"));
 
     // If failed to follow format (needs a creation and destruction function) not valid
     if (mkr == nullptr || dstry == nullptr)

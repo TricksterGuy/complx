@@ -1,8 +1,8 @@
 #include "lc3/lc3_runner.hpp"
 
-#include <cstring>
 #include <cassert>
 #include <cstdlib>
+#include <cstring>
 #include <dlfcn.h>
 #include <iostream>
 #include <istream>
@@ -25,29 +25,29 @@ void lc3_trace(lc3_state& state)
     snprintf(buf, 128, "instr: %s", lc3_disassemble(state, state.mem[state.pc], state.pc, 1).c_str());
     stream << buf;
 
-    snprintf(buf, 128, " (%04x)\n", static_cast<unsigned short>(state.mem[state.pc]));
+    snprintf(buf, 128, " (%04x)\n", static_cast<uint16_t>(state.mem[state.pc]));
     stream << buf;
 
     snprintf(buf, 128, "R0 %6d|x%04x\tR1 %6d|x%04x\tR2 %6d|x%04x\tR3 %6d|x%04x\n",
-             state.regs[0], static_cast<unsigned short>(state.regs[0]),
-             state.regs[1], static_cast<unsigned short>(state.regs[1]),
-             state.regs[2], static_cast<unsigned short>(state.regs[2]),
-             state.regs[3], static_cast<unsigned short>(state.regs[3]));
+             state.regs[0], static_cast<uint16_t>(state.regs[0]),
+             state.regs[1], static_cast<uint16_t>(state.regs[1]),
+             state.regs[2], static_cast<uint16_t>(state.regs[2]),
+             state.regs[3], static_cast<uint16_t>(state.regs[3]));
     stream << buf;
 
 
     snprintf(buf, 128, "R4 %6d|x%04x\tR5 %6d|x%04x\tR6 %6d|x%04x\tR7 %6d|x%04x\n",
-             state.regs[4], static_cast<unsigned short>(state.regs[4]),
-             state.regs[5], static_cast<unsigned short>(state.regs[5]),
-             state.regs[6], static_cast<unsigned short>(state.regs[6]),
-             state.regs[7], static_cast<unsigned short>(state.regs[7]));
+             state.regs[4], static_cast<uint16_t>(state.regs[4]),
+             state.regs[5], static_cast<uint16_t>(state.regs[5]),
+             state.regs[6], static_cast<uint16_t>(state.regs[6]),
+             state.regs[7], static_cast<uint16_t>(state.regs[7]));
     stream << buf;
 
     snprintf(buf, 128, "CC: %s\n\n", (state.n ? "N" : (state.z ? "Z" : "P")));
     stream << buf;
 }
 
-void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory, short register_fill_value, short memory_fill_value)
+void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory, int16_t register_fill_value, int16_t memory_fill_value)
 {
     state.dist.reset();
     state.rng.seed(state.default_seed);
@@ -71,7 +71,7 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     state.priority = 0;
 
     // Set Control Flags
-    short rand_value = randomize_registers ? lc3_random(state) : register_fill_value;
+    int16_t rand_value = randomize_registers ? lc3_random(state) : register_fill_value;
     state.n = rand_value < 0;
     state.z = rand_value == 0;
     state.p = rand_value > 0;
@@ -116,12 +116,11 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     }
     else
     {
-        for (unsigned int i = 0; i < 65536; i++)
-            state.mem[i] = memory_fill_value;
+        std::fill(state.mem, state.mem + 65536, memory_fill_value);
     }
 
     // Add LC3 OS
-    memcpy(state.mem, lc3_osv2.data(), lc3_osv2.size() * sizeof(unsigned short));
+    memcpy(state.mem, lc3_osv2.data(), lc3_osv2.size() * sizeof(uint16_t));
 
     // Clear plugins
     lc3_remove_plugins(state);
@@ -162,8 +161,8 @@ void lc3_set_version(lc3_state& state, int version)
     if (version >=0 && version <= 1)
     {
         state.lc3_version = version;
-        const std::array<unsigned short, 0x300>& os = (version == 0) ? lc3_os : lc3_osv2;
-        memcpy(state.mem, os.data(), os.size() * sizeof(unsigned short));
+        const std::array<uint16_t, 0x300>& os = (version == 0) ? lc3_os : lc3_osv2;
+        memcpy(state.mem, os.data(), os.size() * sizeof(uint16_t));
     }
     else
     {
@@ -180,25 +179,29 @@ void lc3_remove_plugins(lc3_state& state)
     state.interruptPlugin.clear();
 
     // Destroy all plugins
-    for (std::map<std::string, PluginInfo>::const_iterator i = state.filePlugin.begin(); i != state.filePlugin.end(); ++i)
+    for (const auto& file_plugin : state.filePlugin)
     {
-        const PluginInfo& infos = i->second;
+        const PluginInfo& infos = file_plugin.second;
         infos.destroy(infos.plugin);
         dlclose(infos.handle);
     }
     state.filePlugin.clear();
 
     // Set up "dummy plugins" to sit on reserved addresses
-    state.trapPlugins[0x20] = nullptr;
-    state.trapPlugins[0x21] = nullptr;
-    state.trapPlugins[0x22] = nullptr;
-    state.trapPlugins[0x23] = nullptr;
-    state.trapPlugins[0x24] = nullptr;
-    state.trapPlugins[0x25] = nullptr;
+    state.trapPlugins[TRAP_GETC]  = nullptr;
+    state.trapPlugins[TRAP_OUT]   = nullptr;
+    state.trapPlugins[TRAP_PUTS]  = nullptr;
+    state.trapPlugins[TRAP_IN]    = nullptr;
+    state.trapPlugins[TRAP_PUTSP] = nullptr;
+    state.trapPlugins[TRAP_HALT]  = nullptr;
 
-    state.address_plugins[0xFE00] = nullptr;
-    state.address_plugins[0xFE02] = nullptr;
-    state.address_plugins[0xFFFE] = nullptr;
+    state.address_plugins[DEV_KBSR] = nullptr;
+    state.address_plugins[DEV_KBDR] = nullptr;
+    state.address_plugins[DEV_DSR]  = nullptr;
+    state.address_plugins[DEV_DDR]  = nullptr;
+    state.address_plugins[DEV_MCR]  = nullptr;
+    if (state.lc3_version == 1)
+        state.address_plugins[DEV_PSR] = nullptr;
 }
 
 void lc3_run(lc3_state& state)
@@ -229,13 +232,13 @@ void lc3_step(lc3_state& state)
     // If we are halted then don't step.
     if (state.halted) return;
 
-    if (state.trace)
+    if (state.trace != nullptr)
         lc3_trace(state);
 
     // Tick all plugins
     lc3_tick_plugins(state);
     // Fetch Instruction
-    unsigned short data = state.mem[state.pc];
+    uint16_t data = state.mem[state.pc];
     // Test for blackbox (If the line was a JSR statement and it had a blackbox).
     bool blackbox_finish = lc3_blackbox_test(state);
     // Increment PC
@@ -291,12 +294,8 @@ void lc3_step(lc3_state& state)
     if (!state.interrupt_enabled) return;
 
     // Chime in on all observers.
-    std::list<interrupt_test_func>::iterator i;
-    for (i = state.interrupt_test.begin(); i != state.interrupt_test.end(); ++i)
-    {
-        interrupt_test_func func = *i;
+    for (const auto& func : state.interrupt_test)
         func(state);
-    }
 
     // Interrupt?
     if (!lc3_interrupt(state)) return;
@@ -351,9 +350,8 @@ void lc3_back(lc3_state& state)
         }
         else if (changes.changes == LC3_MULTI_CHANGE)
         {
-            for (unsigned int i = 0; i < changes.info.size(); i++)
+            for (const auto& info : changes.info)
             {
-                lc3_change_info& info = changes.info[i];
                 if (info.is_reg)
                 {
                     assert(info.location < 0x7);
@@ -535,12 +533,12 @@ bool lc3_interrupt(lc3_state& state)
     if (state.interrupts.empty()) return false;
 
     int my_priority = state.priority;
-    int max_priority = -1, max_vector = -1;
+    int max_priority = -1;
+    int max_vector = -1;
 
     // Try to find a interrupt with higher priority
-    std::list<lc3_interrupt_req>::iterator i;
-    std::list<lc3_interrupt_req>::iterator max_pos;
-    for (i = state.interrupts.begin(); i != state.interrupts.end(); ++i)
+    auto max_pos = state.interrupts.begin();
+    for (auto i = state.interrupts.begin(); i != state.interrupts.end(); ++i)
     {
         const lc3_interrupt_req& inter = *i;
         // We will be interrupted
@@ -566,13 +564,13 @@ bool lc3_interrupt(lc3_state& state)
     if (state.privilege) // in user mode
     {
         state.savedusp = state.regs[6];
-        state.regs[6] = state.savedssp;
+        state.regs[6] = static_cast<int16_t>(state.savedssp);
     }
     // push PSR&PC to STACK
     int psr = (state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p;
     state.regs[6] -= 2;
-    state.mem[state.regs[6] + 1] = psr;
-    state.mem[state.regs[6]] = state.pc;
+    state.mem[state.regs[6] + 1] = static_cast<int16_t>(psr);
+    state.mem[state.regs[6]] = static_cast<int16_t>(state.pc);
 
     // Set up new PSR
     state.privilege = 0;
@@ -597,10 +595,7 @@ void lc3_keyboard_interrupt(lc3_state& state)
 
 void lc3_signal_interrupt(lc3_state& state, int priority, int vector)
 {
-    lc3_interrupt_req interrupt;
-    interrupt.vector = vector;
-    interrupt.priority = priority;
-    state.interrupts.push_back(interrupt);
+    state.interrupts.push_back(lc3_interrupt_req{static_cast<unsigned char>(vector), static_cast<unsigned char>(priority)});
 }
 
 void lc3_check_keyboard_interrupt(lc3_state& state)
@@ -610,7 +605,7 @@ void lc3_check_keyboard_interrupt(lc3_state& state)
     if (state.interrupt_vector != 0x80)
     {
         // If interrupts are enabled for keyboard and interrupts are enabled and there is a character
-        if (((state.mem[0xFE00] >> 14) & 1) && state.interrupt_enabled && state.input->peek() != EOF)
+        if (((state.mem[DEV_KBSR] >> 14) & 1) && state.interrupt_enabled && state.input->peek() != EOF)
         {
             state.keyboard_int_counter++;
             if (state.keyboard_int_counter >= state.keyboard_int_delay)
@@ -625,14 +620,10 @@ void lc3_check_keyboard_interrupt(lc3_state& state)
 bool lc3_signal_interrupt_once(lc3_state& state, int priority, int vector)
 {
     // Try to find this interrupt
-    std::list<lc3_interrupt_req>::iterator i;
-    for (i = state.interrupts.begin(); i != state.interrupts.end(); ++i)
+    for (const auto& inter : state.interrupts)
     {
-        const lc3_interrupt_req& inter = *i;
         if (inter.priority == priority && inter.vector == vector)
-        {
             return false;
-        }
     }
     lc3_signal_interrupt(state, priority, vector);
     return true;
@@ -642,18 +633,18 @@ void lc3_tick_plugins(lc3_state& state)
 {
     if (state.instructionPlugin != nullptr)
         state.instructionPlugin->OnTick(state);
-    for (std::map<unsigned char, TrapFunctionPlugin*>::const_iterator i = state.trapPlugins.begin(); i != state.trapPlugins.end(); ++i)
-        if (i->second != nullptr)
-            i->second->OnTick(state);
-    for (unsigned int i = 0; i < state.plugins.size(); i++)
-        state.plugins[i]->OnTick(state);
+    for (auto& vector_plugin : state.trapPlugins)
+        if (vector_plugin.second != nullptr)
+            vector_plugin.second->OnTick(state);
+    for (auto* plugin : state.plugins)
+        plugin->OnTick(state);
 }
 
 void lc3_tock_plugins(lc3_state& state)
 {
     if (state.instructionPlugin != nullptr)
         state.instructionPlugin->OnTock(state);
-    for (std::map<unsigned char, TrapFunctionPlugin*>::const_iterator i = state.trapPlugins.begin(); i != state.trapPlugins.end(); ++i)
+    for (auto i = state.trapPlugins.begin(); i != state.trapPlugins.end(); ++i)
         if (i->second != nullptr)
             i->second->OnTock(state);
     for (unsigned int i = 0; i < state.plugins.size(); i++)

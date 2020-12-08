@@ -42,7 +42,7 @@ private:
     void InitializeOutput();
 
     /** Do the work of assembling a file. */
-    bool DoLoadFile(const LoadingOptions& options);
+    bool DoLoadFile(const LoadingOptions& opts);
     /** Updates all objects referring to the now stale lc3_state object */
     void PostLoadFile();
     /** Called to read data from textctrls before executing instructions. */

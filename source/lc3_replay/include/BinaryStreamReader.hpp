@@ -19,8 +19,8 @@ public:
     BinaryStreamReader& operator>>(bool& val);
     BinaryStreamReader& operator>>(char& val);
     BinaryStreamReader& operator>>(unsigned char& val);
-    BinaryStreamReader& operator>>(short& val);
-    BinaryStreamReader& operator>>(unsigned short& val);
+    BinaryStreamReader& operator>>(int16_t& val);
+    BinaryStreamReader& operator>>(uint16_t& val);
     BinaryStreamReader& operator>>(int& val);
     BinaryStreamReader& operator>>(unsigned int& val);
     BinaryStreamReader& operator>>(float& val);

@@ -20,8 +20,8 @@ enum class LogLevel
 class AbstractLogger
 {
 public:
-    explicit AbstractLogger(std::reference_wrapper<std::ostream> target = std::ref(std::cerr)) : out(target), log_level(LogLevel::INFO), log_time(true), log_color(true) {}
-    virtual ~AbstractLogger() {}
+    explicit AbstractLogger(std::reference_wrapper<std::ostream> target = std::ref(std::cerr)) : out(target) {}
+    virtual ~AbstractLogger() = default;
     virtual void Log(LogLevel level, const char* format, va_list ap);
     virtual void DoLog(LogLevel level, const char* format, va_list ap);
     void SetLogTarget(std::reference_wrapper<std::ostream> stream) { out = stream; }
@@ -33,9 +33,9 @@ public:
     bool GetLogTime() const { return log_time; }
 protected:
     std::reference_wrapper<std::ostream> out;
-    LogLevel log_level;
-    bool log_time;
-    bool log_color;
+    LogLevel log_level = LogLevel::INFO;
+    bool log_time = true;
+    bool log_color = true;
 };
 
 class Logger : public AbstractLogger

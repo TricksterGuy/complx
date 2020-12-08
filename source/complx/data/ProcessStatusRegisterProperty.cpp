@@ -40,7 +40,7 @@ void ProcessStatusRegisterProperty::RefreshDisplayedValue()
     }
     else if (mode == DisplayAsPSR)
     {
-        unsigned short psr = (state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p;
+        uint16_t psr = (state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p;
         SetValue(wxString::Format("x%04x", psr));
     }
 }
@@ -74,8 +74,8 @@ void ProcessStatusRegisterProperty::UpdateRegisterValue()
     }
     else if (mode == DisplayAsPSR)
     {
-        unsigned short old = (state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p;
-        unsigned short psr = ParseValueOrDie(str);
+        uint16_t old = (state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p;
+        uint16_t psr = ParseValueOrDie(str);
         state.privilege = (psr >> 16) & 1;
         state.priority = (psr >> 8) & 7;
         state.n = (psr >> 2) & 1;

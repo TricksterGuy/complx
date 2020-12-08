@@ -3,7 +3,7 @@
 
 #include <array>
 
-extern std::array<unsigned short, 0x300> lc3_os;
-extern std::array<unsigned short, 0x300> lc3_osv2;
+extern std::array<uint16_t, 0x300> lc3_os;
+extern std::array<uint16_t, 0x300> lc3_osv2;
 
 #endif

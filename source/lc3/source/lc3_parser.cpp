@@ -23,11 +23,11 @@ void remove_comments(std::string& line, std::string& comment)
     /// @todo meh make this code better.
     // Handling lines with only comments
     bool word = false;
-    for (size_t i = 0; i < line.size(); i++)
+    for (const auto& c : line)
     {
-        if (line[i] == ';' || line[i] == '\n' || line[i] == '\r')
+        if (c == ';' || c == '\n' || c == '\r')
             break;
-        if (isalpha(line[i]))
+        if (isalpha(c))
             word = true;
         width++;
     }
@@ -76,7 +76,7 @@ std::string process_str(const std::string& str, const LC3AssembleContext& contex
                 THROWANDDO(LC3AssembleException("", str, MALFORMED_STRING, context.lineno), goto endstringprocessing);
             }
             char num = 0;
-            long parsed_num = 0;
+            int64_t parsed_num = 0;
             char buf[4];
             switch(str[i])
             {
@@ -122,7 +122,7 @@ std::string process_str(const std::string& str, const LC3AssembleContext& contex
                         i++;
                         buf[1] = str[i];
                     }
-                    num = strtol(buf, nullptr, 16);
+                    num = static_cast<char>(strtol(buf, nullptr, 16));
                 }
                 else
                 {
@@ -251,12 +251,13 @@ int get_opcode(const std::string& opinstr, int& specialop, const LC3AssembleCont
     else
     {
         // Hey test for trap special names
-        for (std::map<unsigned char, TrapFunctionPlugin*>::const_iterator i = context.state->trapPlugins.begin(); i != context.state->trapPlugins.end(); ++i)
+        for (const auto& vector_plugin : context.state->trapPlugins)
         {
-            if (i->second != nullptr && instr == i->second->GetTrapName())
+            const auto* plugin = vector_plugin.second;
+            if (plugin != nullptr && instr == plugin->GetTrapName())
             {
                 // Good Good You are a trap...
-                specialop = i->second->GetTrapVector();
+                specialop = plugin->GetTrapVector();
                 return TRAP_INSTR;
             }
         }
@@ -279,7 +280,7 @@ int get_opcode(const std::string& opinstr, int& specialop, const LC3AssembleCont
   *
   * Parses a registers value
   */
-short get_register(const std::string& regstr, const LC3AssembleContext& context)
+int16_t get_register(const std::string& regstr, const LC3AssembleContext& context)
 {
     std::string reg = regstr;
     std::transform(reg.begin(), reg.end(), reg.begin(), static_cast<int (*)(int)>(std::toupper));
@@ -303,7 +304,7 @@ short get_register(const std::string& regstr, const LC3AssembleContext& context)
   *
   * Parses a register or a 5 bit immediate value
   */
-short get_register_imm5(const std::string& regstr, bool& is_reg, const LC3AssembleContext& context)
+int16_t get_register_imm5(const std::string& regstr, bool& is_reg, const LC3AssembleContext& context)
 {
     int regnum;
     is_reg = (regstr[0] == 'R' || regstr[0] == 'r') && regstr.size() == 2 && isdigit(regstr[1]);
@@ -330,7 +331,7 @@ int get_imm(const std::string& value, int bits, bool is_num, bool is_signed, con
 
     char* errstr;
     errno = 0;
-    long d = strtol(effValue.c_str(), &errstr, base);
+    int64_t d = strtol(effValue.c_str(), &errstr, base);
     if (negate) d *= -1;
     // Failed for some reason they could have done 0xCAFEG or something
     if (*errstr)
@@ -409,7 +410,7 @@ void get_number(std::string& num, int& base, bool& negate)
   *
   * Checks the number given to it to see if it will fit in a certain number of bits.
   */
-short check_value(long value, int bits, bool is_num, bool signed_check, const LC3AssembleContext& context)
+int16_t check_value(int64_t value, int bits, bool is_num, bool signed_check, const LC3AssembleContext& context)
 {
     int min = -(1 << (bits - 1));
     int max = (1 << (bits - 1)) - 1;
@@ -488,7 +489,7 @@ void get_cc_flags(const std::string& opcode, bool& n, bool& z, bool& p, const LC
   *
   * Gets a x bit offset.
   */
-short get_offset(const std::string& sym, int bits, const LC3AssembleContext& context, bool really_is_number)
+int16_t get_offset(const std::string& sym, int bits, const LC3AssembleContext& context, bool really_is_number)
 {
     bool number = isdigit(sym[0]) || sym[0] == '#' || sym[0] == '-' || sym[0] == '+';
     int offset;
@@ -525,7 +526,7 @@ short get_offset(const std::string& sym, int bits, const LC3AssembleContext& con
   *
   * Gets a symbols value or an immediate value
   */
-short get_sym_imm(const std::string& sym, int bits, const LC3AssembleContext& context, bool really_is_number)
+int16_t get_sym_imm(const std::string& sym, int bits, const LC3AssembleContext& context, bool really_is_number)
 {
     bool number = isdigit(sym[0]) || sym[0] == '#' || sym[0] == '-' || sym[0] == '+';
     int offset;
@@ -569,7 +570,7 @@ short get_sym_imm(const std::string& sym, int bits, const LC3AssembleContext& co
   *
   * Gets the value for the .fill statement
   */
-short get_fill_value(const std::string& value, const LC3AssembleContext& context)
+int16_t get_fill_value(const std::string& value, const LC3AssembleContext& context)
 {
     if (value[0] == '\'')
     {

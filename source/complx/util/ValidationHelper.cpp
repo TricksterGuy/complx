@@ -40,12 +40,12 @@ bool ValidateDecimalValue(const wxString& str)
     return true;
 }
 
-short ParseValueOrDie(const wxString& str)
+int16_t ParseValueOrDie(const wxString& str)
 {
-    long convert;
+    int64_t convert;
     if (str[0] == 'x')
     {
-        bool ret = str.Mid(1).ToCULong(reinterpret_cast<unsigned long*>(&convert), 16);
+        bool ret = str.Mid(1).ToCULong(reinterpret_cast<uint64_t*>(&convert), 16);
         wxASSERT(ret);
         return convert;
     }

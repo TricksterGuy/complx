@@ -1,7 +1,8 @@
 #include "MemoryViewDataModel.hpp"
-#include "MemoryViewInfoState.hpp"
-#include "Lc3BinaryDisplayData.hpp"
+
 #include "../util/ValidationHelper.hpp"
+#include "Lc3BinaryDisplayData.hpp"
+#include "MemoryViewInfoState.hpp"
 
 #include <logging.hpp>
 
@@ -18,14 +19,10 @@ wxString MemoryViewDataModel::GetColumnType(unsigned int col) const
     {
         case MemoryInfo:
             // Technically a MemoryViewInfoState
-            ret = "long";
+            ret = "int64_t";
             break;
         case MemoryAddress:
-            ret = "string";
-            break;
         case MemoryHexadecimal:
-            ret = "string";
-            break;
         case MemoryDecimal:
             ret = "string";
             break;
@@ -33,11 +30,7 @@ wxString MemoryViewDataModel::GetColumnType(unsigned int col) const
             ret = "Lc3BinaryDisplayData";
             break;
         case MemoryLabel:
-            ret = "string";
-            break;
         case MemoryInstruction:
-            ret = "string";
-            break;
         case MemoryComment:
             ret = "string";
             break;
@@ -53,9 +46,9 @@ void MemoryViewDataModel::GetValueByRow(wxVariant& variant, unsigned int row, un
 
     wxString ret = wxEmptyString;
 
-    unsigned short addr = row; //ViewToAddress(row;
-    short data = state.mem[addr];
-    long info = 0;
+    uint16_t addr = row; //ViewToAddress(row;
+    int16_t data = state.mem[addr];
+    int64_t info = 0;
 
     switch(column)
     {
@@ -88,7 +81,7 @@ void MemoryViewDataModel::GetValueByRow(wxVariant& variant, unsigned int row, un
             ret = wxString::Format("%04X:", addr);
             break;
         case MemoryHexadecimal:
-            ret = wxString::Format("x%04X", static_cast<unsigned short>(data));
+            ret = wxString::Format("x%04X", static_cast<uint16_t>(data));
             break;
         case MemoryDecimal:
             ret = wxString::Format("%d", data);
@@ -100,7 +93,7 @@ void MemoryViewDataModel::GetValueByRow(wxVariant& variant, unsigned int row, un
             ret = lc3_disassemble(state, data, addr + 1, disassemble_level);
             break;
         case MemoryBinary:
-            variant << ConstructBinaryDisplayData(static_cast<unsigned short>(data), state.instructionPlugin);
+            variant << ConstructBinaryDisplayData(static_cast<uint16_t>(data), state.instructionPlugin);
             return;
         case MemoryComment:
             if (state.comments.find(addr) != state.comments.end())
@@ -124,7 +117,7 @@ bool MemoryViewDataModel::SetValueByRow(const wxVariant& variant, unsigned int r
     wxASSERT(row <= 0xFFFF);
 
     wxString value;
-    long num;
+    int64_t num;
     Lc3BinaryDisplayData binary_data;
 
     switch(column)
@@ -157,16 +150,7 @@ bool MemoryViewDataModel::SetValueByRow(const wxVariant& variant, unsigned int r
             }
             catch (const LC3AssembleException& e)
             {
-                WarnLog("Assembling instruction %s failed. Reason: %s", static_cast<const char*>(value), e.what().c_str());
-                return false;
-            }
-            catch (const std::vector<LC3AssembleException>& vec)
-            {
-                WarnLog("Assembling instruction %s failed. Reasons below.\n-----", static_cast<const char*>(value));
-
-                for (const auto& ex : vec)
-                    WarnLog("%s", ex.what().c_str());
-
+                WarnLog("Assembling instruction %s failed. Reason: %s", static_cast<const char*>(value), e.what());
                 return false;
             }
             break;
@@ -178,8 +162,8 @@ bool MemoryViewDataModel::SetValueByRow(const wxVariant& variant, unsigned int r
             return false;
     }
 
-    InfoLog("Setting x%04x to %5d|x%04x", row, static_cast<short>(num), static_cast<unsigned short>(num));
-    lc3_mem_write(state, row, static_cast<short>(num), true);
+    InfoLog("Setting x%04x to %5d|x%04x", row, static_cast<int16_t>(num), static_cast<uint16_t>(num));
+    lc3_mem_write(state, row, static_cast<int16_t>(num), true);
     return true;
 }
 

@@ -1,19 +1,21 @@
 #include "MemoryView.hpp"
-#include "data/MemoryViewDataModel.hpp"
+
 #include "data/MemoryViewBinaryDataRenderer.hpp"
+#include "data/MemoryViewDataModel.hpp"
 #include "data/MemoryViewInfoDataRenderer.hpp"
 #include "util/GuiConstants.hpp"
 
 #include <algorithm>
+#include <logging.hpp>
 
 #include <wx/debug.h>
 #include <wx/menu.h>
 #include <wx/settings.h>
 #include <wx/version.h>
 
-#include <logging.hpp>
 
-MemoryView::MemoryView(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style, const wxValidator& validator, const wxString& name) :
+
+MemoryView::MemoryView(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, int64_t style, const wxValidator& validator, const wxString& name) :
     wxDataViewCtrl(parent, id, pos, size, style, validator, name)
 {
     EventLog l(__func__);
@@ -46,10 +48,6 @@ MemoryView::MemoryView(wxWindow* parent, wxWindowID id, const wxPoint& pos, cons
     Connect(MemoryMenuGoto,         wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryView::OnGotoAddress));
 }
 
-MemoryView::~MemoryView()
-{
-}
-
 int MemoryView::GetSelectedAddress() const
 {
     if (!HasSelection())
@@ -61,14 +59,14 @@ int MemoryView::GetSelectedAddress() const
 
     wxASSERT(model);
 
-    auto* lmodel = dynamic_cast<const wxDataViewListModel*>(model);
+    const auto* lmodel = dynamic_cast<const wxDataViewListModel*>(model);
 
     wxASSERT(lmodel);
 
     return lmodel->GetRow(selection);
 }
 
-void MemoryView::ScrollTo(unsigned short address)
+void MemoryView::ScrollTo(uint16_t address)
 {
     VerboseLog("Scrolling Memory to x%04x", address);
 
@@ -82,7 +80,7 @@ void MemoryView::ScrollTo(unsigned short address)
 
 #ifdef _WIN32
     /// TODO Delete this section when wx 3.2 is a thing and GetCountPerPage can be used, odd numbered minor versions are experimental releases.
-    unsigned short original = address;
+    uint16_t original = address;
 #if wxCHECK_VERSION(3, 1, 0)
     // Apparently Windows uses the Generic wxDataViewCtrl whose implementation is to put the VisibleItem at the bottom.
     address += GetCountPerPage() - 1;
@@ -135,7 +133,7 @@ void MemoryView::OnTemporaryBreakpoint(wxCommandEvent& WXUNUSED(event))
         return;
     }
 
-    auto address = static_cast<unsigned short>(addr);
+    auto address = static_cast<uint16_t>(addr);
 
     if (!lc3_has_breakpoint(state, address))
     {
@@ -163,7 +161,7 @@ void MemoryView::OnBreakpoint(wxCommandEvent& WXUNUSED(event))
         return;
     }
 
-    auto address = static_cast<unsigned short>(addr);
+    auto address = static_cast<uint16_t>(addr);
 
 
     if (!lc3_has_breakpoint(state, address))
@@ -192,7 +190,7 @@ void MemoryView::OnWatchpoint(wxCommandEvent& WXUNUSED(event))
         return;
     }
 
-    auto address = static_cast<unsigned short>(addr);
+    auto address = static_cast<uint16_t>(addr);
 
     if (!lc3_has_watch(state, false, address))
     {
@@ -220,7 +218,7 @@ void MemoryView::OnBlackbox(wxCommandEvent& WXUNUSED(event))
         return;
     }
 
-    auto address = static_cast<unsigned short>(addr);
+    auto address = static_cast<uint16_t>(addr);
 
     if (!lc3_has_blackbox(state, address))
     {

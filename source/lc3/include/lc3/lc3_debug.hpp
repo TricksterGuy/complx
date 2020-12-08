@@ -24,7 +24,7 @@ bool LC3_API lc3_add_break(lc3_state& state, const std::string& symbol, const st
   * @param times Hit count. After the breakpoint is hit this number of times it disappears
   * @return True if there was an error adding the breakpoint false otherwise.
   */
-bool LC3_API lc3_add_break(lc3_state& state, unsigned short addr, const std::string& label = "", const std::string& condition = "1", int times = -1);
+bool LC3_API lc3_add_break(lc3_state& state, uint16_t addr, const std::string& label = "", const std::string& condition = "1", int times = -1);
 /** lc3_has_breakpoint
   *
   * Checks if there is a breakpoint at the given symbol.
@@ -40,7 +40,7 @@ bool LC3_API lc3_has_breakpoint(lc3_state& state, const std::string& symbol);
   * @param addr Address to check.
   * @return True if there is a breakpoint at the given address.
   */
-bool LC3_API lc3_has_breakpoint(lc3_state& state, unsigned short addr);
+bool LC3_API lc3_has_breakpoint(lc3_state& state, uint16_t addr);
 /** lc3_add_blackbox
   *
   * Adds a blackbox at the given symbol.
@@ -60,7 +60,7 @@ bool LC3_API lc3_add_blackbox(lc3_state& state, const std::string& symbol, const
   * @param condition If condition evaluates to true, then the code will not be traced (will execute all of the code when stepped through).
   * @return True if there was an error adding the blackbox false otherwise.
   */
-bool LC3_API lc3_add_blackbox(lc3_state& state, unsigned short addr, const std::string& label = "", const std::string& condition = "1");
+bool LC3_API lc3_add_blackbox(lc3_state& state, uint16_t addr, const std::string& label = "", const std::string& condition = "1");
 /** lc3_has_blackbox
   *
   * Checks if there is a blackbox at the given symbol.
@@ -76,7 +76,7 @@ bool LC3_API lc3_has_blackbox(lc3_state& state, const std::string& symbol);
   * @param addr Address to check.
   * @return True if there is a blackbox at the given address.
   */
-bool LC3_API lc3_has_blackbox(lc3_state& state, unsigned short addr);
+bool LC3_API lc3_has_blackbox(lc3_state& state, uint16_t addr);
 /** lc3_add_watch
   *
   * Adds a watchpoint at the given address or register.
@@ -88,7 +88,7 @@ bool LC3_API lc3_has_blackbox(lc3_state& state, unsigned short addr);
   * @param times Hit count. After the watchpoint is hit this number of times it disappears.
   * @return True if there was an error adding the watchpoint false otherwise.
   */
-bool LC3_API lc3_add_watch(lc3_state& state, bool is_reg, unsigned short data, const std::string& condition, const std::string& label = "", int times = -1);
+bool LC3_API lc3_add_watch(lc3_state& state, bool is_reg, uint16_t data, const std::string& condition, const std::string& label = "", int times = -1);
 /** lc3_add_watch
   *
   * Adds a watchpoint at the given symbol.
@@ -117,7 +117,7 @@ bool LC3_API lc3_has_watch(lc3_state& state, const std::string& symbol);
   * @param data Register number or memory address.
   * @return True if there was a watchpoint at the given address/register false otherwise.
   */
-bool LC3_API lc3_has_watch(lc3_state& state, bool is_reg, unsigned short data);
+bool LC3_API lc3_has_watch(lc3_state& state, bool is_reg, uint16_t data);
 
 /** lc3_add_subroutine
   *
@@ -148,7 +148,7 @@ bool LC3_API lc3_add_subroutine(lc3_state& state, const std::string& symbol, con
   * @param params Names of parameters
   * @return True if there was an error adding the subroutine false otherwise.
   */
-bool LC3_API lc3_add_subroutine(lc3_state& state, unsigned short address, const std::string& name, const std::vector<std::string>& params);
+bool LC3_API lc3_add_subroutine(lc3_state& state, uint16_t address, const std::string& name, const std::vector<std::string>& params);
 /** lc3_add_subroutine
   *
   * Registers an address as a subroutine.
@@ -158,7 +158,7 @@ bool LC3_API lc3_add_subroutine(lc3_state& state, unsigned short address, const 
   * @param num_params Number of parameters the subroutine accepts
   * @return True if there was an error adding the subroutine false otherwise.
   */
-bool LC3_API lc3_add_subroutine(lc3_state& state, unsigned short address, const std::string& name = "", int num_params = 0);
+bool LC3_API lc3_add_subroutine(lc3_state& state, uint16_t address, const std::string& name = "", int num_params = 0);
 /** lc3_remove_break
   *
   * Removes the breakpoints associated with the symbol.
@@ -174,7 +174,7 @@ bool LC3_API lc3_remove_break(lc3_state& state, const std::string& symbol);
   * @param addr Address to remove breakpoint from.
   * @return True if there was an error removing the blackbox false otherwise.
   */
-bool LC3_API lc3_remove_break(lc3_state& state, unsigned short addr);
+bool LC3_API lc3_remove_break(lc3_state& state, uint16_t addr);
 /** lc3_remove_blackbox
   *
   * Removes the blackbox associated with the symbol.
@@ -190,7 +190,7 @@ bool LC3_API lc3_remove_blackbox(lc3_state& state, const std::string& symbol);
   * @param addr address to remove blackbox from.
   * @return True if there was an error removing the blackbox false otherwise.
   */
-bool LC3_API lc3_remove_blackbox(lc3_state& state, unsigned short addr);
+bool LC3_API lc3_remove_blackbox(lc3_state& state, uint16_t addr);
 /** lc3_remove_watch
   *
   * Removes any watchpoints associated with the register/memory address.
@@ -198,7 +198,7 @@ bool LC3_API lc3_remove_blackbox(lc3_state& state, unsigned short addr);
   * @param is_reg True if data refers to a register otherwise false for a memory address.
   * @param data Register number or memory address.
   */
-bool LC3_API lc3_remove_watch(lc3_state& state, bool is_reg, unsigned short data);
+bool LC3_API lc3_remove_watch(lc3_state& state, bool is_reg, uint16_t data);
 /** lc3_remove_watch
   *
   * Removes any watchpoints associated with the symbol.

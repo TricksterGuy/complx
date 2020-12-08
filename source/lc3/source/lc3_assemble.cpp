@@ -37,24 +37,42 @@ struct code_line
 // For comments with debugging information
 struct debug_statement
 {
-    debug_statement(const std::string& lineno, unsigned int loc, unsigned short addr) :
+    debug_statement(const std::string& lineno, unsigned int loc, uint16_t addr) :
         line(lineno), location(loc), address(addr) {}
     std::string line;
     unsigned int location;
-    unsigned short address;
+    uint16_t address;
 };
 
-unsigned short lc3_assemble_one(lc3_state& state, LC3AssembleContext& context);
+uint16_t lc3_assemble_one(lc3_state& state, LC3AssembleContext& context);
 
 void process_debug_info(lc3_state& state, const debug_statement& statement, bool enable_debug_statements);
 void process_plugin_info(lc3_state& state, const LC3AssembleContext& context);
 void process_version_info(lc3_state& state, const LC3AssembleContext& context);
 void parse_params(const std::string& line, std::map<std::string, std::string>& params);
 
-std::string LC3AssembleException::what() const throw()
+
+LC3AssembleException::LC3AssembleException(const std::string& line_str, const std::vector<std::string>& args, int errorid, int linenum) noexcept :
+        line(line_str), params(args), id(errorid), lineno(linenum)
+{
+    msg = form_exception_message();
+}
+
+LC3AssembleException::LC3AssembleException(const std::string& line_str, const std::string& param, int errorid, int linenum) noexcept :
+        line(line_str), params(1, param), id(errorid), lineno(linenum)
+{
+    msg = form_exception_message();
+}
+
+LC3AssembleException::LC3AssembleException(const std::list<LC3AssembleException>& exceptions_list) noexcept : exceptions(exceptions_list), id(MULTIPLE_ERRORS), lineno(-1)
+{
+    msg = form_exception_message();
+}
+
+std::string LC3AssembleException::form_exception_message() const noexcept
 {
     std::stringstream stream;
-    std::string line_str = "";
+    std::string line_str;
 
     if (lineno != -1)
     {
@@ -143,6 +161,11 @@ std::string LC3AssembleException::what() const throw()
         case INVALID_LC3_VERSION:
             stream << "Invalid LC3 Version " << params[0] << line_str;
             break;
+        case MULTIPLE_ERRORS:
+            stream << "Failed due to multiple errors. Reasons below.\n-----\n";
+            for (const auto& ex : exceptions)
+                stream << ex.what() << "\n";
+            break;
         case UNKNOWN_ERROR:
             // fall through
         default:
@@ -152,7 +175,7 @@ std::string LC3AssembleException::what() const throw()
     return stream.str();
 }
 
-unsigned short lc3_assemble_one(lc3_state& state, unsigned short address, const std::string& line, int lineno, const LC3AssembleOptions& options)
+uint16_t lc3_assemble_one(lc3_state& state, uint16_t address, const std::string& line, int lineno, const LC3AssembleOptions& options)
 {
     LC3AssembleContext context;
     context.line = line;
@@ -161,15 +184,15 @@ unsigned short lc3_assemble_one(lc3_state& state, unsigned short address, const 
     context.address = address;
     context.options = options;
 
-    unsigned short ret = lc3_assemble_one(state, context);
+    uint16_t ret = lc3_assemble_one(state, context);
 
     if (context.options.multiple_errors && !context.exceptions.empty())
-        throw context.exceptions;
+        throw LC3AssembleException(context.exceptions);
 
     return ret;
 }
 
-unsigned short lc3_assemble_one(lc3_state& state, LC3AssembleContext& context)
+uint16_t lc3_assemble_one(lc3_state& state, LC3AssembleContext& context)
 {
     size_t pos = context.line.find_first_of(" \t");
     std::string opcode = context.line.substr(0, pos);
@@ -181,15 +204,15 @@ unsigned short lc3_assemble_one(lc3_state& state, LC3AssembleContext& context)
     std::vector<std::string> tokens;
     tokenize(line, tokens, ",");
     // Remove spaces
-    for (unsigned int i = 0; i < tokens.size(); i++)
-        trim(tokens[i]);
+    for (auto& token : tokens)
+        trim(token);
 
     int specialop;
     int opcode_id = get_opcode(opcode, specialop, context);
     int dr, sr1, sr2_imm;
     bool is_reg;
     bool n, z, p;
-    unsigned short instruction = (opcode_id << 12);
+    uint16_t instruction = (opcode_id << 12);
     unsigned int params = 0;
 
     switch(opcode_id)
@@ -346,9 +369,6 @@ void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>&
     code_line last_orig("", 0);
 
     LC3AssembleContext context;
-    context.address = 0x0000;
-    context.line = "";
-    context.lineno = 0;
     context.state = &state;
     context.options = options;
     bool in_orig = false;
@@ -356,9 +376,9 @@ void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>&
     // First pass get all symbols.
     while (!file.eof())
     {
-        unsigned short last_addr = context.address;
+        uint16_t last_addr = context.address;
         std::string line;
-        std::string comment = "";
+        std::string comment;
         std::getline(file, line);
         context.lineno++;
         context.line = line;
@@ -375,7 +395,7 @@ void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>&
         }
         else if (comment.size() > 2 && comment[1] == '@')
         {
-            debugging.push_back(debug_statement(comment.substr(2), context.lineno, context.address));
+            debugging.emplace_back(comment.substr(2), context.lineno, context.address);
         }
         else if (!comment.empty() && in_orig)
         {
@@ -400,13 +420,13 @@ void lc3_assemble(lc3_state& state, std::istream& file, std::vector<code_range>&
             comments.str("");
         }
 
-        code.push_back(code_line(line, context.lineno));
+        code.emplace_back(line, context.lineno);
 
         std::vector<std::string> tokens;
         tokenize(line, tokens, " \t,");
         context.tokens = tokens;
 
-        std::string symbol = "";
+        std::string symbol;
 
         // If not an assembler pseudoop
         if (tokens[0][0] != '.')
@@ -494,7 +514,7 @@ symbolcheckdone:
                 // HELLO WORLD ADD R0, R0, R0
                 // Two symbols on one line
                 //printf("CHECK %d %s %s\n", tokens.size(), symbol.c_str(), context.line.c_str());
-                while (tokens.size() >= 1 && tokens[0][0] != '.')
+                while (!tokens.empty() && tokens[0][0] != '.')
                 {
                     std::string symbol2 = tokens[0];
                     op = get_opcode(symbol2, specialop, context, false);
@@ -528,7 +548,7 @@ symbolcheckdone:
             std::transform(directive.begin(), directive.end(), directive.begin(), static_cast<int (*)(int)>(std::tolower));
             std::string param = tokens.size() > 1 ? tokens[1] : "";
 
-            if (directive.compare(".orig") == 0)
+            if (directive == ".orig")
             {
                 if (current_location.size != 0)
                     THROW(LC3AssembleException(last_orig.line, "",  ORIG_MATCHUP, last_orig.location));
@@ -540,7 +560,7 @@ symbolcheckdone:
                 context.address = current_location.location;
                 in_orig = true;
             }
-            else if (directive.compare(".end") == 0)
+            else if (directive == ".end")
             {
                 if (current_location.location == 0 && current_location.size == 0)
                     THROW(LC3AssembleException("", "", STRAY_END, context.lineno));
@@ -553,11 +573,11 @@ symbolcheckdone:
                 paramcheck = 1;
                 in_orig = false;
             }
-            else if (directive.compare(".stringz") == 0)
+            else if (directive == ".stringz")
             {
                 size_t start, end;
-                start = line.find("\"");
-                end = line.rfind("\"");
+                start = line.find('\"');
+                end = line.rfind('\"');
 
                 if (start == std::string::npos)
                 {
@@ -566,7 +586,7 @@ symbolcheckdone:
                 }
 
                 std::string str = line.substr(start, end - start + 1);
-                int size = process_str(str, context).size() + 1;
+                size_t size = process_str(str, context).size() + 1;
                 if (context.address + size > 0xFFFF)
                 {
                     std::stringstream oss;
@@ -575,17 +595,17 @@ symbolcheckdone:
                 }
                 context.address += size;
                 current_location.size += size;
-                paramcheck = (unsigned int) -1;
+                paramcheck = static_cast<unsigned int>(-1);
             }
-            else if (directive.compare(".fill") == 0)
+            else if (directive == ".fill")
             {
                 context.address += 1;
                 current_location.size += 1;
-                paramcheck = (unsigned int) -1;
+                paramcheck = static_cast<unsigned int>(-1);
             }
-            else if (directive.compare(".blkw") == 0)
+            else if (directive == ".blkw")
             {
-                unsigned short locs = get_imm(param, 16, true, false, context);
+                uint16_t locs = get_imm(param, 16, true, false, context);
                 // No, no, no ex .orig xFFFF .blkw 2 .end
                 if (context.address + locs > 0xFFFF)
                     THROW(LC3AssembleException("", param, MEMORY_OVERFLOW, context.lineno));
@@ -661,10 +681,10 @@ symbolcheckdone:
     context.state = &state;
 
     // Second pass actually do things now.
-    for (unsigned int i = 0; i < code.size(); i++)
+    for (const auto& code_line : code)
     {
-        std::string line = code[i].line;
-        context.lineno = code[i].location;
+        std::string line = code_line.line;
+        context.lineno = static_cast<int>(code_line.location);
         context.line = line;
         std::vector<std::string> symbols;
 
@@ -673,7 +693,7 @@ symbolcheckdone:
 
         context.tokens = tokens;
 
-        std::string symbol = "";
+        std::string symbol;
         //printf("-------\n");
         while (!tokens.empty() && !tokens[0].empty() && tokens[0][0] != '.')
         {
@@ -716,30 +736,30 @@ symbolcheckdone:
             trim(rest);
             std::transform(directive.begin(), directive.end(), directive.begin(), static_cast<int (*)(int)>(std::tolower));
 
-            if (directive.compare(".orig") == 0)
+            if (directive == ".orig")
             {
                 current_location.location = get_imm(param, 16, true, false, context);
                 context.address = current_location.location;
             }
-            else if (directive.compare(".stringz") == 0)
+            else if (directive == ".stringz")
             {
                 std::string processed = process_str(rest, context);
-                int size = processed.size() + 1;
+                size_t size = processed.size() + 1;
 
-                for (int j = 0; j < size - 1; j++)
-                    state.mem[context.address + j] = processed[j];
+                for (size_t j = 0; j < size - 1; j++)
+                    state.mem[context.address + j] = static_cast<int16_t>(processed[j]);
                 state.mem[context.address + size - 1] = 0;
 
                 context.address += size;
             }
-            else if (directive.compare(".fill") == 0)
+            else if (directive == ".fill")
             {
                 state.mem[context.address] = get_fill_value(rest, context);
                 context.address += 1;
             }
-            else if (directive.compare(".blkw") == 0)
+            else if (directive == ".blkw")
             {
-                unsigned short locs = get_imm(param, 16, true, false, context);
+                uint16_t locs = get_imm(param, 16, true, false, context);
                 // blkw should not emit anything to memory
                 context.address += locs;
             }
@@ -763,16 +783,13 @@ symbolcheckdone:
     // @break[point]
     // @watch[point]
     // @black[box]
-    for (unsigned int i = 0; i < debugging.size(); i++)
-    {
-        debug_statement statement = debugging[i];
+    for (const auto& statement : debugging)
         process_debug_info(state, statement, context.options.process_debug_comments);
-    }
 
 
     if (context.options.multiple_errors && !context.exceptions.empty())
     {
-        throw context.exceptions;
+        throw LC3AssembleException(context.exceptions);
     }
 }
 
@@ -792,14 +809,14 @@ bool lc3_assemble_object_writer(const std::string& filename, const lc3_state& st
     {
         if (range.size == 0) continue;
 
-        short lol = htons(range.location);
-        obj.write(reinterpret_cast<char*>(&lol), sizeof(short));
+        int16_t lol = htons(range.location);
+        obj.write(reinterpret_cast<char*>(&lol), sizeof(int16_t));
         lol = htons(range.size);
-        obj.write(reinterpret_cast<char*>(&lol), sizeof(short));
+        obj.write(reinterpret_cast<char*>(&lol), sizeof(int16_t));
         for (unsigned int j = 0; j < range.size; j++)
         {
             lol = htons(state.mem[range.location + j]);
-            obj.write(reinterpret_cast<char*>(&lol), sizeof(short));
+            obj.write(reinterpret_cast<char*>(&lol), sizeof(int16_t));
         }
     }
 
@@ -861,7 +878,7 @@ bool lc3_assemble_full_writer(const std::string& filename, lc3_state& state, con
     if (!obj.good())
         return false;
 
-    unsigned short pc = state.pc;
+    uint16_t pc = state.pc;
     for (const auto& range : ranges)
     {
         if (range.size == 0)
@@ -869,10 +886,10 @@ bool lc3_assemble_full_writer(const std::string& filename, lc3_state& state, con
 
         for (unsigned int j = 0; j < range.size; j++)
         {
-            unsigned short address = range.location + j;
+            uint16_t address = range.location + j;
             state.pc = address + 1;
-            short data = state.mem[range.location + j];
-            unsigned short udata = static_cast<unsigned short>(data);
+            int16_t data = state.mem[range.location + j];
+            auto udata = static_cast<uint16_t>(data);
             obj << "x" << std::hex << std::uppercase << std::setw(4) << std::setfill('0') << address << std::nouppercase << "\t";
             obj << "x" << std::hex << std::uppercase << std::setw(4) << udata << std::dec << std::nouppercase << std::setfill(' ') << "\t";
             obj << std::setw(6) << data << "\t";
@@ -901,11 +918,8 @@ bool lc3_assemble(const std::string& filename, const std::string& output_prefix,
         std::string sym_file = prefix + ".sym";
         std::ofstream sym(sym_file.c_str());
         if (!sym.good()) return false;
-        std::map<unsigned short, std::string>::const_iterator i;
-        for (i = state.rev_symbols.begin(); i != state.rev_symbols.end(); i++)
-        {
-            sym << std::hex << i->first << std::dec << "\t" << i->second << std::endl;
-        }
+        for (const auto& addr_symbol : state.rev_symbols)
+            sym << std::hex << addr_symbol.first << std::dec << "\t" << addr_symbol.second << std::endl;
     }
 
     switch (options.output_mode)
@@ -977,8 +991,8 @@ void process_version_info(lc3_state& state, const LC3AssembleContext& context)
 }
 
 bool lc3_add_break(const std::string& symbol, const std::string& label = "", const std::string& condition = "1", int times = -1);
-bool lc3_add_break(unsigned short addr, const std::string& label = "", const std::string& condition = "1", int times = -1);
-bool lc3_add_watch(bool is_reg, unsigned short data, const std::string& condition, const std::string& label = "", int times = -1);
+bool lc3_add_break(uint16_t addr, const std::string& label = "", const std::string& condition = "1", int times = -1);
+bool lc3_add_watch(bool is_reg, uint16_t data, const std::string& condition, const std::string& label = "", int times = -1);
 bool lc3_add_watch(const std::string& symbol, const std::string& condition, const std::string& label = "", int times = -1);
 
 /** process_debug_info
@@ -1030,7 +1044,7 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
         // If using = sign mode
         if (equal_sign_mode)
         {
-            unsigned short address;
+            uint16_t address;
             std::string name = params.find("name") == params.end() ? "" : params["name"];
             std::string condition = params.find("condition") == params.end() ? "1" : params["condition"];
             int times = params.find("times") == params.end() ? -1 : atoi(params["times"].c_str());
@@ -1050,8 +1064,8 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
         // If using function call mode
         else
         {
-            unsigned short address;
-            std::string name = "";
+            uint16_t address;
+            std::string name;
             std::string condition = "1";
             int times = -1;
 
@@ -1096,7 +1110,7 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
         if (equal_sign_mode)
         {
             bool is_reg;
-            unsigned short data;
+            uint16_t data;
             std::string condition = params.find("condition") == params.end() ? "0" : params["condition"];
             std::string name = params.find("name") == params.end() ? "" : params["name"];
             int times = params.find("times") == params.end() ? -1 : atoi(params["times"].c_str());
@@ -1125,9 +1139,9 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
         else
         {
             bool is_reg;
-            unsigned short data = 0;
+            uint16_t data = 0;
             std::string condition = "0";
-            std::string name = "";
+            std::string name;
             int times = -1;
 
             std::vector<std::string> pieces;
@@ -1182,7 +1196,7 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
         // If using = sign mode
         if (equal_sign_mode)
         {
-            unsigned short address;
+            uint16_t address;
             std::string name = params.find("name") == params.end() ? "" : params["name"];
             int num_params = params.find("num_params") == params.end() ? 0 : atoi(params["num_params"].c_str());
             std::string params_str = params.find("params") == params.end() ? "" : params["params"];
@@ -1207,9 +1221,9 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
         // If using function call mode
         else
         {
-            unsigned short address;
-            std::string name = "";
-            std::string params_str = "";
+            uint16_t address;
+            std::string name;
+            std::string params_str;
 
             std::vector<std::string> pieces;
             tokenize(debug_params, pieces, " \t");
@@ -1257,7 +1271,7 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
         // If using = sign mode
         if (equal_sign_mode)
         {
-            unsigned short address;
+            uint16_t address;
             std::string name = params.find("name") == params.end() ? "" : params["name"];
             std::string condition = params.find("condition") == params.end() ? "1" : params["condition"];
 
@@ -1276,8 +1290,8 @@ void process_debug_info(lc3_state& state, const debug_statement& statement, bool
         // If using function call mode
         else
         {
-            unsigned short address;
-            std::string name = "";
+            uint16_t address;
+            std::string name;
             std::string condition = "1";
 
             std::vector<std::string> pieces;
@@ -1316,9 +1330,8 @@ void parse_params(const std::string& line, std::map<std::string, std::string>& p
 {
     std::vector<std::string> pieces;
     tokenize(line, pieces, " \t");
-    for (unsigned int i = 0; i < pieces.size(); i++)
+    for (const auto& piece : pieces)
     {
-        std::string piece = pieces[i];
         size_t index = piece.find('=');
         if (index == std::string::npos) continue;
         std::string key = piece.substr(0, index);

@@ -26,7 +26,7 @@ int LC3_API lc3_sym_lookup(lc3_state& state, const std::string& symbol);
   * @param addr Address to search.
   * @return the symbol at the address, otherwise an empty string.
   */
-const LC3_API std::string lc3_sym_rev_lookup(lc3_state& state, unsigned short addr);
+LC3_API std::string lc3_sym_rev_lookup(lc3_state& state, uint16_t addr);
 /** lc3_sym_add
   *
   * Adds this symbol to the symbol table, overwriting the associated address if it already exists.
@@ -35,7 +35,7 @@ const LC3_API std::string lc3_sym_rev_lookup(lc3_state& state, unsigned short ad
   * @param addr Address to link symbol to.
   * @return true if added successfully (not replaced) false if symbol already exists.
   */
-bool LC3_API lc3_sym_add(lc3_state& state, const std::string& symbol, unsigned short addr);
+bool LC3_API lc3_sym_add(lc3_state& state, const std::string& symbol, uint16_t addr);
 /** lc3_sym_delete
   *
   * Deletes the symbol from the symbol table.
@@ -49,7 +49,7 @@ void LC3_API lc3_sym_delete(lc3_state& state, const std::string& symbol);
   * @param state LC3State object.
   * @param addr Address to delete associated symbols.
   */
-void LC3_API lc3_sym_delete(lc3_state& state, unsigned short addr);
+void LC3_API lc3_sym_delete(lc3_state& state, uint16_t addr);
 /** lc3_sym_clear
   *
   * Clears the symbol table.

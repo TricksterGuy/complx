@@ -3,11 +3,11 @@
 #include <cassert>
 #include <sstream>
 
-#include "lc3/lc3_symbol.hpp"
 #include "lc3/lc3_execute.hpp"
 #include "lc3/lc3_expressions.hpp"
+#include "lc3/lc3_symbol.hpp"
 
-bool lc3_add_subroutine(lc3_state& state, unsigned short address, const std::string& name, int num_params, const std::vector<std::string>& params);
+bool lc3_add_subroutine(lc3_state& state, uint16_t address, const std::string& name, int num_params, const std::vector<std::string>& params);
 
 bool lc3_has_breakpoint(lc3_state& state, const std::string& symbol)
 {
@@ -17,7 +17,7 @@ bool lc3_has_breakpoint(lc3_state& state, const std::string& symbol)
     return lc3_has_breakpoint(state, addr);
 }
 
-bool lc3_has_breakpoint(lc3_state& state, unsigned short addr)
+bool lc3_has_breakpoint(lc3_state& state, uint16_t addr)
 {
     return state.breakpoints.find(addr) != state.breakpoints.end();
 }
@@ -30,7 +30,7 @@ bool lc3_has_watch(lc3_state& state, const std::string& symbol)
     return lc3_has_watch(state, false, addr);
 }
 
-bool lc3_has_watch(lc3_state& state, bool is_reg, unsigned short data)
+bool lc3_has_watch(lc3_state& state, bool is_reg, uint16_t data)
 {
     if (is_reg)
         return state.reg_watchpoints.find(data) != state.reg_watchpoints.end();
@@ -47,7 +47,7 @@ bool lc3_has_blackbox(lc3_state& state, const std::string& symbol)
     return lc3_has_blackbox(state, addr);
 }
 
-bool lc3_has_blackbox(lc3_state& state, unsigned short addr)
+bool lc3_has_blackbox(lc3_state& state, uint16_t addr)
 {
     return state.blackboxes.find(addr) != state.blackboxes.end();
 }
@@ -60,7 +60,7 @@ bool lc3_add_break(lc3_state& state, const std::string& symbol, const std::strin
     return lc3_add_break(state, addr, label, condition, times);
 }
 
-bool lc3_add_break(lc3_state& state, unsigned short addr, const std::string& label, const std::string& condition, int times)
+bool lc3_add_break(lc3_state& state, uint16_t addr, const std::string& label, const std::string& condition, int times)
 {
     if (state.breakpoints.find(addr) != state.breakpoints.end()) return true;
 
@@ -85,7 +85,7 @@ bool lc3_add_blackbox(lc3_state& state, const std::string& symbol, const std::st
     return lc3_add_blackbox(state, addr, label, condition);
 }
 
-bool lc3_add_blackbox(lc3_state& state, unsigned short addr, const std::string& label, const std::string& condition)
+bool lc3_add_blackbox(lc3_state& state, uint16_t addr, const std::string& label, const std::string& condition)
 {
     if (state.blackboxes.find(addr) != state.blackboxes.end()) return true;
 
@@ -109,7 +109,7 @@ bool lc3_add_watch(lc3_state& state, const std::string& symbol, const std::strin
     return lc3_add_watch(state, false, addr, condition, label, times);
 }
 
-bool lc3_add_watch(lc3_state& state, bool is_reg, unsigned short data, const std::string& condition, const std::string& label, int times)
+bool lc3_add_watch(lc3_state& state, bool is_reg, uint16_t data, const std::string& condition, const std::string& label, int times)
 {
     if (is_reg)
     {
@@ -153,19 +153,19 @@ bool lc3_add_subroutine(lc3_state& state, const std::string& symbol, const std::
     return lc3_add_subroutine(state, addr, name, num_params, params);
 }
 
-bool lc3_add_subroutine(lc3_state& state, unsigned short address, const std::string& name, const std::vector<std::string>& params)
+bool lc3_add_subroutine(lc3_state& state, uint16_t address, const std::string& name, const std::vector<std::string>& params)
 {
     return lc3_add_subroutine(state, address, name, params.size(), params);
 }
 
-bool lc3_add_subroutine(lc3_state& state, unsigned short address, const std::string& name, int num_params)
+bool lc3_add_subroutine(lc3_state& state, uint16_t address, const std::string& name, int num_params)
 {
     std::vector<std::string> params;
     return lc3_add_subroutine(state, address, name, num_params, params);
 }
 
 
-bool lc3_add_subroutine(lc3_state& state, unsigned short address, const std::string& name, int num_params, const std::vector<std::string>& params)
+bool lc3_add_subroutine(lc3_state& state, uint16_t address, const std::string& name, int num_params, const std::vector<std::string>& params)
 {
     if (state.subroutines.find(address) != state.subroutines.end()) return true;
 
@@ -187,7 +187,7 @@ bool lc3_remove_break(lc3_state& state, const std::string& symbol)
     return lc3_remove_break(state, addr);
 }
 
-bool lc3_remove_break(lc3_state& state, unsigned short addr)
+bool lc3_remove_break(lc3_state& state, uint16_t addr)
 {
     if (state.breakpoints.find(addr) == state.breakpoints.end()) return true;
 
@@ -204,7 +204,7 @@ bool lc3_remove_blackbox(lc3_state& state, const std::string& symbol)
     return lc3_remove_blackbox(state, addr);
 }
 
-bool lc3_remove_blackbox(lc3_state& state, unsigned short addr)
+bool lc3_remove_blackbox(lc3_state& state, uint16_t addr)
 {
     if (state.blackboxes.find(addr) == state.blackboxes.end()) return true;
 
@@ -222,7 +222,7 @@ bool lc3_remove_watch(lc3_state& state, const std::string& symbol)
     return false;
 }
 
-bool lc3_remove_watch(lc3_state& state, bool is_reg, unsigned short data)
+bool lc3_remove_watch(lc3_state& state, bool is_reg, uint16_t data)
 {
     if (is_reg)
     {

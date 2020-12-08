@@ -13,12 +13,12 @@ Plugin* create_plugin(const PluginParams& params)
     if (instance)
         return instance.get();
 
-    unsigned short width, height, startaddr, initaddr;
+    uint16_t width, height, startaddr, initaddr;
 
-    width = params.read_ushort_required("width");
-    height = params.read_ushort_required("height");
-    startaddr = params.read_ushort_required("startaddr");
-    initaddr = params.read_ushort_required("initaddr");
+    width = params.read_uint16_t_required("width");
+    height = params.read_uint16_t_required("height");
+    startaddr = params.read_uint16_t_required("startaddr");
+    initaddr = params.read_uint16_t_required("initaddr");
 
     /*if (wxTheApp == nullptr)
     {
@@ -26,7 +26,7 @@ Plugin* create_plugin(const PluginParams& params)
         return nullptr;
     }*/
 
-    instance.reset(new ColorLCDPlugin(width, height, initaddr, startaddr));
+    instance = std::make_unique<ColorLCDPlugin>(width, height, initaddr, startaddr);
 
     return instance.get();
 }
@@ -37,7 +37,7 @@ void destroy_plugin(Plugin* ptr)
         instance.reset();
 }
 
-ColorLCDPlugin::ColorLCDPlugin(unsigned short _width, unsigned short _height, unsigned short _initaddr, unsigned short _startaddr) :
+ColorLCDPlugin::ColorLCDPlugin(uint16_t _width, uint16_t _height, uint16_t _initaddr, uint16_t _startaddr) :
     Plugin(COLORLCD_MAJOR_VERSION, COLORLCD_MINOR_VERSION, LC3_OTHER, "Color LCD Display"), width(_width),
     height(_height), initaddr(_initaddr), startaddr(_startaddr), lcd(nullptr),
     lcd_initializing(false)
@@ -50,8 +50,7 @@ ColorLCDPlugin::ColorLCDPlugin(unsigned short _width, unsigned short _height, un
 
 ColorLCDPlugin::~ColorLCDPlugin()
 {
-    if (lcd)
-        delete lcd;
+    delete lcd;
 }
 
 void ColorLCDPlugin::InitDisplay(wxThreadEvent& event)
@@ -67,14 +66,14 @@ void ColorLCDPlugin::DestroyDisplay(wxThreadEvent& WXUNUSED(event))
     lcd = nullptr;
 }
 
-void ColorLCDPlugin::OnWrite(lc3_state& state, unsigned short address, short value)
+void ColorLCDPlugin::OnWrite(lc3_state& state, uint16_t address, int16_t value)
 {
     if (address == initaddr)
     {
-        unsigned short data = value;
+        uint16_t data = value;
         if (data == 0x8000U && lcd == nullptr)
         {
-            wxThreadEvent* evt = new wxThreadEvent(wxEVT_COMMAND_CREATE_DISPLAY);
+            auto* evt = new wxThreadEvent(wxEVT_COMMAND_CREATE_DISPLAY);
             evt->SetPayload<lc3_state*>(&state);
             wxQueueEvent(this, evt);
             lcd_initializing = true;
@@ -91,7 +90,7 @@ void ColorLCDPlugin::OnWrite(lc3_state& state, unsigned short address, short val
         {
             wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_DESTROY_DISPLAY));
         }
-        else if (static_cast<unsigned short>(state.mem[address]) == 0x8000U && data != 0x8000U && (lcd != nullptr || lcd_initializing))
+        else if (static_cast<uint16_t>(state.mem[address]) == 0x8000U && data != 0x8000U && (lcd != nullptr || lcd_initializing))
         {
             wxQueueEvent(this, new wxThreadEvent(wxEVT_COMMAND_DESTROY_DISPLAY));
         }
@@ -109,7 +108,7 @@ void ColorLCDPlugin::OnWrite(lc3_state& state, unsigned short address, short val
     state.mem[address] = value;
 }
 
-ColorLCD::ColorLCD(wxWindow* top, int _width, int _height, unsigned short _startaddr, lc3_state* s) :
+ColorLCD::ColorLCD(wxWindow* top, int _width, int _height, uint16_t _startaddr, lc3_state* s) :
     COLORLCDGUI(top), timer(this), state(s), width(_width), height(_height), startaddr(_startaddr)
 {
     //Centre();
@@ -144,7 +143,7 @@ void ColorLCD::OnPaint(wxPaintEvent& WXUNUSED(event))
     {
         for (int j = 0; j < width; j++)
         {
-            unsigned short val = state->mem[startaddr + j + i * width];
+            uint16_t val = state->mem[startaddr + j + i * width];
 
             unsigned char r = (val >> 10) & 0x1f;
             unsigned char g = (val >> 5) & 0x1f;

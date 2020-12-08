@@ -12,9 +12,9 @@
 class LC3_RANDOM_API RandomPlugin : public Plugin
 {
 public:
-    RandomPlugin(unsigned short address, unsigned int seed);
-    short OnRead(lc3_state& state, unsigned short addr) override;
-    void OnWrite(lc3_state& state, unsigned short addr, short value) override;
+    RandomPlugin(uint16_t address, unsigned int seed);
+    int16_t OnRead(lc3_state& state, uint16_t addr) override;
+    void OnWrite(lc3_state& state, uint16_t addr, int16_t value) override;
 private:
     std::default_random_engine generator;
     std::uniform_int_distribution<int> distribution;

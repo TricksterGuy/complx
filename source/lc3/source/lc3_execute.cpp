@@ -25,7 +25,7 @@ const char* WARNING_MESSAGES[LC3_WARNINGS] =
     "Invalid value x%04x loaded into the PSR."
 };
 
-lc3_instr lc3_decode(lc3_state& state, unsigned short data)
+lc3_instr lc3_decode(lc3_state& state, uint16_t data)
 {
     lc3_instr instr;
     // Clear
@@ -112,7 +112,7 @@ lc3_instr lc3_decode(lc3_state& state, unsigned short data)
     return instr;
 }
 
-const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
+lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
 {
     // Initialize Changes (We don't know everything yet)
     lc3_state_change changes;
@@ -224,17 +224,17 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
                     //printf("enter: %x %d\n", state.pc, state.call_stack.size());
                     if (state.call_stack.empty() && state.in_lc3test)
                     {
-                        unsigned int num_params = 0;
+                        int32_t num_params = 0;
                         lc3_subroutine_call_info call_info;
                         call_info.address = state.pc;
                         call_info.r6 = state.regs[0x6];
                         if (state.subroutines.find(state.pc) != state.subroutines.end())
                             num_params = state.subroutines[state.pc].num_params;
-                        for (unsigned int i = 0; i < num_params; i++)
+                        for (int32_t i = 0; i < num_params; i++)
 			{
 				call_info.params.push_back(state.mem[call_info.r6 + i]);
 			}
-           	        for (unsigned int i = 0; i < 8; i++)
+           	        for (int32_t i = 0; i < 8; i++)
 			{
 				call_info.regs[i] = state.regs[i];
 			}
@@ -323,10 +323,10 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
             }
             else
             {
-                const bool bits[8] = {0, 1, 1, 0, 1, 0, 0, 0};
+                const char bits[8] = {0, 1, 1, 0, 1, 0, 0, 0};
                 // Pop PC and psr
                 state.pc = state.mem[state.regs[6]];
-                unsigned short psr = state.mem[state.regs[6] + 1];
+                uint16_t psr = state.mem[state.regs[6] + 1];
                 // Invalid PSR check, if the unspecified bits are filled or trying
                 // to set multiple nzp bits warn.
                 if ((psr & 0x78F8) != 0 || bits[psr & 7] != 1)
@@ -447,7 +447,7 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
             changes.value = state.regs[changes.location];
 
             state.regs[changes.location] = state.pc + instruction.mem.offset.pc_offset;
-            // In the 2019 revision of LC-3 LEA no longer sets condition codes.
+            // In the 2019 revision of LC-3 LEA no int64_ter sets condition codes.
             if (state.lc3_version == 0)
                 lc3_setcc(state, state.regs[changes.location]);
             break;
@@ -517,7 +517,7 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
     return changes;
 }
 
-void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
+void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instruction trap)
 {
     // If not within an interrupt.
     if (state.privilege)
@@ -526,14 +526,14 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
         {
             lc3_trap_call_info call_info;
             call_info.vector = trap.vector;
-            for (unsigned int i = 0; i < 8; i++)
+            for (int32_t i = 0; i < 8; i++)
                 call_info.regs[i] = state.regs[i];
             state.first_level_traps.push_back(call_info);
         }
     }
 
     // Declarations
-    unsigned short r0 = state.regs[0];
+    uint16_t r0 = state.regs[0];
     bool kernel_mode = (state.pc >= 0x200 && state.pc < 0x3000) || (state.privilege == 0);
     // If we are doing true traps.
     if (state.true_traps)
@@ -544,7 +544,7 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
 
         if (state.lc3_version > 0)
         {
-            short psr = (state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p;
+            int16_t psr = (state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p;
             // If we are in user mode we must switch usp/ssp
             if (state.privilege)
             {
@@ -554,8 +554,8 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
 
             state.privilege = 0;
             state.regs[6] -= 2;
-            state.mem[(unsigned short)state.regs[6]] = state.pc;
-            state.mem[(unsigned short)(state.regs[6] + 1)] = psr;
+            state.mem[static_cast<uint16_t>(state.regs[6])] = state.pc;
+            state.mem[static_cast<uint16_t>(state.regs[6] + 1)] = psr;
             state.rti_stack.push_back(lc3_rti_stack_item{false});
         }
 
@@ -632,7 +632,7 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
                     {
                         if (putsp_should_stop)
                             lc3_warning(state, LC3_PUTSP_UNEXPECTED_NUL, r0, 0);
-                        unsigned short chunk = state.mem[r0];
+                        uint16_t chunk = state.mem[r0];
                         if ((chunk & 0xFF) != 0)
                             lc3_write_char(state, *state.output, chunk & 0xFF);
                         else
@@ -675,14 +675,14 @@ void lc3_trap(lc3_state& state, lc3_state_change& changes, trap_instr trap)
     }
 }
 
-void lc3_setcc(lc3_state& state, short value)
+void lc3_setcc(lc3_state& state, int16_t value)
 {
     state.n = value < 0;
     state.z = value == 0;
     state.p = value > 0;
 }
 
-short lc3_mem_read(lc3_state& state, unsigned short addr, bool privileged)
+int16_t lc3_mem_read(lc3_state& state, uint16_t addr, bool privileged)
 {
     state.memory_ops[addr].reads++;
     state.total_reads++;
@@ -724,7 +724,7 @@ short lc3_mem_read(lc3_state& state, unsigned short addr, bool privileged)
             /// Unless the code polls from both status registers at the same time...
             if (lc3_random(state) % 4 < 1)
             {
-                state.mem[DEV_DSR] = static_cast<short>(1 << 15);
+                state.mem[DEV_DSR] = static_cast<int16_t>(1 << 15);
             }
             break;
         case DEV_DDR:
@@ -745,7 +745,7 @@ short lc3_mem_read(lc3_state& state, unsigned short addr, bool privileged)
             }
             break;
         case DEV_MCR:
-            state.mem[DEV_MCR] = static_cast<short>(1 << 15);
+            state.mem[DEV_MCR] = static_cast<int16_t>(1 << 15);
             break;
         default:
             // Hey does a plugin handle this address
@@ -765,7 +765,7 @@ short lc3_mem_read(lc3_state& state, unsigned short addr, bool privileged)
     return state.mem[addr];
 }
 
-void lc3_mem_write(lc3_state& state, unsigned short addr, short value, bool privileged)
+void lc3_mem_write(lc3_state& state, uint16_t addr, int16_t value, bool privileged)
 {
     state.memory_ops[addr].writes++;
     state.total_writes++;
@@ -784,9 +784,6 @@ void lc3_mem_write(lc3_state& state, unsigned short addr, short value, bool priv
             state.mem[DEV_KBSR] |= value;
             break;
         case DEV_KBDR:
-            if (!kernel_mode)
-                lc3_warning(state, LC3_RESERVED_MEM_WRITE, addr, 0);
-            break;
         case DEV_DSR:
             if (!kernel_mode)
                 lc3_warning(state, LC3_RESERVED_MEM_WRITE, addr, 0);
@@ -838,7 +835,7 @@ void lc3_mem_write(lc3_state& state, unsigned short addr, short value, bool priv
     state.mem[addr] = value;
 }
 
-void lc3_warning(lc3_state& state, unsigned int warn_id, short arg1, short arg2)
+void lc3_warning(lc3_state& state, uint32_t warn_id, int16_t arg1, int16_t arg2)
 {
     if (state.warn_limits.find(warn_id) != state.warn_limits.end() && state.warn_limits[warn_id] <= state.warn_stats[warn_id])
     {
@@ -850,14 +847,14 @@ void lc3_warning(lc3_state& state, unsigned int warn_id, short arg1, short arg2)
     char warning[128];
     std::string msg;
 
-    sprintf(warning, WARNING_MESSAGES[warn_id], (unsigned short) arg1, (unsigned short) arg2);
+    sprintf(warning, WARNING_MESSAGES[warn_id], static_cast<uint16_t>(arg1), static_cast<uint16_t>(arg2));
     msg = warning;
 
     lc3_warning(state, msg);
     state.warn_stats[warn_id] += 1;
     if (state.warn_limits.find(warn_id) != state.warn_limits.end() && state.warn_limits[warn_id] <= state.warn_stats[warn_id])
     {
-        lc3_warning(state, "Limit for previous warning has been reached will no longer output messages of this type");
+        lc3_warning(state, "Limit for previous warning has been reached will no int64_ter output messages of this type");
         return;
     }
 }
@@ -867,7 +864,7 @@ void lc3_warning(lc3_state& state, const std::string& msg)
     char warning[256];
     std::string message;
 
-    unsigned short addr = state.pc - 1;
+    uint16_t addr = state.pc - 1;
     std::string instr = lc3_disassemble(state, state.mem[addr]);
 
     sprintf(warning, "Warning at x%04x (instruction - %s): %s", addr, instr.c_str(), msg.c_str());

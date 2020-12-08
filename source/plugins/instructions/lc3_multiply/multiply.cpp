@@ -7,7 +7,7 @@ static std::unique_ptr<Plugin> instance;
 Plugin* create_plugin(const PluginParams& /*params*/)
 {
     if (!instance)
-        instance.reset(new MultiplyPlugin());
+        instance = std::make_unique<MultiplyPlugin>();
 
     return instance.get();
 }
@@ -23,7 +23,7 @@ std::string MultiplyPlugin::GetOpcode() const
     return "MUL";
 }
 
-unsigned short MultiplyPlugin::DoAssembleOne(lc3_state& /*state*/, LC3AssembleContext& context)
+uint16_t MultiplyPlugin::DoAssembleOne(lc3_state& /*state*/, LC3AssembleContext& context)
 {
     size_t pos = context.line.find_first_of(" \t");
 
@@ -39,8 +39,8 @@ unsigned short MultiplyPlugin::DoAssembleOne(lc3_state& /*state*/, LC3AssembleCo
     tokenize(line, tokens, ",");
 
     // Remove spaces
-    for (unsigned int i = 0; i < tokens.size(); i++)
-        trim(tokens[i]);
+    for (auto& token : tokens)
+        trim(token);
 
     if (tokens.size() < 3)
     {
@@ -53,7 +53,7 @@ unsigned short MultiplyPlugin::DoAssembleOne(lc3_state& /*state*/, LC3AssembleCo
 
     bool is_reg;
     int dr, sr1, sr2_imm;
-    unsigned short instruction = 0xD000;
+    uint16_t instruction = 0xD000;
 
     dr = get_register(tokens[0], context);
     sr1 = get_register(tokens[1], context);
@@ -63,7 +63,7 @@ unsigned short MultiplyPlugin::DoAssembleOne(lc3_state& /*state*/, LC3AssembleCo
     return instruction;
 }
 
-void MultiplyPlugin::OnDecode(lc3_state& /*state*/, unsigned short data, lc3_instr& instr)
+void MultiplyPlugin::OnDecode(lc3_state& /*state*/, uint16_t data, lc3_instr& instr)
 {
     // ARITH FORMAT INSTRUCTION
     instr.arith.imm.dr = (data >> 9) & 0x7;
@@ -113,7 +113,7 @@ static const char* const MUL_ADVANCED_DISASSEMBLE[7] =
 std::string MultiplyPlugin::OnDisassemble(lc3_state& /*state*/, lc3_instr& instr, unsigned int level)
 {
     char buf[128];
-    short data;
+    int16_t data;
 
     // No difference between basic and normal
     if (level == LC3_BASIC_DISASSEMBLE || level == LC3_NORMAL_DISASSEMBLE)
@@ -171,7 +171,7 @@ static const RLEColorEntry mulColorings[2][4] =
     {{"DR_COLOR", 96, 0, 0, 3}, {"SR_COLOR", 0, 0, 80, 3}, {"UNUSED_BITS_COLOR", 0, 0, 0, 3}, {"SR_COLOR", 0, 0, 80, 3}},  // REG Version
 };
 
-std::list<RLEColorEntry> MultiplyPlugin::GetInstructionColoring(unsigned short instr) const
+std::list<RLEColorEntry> MultiplyPlugin::GetInstructionColoring(uint16_t instr) const
 {
     // Just like the ADD instruction
     std::list<RLEColorEntry> answer;

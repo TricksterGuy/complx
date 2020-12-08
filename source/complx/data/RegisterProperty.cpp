@@ -1,6 +1,7 @@
 #include "RegisterProperty.hpp"
-#include "PropertyTypes.hpp"
+
 #include "../util/ValidationHelper.hpp"
+#include "PropertyTypes.hpp"
 
 #include <wx/debug.h>
 #include <wx/valnum.h>
@@ -29,7 +30,7 @@ wxString GetAllowedCharacters(unsigned int flags)
 
 }
 
-RegisterProperty::RegisterProperty(const wxString& property, std::reference_wrapper<short> register_value, unsigned int display_base, unsigned int settings) :
+RegisterProperty::RegisterProperty(const wxString& property, std::reference_wrapper<int16_t> register_value, unsigned int display_base, unsigned int settings) :
     wxStringProperty(property),
     name(property),
     value(register_value),
@@ -55,7 +56,7 @@ RegisterProperty::RegisterProperty(const wxString& property, std::reference_wrap
 void RegisterProperty::RefreshDisplayedValue()
 {
     wxString str = (base == Decimal) ? wxString::Format("%d", value.get()) :
-                                       wxString::Format("x%04x", static_cast<unsigned short>(value.get()));
+                                       wxString::Format("x%04x", static_cast<uint16_t>(value.get()));
     SetValue(str);
 }
 
@@ -94,13 +95,13 @@ bool RegisterProperty::ValidateValue(wxVariant& value, wxPGValidationInfo& WXUNU
 void RegisterProperty::UpdateRegisterValue()
 {
     EventLog l(__func__);
-    short& reg = value.get();
+    int16_t& reg = value.get();
 
-    short old = reg;
+    int16_t old = reg;
 
     reg = ParseValueOrDie(GetValueAsString());
 
-    InfoLog("Updated %s from (%d x%04x) to (%d x%04x)", static_cast<const char*>(GetName()), old, static_cast<unsigned short>(old), reg, static_cast<unsigned short>(reg));
+    InfoLog("Updated %s from (%d x%04x) to (%d x%04x)", static_cast<const char*>(GetName()), old, static_cast<uint16_t>(old), reg, static_cast<uint16_t>(reg));
 }
 
 void RegisterProperty::UpdateDisplayBase()
@@ -115,7 +116,7 @@ void RegisterProperty::UpdateDisplayBase()
     InfoLog("Changed display base of %s to %s", static_cast<const char*>(GetName()), base == Decimal ? "Decimal" : "Hexadecimal");
 }
 
-void RegisterProperty::UpdateRef(std::reference_wrapper<short> new_value)
+void RegisterProperty::UpdateRef(std::reference_wrapper<int16_t> new_value)
 {
     value = new_value;
     RefreshDisplayedValue();

@@ -22,12 +22,12 @@ enum
 class MemoryView : public wxDataViewCtrl
 {
 public:
-    MemoryView(wxWindow* parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = 0, const wxValidator& validator = wxDefaultValidator, const wxString& name = wxDataViewCtrlNameStr);
-    ~MemoryView();
+    MemoryView(wxWindow* parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, int64_t style = 0, const wxValidator& validator = wxDefaultValidator, const wxString& name = wxDataViewCtrlNameStr);
+    ~MemoryView() override = default;
 
     /// Gets the address currently selected or -1 if nothing selected.
     int GetSelectedAddress() const;
-    void ScrollTo(unsigned short address);
+    void ScrollTo(uint16_t address);
 
     // Context Menu Event Handlers
     void OnContextMenu(wxDataViewEvent& event);

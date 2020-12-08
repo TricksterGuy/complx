@@ -16,7 +16,7 @@ Plugin* create_plugin(const PluginParams& params)
     unsigned int priority = params.read_uint_required("priority");
     unsigned char vec = params.read_uchar_required("vector");
 
-    instance.reset(new PingerPlugin(interval, priority, vec));
+    instance = std::make_unique<PingerPlugin>(interval, priority, vec);
 
     return instance.get();
 }
@@ -27,7 +27,7 @@ void destroy_plugin(Plugin* ptr)
         instance.reset();
 }
 
-PingerPlugin::PingerPlugin(unsigned short ping_interval, unsigned int prio, unsigned char vec) :
+PingerPlugin::PingerPlugin(uint16_t ping_interval, unsigned int prio, unsigned char vec) :
         Plugin(PINGER_MAJOR_VERSION, PINGER_MINOR_VERSION, LC3_OTHER, "Pinger plugin"), interval(ping_interval), priority(prio), ticks(0), int_vector(vec)
 {
     BindInterrupt(vec);

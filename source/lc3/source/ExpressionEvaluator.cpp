@@ -1,7 +1,8 @@
+#include "lc3/ExpressionEvaluator.hpp"
+
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <cstdio>
-#include "lc3/ExpressionEvaluator.hpp"
 
 /* -----------------------------------------------------------------------------
  * Copyright (c) 2003 Lallous <lallousx86@yahoo.com>
@@ -97,24 +98,24 @@ const operator_t operators[] =
 
 
 std::map<std::string, eval_type> symbol_table;
-int (*OnUndefinedSymbol)(const std::string& symbol, bool hasref, int ref, int& error) = 0;
+int (*OnUndefinedSymbol)(const string& symbol, bool hasref, int ref, int& error) = nullptr;
 
-int EvaluateOperand(string, int&);
+int EvaluateOperand(const string&, int&);
 
 // Returns < 0 if 'op' is not an operator
 // Otherwise it returns the index of the operator in the 'operators' array
 // The index can be used to get the operator's precedence value.
-int isOperator(string op)
+int isOperator(const string& op)
 {
     unsigned int i = 0;
     int oplen = 0;
     string s = operators[0].op;
-    // scan as long as it is a valid operator
+    // scan as int64_t as it is a valid operator
     // an operator might  have not just one symbol to represent it
 
     while (i<op.length())
     {
-        if (s.find(op[i]) == s.npos)
+        if (s.find(op[i]) == string::npos)
             break;
         oplen++;
         i++;
@@ -137,8 +138,8 @@ int isOperator(string op)
 }
 
 // returns the operands length.
-// scans as long as the current value is an alphanumeric or []
-int getToken(string str)
+// scans as int64_t as the current value is an alphanumeric or []
+int getToken(const string& str)
 {
     unsigned int i=0;
     int tokenLen = 0;
@@ -154,12 +155,12 @@ int getToken(string str)
     return depth == 0 ? tokenLen : 0;
 }
 
-int toRPN(string exp, string &rpn)
+int toRPN(const string& exp, string& rpn)
 {
     std::stack<string> st;
     string token, topToken;
     int  tokenLen, topPrecedence, idx, precedence;
-    string SEP(" "), EMPTY("");
+    string SEP(" "), EMPTY;
 
     rpn = "";
 
@@ -236,7 +237,7 @@ int toRPN(string exp, string &rpn)
                 if (!st.empty())
                 {
                     topToken = st.top();
-                    idx = isOperator(topToken.c_str());
+                    idx = isOperator(topToken);
                     if (idx < 0)
                         topPrecedence = 1; // give a low priority if operator not ok!
                     else
@@ -278,7 +279,7 @@ int toRPN(string exp, string &rpn)
 }
 
 //template <typename T> int evaluateRPN(string rpn, T &result)
-int evaluateRPN(string rpn, int& result)
+int evaluateRPN(const string& rpn, int& result)
 {
     std::stack<int> st;
     string token;
@@ -378,7 +379,7 @@ int evaluateRPN(string rpn, int& result)
     return eval_ok;
 }
 
-int Calculate(string expr, int &r)
+int Calculate(const string& expr, int &r)
 {
     string rpn;
     int err = eval_evalerr; // unexpected error
@@ -401,7 +402,7 @@ int Calculate(string expr, int &r)
     return err;
 }
 
-int SymbolTableLookup(string symbol, bool hasref, int ref, int& error)
+int SymbolTableLookup(const string& symbol, bool hasref, int ref, int& error)
 {
     if (symbol_table.find(symbol) == symbol_table.end())
     {
@@ -435,7 +436,7 @@ int SymbolTableLookup(string symbol, bool hasref, int ref, int& error)
     return -1;
 }
 
-int EvaluateOperand(string token, int& error)
+int EvaluateOperand(const string& token, int& error)
 {
     error = 0;
 

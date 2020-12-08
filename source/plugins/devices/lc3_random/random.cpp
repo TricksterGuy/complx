@@ -11,7 +11,7 @@ Plugin* create_plugin(const PluginParams& params)
     if (instance)
         return instance.get();
 
-    unsigned short address = params.read_ushort_required("address");
+    uint16_t address = params.read_uint16_t_required("address");
 
     unsigned int seed = 0;
     params.read_uint("seed", seed);
@@ -22,7 +22,7 @@ Plugin* create_plugin(const PluginParams& params)
     if (random_seed)
         seed = time(nullptr);
 
-    instance.reset(new RandomPlugin(address, seed));
+    instance = std::make_unique<RandomPlugin>(address, seed);
 
     return instance.get();
 }
@@ -33,21 +33,21 @@ void destroy_plugin(Plugin* ptr)
         instance.reset();
 }
 
-RandomPlugin::RandomPlugin(unsigned short address, unsigned int seed) :
+RandomPlugin::RandomPlugin(uint16_t address, unsigned int seed) :
     Plugin(RANDOM_MAJOR_VERSION, RANDOM_MINOR_VERSION, LC3_OTHER, "Random Generator plugin"), generator(seed),
     distribution(-32768, 32767)
 {
     BindAddress(address);
 }
 
-short RandomPlugin::OnRead(lc3_state& state, unsigned short addr)
+int16_t RandomPlugin::OnRead(lc3_state& state, uint16_t addr)
 {
-    short retVal = static_cast<short>(distribution(generator));
+    auto retVal = static_cast<int16_t>(distribution(generator));
     state.mem[addr] = retVal;
     return retVal;
 }
 
-void RandomPlugin::OnWrite(lc3_state& /*state*/, unsigned short /*addr*/, short value)
+void RandomPlugin::OnWrite(lc3_state& /*state*/, uint16_t /*addr*/, int16_t value)
 {
     generator.seed(value);
 }

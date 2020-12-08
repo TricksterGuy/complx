@@ -76,41 +76,41 @@ BOOST_FIXTURE_TEST_CASE(InstructionDecodeTest, LC3BasicTest)
     lc3_instr instr[18];
 
                             //BR #1             : op, n, z, p, pc_offset
-    instr[0].br             = br_instr({BR_INSTR, 1, 1, 1, 1});
+    instr[0].br             = br_instruction({BR_INSTR, 1, 1, 1, 1});
                             //ADD R0, R1, R2    : op, dr, sr1, 0, 0, sr2
-    instr[1].arith.reg      = arithreg_instr({ADD_INSTR, 0, 1, 0, 0, 2});
+    instr[1].arith.reg      = arithreg_instruction({ADD_INSTR, 0, 1, 0, 0, 2});
                             //ADD R0, R1, #2    : op, dr, sr1, 1, imm
-    instr[2].arith.imm      = arithimm_instr({ADD_INSTR, 0, 1, 1, 2});
+    instr[2].arith.imm      = arithimm_instruction({ADD_INSTR, 0, 1, 1, 2});
                             //LD R0, #-1        : op, reg, pc_offset
-    instr[3].mem.offset     = memoryoffset_instr({LD_INSTR, 0, -1});
+    instr[3].mem.offset     = memoryoffset_instruction({LD_INSTR, 0, -1});
                             //ST R0, #-1        : op, reg, pc_offset
-    instr[4].mem.offset     = memoryoffset_instr({ST_INSTR, 0, -1});
+    instr[4].mem.offset     = memoryoffset_instruction({ST_INSTR, 0, -1});
                             //JSR #-1           : op, 1, pc_offset
-    instr[5].subr.jsr       = jsr_instr({JSR_INSTR, 1, -1});
+    instr[5].subr.jsr       = jsr_instruction({JSR_INSTR, 1, -1});
                             //JSRR R0           : op, 0, 0, reg, 0
-    instr[6].subr.jsrr      = jsrr_instr({JSRR_INSTR, 0, 0, 0, 0});
+    instr[6].subr.jsrr      = jsrr_instruction({JSRR_INSTR, 0, 0, 0, 0});
                             //AND R0, R1, R2    : op, dr, sr1, 0, 0, sr2
-    instr[7].arith.reg      = arithreg_instr({AND_INSTR, 0, 1, 0, 0, 2});
+    instr[7].arith.reg      = arithreg_instruction({AND_INSTR, 0, 1, 0, 0, 2});
                             //AND R0, R1, #2    : op, dr, sr1, 1, imm
-    instr[8].arith.imm      = arithimm_instr({AND_INSTR, 0, 1, 1, 2});
+    instr[8].arith.imm      = arithimm_instruction({AND_INSTR, 0, 1, 1, 2});
                             //LDR R0, R1, #2    : op, reg, base, offset
-    instr[9].mem.reg        = memoryreg_instr({LDR_INSTR, 0, 1, 2});
+    instr[9].mem.reg        = memoryreg_instruction({LDR_INSTR, 0, 1, 2});
                             //STR R0, R1, #2    : op, reg, base, offset
-    instr[10].mem.reg       = memoryreg_instr({STR_INSTR, 0, 1, 2});
+    instr[10].mem.reg       = memoryreg_instruction({STR_INSTR, 0, 1, 2});
                             //NOT R0, R1        : op, dr, sr1, 0x3F
-    instr[11].arith.inv     = not_instr({NOT_INSTR, 0, 1, 0x3F});
+    instr[11].arith.inv     = not_instruction({NOT_INSTR, 0, 1, 0x3F});
                             // LDI R0, #-1      : op, reg, pc_offset
-    instr[12].mem.offset    = memoryoffset_instr({LDI_INSTR, 0, -1});
+    instr[12].mem.offset    = memoryoffset_instruction({LDI_INSTR, 0, -1});
                             // STI R0, #-1      : op, reg, pc_offset
-    instr[13].mem.offset    = memoryoffset_instr({STI_INSTR, 0, -1});
+    instr[13].mem.offset    = memoryoffset_instruction({STI_INSTR, 0, -1});
                             // RET              : op, 0, 7, 0
-    instr[14].jmp           = jmp_instr({RET_INSTR, 0, 7, 0});
+    instr[14].jmp           = jmp_instruction({RET_INSTR, 0, 7, 0});
                             // JMP R0           : op, 0, reg, 0
-    instr[15].jmp           = jmp_instr({JMP_INSTR, 0, 0, 0});
+    instr[15].jmp           = jmp_instruction({JMP_INSTR, 0, 0, 0});
                             // LEA R0, #-1      : op, reg, pc_offset
-    instr[16].mem.offset    = memoryoffset_instr({LEA_INSTR, 0, -1});
+    instr[16].mem.offset    = memoryoffset_instruction({LEA_INSTR, 0, -1});
                             // TRAP x25         : op, 0, vector
-    instr[17].trap          = trap_instr({TRAP_INSTR, 0, 0x25});
+    instr[17].trap          = trap_instruction({TRAP_INSTR, 0, 0x25});
 
     unsigned short data_answers[18] = {
         0x0E01, 0x1042, 0x1062, 0x21ff, 0x31ff, 0x4fff, 0x4000,
@@ -213,9 +213,9 @@ BOOST_FIXTURE_TEST_CASE(InstructionDecodeTest2, LC3BasicTest)
 
 BOOST_FIXTURE_TEST_CASE(MalformedInstructionTest, LC3BasicTest)
 {
-    const std::vector<unsigned short> malformed_instructions = {0, 1, 0x1008, 0x4001, 0x4200, 0x5008, 0x8001, 0x903E, 0xC001, 0xC200, 0xF100};
+    const std::vector<unsigned short> malformed_instructionuctions = {0, 1, 0x1008, 0x4001, 0x4200, 0x5008, 0x8001, 0x903E, 0xC001, 0xC200, 0xF100};
 
-    for (const auto& data : malformed_instructions)
+    for (const auto& data : malformed_instructionuctions)
     {
         BOOST_TEST_MESSAGE("data = x" << std::hex << data);
         lc3_instr instr = lc3_decode(state, data);
@@ -232,14 +232,14 @@ BOOST_FIXTURE_TEST_CASE(MalformedInstructionTest, LC3BasicTest)
 
 BOOST_FIXTURE_TEST_CASE(MalformedInstructionDisassemble, LC3BasicTest)
 {
-    const std::vector<unsigned short> malformed_instructions = {0, 1, 0x1008, 0x4001, 0x4200, 0x5008, 0x8001, 0x903E, 0xC001, 0xC200, 0xF100};
+    const std::vector<unsigned short> malformed_instructionuctions = {0, 1, 0x1008, 0x4001, 0x4200, 0x5008, 0x8001, 0x903E, 0xC001, 0xC200, 0xF100};
     const std::vector<std::string> answers = {"NOP *", "NOP *", "ADD R0, R0, R0 *", "JSRR R0 *", "JSRR R0 *", "AND R0, R0, R0 *", "RTI *", "NOT R0, R0 *", "JMP R0 *", "JMP R0 *", "TRAP x00 *"};
 
 
-    for (unsigned int i = 0; i < malformed_instructions.size(); i++)
+    for (unsigned int i = 0; i < malformed_instructionuctions.size(); i++)
     {
-        BOOST_TEST_MESSAGE("data = x" << std::hex << malformed_instructions[i]);
-        BOOST_CHECK_EQUAL(lc3_disassemble(state, malformed_instructions[i], -1, 0), answers[i]);
+        BOOST_TEST_MESSAGE("data = x" << std::hex << malformed_instructionuctions[i]);
+        BOOST_CHECK_EQUAL(lc3_disassemble(state, malformed_instructionuctions[i], -1, 0), answers[i]);
     }
 
     // This should not be considered malformed
@@ -485,21 +485,21 @@ BOOST_FIXTURE_TEST_CASE(TestSmartDisassemble, LC3BasicTest)
 
 BOOST_FIXTURE_TEST_CASE(TestArithInstructions, LC3BasicTest)
 {
-    arithreg_instr add_r, and_r;
-    arithimm_instr add_i, and_i;
-    not_instr not_r;
+    arithreg_instruction add_r, and_r;
+    arithimm_instruction add_i, and_i;
+    not_instruction not_r;
     lc3_instr instr;
 
             //ADD R0, R1, R2    : op, dr, sr1, 0, 0, sr2
-    add_r = arithreg_instr({ADD_INSTR, 0, 1, 0, 0, 2});
+    add_r = arithreg_instruction({ADD_INSTR, 0, 1, 0, 0, 2});
             //ADD R0, R1, #2    : op, dr, sr1, 1, imm
-    add_i = arithimm_instr({ADD_INSTR, 0, 1, 1, 2});
+    add_i = arithimm_instruction({ADD_INSTR, 0, 1, 1, 2});
             //AND R0, R1, R2    : op, dr, sr1, 0, 0, sr2
-    and_r = arithreg_instr({AND_INSTR, 0, 1, 0, 0, 2});
+    and_r = arithreg_instruction({AND_INSTR, 0, 1, 0, 0, 2});
             //AND R0, R1, #2    : op, dr, sr1, 1, imm
-    and_i = arithimm_instr({AND_INSTR, 0, 1, 1, 2});
+    and_i = arithimm_instruction({AND_INSTR, 0, 1, 1, 2});
             //NOT R0, R1        : op, dr, sr1, 0x3F
-    not_r = not_instr({NOT_INSTR, 0, 1, 0x3F});
+    not_r = not_instruction({NOT_INSTR, 0, 1, 0x3F});
 
     // ADD R0, R1, R2
     state.regs[0] = 23;
@@ -565,37 +565,37 @@ BOOST_FIXTURE_TEST_CASE(TestControlInstructions, LC3BasicTest)
 {
     state.strict_execution = 0;
 
-    br_instr brnzp, brn, brz, brp, brnil;
-    jsr_instr jsr;
-    jsrr_instr jsrr;
-    jsrr_instr jsrr7;
-    jmp_instr ret, jmp;
-    trap_instr halt;
+    br_instruction brnzp, brn, brz, brp, brnil;
+    jsr_instruction jsr;
+    jsrr_instruction jsrr;
+    jsrr_instruction jsrr7;
+    jmp_instruction ret, jmp;
+    trap_instruction halt;
     lc3_instr instr;
 
     //BR #1             : op, n, z, p, pc_offset
-    brnzp = br_instr({BR_INSTR, 1, 1, 1, 1});
+    brnzp = br_instruction({BR_INSTR, 1, 1, 1, 1});
     //BRN #1            : op, n, z, p, pc_offset
-    brn   = br_instr({BR_INSTR, 1, 0, 0, 1});
+    brn   = br_instruction({BR_INSTR, 1, 0, 0, 1});
     //BRZ #-11          : op, n, z, p, pc_offset
-    brz   = br_instr({BR_INSTR, 0, 1, 0, -11});
+    brz   = br_instruction({BR_INSTR, 0, 1, 0, -11});
     //BRP #1            : op, n, z, p, pc_offset
-    brp   = br_instr({BR_INSTR, 0, 0, 1, 1});
+    brp   = br_instruction({BR_INSTR, 0, 0, 1, 1});
     //.fill #1          : op, n, z, p, pc_offset
-    brnil = br_instr({BR_INSTR, 0, 0, 0, 1});
+    brnil = br_instruction({BR_INSTR, 0, 0, 0, 1});
 
     //JSR #-1           : op, 1, pc_offset
-    jsr   = jsr_instr({JSR_INSTR, 1, -1});
+    jsr   = jsr_instruction({JSR_INSTR, 1, -1});
     //JSRR R0           : op, 0, 0, reg, 0
-    jsrr  = jsrr_instr({JSRR_INSTR, 0, 0, 0, 0});
+    jsrr  = jsrr_instruction({JSRR_INSTR, 0, 0, 0, 0});
     //JSRR R7           : op, 0, 0, reg, 0
-    jsrr7  = jsrr_instr({JSRR_INSTR, 0, 0, 7, 0});
+    jsrr7  = jsrr_instruction({JSRR_INSTR, 0, 0, 7, 0});
     // RET              : op, 0, 7, 0
-    ret   = jmp_instr({RET_INSTR, 0, 7, 0});
+    ret   = jmp_instruction({RET_INSTR, 0, 7, 0});
     // JMP R0           : op, 0, reg, 0
-    jmp   = jmp_instr({JMP_INSTR, 0, 0, 0});
+    jmp   = jmp_instruction({JMP_INSTR, 0, 0, 0});
     // TRAP x25         : op, 0, vector
-    halt  = trap_instr({TRAP_INSTR, 0, 0x25});
+    halt  = trap_instruction({TRAP_INSTR, 0, 0x25});
 
 
     // BR #1 (Taken)
@@ -715,24 +715,24 @@ BOOST_FIXTURE_TEST_CASE(TestErrorInstructions, LC3BasicTest)
 
 BOOST_FIXTURE_TEST_CASE(TestMemoryInstructions, LC3BasicTest)
 {
-    memoryoffset_instr ld, st, ldi, sti, lea;
-    memoryreg_instr ldr, str;
+    memoryoffset_instruction ld, st, ldi, sti, lea;
+    memoryreg_instruction ldr, str;
     lc3_instr instr;
 
     // LD R0, #-1        : op, reg, pc_offset
-    ld = memoryoffset_instr({LD_INSTR, 0, -1});
+    ld = memoryoffset_instruction({LD_INSTR, 0, -1});
     // ST R0, #-1        : op, reg, pc_offset
-    st = memoryoffset_instr({ST_INSTR, 0, -1});
+    st = memoryoffset_instruction({ST_INSTR, 0, -1});
     // LDR R0, R1, #2    : op, reg, base, offset
-    ldr = memoryreg_instr({LDR_INSTR, 0, 1, 2});
+    ldr = memoryreg_instruction({LDR_INSTR, 0, 1, 2});
     // STR R0, R1, #2    : op, reg, base, offset
-    str = memoryreg_instr({STR_INSTR, 0, 1, 2});
+    str = memoryreg_instruction({STR_INSTR, 0, 1, 2});
     // LDI R0, #-1      : op, reg, pc_offset
-    ldi = memoryoffset_instr({LDI_INSTR, 0, -1});
+    ldi = memoryoffset_instruction({LDI_INSTR, 0, -1});
     // STI R0, #-1      : op, reg, pc_offset
-    sti = memoryoffset_instr({STI_INSTR, 0, -1});
+    sti = memoryoffset_instruction({STI_INSTR, 0, -1});
     // LEA R0, #-1      : op, reg, pc_offset
-    lea = memoryoffset_instr({LEA_INSTR, 0, -1});
+    lea = memoryoffset_instruction({LEA_INSTR, 0, -1});
 
     // LD R0, #-1
     state.mem[0x2FFF] = 23;

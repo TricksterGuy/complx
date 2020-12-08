@@ -11,15 +11,15 @@ public:
     MemoryViewBinaryDataRenderer();
     ~MemoryViewBinaryDataRenderer() {}
 
-    bool SetValue(const wxVariant& value) override;
-    bool GetValue(wxVariant& value) const override;
+    bool SetValue(const wxVariant& variant) override;
+    bool GetValue(wxVariant& variant) const override;
 
     bool Render(wxRect rect, wxDC* dc, int state) override;
     wxSize GetSize() const override;
 
     // in-place editing
     bool HasEditorCtrl() const override;
-    wxWindow* CreateEditorCtrl(wxWindow* parent, wxRect labelRect, const wxVariant& value) override;
+    wxWindow* CreateEditorCtrl(wxWindow* parent, wxRect labelRect, const wxVariant& variant) override;
     bool GetValueFromEditorCtrl(wxWindow* editor, wxVariant& value) override;
 
 private:

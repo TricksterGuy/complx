@@ -147,7 +147,7 @@ void ComplxFrame::InitializeMemoryView()
 void ComplxFrame::InitializeStatePropGrid()
 {
     // Setup PC Property.
-    pc_property = new RegisterProperty("PC", std::ref(reinterpret_cast<short&>(state->pc)), RegisterProperty::Hexadecimal, RegisterProperty::NoBaseProperty | RegisterProperty::AllowHexadecimal);
+    pc_property = new RegisterProperty("PC", std::ref(reinterpret_cast<int16_t&>(state->pc)), RegisterProperty::Hexadecimal, RegisterProperty::NoBaseProperty | RegisterProperty::AllowHexadecimal);
     statePropGrid->Append(pc_property);
     // xFFFF
     statePropGrid->SetPropertyMaxLength(pc_property, 5);
@@ -175,13 +175,13 @@ void ComplxFrame::InitializeStatePropGrid()
 
 void ComplxFrame::InitializeOutput()
 {
-    output.reset(new std::ostream(consoleText));
-    warning.reset(new std::ostream(warningText));
-    trace.reset(new std::ostream(traceText));
-    logging.reset(new std::ostream(loggingText));
+    output = std::make_unique<std::ostream>(consoleText);
+    warning = std::make_unique<std::ostream>(warningText);
+    trace = std::make_unique<std::ostream>(traceText);
+    logging = std::make_unique<std::ostream>(loggingText);
 
     // Copy initial logs to the logging textctrl. And switch to logging to the textctrl.
-    const std::stringstream& old = dynamic_cast<const std::stringstream&>(logger->GetLogTarget());
+    const auto& old = dynamic_cast<const std::stringstream&>(logger->GetLogTarget());
     *logging << (old.str());
     logger->SetLogTarget(*logging);
 }
@@ -193,8 +193,8 @@ bool ComplxFrame::DoLoadFile(const LoadingOptions& opts)
     wxFileName filename(opts.file);
     bool randomize_registers = opts.registers == RANDOMIZE;
     bool randomize_memory = opts.memory == RANDOMIZE;
-    short fill_registers = opts.registers;
-    short fill_memory = opts.memory;
+    int16_t fill_registers = opts.registers;
+    int16_t fill_memory = opts.memory;
 
     new_state->default_seed = (opts.has_random_seed) ? opts.random_seed : state->default_seed;
     lc3_init(*new_state, randomize_registers, randomize_memory, fill_registers, fill_memory);
@@ -213,16 +213,7 @@ bool ComplxFrame::DoLoadFile(const LoadingOptions& opts)
     }
     catch (const LC3AssembleException& e)
     {
-        WarnLog("Assembling file %s failed. Reason: %s", static_cast<const char*>(filename.GetFullName()), e.what().c_str());
-        return false;
-    }
-    catch (const std::vector<LC3AssembleException>& vec)
-    {
-        WarnLog("Assembling file %s failed. Reasons below.\n-----", static_cast<const char*>(filename.GetFullName()));
-
-        for (const auto& ex : vec)
-            WarnLog("%s", ex.what().c_str());
-
+        WarnLog("Assembling file %s failed. Reason: %s", static_cast<const char*>(filename.GetFullName()), e.what());
         return false;
     }
 
@@ -243,7 +234,7 @@ void ComplxFrame::PostLoadFile()
 {
     memoryView->UpdateRef(std::ref(*state));
     cc_property->UpdateRef(std::ref(*state));
-    pc_property->UpdateRef(std::ref(reinterpret_cast<short&>(state->pc)));
+    pc_property->UpdateRef(std::ref(reinterpret_cast<int16_t&>(state->pc)));
     for (unsigned int i = 0; i < 8; i++)
         register_properties[i]->UpdateRef(std::ref(state->regs[i]));
     memoryView->Refresh();

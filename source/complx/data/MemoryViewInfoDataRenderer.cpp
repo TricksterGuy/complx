@@ -4,7 +4,7 @@
 #include <wx/dc.h>
 
 MemoryViewInfoDataRenderer::MemoryViewInfoDataRenderer() :
-    wxDataViewCustomRenderer("long", wxDATAVIEW_CELL_INERT)
+    wxDataViewCustomRenderer("int64_t", wxDATAVIEW_CELL_INERT)
 {
 
 }
