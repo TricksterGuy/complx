@@ -6,8 +6,8 @@ import six
 import struct
 import sys
 import unittest
-import lc3_unit_test_case
-from lc3_unit_test_case import DataItem
+from pylc3.unittests import lc3_unit_test_case
+from pylc3.unittests.lc3_unit_test_case import DataItem
 
 
 # Note this file is not to be used as a template for writing student tests.
@@ -1318,15 +1318,26 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.fillData(0xC000, data=(0x9000, 'test', [44, 55], (72, [1, 2, 3])))
 
         def splitBlob(blob):
-            blobettes = []
+            preBlobettes = set()
+            postBlobettes = set()
             index = 0
             while index < len(blob):
-                t = struct.unpack('=B', blob[index])[0]
-                if t < 16:
-                    blobettes.append(blob[index:index+5])
+                t = struct.unpack('=B', blob[index:index+1])[0]
+                if t == 16:
+                    preBlobettes.add(blob[index:index+1])
+                    index += 1
+                    break
+                elif t < 16:
+                    preBlobettes.add(blob[index:index+5])
                     index += 5
-                elif t == 16 or t == 255:
-                    blobettes.append(blob[index])
+                else:
+                    self.fail("Index indicates chunk that is not an environment setting")
+            while index < len(blob):
+                t = struct.unpack('=B', blob[index:index+1])[0]
+                if t < 16:
+                    self.fail("Index indicates chunk that is an environment setting")
+                elif t == 255:
+                    postBlobettes.add(blob[index:index+1])
                     index += 1
                 else:
                     start = index
@@ -1335,12 +1346,12 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
                     index += size
                     size = struct.unpack('=I', blob[index:index+4])[0]
                     index += 4 + 2 * size
-                    blobettes.append(blob[start:index])
-            return blobettes
+                    postBlobettes.add(blob[start:index])
+            return preBlobettes, postBlobettes
 
-        blob = splitBlob(self.preconditions._formBlob())
+        preBlob, postBlob = splitBlob(self.preconditions._formBlob())
 
-        expected_blob = [
+        expected_preBlob, expected_postBlob = ({
                     b'\x01\x01\x00\x00\x00',
                     b'\x02\x01\x00\x00\x00',
                     b'\x03\x01\x00\x00\x00',
@@ -1349,9 +1360,9 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
                     b'\x06\xff\xff\xff\xff',
                     b'\x07\x00\x80\x00\x00',
                     b'\x08\x01\x00\x00\x00',
-                    b'\x10',
+                    b'\x10'},
 
-                    b'\x11\x01\x00\x00\x004\x01\x00\x00\x00\x01@',
+                    [b'\x11\x01\x00\x00\x004\x01\x00\x00\x00\x01@',
                     b'\x12\x00\x00\x00\x00\x01\x00\x00\x00\x00\x05',
                     b'\x13\x03\x00\x00\x00AHH\x01\x00\x00\x00\x07\x00',
                     b'\x14\x04\x00\x00\x00BLAH\x01\x00\x00\x00\xa6\x02',
@@ -1367,9 +1378,11 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
                     b'\x1D\x04\x00\x00\x00b050\n\x00\x00\x00\x03\x00\x04\x00\x00\xb0\x01\xb0\x02\xb0\x03\xb0\xff\x00\x01\x00H\x00\x00\x00',
                     b'\x1E\x04\x00\x00\x00c000\x15\x00\x00\x00\x01\x00\x00\x90\x02\x00\x04\x00t\x00e\x00s\x00t\x00\x03\x00\x02\x00,\x007\x00\xff\x00\x01\x00H\x00\x03\x00\x03\x00\x01\x00\x02\x00\x03\x00\x00\x00',
                     b'\xff'
-        ]
+        ])
 
-        self.assertEqual(blob, expected_blob)
+
+        self.assertCountEqual(preBlob, expected_preBlob)
+        self.assertCountEqual(postBlob, expected_postBlob)
 
         #print self.preconditions.encode()
 
@@ -1439,12 +1452,12 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
             blobettes = []
             index = 0
             while index < len(blob):
-                id = struct.unpack('=B', blob[index])[0]
+                id = struct.unpack('=B', blob[index:index+1])[0]
                 if id == 0xFF:
                     blobettes.append(b'\xff')
                     break
                 start = index
-                type = struct.unpack('=B', blob[index+1])[0]
+                type = struct.unpack('=B', blob[index+1:index+2])[0]
                 index += 2
                 if type == 0:
                     index += 4
@@ -1642,7 +1655,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         names = [tup[0] for tup in self.failed_assertions]
         msgs = [tup[1] for tup in self.failed_assertions]
 
-        self.assertEquals(names, ['value: A', 'value: B', 'value: C'])
+        self.assertEqual(names, ['value: A', 'value: B', 'value: C'])
         self.assertIn('MEM[A] was expected to be (2 x0002) but code produced (3 x0003)\n', msgs[0])
         self.assertIn('Not checked due to previous failures.', msgs[1])
         self.assertIn('Not checked due to previous failures.', msgs[2])
@@ -1669,7 +1682,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         names = [tup[0] for tup in self.failed_assertions]
         msgs = [tup[1] for tup in self.failed_assertions]
 
-        self.assertEquals(names, ['value: B', 'value: C'])
+        self.assertEqual(names, ['value: B', 'value: C'])
         self.assertIn('MEM[B] was expected to be (3 x0003) but code produced (5 x0005)\n', msgs[0])
         self.assertIn('MEM[C] was expected to be (4 x0004) but code produced (7 x0007)\n', msgs[1])
 

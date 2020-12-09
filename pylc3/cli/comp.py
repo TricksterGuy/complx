@@ -128,7 +128,7 @@ class Comp(cmd.Cmd):
                 error()
                 return None
 
-        for i in xrange(len(args), len(types)):
+        for i in range(len(args), len(types)):
             index = i - num_required
             params.append(defaults[index] if index < len(defaults) else None)
 
@@ -441,7 +441,7 @@ class Comp(cmd.Cmd):
 
         table_data = [['Addr', 'Hex', 'Dec', 'Binary', 'Label', 'Instruction', 'Comment']]
 
-        for addr in xrange(start, end+1):
+        for addr in range(start, end+1):
             data = self.state.get_memory(addr)
             symbol = self.state.reverse_lookup(addr)
             instruction = self.state.disassemble(addr, 1)

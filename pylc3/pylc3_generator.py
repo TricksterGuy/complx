@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 from pygccxml import parser
 from pygccxml import declarations
 from pyplusplus import module_builder

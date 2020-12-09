@@ -1,4 +1,4 @@
-import comp
+from pylc3.cli import comp
 from .. import pylc3
 import unittest
 

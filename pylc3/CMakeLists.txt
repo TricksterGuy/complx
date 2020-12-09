@@ -16,7 +16,7 @@ set(CASTXML_PATH "/usr/bin/castxml" CACHE STRING "where to find the castXML exec
 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PyLC3Gen.cpp ${CMAKE_CURRENT_SOURCE_DIR}/exposed_decl.pypp.txt ${CMAKE_CURRENT_SOURCE_DIR}/named_tuple.py
-    COMMAND python pylc3_generator.py ${CASTXML_PATH}
+    COMMAND python3 pylc3_generator.py ${CASTXML_PATH}
     DEPENDS PyLC3.hpp
     MAIN_DEPENDENCY pylc3_generator.py
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
