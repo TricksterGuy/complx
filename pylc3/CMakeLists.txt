@@ -5,18 +5,17 @@ include_directories(${complx-tools_SOURCE_DIR}/logging)
 # SET(Boost_USE_STATIC_LIBS OFF)
 set(CMAKE_SHARED_LINKER_FLAGS "-Wl,--export-all-symbols")
 
-find_package(PythonInterp REQUIRED)
-find_package(PythonLibs REQUIRED)
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 find_package(Boost COMPONENTS python REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${PYTHON_INCLUDE_DIRS})
+include_directories(${Python3_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIR})
 
 set(CASTXML_PATH "/usr/bin/castxml" CACHE STRING "where to find the castXML executable")
 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PyLC3Gen.cpp ${CMAKE_CURRENT_SOURCE_DIR}/exposed_decl.pypp.txt ${CMAKE_CURRENT_SOURCE_DIR}/named_tuple.py
-    COMMAND python3 pylc3_generator.py ${CASTXML_PATH}
+    COMMAND ${Python3_EXECUTABLE} pylc3_generator.py ${CASTXML_PATH}
     DEPENDS PyLC3.hpp
     MAIN_DEPENDENCY pylc3_generator.py
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -38,7 +37,7 @@ target_link_libraries(
     pylc3
     lc3
     ${Boost_LIBRARIES}
-    ${PYTHON_LIBRARIES}
+    ${Python3_LIBRARIES}
 )
 
 if (ENABLE_REPLAY)
@@ -72,6 +71,6 @@ else(SKBUILD)
         COMMENT "Copying needed plugins for testing")
 
     get_filename_component(PYTHON_WORKING_DIR ${CMAKE_CURRENT_SOURCE_DIR} PATH)
-    add_test(NAME lc3_unit_test_case_test COMMAND ${PYTHON_EXECUTABLE} -m pylc3.unittests.lc3_unit_test_case_test WORKING_DIRECTORY ${PYTHON_WORKING_DIR})
-    add_test(NAME comp_test COMMAND ${PYTHON_EXECUTABLE} -m pylc3.cli.comp_test WORKING_DIRECTORY ${PYTHON_WORKING_DIR})
+    add_test(NAME lc3_unit_test_case_test COMMAND ${Python3_EXECUTABLE} -m pylc3.unittests.lc3_unit_test_case_test WORKING_DIRECTORY ${PYTHON_WORKING_DIR})
+    add_test(NAME comp_test COMMAND ${Python3_EXECUTABLE} -m pylc3.cli.comp_test WORKING_DIRECTORY ${PYTHON_WORKING_DIR})
 endif(SKBUILD)
