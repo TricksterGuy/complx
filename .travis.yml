@@ -8,7 +8,7 @@ matrix:
 before_install:
 - sudo apt-get update -qq
 - sudo apt-get install -y libboost-test-dev castxml python3-pip libpython3-dev libboost-python-dev libboost-serialization-dev
-- sudo pip3 install wheel unittest2 pygccxml pyplusplus terminaltables
+- sudo pip3 install wheel setuptools unittest2
 - sudo pip3 install -r pylc3/requirements.txt
 - sudo pip3 install -r pylc3/requirements-build.txt
 script:
