@@ -252,7 +252,7 @@ def _formDataPreconditions(t):
 
 
 def _cstringifyData(data):
-    return [six.u(d) + u'\0' if isinstance(d, str) else d for d in list(data)]
+    return [six.u(d) + '\0' if isinstance(d, str) else d for d in list(data)]
 
 
 class SubroutineCallMode(enum.Enum):
@@ -286,7 +286,7 @@ class Preconditions(object):
     def _formBlob(self):
         file = six.BytesIO()
 
-        for id, value in self._environment_data.items():
+        for id, value in list(self._environment_data.items()):
             file.write(struct.pack('=B', id))
             file.write(struct.pack('=i', value))
         file.write(struct.pack('=B', 16))
@@ -418,8 +418,8 @@ class LC3UnitTestCase(unittest.TestCase):
         name = cls.__name__
         filename = 'results.json'
         tests = set()
-        tests.update(cls.failed_assertions_per_test.keys())
-        tests.update(cls.passed_assertions_per_test.keys())
+        tests.update(list(cls.failed_assertions_per_test.keys()))
+        tests.update(list(cls.passed_assertions_per_test.keys()))
         json_obj = {name: []}
         for test_name in tests:
             for check_name in cls.passed_assertions_per_test.get(test_name, []):
@@ -682,7 +682,7 @@ class LC3UnitTestCase(unittest.TestCase):
                     length = dataspec[i + 1]
                     string = []
                     for addr in range(address, address + length + 1):
-                        string.append(six.unichr(self._readMem(addr, unsigned=True)))
+                        string.append(chr(self._readMem(addr, unsigned=True)))
                     data.append(''.join(string))
                     address += length + 1
                     i += 2
@@ -898,10 +898,10 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             subroutine: String - Label pointing at the start of the subroutine.
             params: List of Integer - (LC-3 Calling Convention Style) Parameters to the subroutine
-                    Dict of Integer to Integer - (Pass by Register Style) Map of Register number to value. (Do not set R5-R7 in this dictionary).
-            r5: Integer - Dummy value to store in r5 (frame pointer) for the test.
+                    Dict of Integer to Integer - (Pass by Register Style) Map of Register number to value.
+            r5: Integer - Dummy value to store in r5 (frame pointer) for the test, ignored if pass by register mode.
             r6: Integer - Dummy value to store in r6 (stack pointer) for the test.
-            r7: Integer - Dummy value to store in r7 (return address) for the test.
+            r7: Integer - Dummy value to store in r7 (return address) for the test, ignored if pass by register mode.
         """
 
         self.state.pc = self._lookup(subroutine)
@@ -921,19 +921,16 @@ class LC3UnitTestCase(unittest.TestCase):
             self.preconditions.addPrecondition(PreconditionFlag.subroutine, subroutine, [r5, r6, r7] + params)
         elif isinstance(params, dict):
             self.state.r6 = r6
-            self._internalAssert('callSubroutine', 5 not in params, 'R5 present in params list in pass by register mode, use kwarg r5 instead.', AssertionType.fatal, internal=True)
-            self._internalAssert('callSubroutine', 6 not in params, 'R6 present in params list in pass by register mode, use kwarg r6 instead.', AssertionType.fatal, internal=True)
-            self._internalAssert('callSubroutine', 7 not in params, 'R7 present in params list in pass by register mode, use kwarg r7 instead.', AssertionType.fatal, internal=True)
-            for register, value in params.items():
+            for register, value in list(params.items()):
                 self._writeReg(register, value)
-            self.subroutine_specifications[subroutine] = params.keys()
+            self.subroutine_specifications[subroutine] = list(params.keys())
             if r5:
                 params[5] = r5
             params[6] = r6
             params[7] = r7
             self._internalAssert('callSubroutine', self._subroutine_call_mode is None or self._subroutine_call_mode == SubroutineCallMode.pass_by_register, "Can't mix subroutine call styles in the same test.", AssertionType.fatal, internal=True)
             self._subroutine_call_mode = SubroutineCallMode.pass_by_register
-            data = list(six.moves.reduce(lambda a, b: a + b, params.items()))
+            data = list(six.moves.reduce(lambda a, b: a + b, list(params.items())))
             self.preconditions.addPrecondition(PreconditionFlag.pass_by_regs, subroutine, data)
         self.preconditions.addEnvironment(PreconditionFlag.break_address, r7)
 
@@ -972,8 +969,8 @@ class LC3UnitTestCase(unittest.TestCase):
             self._subroutine_call_mode = SubroutineCallMode.lc3_calling_convention
         elif isinstance(params, dict):
             if subroutine not in self.subroutine_specifications:
-                self.subroutine_specifications[subroutine] = params.keys()
-            inner_value = tuple([(k, v) for k, v in params.items()])
+                self.subroutine_specifications[subroutine] = list(params.keys())
+            inner_value = tuple([(k, v) for k, v in list(params.items())])
             self._internalAssert('expectSubroutineCall', self._subroutine_call_mode is None or self._subroutine_call_mode == SubroutineCallMode.pass_by_register, "Can't mix subroutine call styles in the same test.", AssertionType.fatal, internal=True)
             self._subroutine_call_mode = SubroutineCallMode.pass_by_register
         else:
@@ -992,7 +989,7 @@ class LC3UnitTestCase(unittest.TestCase):
         if isinstance(params, list):
             self.postconditions.add(PostconditionFlag.subroutine_call, subroutine, params)
         else:
-            data = list(six.moves.reduce(lambda a, b: a + b, params.items()))
+            data = list(six.moves.reduce(lambda a, b: a + b, list(params.items())))
             self.postconditions.add(PostconditionFlag.pass_by_regs, subroutine, data)
 
     def expectTrapCall(self, vector, params, optional=False):
@@ -1016,10 +1013,10 @@ class LC3UnitTestCase(unittest.TestCase):
         self._internalAssert('expectTrapCall', vector != 0x25, 'Method expectTrapCall called with vector=0x25, use assertHalted instead.', AssertionType.fatal, internal=True)
 
         if vector not in self.trap_specifications:
-            self.trap_specifications[vector] = params.keys()
+            self.trap_specifications[vector] = list(params.keys())
 
         set_to_add = self.expected_traps
-        value = (vector, tuple([(k, v) for k, v in params.items()]))
+        value = (vector, tuple([(k, v) for k, v in list(params.items())]))
 
         if optional:
             set_to_add = self.optional_traps
@@ -1030,7 +1027,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
         self._internalAssert('expectTrapCall', not (value in self.expected_subroutines and value in self.optional_subroutines), 'Trap %s found in both expected and optional subroutine calls.' % str(value), AssertionType.fatal, internal=True)
 
-        data = list(six.moves.reduce(lambda a, b: a + b, params.items()))
+        data = list(six.moves.reduce(lambda a, b: a + b, list(params.items())))
         self.postconditions.add(PostconditionFlag.pass_by_regs, 'x%02x' % vector, data)
 
     def fillValue(self, address, value):
@@ -1417,10 +1414,10 @@ class LC3UnitTestCase(unittest.TestCase):
         start_addr = self._readMem(self._lookup(label))
         actual_str = []
         for addr, _ in enumerate(text, start_addr):
-            actual_str.append(six.unichr(self._readMem(addr, unsigned=True)))
-        actual_str.append(six.unichr(self._readMem(start_addr + len(text), unsigned=True)))
+            actual_str.append(chr(self._readMem(addr, unsigned=True)))
+        actual_str.append(chr(self._readMem(start_addr + len(text), unsigned=True)))
         expected_str = list(six.u(text))
-        expected_str.append(u'\0')
+        expected_str.append('\0')
         self._assertEqual(expected_str, actual_str, 'string: %s' % label, 'String of characters starting at MEM[%s] was expected to be %s but code produced %s\n' % (label, repr(''.join(expected_str)), repr(''.join(actual_str))), level=level)
         self.postconditions.add(PostconditionFlag.string, label, [ord(char) for char in text])
 
@@ -1527,10 +1524,10 @@ class LC3UnitTestCase(unittest.TestCase):
 
         actual_str = []
         for addr, _ in enumerate(text, start_addr):
-            actual_str.append(six.unichr(self._readMem(addr, unsigned=True)))
-        actual_str.append(six.unichr(self._readMem(start_addr + len(text), unsigned=True)))
+            actual_str.append(chr(self._readMem(addr, unsigned=True)))
+        actual_str.append(chr(self._readMem(start_addr + len(text), unsigned=True)))
         expected_str = list(six.u(text))
-        expected_str.append(u'\0')
+        expected_str.append('\0')
         self._assertEqual(expected_str, actual_str, 'stringAt: x%04x' % start_addr, 'String of characters at MEM[x%04x] was expected to be %s but code produced %s\n' % (start_addr, repr(''.join(expected_str)), repr(''.join(actual_str))), level=level)
         self.postconditions.add(PostconditionFlag.direct_string, '%04x' % start_addr, [ord(char) for char in text])
 
@@ -1719,7 +1716,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
         def subroutine_list(subrs):
             if self._subroutine_call_mode == SubroutineCallMode.lc3_calling_convention:
-                return ' '.join(['%s(%s)' % (name, ','.join(map(str, map(_toShort, params)))) for name, params in subrs])
+                return ' '.join(['%s(%s)' % (name, ','.join(map(str, list(map(_toShort, params))))) for name, params in subrs])
             else:
                 subr_strs = []
                 for subr in subrs:
