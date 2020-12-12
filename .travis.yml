@@ -7,12 +7,12 @@ jobs:
       compiler: gcc
     - os: linux
       compiler: clang
-    - os: macosx
+    - os: osx
       compiler: clang
     - os: windows
       compiler: gcc
 script:
-- | -
+- |
     if [ "$TRAVIS_OS_NAME" = "windows" ]; then
       $msys2 ./configure test
       $msys2 ./configure test
@@ -77,7 +77,7 @@ cache:
     directories:
       - $HOME/AppData/Local/Temp/chocolatey
       - /C/tools/msys64
-after_faillure:
+after_failure:
   - pwd
   - ls
   - dir
