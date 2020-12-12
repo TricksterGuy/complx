@@ -12,23 +12,13 @@ jobs:
     - os: windows
       compiler: gcc
 script:
-- |
-    if [ "$TRAVIS_OS_NAME" = "windows" ]; then
-      $msys2 ./configure test
-      $msys2 ./configure test
-      $msys2 cmake --build build-test
-      $msys2 make install
-      $msys2 make test
-    else
-      ./configure test
-      ./configure test
-      cd build-test
-      sudo make install
-      if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo ldconfig; fi
-      make test
-      cd ..
-    fi
-  
+  - ./configure test
+  - ./configure test
+  - cd build-test
+  - cmake ..
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then make install; else sudo make install; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo ldconfig; fi
+  - make test
 addons:
   apt:
     update: true
@@ -81,6 +71,6 @@ after_failure:
   - pwd
   - ls
   - dir
-  - cat build-test/CMakefiles/CMakeOutput.log
-  - cat build-test/CMakefiles/CMakeError.log
-  - cat build-test/CMakeCache.txt
+  - cat CMakefiles/CMakeOutput.log
+  - cat CMakefiles/CMakeError.log
+  - cat CMakeCache.txt
