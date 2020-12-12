@@ -26,6 +26,7 @@ script:
       sudo make install
       if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo ldconfig; fi
       make test
+      cd ..
     fi
   
 addons:
@@ -80,5 +81,6 @@ after_faillure:
   - pwd
   - ls
   - dir
-  - cat CMakefiles/CMakeOutput.log
-  - cat CMakefiles/CMakeError.log
+  - cat build-test/CMakefiles/CMakeOutput.log
+  - cat build-test/CMakefiles/CMakeError.log
+  - cat build-test/CMakeCache.txt
