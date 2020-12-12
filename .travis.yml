@@ -71,6 +71,7 @@ after_failure:
   - pwd
   - ls
   - dir
+  - echo $PATH
   - cat CMakefiles/CMakeOutput.log
   - cat CMakefiles/CMakeError.log
   - cat CMakeCache.txt
