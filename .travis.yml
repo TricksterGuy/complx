@@ -12,13 +12,22 @@ jobs:
     - os: windows
       compiler: gcc
 script:
-  - ./configure test
-  - ./configure test
-  - cd build-test
-  - sudo make install
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo ldconfig; fi
-  - make test
-
+- | -
+    if [ "$TRAVIS_OS_NAME" = "windows" ]; then
+      $msys2 ./configure test
+      $msys2 ./configure test
+      $msys2 cmake --build build-test
+      $msys2 make install
+      $msys2 make test
+    else
+      ./configure test
+      ./configure test
+      cd build-test
+      sudo make install
+      if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo ldconfig; fi
+      make test
+    fi
+  
 addons:
   apt:
     update: true
