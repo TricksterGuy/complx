@@ -119,7 +119,7 @@ BOOST_FIXTURE_TEST_CASE(TestInstructionPluginDisassemble, LC3PluginTest)
 
 BOOST_FIXTURE_TEST_CASE(TestInstructionPluginColoring, LC3PluginTest)
 {
-    std::map<std::string, std::string> params;
+    PluginParams params;
     BOOST_REQUIRE_NO_THROW(lc3_install_plugin(state, "lc3_multiply", params));
 
     BOOST_REQUIRE(state.instructionPlugin != nullptr);
