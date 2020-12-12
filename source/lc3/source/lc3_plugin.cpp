@@ -76,7 +76,7 @@ std::list<RLEColorEntry> InstructionPlugin::GetInstructionColoring(uint16_t) con
     return answer;
 }
 
-void lc3_install_plugin(lc3_state& state, const std::string& filename, const std::map<std::string, std::string>& params)
+void lc3_install_plugin(lc3_state& state, const std::string& filename, const PluginParams& params)
 {
     std::string realfilename = "lib" + filename + FILENAME_SUFFIX + SHARED_LIBRARY_SUFFIX;
     std::string full_path = realfilename;
