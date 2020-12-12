@@ -15,7 +15,7 @@ script:
   - ./configure test
   - ./configure test
   - cd build-test
-  - cmake ..
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then $msys2 cmake --build build-test; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then make install; else sudo make install; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo ldconfig; fi
   - make test
