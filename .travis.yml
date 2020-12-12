@@ -69,5 +69,7 @@ cache:
       - /C/tools/msys64
 after_faillure:
   - pwd
+  - ls
+  - dir
   - cat CMakefiles/CMakeOutput.log
   - cat CMakefiles/CMakeError.log
