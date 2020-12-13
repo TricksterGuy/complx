@@ -9,8 +9,9 @@ jobs:
       compiler: clang
     - os: osx
       compiler: clang
-    - os: windows
-      compiler: gcc
+## Msys2 environment here doesn't work well 
+##    - os: windows
+##      compiler: gcc
 script:
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then $msys2 ./configure test; else ./configure test; fi
   - if [ "$TRAVIS_OS_NAME" = "windows" ]; then $msys2 ./configure test; else ./configure test; fi
