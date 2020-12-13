@@ -59,16 +59,16 @@ class ComplxFrameDecl : public wxFrame
 		wxMenu* menuHelp;
 		wxPanel* toolbarPanel;
 		wxAuiToolBar* m_auiToolBar1;
+		wxButton* m_button1;
 		wxButton* m_button2;
 		wxButton* m_button3;
 		wxButton* m_button4;
 		wxButton* m_button5;
 		wxButton* m_button6;
 		wxButton* m_button7;
-		wxButton* m_button8;
 		wxAuiToolBar* m_auiToolBar2;
-		wxButton* m_button10;
-		wxButton* m_button11;
+		wxButton* m_button8;
+		wxButton* m_button9;
 		wxPanel* memoryPanel;
 		MemoryView* memoryView;
 		wxPanel* statePanel;
@@ -99,7 +99,7 @@ class ComplxFrameDecl : public wxFrame
 	public:
 		wxString consoleInput;
 
-		ComplxFrameDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Complx2"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1024,800 ), int64_t style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		ComplxFrameDecl( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Complx2"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1024,800 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 		wxAuiManager m_mgr;
 
 		~ComplxFrameDecl();

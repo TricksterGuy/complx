@@ -11,7 +11,7 @@
 
 ///////////////////////////////////////////////////////////////////////////
 
-ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, int64_t style ) : wxFrame( parent, id, title, pos, size, style )
+ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 	this->SetExtraStyle( wxWS_EX_VALIDATE_RECURSIVELY );
@@ -29,7 +29,7 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuFile->Append( menuFileReload );
 
 	wxMenuItem* menuFileAdvancedLoad;
-	menuFileAdvancedLoad = new wxMenuItem( menuFile, ID_ADVANCED_LOAD, wxString( wxT("&Advanced Load") ) , wxT("Opens dialog for loading program under special conditions."), wxITEM_NORMAL );
+	menuFileAdvancedLoad = new wxMenuItem( menuFile, ID_ADVANCED_LOAD, wxString( wxT("&Advanced Load...") ) , wxT("Opens dialog for loading program under special conditions."), wxITEM_NORMAL );
 	menuFile->Append( menuFileAdvancedLoad );
 
 	wxMenuItem* menuFileExit;
@@ -72,33 +72,33 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	wxBoxSizer* bSizer111;
 	bSizer111 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_auiToolBar1 = new wxAuiToolBar( toolbarPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_GRIPPER|wxAUI_TB_HORZ_LAYOUT );
-	m_button2 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Run"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_auiToolBar1 = new wxAuiToolBar( toolbarPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT );
+	m_button1 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Run"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_auiToolBar1->AddControl( m_button1 );
+	m_button2 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Step"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_auiToolBar1->AddControl( m_button2 );
-	m_button3 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Step"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_button3 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Back"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_auiToolBar1->AddControl( m_button3 );
-	m_button4 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Back"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_button4 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Step Over"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_auiToolBar1->AddControl( m_button4 );
-	m_button5 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Step Over"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_button5 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Back Over"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_auiToolBar1->AddControl( m_button5 );
-	m_button6 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Back Over"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_button6 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Step Out"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_auiToolBar1->AddControl( m_button6 );
-	m_button7 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Step Out"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_button7 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Rewind"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_auiToolBar1->AddControl( m_button7 );
-	m_button8 = new wxButton( m_auiToolBar1, wxID_ANY, wxT("Rewind"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_auiToolBar1->AddControl( m_button8 );
 	m_auiToolBar1->Realize();
 
 	bSizer111->Add( m_auiToolBar1, 1, wxALL|wxEXPAND, 5 );
 
 	m_auiToolBar2 = new wxAuiToolBar( toolbarPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT );
-	m_button10 = new wxButton( m_auiToolBar2, wxID_ANY, wxT("Breakpoint"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_auiToolBar2->AddControl( m_button10 );
-	m_button11 = new wxButton( m_auiToolBar2, wxID_ANY, wxT("Watchpoint"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_auiToolBar2->AddControl( m_button11 );
+	m_button8 = new wxButton( m_auiToolBar2, wxID_ANY, wxT("Breakpoint"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_auiToolBar2->AddControl( m_button8 );
+	m_button9 = new wxButton( m_auiToolBar2, wxID_ANY, wxT("Watchpoint"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_auiToolBar2->AddControl( m_button9 );
 	m_auiToolBar2->Realize();
 
-	bSizer111->Add( m_auiToolBar2, 1, wxALL|wxALIGN_BOTTOM|wxEXPAND, 5 );
+	bSizer111->Add( m_auiToolBar2, 1, wxALL|wxEXPAND, 5 );
 
 
 	toolbarPanel->SetSizer( bSizer111 );
@@ -144,13 +144,9 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	bSizer11 = new wxBoxSizer( wxVERTICAL );
 
 	consoleText = new wxTextCtrl( consolePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxTE_WORDWRAP );
-	consoleText->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
-
 	bSizer11->Add( consoleText, 1, wxEXPAND|wxTOP|wxRIGHT|wxLEFT, 5 );
 
 	consoleInputText = new wxTextCtrl( consolePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	consoleInputText->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
-
 	consoleInputText->SetValidator( wxTextValidator( wxFILTER_ASCII, &consoleInput ) );
 
 	bSizer11->Add( consoleInputText, 0, wxALL|wxEXPAND, 5 );
@@ -177,8 +173,6 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	bSizer14 = new wxBoxSizer( wxVERTICAL );
 
 	traceText = new wxTextCtrl( tracePanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxTE_WORDWRAP );
-	traceText->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
-
 	bSizer14->Add( traceText, 1, wxEXPAND, 5 );
 
 
@@ -191,8 +185,6 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	bSizer15 = new wxBoxSizer( wxVERTICAL );
 
 	loggingText = new wxTextCtrl( loggingPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY|wxTE_WORDWRAP );
-	loggingText->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, wxEmptyString ) );
-
 	bSizer15->Add( loggingText, 1, wxEXPAND, 5 );
 
 
@@ -212,16 +204,16 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuFile->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnExit ), this, menuFileExit->GetId());
 	menuControl->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnStep ), this, menuControlStep->GetId());
 	menuControl->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnBack ), this, menuControlBack->GetId());
-	m_button3->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnStep ), NULL, this );
-	m_button4->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnBack ), NULL, this );
+	m_button2->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnStep ), NULL, this );
+	m_button3->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnBack ), NULL, this );
 	statePropGridManager->Connect( wxEVT_PG_CHANGED, wxPropertyGridEventHandler( ComplxFrameDecl::OnStateChange ), NULL, this );
 }
 
 ComplxFrameDecl::~ComplxFrameDecl()
 {
 	// Disconnect Events
-	m_button3->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnStep ), NULL, this );
-	m_button4->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnBack ), NULL, this );
+	m_button2->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnStep ), NULL, this );
+	m_button3->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( ComplxFrameDecl::OnBack ), NULL, this );
 	statePropGridManager->Disconnect( wxEVT_PG_CHANGED, wxPropertyGridEventHandler( ComplxFrameDecl::OnStateChange ), NULL, this );
 
 	m_mgr.UnInit();
