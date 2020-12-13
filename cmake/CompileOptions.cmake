@@ -26,6 +26,11 @@ set(DEFAULT_PROJECT_OPTIONS
     CXX_EXTENSIONS            Off
 )
 
+# TODO Fix the visibility error on MacOSx
+# Something strange with the plugins on MacOSx with the visibility set to Hidden.
+if(APPLE)
+    set(CXX_VISIBILITY_PRESET "default")
+endif()
 
 # 
 # Include directories
@@ -160,4 +165,9 @@ if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" OR "${CMAKE_SYSTEM_NAME}" MATCHES "L
                 -ftest-coverage
         )
     endif ()
+endif()
+
+# Use -flat_namespace on OSX this is apparently needed due to plugins not working well i.e. InstructionPlugins won't be recognized as such.
+if (APPLE)
+  set(DEFAULT_LINKER_OPTIONS "${DEFAULT_LINKER_OPTIONS} -flat_namespace")
 endif()
