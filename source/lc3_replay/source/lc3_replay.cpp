@@ -1,4 +1,5 @@
-#include "lc3_replay.hpp"
+#include <lc3_replay/lc3_replay.hpp>
+#include <lc3_replay/BinaryStreamReader.hpp>
 
 #include <algorithm>
 #include <iomanip>
@@ -10,7 +11,7 @@
 #include <boost/archive/iterators/remove_whitespace.hpp>
 #include <boost/archive/iterators/transform_width.hpp>
 
-#include "BinaryStreamReader.hpp"
+
 
 void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& replay_string, std::stringstream& newinput);
 

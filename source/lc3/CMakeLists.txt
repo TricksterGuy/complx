@@ -27,23 +27,23 @@ set(export_macro         "${target_id}_API")
 # Sources
 #
 
-set(include_path "${CMAKE_CURRENT_SOURCE_DIR}/include/${target}")
+set(include_path "${CMAKE_CURRENT_SOURCE_DIR}/include/")
 set(source_path  "${CMAKE_CURRENT_SOURCE_DIR}/source")
 
 set(headers
-    ${include_path}/ExpressionEvaluator.hpp
-    ${include_path}/lc3_assemble.hpp
+    ${include_path}/lc3/ExpressionEvaluator.hpp
+    ${include_path}/lc3/lc3_assemble.hpp
+    ${include_path}/lc3/lc3.hpp
+    ${include_path}/lc3/lc3_debug.hpp
+    ${include_path}/lc3/lc3_execute.hpp
+    ${include_path}/lc3/lc3_expressions.hpp
+    ${include_path}/lc3/lc3_os.hpp
+    ${include_path}/lc3/lc3_params.hpp
+    ${include_path}/lc3/lc3_parser.hpp
+    ${include_path}/lc3/lc3_plugin.hpp
+    ${include_path}/lc3/lc3_runner.hpp
+    ${include_path}/lc3/lc3_symbol.hpp
     ${include_path}/lc3.hpp
-    ${include_path}/lc3_debug.hpp
-    ${include_path}/lc3_execute.hpp
-    ${include_path}/lc3_expressions.hpp
-    ${include_path}/lc3_os.hpp
-    ${include_path}/lc3_params.hpp
-    ${include_path}/lc3_parser.hpp
-    ${include_path}/lc3_plugin.hpp
-    ${include_path}/lc3_runner.hpp
-    ${include_path}/lc3_symbol.hpp
-    ${include_path}/../lc3.hpp
 
 )
 
@@ -245,13 +245,13 @@ install(TARGETS ${target}
 
 # Header files
 install(DIRECTORY
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/${target} DESTINATION ${INSTALL_INCLUDE}
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION ${INSTALL_INCLUDE}
     COMPONENT dev
 )
 
 # Generated header files
 install(DIRECTORY
-    ${CMAKE_CURRENT_BINARY_DIR}/include/${target} DESTINATION ${INSTALL_INCLUDE}
+    ${CMAKE_CURRENT_BINARY_DIR}/include/ DESTINATION ${INSTALL_INCLUDE}
     COMPONENT dev
 )
 

@@ -1,4 +1,4 @@
-#include "BinaryStreamReader.hpp"
+#include <lc3_replay/BinaryStreamReader.hpp>
 
 #include <cstring>
 #include <vector>
