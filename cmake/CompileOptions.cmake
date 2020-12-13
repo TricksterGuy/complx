@@ -23,13 +23,20 @@ set(DEFAULT_PROJECT_OPTIONS
     LINKER_LANGUAGE           "CXX"
     POSITION_INDEPENDENT_CODE ON
     CXX_VISIBILITY_PRESET     "hidden"
-    CXX_EXTENSIONS            Off
+    CXX_EXTENSIONS            OFF
 )
 
 # TODO Fix the visibility error on MacOSx
 # Something strange with the plugins on MacOSx with the visibility set to Hidden.
 if(APPLE)
-    set(CXX_VISIBILITY_PRESET "default")
+    set(DEFAULT_PROJECT_OPTIONS
+        DEBUG_POSTFIX             "d"
+        CXX_STANDARD              17
+        LINKER_LANGUAGE           "CXX"
+        POSITION_INDEPENDENT_CODE ON
+        CXX_VISIBILITY_PRESET     "default"
+        CXX_EXTENSIONS            OFF
+    )
 endif()
 
 # 
@@ -169,5 +176,5 @@ endif()
 
 # Use -flat_namespace on OSX this is apparently needed due to plugins not working well i.e. InstructionPlugins won't be recognized as such.
 if (APPLE)
-  set(DEFAULT_LINKER_OPTIONS "${DEFAULT_LINKER_OPTIONS} -flat_namespace")
+  set(DEFAULT_LINKER_OPTIONS "-flat_namespace ${DEFAULT_LINKER_OPTIONS}")
 endif()
