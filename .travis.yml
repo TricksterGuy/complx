@@ -12,13 +12,14 @@ jobs:
 ## Msys2 environment here doesn't work well 
 ##    - os: windows
 ##      compiler: gcc
+## See https://docs.travis-ci.com/user/reference/windows#how-do-i-use-msys2 when enabling again.
 script:
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then $msys2 ./configure test; else ./configure test; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then $msys2 ./configure test; else ./configure test; fi
+  - ./configure test
+  - ./configure test
   - cd build-test
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then $msys2 make install; else sudo make install; fi
+  - sudo make install
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo ldconfig; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then $msys2 make test; else make test; fi
+  - make test
 addons:
   apt:
     update: true
@@ -31,49 +32,3 @@ addons:
     - cmake
     - pkg-config
     - boost
-before_install:
-- |-
-    case $TRAVIS_OS_NAME in
-      windows)
-        [[ ! -f C:/tools/msys64/msys2_shell.cmd ]] && rm -rf C:/tools/msys64
-        choco uninstall -y mingw
-        choco upgrade --no-progress -y msys2
-        export msys2='cmd //C RefreshEnv.cmd '
-        export msys2+='& set MSYS=winsymlinks:nativestrict '
-        export msys2+='& C:\\tools\\msys64\\msys2_shell.cmd -defterm -no-start'
-        export mingw64="$msys2 -mingw64 -full-path -here -c "\"\$@"\" --"
-        export msys2+=" -msys2 -c "\"\$@"\" --"
-        $msys2 pacman --sync --noconfirm --needed mingw-w64-x86_64-toolchain
-        ## Install more MSYS2 packages from https://packages.msys2.org/base here
-        $msys2 pacman --sync --noconfirm --needed mingw-w64-x86_64-cmake
-        $msys2 pacman --sync --noconfirm --needed mingw-w64-x86_64-boost
-        $msys2 pacman --sync --noconfirm --needed mingw-w64-x86_64-make
-        taskkill //IM gpg-agent.exe //F  # https://travis-ci.community/t/4967
-        export PATH=/C/tools/msys64/mingw64/bin:$PATH
-        export PATH=/C/tools/msys64/bin:$PATH
-        export PATH=/C/tools/msys64/usr/bin:$PATH
-        export MAKE=make
-        ;;
-    esac
-
-before_cache:
-- |-
-    case $TRAVIS_OS_NAME in
-      windows)
-        # https://unix.stackexchange.com/a/137322/107554
-        $msys2 pacman --sync --clean --noconfirm
-        ;;
-    esac
-
-cache:
-    directories:
-      - $HOME/AppData/Local/Temp/chocolatey
-      - /C/tools/msys64
-after_failure:
-  - pwd
-  - ls
-  - dir
-  - echo $PATH
-  - cat CMakefiles/CMakeOutput.log
-  - cat CMakefiles/CMakeError.log
-  - cat CMakeCache.txt
