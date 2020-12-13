@@ -176,5 +176,9 @@ endif()
 
 # Use -flat_namespace on OSX this is apparently needed due to plugins not working well i.e. InstructionPlugins won't be recognized as such.
 if (APPLE)
-  set(DEFAULT_LINKER_OPTIONS "-flat_namespace ${DEFAULT_LINKER_OPTIONS}")
+        set(DEFAULT_LINKER_OPTIONS
+            PUBLIC
+                ${DEFAULT_LINKER_OPTIONS}
+                -flat_namespace
+        )
 endif()
