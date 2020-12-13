@@ -6,6 +6,7 @@
 set(target lc3as)
 
 # Exit here if required dependencies are not met
+message(STATUS "Program ${target}")
 
 
 #
@@ -112,7 +113,7 @@ generate_coverage_report(${target})
 
 # Executable
 install(TARGETS ${target}
-    RUNTIME DESTINATION ${INSTALL_BIN} COMPONENT examples
-    BUNDLE  DESTINATION ${INSTALL_BIN} COMPONENT examples
+    RUNTIME DESTINATION ${INSTALL_BIN} COMPONENT runtime
+    BUNDLE  DESTINATION ${INSTALL_BIN} COMPONENT runtime
 )
 

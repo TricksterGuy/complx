@@ -1,7 +1,7 @@
 #define BOOST_TEST_MODULE LC3_Replay_Test
 
 #include <lc3.hpp>
-#include <lc3_replay.hpp>
+#include <lc3_replay/lc3_replay.hpp>
 
 #include <boost/test/unit_test.hpp>
 

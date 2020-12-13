@@ -76,6 +76,11 @@ set_target_properties(${target}
 
 target_include_directories(${target}
     PRIVATE
+    ${PROJECT_BINARY_DIR}/source/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_BINARY_DIR}/include
+
+    PUBLIC
     ${DEFAULT_INCLUDE_DIRECTORIES}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${wxWidgets_INCLUDE_DIRS}
@@ -145,6 +150,6 @@ generate_coverage_report(${target})
 
 # Executable
 install(TARGETS ${target}
-    RUNTIME DESTINATION ${INSTALL_BIN} COMPONENT examples
-    BUNDLE  DESTINATION ${INSTALL_BIN} COMPONENT examples
+    RUNTIME DESTINATION ${INSTALL_BIN} COMPONENT runtime
+    BUNDLE  DESTINATION ${INSTALL_BIN} COMPONENT runtime
 )

@@ -59,7 +59,7 @@ set(META_PROJECT_DESCRIPTION "complx-tools is a suite of educational tools for l
 set(META_AUTHOR_ORGANIZATION "TricksterGuy")
 set(META_AUTHOR_DOMAIN       "https://github.com/TricksterGuy/complx/")
 set(META_AUTHOR_MAINTAINER   "bwhitehead0308@gmail.com")
-set(META_VERSION_MAJOR       "5")
+set(META_VERSION_MAJOR       "1")
 set(META_VERSION_MINOR       "0")
 set(META_VERSION_PATCH       "0")
 set(META_VERSION_REVISION    "${GIT_REV}")
