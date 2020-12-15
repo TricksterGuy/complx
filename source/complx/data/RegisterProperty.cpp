@@ -16,6 +16,12 @@ const wxChar* bases[] = {
     wxT("Hexadecimal")
 };
 
+const long values[] =
+{
+    Decimal,
+    Hexadecimal,
+};
+
 wxString GetAllowedCharacters(unsigned int flags)
 {
     wxString ret = "";
@@ -46,7 +52,7 @@ RegisterProperty::RegisterProperty(const wxString& property, std::reference_wrap
 
     if (!(flags & NoBaseProperty))
     {
-        base_property = new wxEnumProperty("Display As", wxPG_LABEL, bases, nullptr, base);
+        base_property = new wxEnumProperty("Display As", wxPG_LABEL, bases, values, base);
         base_property->SetClientData(reinterpret_cast<void*>(PropertyType::RegisterDisplayBase));
         AppendChild(base_property);
     }

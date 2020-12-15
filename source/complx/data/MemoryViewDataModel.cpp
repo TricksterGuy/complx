@@ -19,7 +19,7 @@ wxString MemoryViewDataModel::GetColumnType(unsigned int col) const
     {
         case MemoryInfo:
             // Technically a MemoryViewInfoState
-            ret = "int64_t";
+            ret = "long";
             break;
         case MemoryAddress:
         case MemoryHexadecimal:

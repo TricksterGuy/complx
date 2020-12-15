@@ -46,6 +46,8 @@ MemoryView::MemoryView(wxWindow* parent, wxWindowID id, const wxPoint& pos, cons
     Connect(MemoryMenuAdvanced,     wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryView::OnAdvancedBreakpoint));
     Connect(MemoryMenuPCHere,       wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryView::OnSetPcHere));
     Connect(MemoryMenuGoto,         wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler(MemoryView::OnGotoAddress));
+    auto font = wxFont(wxFontInfo().Family(wxFONTFAMILY_TELETYPE).FaceName("Courier New"));
+    SetFont(font);
 }
 
 int MemoryView::GetSelectedAddress() const
