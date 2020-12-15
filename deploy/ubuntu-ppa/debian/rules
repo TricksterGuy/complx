@@ -22,30 +22,23 @@ build-arch:
 # thirdly called by launchpad
 binary: binary-arch
 
-binary-arch: libcmake-init libcmake-init-dev libcmake-init-docs libcmake-init-dbg libcmake-init-examples-data libcmake-init-examples libcmake-init-all
+binary-arch: complx-tools complx-tools-dev complx-tools-dbg
 
-libcmake-init:
+complx-tools:
 	cd $(BUILDDIR); DESTDIR=../debian/tmp COMPONENT=runtime make component_install
 	mkdir -p debian/tmp/DEBIAN
-	dpkg-gencontrol -plibcmake-init
+	dpkg-gencontrol -pcomplx-tools
 	dpkg --build debian/tmp ..
 	rm -rf debian/tmp
 
-libcmake-init-dev:
+complx-tools-dev:
 	cd $(BUILDDIR); DESTDIR=../debian/tmp COMPONENT=dev make component_install
 	mkdir -p debian/tmp/DEBIAN
-	dpkg-gencontrol -plibcmake-init-dev
+	dpkg-gencontrol -pcomplx-tools-dev
 	dpkg --build debian/tmp ..
 	rm -rf debian/tmp
 
-libcmake-init-docs:
-	cd $(BUILDDIR); DESTDIR=../debian/tmp COMPONENT=docs make component_install
-	mkdir -p debian/tmp/DEBIAN
-	dpkg-gencontrol -plibcmake-init-docs
-	dpkg --build debian/tmp ..
-	rm -rf debian/tmp
-
-libcmake-init-dbg:
+complx-tools-dbg:
 	cd $(BUILDDEBUGDIR); DESTDIR=../debian/tmp COMPONENT=runtime make component_install
 	cd $(BUILDDEBUGDIR); DESTDIR=../debian/tmp COMPONENT=dev make component_install
 	rm -rf debian/tmp/usr/include
@@ -56,28 +49,8 @@ libcmake-init-dbg:
 	rm debian/tmp/usr/share/*/VERSION
 	rm debian/tmp/usr/share/*/cmake/*/*-export.cmake
 	mkdir -p debian/tmp/DEBIAN
-	dpkg-gencontrol -plibcmake-init-dbg
+	dpkg-gencontrol -pcomplx-tools-dbg
 	dpkg --build debian/tmp ..
 	rm -rf debian/tmp
 
-libcmake-init-examples-data:
-	cd $(BUILDDIR); DESTDIR=../debian/tmp COMPONENT=examples_data make component_install
-	mkdir -p debian/tmp/DEBIAN
-	dpkg-gencontrol -plibcmake-init-examples-data
-	dpkg --build debian/tmp ..
-	rm -rf debian/tmp
-
-libcmake-init-examples:
-	cd $(BUILDDIR); DESTDIR=../debian/tmp COMPONENT=examples_qt make component_install
-	mkdir -p debian/tmp/DEBIAN
-	dpkg-gencontrol -plibcmake-init-examples
-	dpkg --build debian/tmp ..
-	rm -rf debian/tmp
-
-libcmake-init-all:
-	mkdir -p debian/tmp/DEBIAN
-	dpkg-gencontrol -plibcmake-init-all
-	dpkg --build debian/tmp ..
-	rm -rf debian/tmp
-
-.PHONY: build build-arch binary binary-arch clean libcmake-init libcmake-init-dev libcmake-init-docs libcmake-init-dbg libcmake-init-examples-data libcmake-init-examples libcmake-init-all
+.PHONY: build build-arch binary binary-arch clean complx-tools complx-tools-dev complx-tools-dbg

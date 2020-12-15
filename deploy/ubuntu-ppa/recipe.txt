@@ -1,3 +1,3 @@
 # git-build-recipe format 0.4 deb-version {debupstream}+{revno}
-lp:cmake-init
-nest-part packaging lp:cmake-init deploy/ubuntu-ppa/debian debian master
+lp:complx-tools
+nest-part packaging lp:complx-tools deploy/ubuntu-ppa/debian debian master

@@ -1,46 +1,25 @@
-Source: cmake-init
-Section: misc
+Source: complx-tools
+Section: devel
 Priority: optional
-Maintainer: Willy Scheibel <willy.scheibel@cginternals.com>
-Build-Depends: build-essential, cmake, qtbase5-dev, doxygen, graphviz
-Standards-Version: 3.8.0
+Maintainer: Brandon Whitehead <tricksterguy87@gmail.com>
+Build-Depends: debhelper (>= 9), cmake, libwxgtk3.0-dev | libwxgtk3.0-gtk3-dev, libboost-serialization-dev, pkg-config, libglib2.0-dev
+Standards-Version: 3.9.6
+Homepage: https://github.com/TricksterGuy/complx
+Vcs-Git: https://github.com/TricksterGuy/complx.git
 
-Package: libcmake-init
+Package: complx-tools
 Architecture: any
-Depends: 
-Homepage: https://github.com/cginternals/cmake-init
-Description: Template for reliable, cross-platform C++ project setup using cmake.
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: complx is a suite of educational tools for learning lc3 assembly. It includes both a gui and cli based simulator (named complx and comp respectively), an assembler (as2obj), and a framework for testing and grading lc3 assembly code (lc3test). Complx also be extended with plugins that add additional functionality to the LC3. The tools also come with a C++ interface to the LC3 (liblc3). Complx was written using the wxWidgets library.
 
-Package: libcmake-init-dev
+Package: complx-tools-dev
 Architecture: any
-Depends: libcmake-init
-Homepage: https://github.com/cginternals/cmake-init
-Description: Template for reliable, cross-platform C++ project setup using cmake.
+Depends: complx-tools
+Homepage: https://github.com/TricksterGuy/complx
+Description: complx is a suite of educational tools for learning lc3 assembly. It includes both a gui and cli based simulator (named complx and comp respectively), an assembler (as2obj), and a framework for testing and grading lc3 assembly code (lc3test). Complx also be extended with plugins that add additional functionality to the LC3. The tools also come with a C++ interface to the LC3 (liblc3). Complx was written using the wxWidgets library.
+Package: complx-tools-dbg
+Architecture: any
+Depends: complx-tools, complx-tools-dev
+Homepage: https://github.com/TricksterGuy/complx
+Description: complx is a suite of educational tools for learning lc3 assembly. It includes both a gui and cli based simulator (named complx and comp respectively), an assembler (as2obj), and a framework for testing and grading lc3 assembly code (lc3test). Complx also be extended with plugins that add additional functionality to the LC3. The tools also come with a C++ interface to the LC3 (liblc3). Complx was written using the wxWidgets library.
 
-Package: libcmake-init-examples-data
-Architecture: any
-Homepage: https://github.com/cginternals/cmake-init
-Description: Template for reliable, cross-platform C++ project setup using cmake.
-
-Package: libcmake-init-examples
-Architecture: any
-Depends: libcmake-init, libcmake-init-examples-data, libqt5core5a
-Homepage: https://github.com/cginternals/cmake-init
-Description: Template for reliable, cross-platform C++ project setup using cmake.
-
-Package: libcmake-init-docs
-Architecture: any
-Homepage: https://github.com/cginternals/cmake-init
-Description: Template for reliable, cross-platform C++ project setup using cmake.
-
-Package: libcmake-init-dbg
-Architecture: any
-Depends: libcmake-init, libcmake-init-dev
-Homepage: https://github.com/cginternals/cmake-init
-Description: Template for reliable, cross-platform C++ project setup using cmake.
-
-Package: libcmake-init-all
-Architecture: any
-Depends: libcmake-init, libcmake-init-dev, libcmake-init-docs, libcmake-init-examples
-Homepage: https://github.com/cginternals/cmake-init
-Description: Template for reliable, cross-platform C++ project setup using cmake.
