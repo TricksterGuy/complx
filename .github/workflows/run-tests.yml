@@ -1,6 +1,6 @@
 name: Run Tests
 
-on: 
+on:
   push:
     paths:
       - 'tests/**'
@@ -41,9 +41,9 @@ jobs:
 
     - name: Install Python Deps
       run: |
-        sudo pip3 install wheel setuptools unittest2
-        sudo pip3 install -r pylc3/requirements.txt
-        sudo pip3 install -r pylc3/requirements-build.txt
+        pip3 install wheel setuptools unittest2
+        pip3 install -r pylc3/requirements.txt
+        pip3 install -r pylc3/requirements-build.txt
 
     - name: Make build files.
       run: |
