@@ -454,7 +454,11 @@ class LC3UnitTestCase(unittest.TestCase):
         self.passed_assertions = []
         self.failed_assertions = []
         self._hard_failed = False
+        # Display name for JSON. This is required to be set.
         self.display_name = None
+        # Set of labels that were modified as preconditions along with type
+        self._modified_labels = dict()
+        self._code_has_ran = False
         self.replay_msg = 'Code did not assemble or test issue.'
 
     def tearDown(self):
@@ -790,6 +794,7 @@ class LC3UnitTestCase(unittest.TestCase):
             value: Integer - Value to write to that register.
         """
 
+        self._internalAssert('setRegister', not self._code_has_ran, 'Attempt to set a register after the code has ran', AssertionType.fatal, internal=True)
         self._internalAssert('setRegister', register_number >= 0 and register_number < 8, 'Invalid register number given %d' % register_number, AssertionType.fatal, internal=True)
         self.state.set_register(register_number, value)
 
@@ -803,7 +808,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             value: Integer - Value to write to that register.
         """
-
+        self._internalAssert('setPC', not self._code_has_ran, 'Attempt to set the PC after the code has ran', AssertionType.fatal, internal=True)
         self.state.pc = _toUShort(value)
 
         self.preconditions.addPrecondition(PreconditionFlag.pc, "", value)
@@ -817,6 +822,13 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address to set.
             value: Integer - Value to write at that address
         """
+        self._internalAssert('setValue', not self._code_has_ran, 'Attempt to set a label after the code has ran', AssertionType.fatal, internal=True)
+
+        if label in self._modified_labels:
+            t = self._modified_labels.get(label)
+            self._internalAssert('setValue', t == 'VALUE', 'Attempt to use same label for writing different things to memory.'
+                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.', internal=True)
+        self._modified_labels[label] = 'VALUE'
 
         self._writeMem(self._lookup(label), value)
 
@@ -831,6 +843,14 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address which in turn contains the address to set.
             value: Integer - Value to write at that address.
         """
+
+        self._internalAssert('setPointer', not self._code_has_ran, 'Attempt to set a value pointed to by label after the code has ran', AssertionType.fatal, internal=True)
+
+        if label in self._modified_labels:
+            t = self._modified_labels.get(label)
+            self._internalAssert('setPointer', t == 'POINTER', 'Attempt to use same label for writing different things to memory.'
+                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.', internal=True)
+        self._modified_labels[label] = 'POINTER'
 
         self._writeMem(self._readMem(self._lookup(label)), value)
 
@@ -849,6 +869,13 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address which in turn contains the first address to set.
             arr: Iterable of Shorts - Values to write sequentially in memory.
         """
+        self._internalAssert('setArray', not self._code_has_ran, 'Attempt to set a value pointed to by label after the code has ran', AssertionType.fatal, internal=True)
+
+        if label in self._modified_labels:
+            t = self._modified_labels.get(label)
+            self._internalAssert('setArray', t == 'ARRAY', 'Attempt to use same label for writing different things to memory.'
+                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.', internal=True)
+        self._modified_labels[label] = 'ARRAY'
 
         start_addr = self._readMem(self._lookup(label))
         for addr, elem in enumerate(arr, start_addr):
@@ -870,6 +897,13 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address which in turn contains the address to set.
             value: String - String to write in memory.
         """
+        self._internalAssert('setString', not self._code_has_ran, 'Attempt to set a label after the code has ran', AssertionType.fatal, internal=True)
+
+        if label in self._modified_labels:
+            t = self._modified_labels.get(label)
+            self._internalAssert('setString', t == 'STRING', 'Attempt to use same label for writing different things to memory.'
+                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.', internal=True)
+        self._modified_labels[label] = 'STRING'
 
         start_addr = self._readMem(self._lookup(label))
         for addr, elem in enumerate(text, start_addr):
