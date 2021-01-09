@@ -48,7 +48,7 @@ jobs:
     - name: Make build files.
       run: |
         mkdir build
-        run: cmake -DENABLE_TESTS=ON -DENABLE_PYLC3=ON -DENABLE_COMPLX=OFF -DENABLE_AS2OBJ=OFF --build build .
+        cmake -DENABLE_TESTS=ON -DENABLE_PYLC3=ON -DENABLE_COMPLX=OFF -DENABLE_AS2OBJ=OFF --build build .
 
     - name: Build and Install
       run: sudo cmake --build build --target install
