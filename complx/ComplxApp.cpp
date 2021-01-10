@@ -181,6 +181,9 @@ bool ComplxApp::OnInit()
             opts.height = wxAtoi(height_str);
     }
 
+    // Comment devoted to how much I hate CS2110's docker setup. Yup still petty about this.
+    opts.running_in_cs2110docker = wxGetEnv("CS2110_IMAGE_VERSION", nullptr);
+
     complxframe = new ComplxFrame(opts);
     wxIcon icon(icon32_xpm);
     complxframe->SetIcon(icon);

@@ -102,6 +102,14 @@ ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) :
     Connect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_IO, wxThreadEventHandler(ComplxFrame::OnIo));
     Connect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_NOIO, wxThreadEventHandler(ComplxFrame::OnNoIo));
     Connect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_OUTPUT, wxThreadEventHandler(ComplxFrame::OnOutput));
+
+    if (opts.running_in_cs2110docker)
+    {
+        docker_checker_timer.SetOwner(this);
+        Connect(wxID_ANY, wxEVT_TIMER, wxTimerEventHandler(ComplxFrame::OnDockerTimer), this);
+        docker_checker_timer.Start(5000);
+
+    }
 }
 
 /** ~ComplxFrame
@@ -407,6 +415,13 @@ void ComplxFrame::PostInit()
     SetFocus();
 }
 
+void ComplxFrame::OnDockerTimer(wxTimerEvent& event)
+{
+    // Again annoying that docker doesn't generate the activate events when flipping back from editor to docker.
+    wxActivateEvent e;
+    OnActivate(e);
+}
+
 void ComplxFrame::OnActivate(wxActivateEvent& event)
 {
     bool reload_asm = false;
@@ -455,6 +470,12 @@ void ComplxFrame::OnActivate(wxActivateEvent& event)
   */
 void ComplxFrame::OnQuit(wxCommandEvent& event)
 {
+    if (docker_checker_timer.IsRunning())
+    {
+        Disconnect(wxID_ANY, wxEVT_TIMER, wxTimerEventHandler(ComplxFrame::OnDockerTimer), this);
+        //docker_checker_timer.Stop();
+    }
+
     Destroy();
 }
 
