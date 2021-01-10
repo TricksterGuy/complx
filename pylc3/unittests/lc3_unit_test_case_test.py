@@ -100,16 +100,16 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         def badSets(label, ignore_type):
             self.assertEqual(self._modified_labels[label], ignore_type)
-            if ignore_type != 'VALUE'
+            if ignore_type != 'VALUE':
                 with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
                     self.setValue(label, 10)
-            if ignore_type != 'POINTER'
+            if ignore_type != 'POINTER':
                 with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
                     self.setPointer(label, 10)
-            if ignore_type != 'ARRAY'
+            if ignore_type != 'ARRAY':
                 with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
                     self.setArray(label, [10])
-            if ignore_type != 'STRING'
+            if ignore_type != 'STRING':
                 with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
                     self.setString(label, 'STR')
 
