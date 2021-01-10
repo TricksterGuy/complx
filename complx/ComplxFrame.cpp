@@ -1241,6 +1241,7 @@ void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
 
     {
         state.pc = static_cast<unsigned short>(subroutine_location);
+        state.call_stack.push_back(lc3_subroutine_call{state.pc, static_cast<unsigned short>(state.regs[6]), false});
         //wxString end_condition = wxString::Format("R7==x%04x", static_cast<unsigned short>(state.regs[7]));
         lc3_add_break(state, state.regs[7], "END_OF_SUBROUTINE");
         UpdateRegisters();
