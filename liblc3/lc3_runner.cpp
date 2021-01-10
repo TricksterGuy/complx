@@ -237,9 +237,9 @@ void lc3_step(lc3_state& state)
 
     // Warn if executing TVT/IVT
     if (state.pc <= 0xFF)
-        lc3_warning(state, LC3_EXECUTE_TVT, state.pc);
+        lc3_warning(state, LC3_EXECUTE_TVT, state.pc, 0);
     if (state.pc >= 0x100 && state.pc <= 0x1FF)
-        lc3_warning(state, LC3_EXECUTE_IVT, state.pc);
+        lc3_warning(state, LC3_EXECUTE_IVT, state.pc, 0);
 
     // Increment PC
     state.pc++;
