@@ -83,6 +83,44 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         os.remove('sample.obj')
         os.remove('sample.sym')
 
+    def testBadSets(self):
+        snippet = """
+        .orig x3000
+            A .fill 1
+            B .fill 2
+            C .fill 3
+            D .fill 4
+        .end
+        """
+        self.loadCode(snippet)
+        self.setValue("A", 3)
+        self.setPointer("B", 10)
+        self.setArray("C", [255])
+        self.setString("D", "H")
+
+        def badSets(label, ignore_type):
+            self.assertEqual(self._modified_labels[label], ignore_type)
+            if ignore_type != 'VALUE'
+                with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
+                    self.setValue(label, 10)
+            if ignore_type != 'POINTER'
+                with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
+                    self.setPointer(label, 10)
+            if ignore_type != 'ARRAY'
+                with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
+                    self.setArray(label, [10])
+            if ignore_type != 'STRING'
+                with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
+                    self.setString(label, 'STR')
+
+        badSets("A", "VALUE")
+        badSets("B", "POINTER")
+        badSets("C", "ARRAY")
+        badSets("D", "STRING")
+
+        # Clear so that the test doesn't fail during tearDown.
+        self.failed_assertions = []
+
     def testRegister(self):
         snippet = """
         .orig x3000
