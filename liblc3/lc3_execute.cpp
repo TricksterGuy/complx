@@ -21,6 +21,8 @@ const char* WARNING_MESSAGES[LC3_WARNINGS] =
     "PUTSP called with invalid address x%04x",
     "PUTSP found an unexpected NUL byte at address x%04x.",
     "Invalid value x%04x loaded into the PSR."
+    "Executing trap vector table address x%04x.",
+    "Executing interrupt vector table address x%04x."
 };
 
 lc3_instr lc3_decode(lc3_state& state, unsigned short data)

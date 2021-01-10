@@ -88,6 +88,8 @@ enum WARNINGS
     LC3_PUTSP_INVALID_MEMORY = 12,
     LC3_PUTSP_UNEXPECTED_NUL = 13,
     LC3_INVALID_PSR_VALUE = 14,
+    LC3_EXECUTE_TVT = 15,
+    LC3_EXECUTE_IVT = 16,
     LC3_WARNINGS               // Must be last.
 };
 
