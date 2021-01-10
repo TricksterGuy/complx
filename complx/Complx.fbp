@@ -143,7 +143,7 @@
                         <event name="OnMenuSelection">OnQuit</event>
                     </object>
                 </object>
-                <object class="wxMenu" expanded="0">
+                <object class="wxMenu" expanded="1">
                     <property name="label">View</property>
                     <property name="name">menuView</property>
                     <property name="permission">protected</property>
@@ -175,7 +175,7 @@
                         <property name="unchecked_bitmap"></property>
                         <event name="OnMenuSelection">OnGoto</event>
                     </object>
-                    <object class="submenu" expanded="0">
+                    <object class="submenu" expanded="1">
                         <property name="bitmap"></property>
                         <property name="label">Hide Addresses</property>
                         <property name="name">menuViewHideAddresses</property>
@@ -189,20 +189,6 @@
                             <property name="kind">wxITEM_RADIO</property>
                             <property name="label">Show All</property>
                             <property name="name">menuViewHideAddressesShowAll</property>
-                            <property name="permission">protected</property>
-                            <property name="shortcut"></property>
-                            <property name="unchecked_bitmap"></property>
-                            <event name="OnMenuSelection">OnUpdateHideAddresses</event>
-                        </object>
-                        <object class="wxMenuItem" expanded="0">
-                            <property name="bitmap"></property>
-                            <property name="checked">0</property>
-                            <property name="enabled">1</property>
-                            <property name="help">Show all memory addresses that have a value other than 0</property>
-                            <property name="id">ID_SHOW_NON_ZERO</property>
-                            <property name="kind">wxITEM_RADIO</property>
-                            <property name="label">Show Non Zero</property>
-                            <property name="name">menuViewHideAddressesShowNonZero</property>
                             <property name="permission">protected</property>
                             <property name="shortcut"></property>
                             <property name="unchecked_bitmap"></property>
@@ -724,20 +710,6 @@
                     <property name="label">Test</property>
                     <property name="name">menuTest</property>
                     <property name="permission">protected</property>
-                    <object class="wxMenuItem" expanded="1">
-                        <property name="bitmap"></property>
-                        <property name="checked">0</property>
-                        <property name="enabled">1</property>
-                        <property name="help">Starts the replay string server to receive replay strings from host.</property>
-                        <property name="id">ID_START_REPLAY_STRING_SERVER</property>
-                        <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">&amp;Start Replay String Server</property>
-                        <property name="name">menuTestStartReplayStringServer</property>
-                        <property name="permission">none</property>
-                        <property name="shortcut">Ctrl+S</property>
-                        <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnStartReplayStringServer</event>
-                    </object>
                     <object class="wxMenuItem" expanded="1">
                         <property name="bitmap"></property>
                         <property name="checked">0</property>

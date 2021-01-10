@@ -50,7 +50,6 @@ class ComplxFrameDecl : public wxFrame
 			ID_NEW_VIEW,
 			ID_GOTO_ADDRESS,
 			ID_SHOW_ALL,
-			ID_SHOW_NON_ZERO,
 			ID_SHOW_ONLY_CODEDATA,
 			ID_CUSTOM,
 			ID_BASIC,
@@ -83,7 +82,6 @@ class ComplxFrameDecl : public wxFrame
 			ID_ADVANCED_BREAKPOINT,
 			ID_ADD_BLACKBOX,
 			ID_TRACE_FILE,
-			ID_START_REPLAY_STRING_SERVER,
 			ID_SETUP_REPLAY_STRING,
 			ID_RELOAD_REPLAY_STRING,
 			ID_DESCRIBE_REPLAY_STRING,
@@ -99,7 +97,6 @@ class ComplxFrameDecl : public wxFrame
 		wxMenu* menuView;
 		wxMenu* menuViewHideAddresses;
 		wxMenuItem* menuViewHideAddressesShowAll;
-		wxMenuItem* menuViewHideAddressesShowNonZero;
 		wxMenuItem* menuViewHideAddressesShowOnlyCodeData;
 		wxMenuItem* menuViewHideAddressesCustom;
 		wxMenu* menuViewDisassemble;
@@ -180,7 +177,6 @@ class ComplxFrameDecl : public wxFrame
 		virtual void OnAdvancedBreakpoint( wxCommandEvent& event ) = 0;
 		virtual void OnBlackbox( wxCommandEvent& event ) = 0;
 		virtual void OnTraceFile( wxCommandEvent& event ) = 0;
-		virtual void OnStartReplayStringServer( wxCommandEvent& event ) = 0;
 		virtual void OnSetupReplayString( wxCommandEvent& event ) = 0;
 		virtual void OnReloadReplayString( wxCommandEvent& event ) = 0;
 		virtual void OnDescribeReplayString( wxCommandEvent& event ) = 0;

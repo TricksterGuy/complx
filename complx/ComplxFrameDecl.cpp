@@ -68,9 +68,6 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuViewHideAddressesShowAll = new wxMenuItem( menuViewHideAddresses, ID_SHOW_ALL, wxString( _("Show All") ) , _("Shows all memory addresses"), wxITEM_RADIO );
 	menuViewHideAddresses->Append( menuViewHideAddressesShowAll );
 
-	menuViewHideAddressesShowNonZero = new wxMenuItem( menuViewHideAddresses, ID_SHOW_NON_ZERO, wxString( _("Show Non Zero") ) , _("Show all memory addresses that have a value other than 0"), wxITEM_RADIO );
-	menuViewHideAddresses->Append( menuViewHideAddressesShowNonZero );
-
 	menuViewHideAddressesShowOnlyCodeData = new wxMenuItem( menuViewHideAddresses, ID_SHOW_ONLY_CODEDATA, wxString( _("Show Only Code/Data") ) , _("Shows addresses modified when your program was loaded."), wxITEM_RADIO );
 	menuViewHideAddresses->Append( menuViewHideAddressesShowOnlyCodeData );
 
@@ -230,10 +227,6 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menu->Append( menuDebug, _("Debug") );
 
 	menuTest = new wxMenu();
-	wxMenuItem* menuTestStartReplayStringServer;
-	menuTestStartReplayStringServer = new wxMenuItem( menuTest, ID_START_REPLAY_STRING_SERVER, wxString( _("&Start Replay String Server") ) + wxT('\t') + wxT("Ctrl+S"), _("Starts the replay string server to receive replay strings from host."), wxITEM_NORMAL );
-	menuTest->Append( menuTestStartReplayStringServer );
-
 	wxMenuItem* menuTestSetupReplayString;
 	menuTestSetupReplayString = new wxMenuItem( menuTest, ID_SETUP_REPLAY_STRING, wxString( _("Se&tup Replay String...") ) + wxT('\t') + wxT("Ctrl+T"), _("Loads a replay string from the pylc3 unit test framework."), wxITEM_NORMAL );
 	menuTest->Append( menuTestSetupReplayString );
@@ -642,7 +635,6 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuView->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnNewView ), this, menuViewNew->GetId());
 	menuView->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnGoto ), this, menuViewGoto->GetId());
 	menuViewHideAddresses->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ), this, menuViewHideAddressesShowAll->GetId());
-	menuViewHideAddresses->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ), this, menuViewHideAddressesShowNonZero->GetId());
 	menuViewHideAddresses->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnUpdateHideAddresses ), this, menuViewHideAddressesShowOnlyCodeData->GetId());
 	menuViewHideAddresses->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnHideAddressesCustom ), this, menuViewHideAddressesCustom->GetId());
 	menuViewDisassemble->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDumbDisassemble ), this, menuViewBasic->GetId());
@@ -676,7 +668,6 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuDebug->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnAdvancedBreakpoint ), this, menuDebugAdvanced->GetId());
 	menuDebug->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnBlackbox ), this, menuDebugBlackbox->GetId());
 	menuDebug->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTraceFile ), this, menuDebugTraceFile->GetId());
-	menuTest->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnStartReplayStringServer ), this, menuTestStartReplayStringServer->GetId());
 	menuTest->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnSetupReplayString ), this, menuTestSetupReplayString->GetId());
 	menuTest->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReloadReplayString ), this, menuTestReloadReplayString->GetId());
 	menuTest->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDescribeReplayString ), this, menuTestDescribeReplayString->GetId());

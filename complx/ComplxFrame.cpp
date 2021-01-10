@@ -1272,8 +1272,8 @@ void ComplxFrame::OnUpdateHideAddresses(wxCommandEvent& event)
         mode = SHOW_ALL;
     else if (menuViewHideAddressesShowOnlyCodeData->IsChecked())
         mode = SHOW_MODIFIED;
-    else if ((menuViewHideAddressesShowNonZero->IsChecked()))
-        mode = SHOW_NONZERO;
+//    else if ((menuViewHideAddressesShowNonZero->IsChecked()))
+//        mode = SHOW_NONZERO;
     else
         mode = 0;
     ::OnUpdateHideAddresses(memory, memoryView, mode);
