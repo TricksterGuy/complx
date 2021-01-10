@@ -826,8 +826,8 @@ class LC3UnitTestCase(unittest.TestCase):
 
         if label in self._modified_labels:
             t = self._modified_labels.get(label)
-            self._internalAssert('setValue', t != 'VALUE', 'Attempt to use same label for writing different things to memory (%s and %s).'
-                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'VALUE'), internal=True)
+            self._internalAssert('setValue', t == 'VALUE', 'Attempt to use same label for writing different things to memory (%s and %s).'
+                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'VALUE'), AssertionType.fatal, internal=True)
         self._modified_labels[label] = 'VALUE'
 
         self._writeMem(self._lookup(label), value)
@@ -848,8 +848,8 @@ class LC3UnitTestCase(unittest.TestCase):
 
         if label in self._modified_labels:
             t = self._modified_labels.get(label)
-            self._internalAssert('setPointer', t != 'POINTER', 'Attempt to use same label for writing different things to memory (%s and %s).'
-                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'POINTER'), internal=True)
+            self._internalAssert('setPointer', t == 'POINTER', 'Attempt to use same label for writing different things to memory (%s and %s).'
+                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'POINTER'), AssertionType.fatal, internal=True)
         self._modified_labels[label] = 'POINTER'
 
         self._writeMem(self._readMem(self._lookup(label)), value)
@@ -873,8 +873,8 @@ class LC3UnitTestCase(unittest.TestCase):
 
         if label in self._modified_labels:
             t = self._modified_labels.get(label)
-            self._internalAssert('setArray', t != 'ARRAY', 'Attempt to use same label for writing different things to memory (%s and %s).'
-                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'ARRAY'), internal=True)
+            self._internalAssert('setArray', t == 'ARRAY', 'Attempt to use same label for writing different things to memory (%s and %s).'
+                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'ARRAY'), AssertionType.fatal, internal=True)
         self._modified_labels[label] = 'ARRAY'
 
         start_addr = self._readMem(self._lookup(label))
@@ -901,8 +901,8 @@ class LC3UnitTestCase(unittest.TestCase):
 
         if label in self._modified_labels:
             t = self._modified_labels.get(label)
-            self._internalAssert('setString', t != 'STRING', 'Attempt to use same label for writing different things to memory (%s and %s).'
-                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'STRING'), internal=True)
+            self._internalAssert('setString', t == 'STRING', 'Attempt to use same label for writing different things to memory (%s and %s).'
+                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'STRING'), AssertionType.fatal, internal=True)
         self._modified_labels[label] = 'STRING'
 
         start_addr = self._readMem(self._lookup(label))
