@@ -162,15 +162,13 @@ private:
     void PostInit();
     /** DetectSubroutine
       *
-      * Attempts to detect if a subroutine is found in the loaded code
-      * The way this function works is it will try to find a RET, JSR, or JSRR instruction.
-      * We do not look at trap instructions since they are black boxed anyway if true traps are disabled,
-      * however if a custom trap is written then it will of course have a RET statement.
+      * Attempts to detect if a subroutine is found in the code
+      * Specifically if there is any of the following instructions in the text (RET, RTI, JSR, JSRR).
       * The usage of this function is for enabling or disabling the Next/Prev Line and Finish control buttons.
       * @param ranges Code ranges the file that was loaded touches
       * @return True if a subroutine was detected false otherwise
       */
-    bool DetectSubroutine(const std::vector<code_range>& ranges);
+    bool DetectSubroutine(const std::string& file);
 
     wxTimer docker_checker_timer;
 };

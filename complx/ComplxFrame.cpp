@@ -289,7 +289,7 @@ void ComplxFrame::DoLoadFile(const LoadingOptions& opts)
             if ((code_range.location >= 0x100 && code_range.location <= 0x1FF) || (code_range.location + code_range.size >= 0x100 && code_range.location + code_range.size <= 0x1FF))
                 ivt_modification = true;
         }
-        subroutine_found = DetectSubroutine(ranges);
+        subroutine_found = DetectSubroutine(filename.GetFullPath().ToStdString());
     }
     catch (LC3AssembleException e)
     {
@@ -1799,16 +1799,21 @@ void DestroyImages()
     infoImages->RemoveAll();
 }
 
-bool ComplxFrame::DetectSubroutine(const std::vector<code_range>& ranges)
+bool ComplxFrame::DetectSubroutine(const std::string& filename)
 {
-    for (const auto& range : ranges)
+    wxTextFile file(filename);
+    file.Open();
+    for (auto str = file.GetFirstLine(); !file.Eof(); str = file.GetNextLine())
     {
-        for (unsigned int i = 0; i < range.size; i++)
-        {
-            unsigned short data = state.mem[range.location + i];
-            // JSR and JSRR share the same opcode.
-            if (((data >> 12) & 0xF) == JSR_INSTR || data == 0xC1C0)
-                return true;
+        auto instruction = str.BeforeFirst(';');
+        instruction.MakeUpper();
+        // Trap intentionally omitted since there would be an RET/RTI instruction if there was a custom trap.
+        // Default TRAPs are blackboxed anyway.
+        if (instruction.Contains("JSR") ||
+            instruction.Contains("JSRR") ||
+            instruction.Contains("RET") ||
+            instruction.Contains("RTI")) {
+            return true;
         }
     }
     return false;
