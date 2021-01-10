@@ -826,8 +826,8 @@ class LC3UnitTestCase(unittest.TestCase):
 
         if label in self._modified_labels:
             t = self._modified_labels.get(label)
-            self._internalAssert('setValue', t != 'VALUE', 'Attempt to use same label for writing different things to memory (%s and %s).'
-                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'VALUE'), internal=True)
+            self._internalAssert('setValue', t == 'VALUE', 'Attempt to use same label for writing different things to memory (%s and %s).'
+                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'VALUE'), AssertionType.fatal, internal=True)
         self._modified_labels[label] = 'VALUE'
 
         self._writeMem(self._lookup(label), value)
@@ -848,8 +848,8 @@ class LC3UnitTestCase(unittest.TestCase):
 
         if label in self._modified_labels:
             t = self._modified_labels.get(label)
-            self._internalAssert('setPointer', t != 'POINTER', 'Attempt to use same label for writing different things to memory (%s and %s).'
-                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'POINTER'), internal=True)
+            self._internalAssert('setPointer', t == 'POINTER', 'Attempt to use same label for writing different things to memory (%s and %s).'
+                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'POINTER'), AssertionType.fatal, internal=True)
         self._modified_labels[label] = 'POINTER'
 
         self._writeMem(self._readMem(self._lookup(label)), value)
@@ -873,8 +873,8 @@ class LC3UnitTestCase(unittest.TestCase):
 
         if label in self._modified_labels:
             t = self._modified_labels.get(label)
-            self._internalAssert('setArray', t != 'ARRAY', 'Attempt to use same label for writing different things to memory (%s and %s).'
-                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'ARRAY'), internal=True)
+            self._internalAssert('setArray', t == 'ARRAY', 'Attempt to use same label for writing different things to memory (%s and %s).'
+                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'ARRAY'), AssertionType.fatal, internal=True)
         self._modified_labels[label] = 'ARRAY'
 
         start_addr = self._readMem(self._lookup(label))
@@ -901,8 +901,8 @@ class LC3UnitTestCase(unittest.TestCase):
 
         if label in self._modified_labels:
             t = self._modified_labels.get(label)
-            self._internalAssert('setString', t != 'STRING', 'Attempt to use same label for writing different things to memory (%s and %s).'
-                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'STRING'), internal=True)
+            self._internalAssert('setString', t == 'STRING', 'Attempt to use same label for writing different things to memory (%s and %s).'
+                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'STRING'), AssertionType.fatal, internal=True)
         self._modified_labels[label] = 'STRING'
 
         start_addr = self._readMem(self._lookup(label))
@@ -1079,6 +1079,8 @@ class LC3UnitTestCase(unittest.TestCase):
             value: Integer - Value to write at that address
         """
 
+        self._internalAssert('fillValue', not self._code_has_ran, 'Attempt to fill a memory address after the code has ran', AssertionType.fatal, internal=True)
+
         label = self.state.reverse_lookup(address)
         self._internalAssert('fillValue', not label, 'fillValue is not to be used on a labeled address, use setValue instead. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
 
@@ -1110,6 +1112,8 @@ class LC3UnitTestCase(unittest.TestCase):
         Raises:
             ValueError if the address has a label (use setString instead).
         """
+
+        self._internalAssert('fillString', not self._code_has_ran, 'Attempt to fill a memory address after the code has ran', AssertionType.fatal, internal=True)
 
         label = self.state.reverse_lookup(address)
         self._internalAssert('fillString', not label, 'fillString is not to be used on a labeled address, use setString instead. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
@@ -1144,6 +1148,8 @@ class LC3UnitTestCase(unittest.TestCase):
             ValueError if the address has a label (use setArray instead).
         """
 
+        self._internalAssert('fillArray', not self._code_has_ran, 'Attempt to fill a memory address after the code has ran', AssertionType.fatal, internal=True)
+
         label = self.state.reverse_lookup(address)
         self._internalAssert('fillArray', not label, 'fillArray is not to be used on a labeled address, use setArray instead. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
 
@@ -1175,6 +1181,8 @@ class LC3UnitTestCase(unittest.TestCase):
                        3) Iterable of Shorts/None - Next addresses, None to indicate no next address.
             data: Tuple - Node data. (See fillData for a more detailed description on the tuple's contents.)
         """
+
+        self._internalAssert('fillNode', not self._code_has_ran, 'Attempt to fill a memory address after the code has ran', AssertionType.fatal, internal=True)
 
         label = self.state.reverse_lookup(address)
 
@@ -1218,6 +1226,8 @@ class LC3UnitTestCase(unittest.TestCase):
             address: Short - Address to set.
             data: Tuple - Node data.
         """
+
+        self._internalAssert('fillData', not self._code_has_ran, 'Attempt to fill a memory address after the code has ran', AssertionType.fatal, internal=True)
 
         label = self.state.reverse_lookup(address)
         self._internalAssert('fillData', not label, 'fillData is not to be used on a labeled address. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
@@ -1299,7 +1309,7 @@ class LC3UnitTestCase(unittest.TestCase):
             level: AssertionType. Assertion level override.
         """
 
-        assert self.break_address is None, "self.callSubroutine was previously used in this test, a call to assertReturned() should be made instead of assertHalted()."
+        self._internalAssert('assertHalted', self.break_address is None, "self.callSubroutine was previously used in this test, a call to assertReturned() should be made instead of assertHalted().", AssertionType.fatal, internal=True)
         # Don't use self.state.halted here as that is set if a Malformed instruction is executed.
         instruction = self.state.disassemble(self.state.pc, 1)
         malformed = '*' in instruction
