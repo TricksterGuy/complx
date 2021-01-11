@@ -401,9 +401,9 @@ def JsonExpandedOutputPerAssertion(name, tests):
     json_obj = {name: []}
     for test_name in tests:
         for check_name in cls.passed_assertions_per_test.get(test_name, []):
-            json_obj[name].append({'display-name': f'{test_name}/{check_name}',, 'passed': True})
+            json_obj[name].append({'display-name': f'{test_name}/{check_name}', 'passed': True})
         for check_name, msg in cls.failed_assertions_per_test.get(test_name, []):
-            json_obj[name].append({'display-name': f'{test_name}/{check_name}',, 'passed': False, 'message': msg})
+            json_obj[name].append({'display-name': f'{test_name}/{check_name}', 'passed': False, 'message': msg})
     return {'results': json_obj}
 
 def JsonOutputPerAssertion(name, tests):
