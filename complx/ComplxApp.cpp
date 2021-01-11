@@ -155,6 +155,14 @@ bool ComplxApp::OnInit()
     bool firstrun = false;
     opts.exact_column_sizing = true;
 
+    // Comment devoted to how much I hate CS2110's docker setup. Yup still petty about this.
+    opts.running_in_cs2110docker = wxGetEnv("CS2110_IMAGE_VERSION", nullptr);
+    if (opts.running_in_cs2110docker && column_size_str.empty())
+    {
+        // Hack because I hate how complx looks on docker.
+        column_size_str = "22,45,47,60,132,95,166,211,";
+    }
+
     if (last_ver.empty())
     {
         firstrun = true;
@@ -164,7 +172,7 @@ bool ComplxApp::OnInit()
         config->Write("/firstrun", Version::FULLVERSION_STRING);
         config->Flush();
     }
-    else
+    if (!column_size_str.empty())
     {
         // Operation that takes 2 seconds don't want to do it if it is not the first run.
         opts.exact_column_sizing = false;
@@ -175,14 +183,11 @@ bool ComplxApp::OnInit()
             for (const auto& str : columns)
                 opts.column_sizes.push_back(wxAtoi(str));
         }
-        if (!width_str.empty())
-            opts.width = wxAtoi(width_str);
-        if (!height_str.empty())
-            opts.height = wxAtoi(height_str);
     }
-
-    // Comment devoted to how much I hate CS2110's docker setup. Yup still petty about this.
-    opts.running_in_cs2110docker = wxGetEnv("CS2110_IMAGE_VERSION", nullptr);
+    if (!width_str.empty())
+        opts.width = wxAtoi(width_str);
+    if (!height_str.empty())
+        opts.height = wxAtoi(height_str);
 
     complxframe = new ComplxFrame(opts);
     wxIcon icon(icon32_xpm);
