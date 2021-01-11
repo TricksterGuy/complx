@@ -380,6 +380,64 @@ class Postconditions(object):
         """Returns a base64 encoded string with the data."""
         return base64.b64encode(self._formBlob())
 
+def JsonExpandedOutputPerAssertion(name, tests):
+    """Function appropriate for setting cls.json_report_func.
+
+    The format of the results.json file is as follows.
+    {
+        "results": {
+            "TestGCD": [
+                {"display-name": "gcd(1, 1) -> 1/assembles", "passed": true},
+                {"display-name": "gcd(1, 1) -> 1/answer", "passed": true},
+                ...
+            ],
+            "TestLinkedList": [
+                ...
+            ]
+            ...
+        }
+    }
+    """
+    json_obj = {name: []}
+    for test_name in tests:
+        for check_name in cls.passed_assertions_per_test.get(test_name, []):
+            json_obj[name].append({'display-name': f'{test_name}/{check_name}',, 'passed': True})
+        for check_name, msg in cls.failed_assertions_per_test.get(test_name, []):
+            json_obj[name].append({'display-name': f'{test_name}/{check_name}',, 'passed': False, 'message': msg})
+    return {'results': json_obj}
+
+def JsonOutputPerAssertion(name, tests):
+    """Function appropriate for setting cls.json_report_func.
+
+    The format of the results.json file is as follows.
+    {
+        "results": {
+            "TestGCD - assembles": [
+                { "display-name": "gcd(1, 1) -> 1/assembles", "passed": true },
+                ...
+            ],
+            "TestGCD - answer": [
+                { "display-name": "gcd(1, 1) -> 1/answer", "passed": true },
+                ...
+            ],
+            ...
+            "TestLinkedList - assembles": [
+                ...
+            ]
+        }
+    }
+    """
+    check_data = {}
+    for test_name in tests:
+        for check_name in cls.passed_assertions_per_test.get(test_name, []):
+            assertion_name = f'{name} - {check_name}'
+            check_data.setdefault(assertion_name, [])
+            check_data[assertion_name].append({'display-name': f'{test_name}/{check_name}', 'passed': True})
+        for check_name, msg in cls.failed_assertions_per_test.get(test_name, []):
+            assertion_name = f'{name} - {check_name}'
+            check_data.setdefault(assertion_name, [])
+            check_data[assertion_name].append({'display-name': f'{test_name}/{check_name}', 'passed': False, 'message': msg})
+    return {'results': check_data}
 
 class LC3UnitTestCase(unittest.TestCase):
     """LC3UnitTestCase class eases testing of LC3 code from within python.
@@ -400,10 +458,19 @@ class LC3UnitTestCase(unittest.TestCase):
     It is also important not use unittest.TestCase assertion methods directly since:
         1) They don't produce the replay/verification string upon failure
         2) They aren't logged in the verification string.
+
+    Note that each testCase must set self.display_name regardless of if JSON test output
+    is wanted.
+
+    For JSON output cls.json_report_format must be set to either
+    lc3_unit_test_case.JsonOutputPerAssertion or lc3_unit_test_case.JsonExpandedOutputPerAssertion
+    or additionally a function that takes two parameters and returns a map for json output see
+    afforementioned functions for examples.
     """
 
     failed_assertions_per_test = {}
     passed_assertions_per_test = {}
+    json_report_format = None
 
     @classmethod
     def setUpClass(cls):
@@ -420,14 +487,13 @@ class LC3UnitTestCase(unittest.TestCase):
         tests = set()
         tests.update(list(cls.failed_assertions_per_test.keys()))
         tests.update(list(cls.passed_assertions_per_test.keys()))
-        json_obj = {name: []}
-        for test_name in tests:
-            for check_name in cls.passed_assertions_per_test.get(test_name, []):
-                json_obj[name].append({'display-name': '%s/%s' % (test_name, check_name), 'passed': True})
-            for check_name, msg in cls.failed_assertions_per_test.get(test_name, []):
-                json_obj[name].append({'display-name': '%s/%s' % (test_name, check_name), 'passed': False, 'message': msg})
+        if not cls.json_report_func:
+            print("Warning! json_report_func not set, so not generating a results.json file.\n")
+            return
         with open(filename, 'w') as f:
-            json.dump(json_obj, f)
+            json_obj = cls.json_report_func(name, tests)
+            if json_obj:
+                json.dump(json_obj, f)
 
     def setUp(self):
         self.state = pylc3.LC3State(testing_mode=True)

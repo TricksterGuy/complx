@@ -25,7 +25,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         if self.failed_assertions:
             self.fail(form_failure_message())
 
-    # Overriden to not generate a json file.
+    # Overridden to not generate a json file.
     @classmethod
     def tearDownClass(cls):
         pass
