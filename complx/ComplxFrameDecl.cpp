@@ -235,10 +235,6 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuTestReloadReplayString = new wxMenuItem( menuTest, ID_RELOAD_REPLAY_STRING, wxString( _("&Reload Replay String") ) + wxT('\t') + wxT("Ctrl+Alt+T"), _("Reloads a replay string from the pylc3 unit test framework."), wxITEM_NORMAL );
 	menuTest->Append( menuTestReloadReplayString );
 
-	wxMenuItem* menuTestDescribeReplayString;
-	menuTestDescribeReplayString = new wxMenuItem( menuTest, ID_DESCRIBE_REPLAY_STRING, wxString( _("&Describe Replay String") ) + wxT('\t') + wxT("Ctrl+D"), _("Pops a dialog explaining the current replay string."), wxITEM_NORMAL );
-	menuTest->Append( menuTestDescribeReplayString );
-
 	menu->Append( menuTest, _("Test") );
 
 	menuHelp = new wxMenu();
@@ -670,7 +666,6 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuDebug->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTraceFile ), this, menuDebugTraceFile->GetId());
 	menuTest->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnSetupReplayString ), this, menuTestSetupReplayString->GetId());
 	menuTest->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReloadReplayString ), this, menuTestReloadReplayString->GetId());
-	menuTest->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDescribeReplayString ), this, menuTestDescribeReplayString->GetId());
 	menuHelp->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDocs ), this, menuHelpDocs->GetId());
 	menuHelp->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnISA ), this, menuHelpISA->GetId());
 	menuHelp->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnChangeLog ), this, menuHelpChangeLog->GetId());

@@ -1361,64 +1361,6 @@ void ComplxFrame::OnDestroyView(wxCloseEvent& event)
     frame->Destroy();
 }
 
-void ComplxFrame::OnStartReplayStringServer(wxCommandEvent& event)
-{
-#ifdef ENABLE_LC3_REPLAY
-    if (Running())
-        return;
-
-    if (reload_options.file.empty())
-        OnLoad(event);
-
-    if (reload_options.file.empty())
-    {
-        wxMessageBox("An assembly file must be loaded to perform this operation", "Error");
-        return;
-    }
-
-    wxIPV4address address;
-    address.AnyAddress();
-    address.Service(21100);
-    wxSocketServer server(address, wxSOCKET_REUSEADDR);
-    if (!server.IsOk())
-    {
-        wxMessageBox("Unable to start Replay String Server.", "Error");
-        return;
-    }
-
-    wxSocketBase* client = nullptr;
-    {
-        std::unique_ptr<wxBusyInfo> wait(new wxBusyInfo("Waiting for connection..."));
-        std::unique_ptr<wxWindowDisabler> disabler(new wxWindowDisabler());
-
-        if (!server.WaitForAccept(10) || (client = server.Accept(false)) == nullptr)
-        {
-            wait.reset();
-            disabler.reset();
-
-            wxMessageBox("Complx did not receive a replay string from client.", "Error");
-            return;
-        }
-    }
-
-    uint32_t size;
-    client->Read(&size, sizeof(size));
-    size = wxINT32_SWAP_ON_LE(size);
-    if (size <= 1024)
-    {
-        char buf[size+1];
-        client->Read(buf, size);
-        buf[size] = 0;
-        DoSetupReplayString(std::string(buf, size));
-    }
-    else
-    {
-        wxMessageBox("Could not process replay string, length too long.", "Error");
-    }
-    client->Destroy();
-#endif
-}
-
 void ComplxFrame::OnSetupReplayString(wxCommandEvent& event)
 {
 #ifdef ENABLE_LC3_REPLAY
@@ -1439,6 +1381,24 @@ void ComplxFrame::OnSetupReplayString(wxCommandEvent& event)
     if (replay_str.empty())
         return;
 
+    try
+    {
+        std::string description = lc3_describe_replay(replay_str);
+        int answer = wxMessageBox(description, "Use this replay string?", wxYES_NO);
+        if (answer == wxNO)
+            return;
+    }
+    catch (std::string err)
+    {
+        wxMessageBox(err.c_str(), "Error replay string invalid");
+        return;
+    }
+    catch (const char* err)
+    {
+        wxMessageBox(err, "Error replay string invalid");
+        return;
+    }
+
     DoSetupReplayString(replay_str);
 #else
     wxMessageBox("Support for this menu function was not enabled.", "Error");
@@ -1454,40 +1414,6 @@ void ComplxFrame::OnReloadReplayString(wxCommandEvent& event)
     }
 
     DoSetupReplayString(reload_options.replay_string);
-#else
-    wxMessageBox("Support for this menu function was not enabled.", "Error");
-#endif
-}
-void ComplxFrame::OnDescribeReplayString(wxCommandEvent& event)
-{
-#ifdef ENABLE_LC3_REPLAY
-    std::string replay_str = reload_options.replay_string;
-    if (replay_str.empty())
-    {
-        replay_str = DoAskForReplayString();
-
-        if (replay_str.empty())
-        {
-            wxMessageBox("No replay string given.", "Error");
-            return;
-        }
-    }
-
-    try
-    {
-        std::string description = lc3_describe_replay(replay_str);
-        wxMessageBox(description);
-    }
-    catch (std::string err)
-    {
-        wxMessageBox(err.c_str(), "Error");
-        return;
-    }
-    catch (const char* err)
-    {
-        wxMessageBox(err, "Error");
-        return;
-    }
 #else
     wxMessageBox("Support for this menu function was not enabled.", "Error");
 #endif

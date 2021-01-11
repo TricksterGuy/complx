@@ -110,11 +110,8 @@ public:
     void OnTraceFile(wxCommandEvent& event) override;
 
     // Test menu event handlers
-    /// TODO remove
-    void OnStartReplayStringServer(wxCommandEvent& event);// override;
 	void OnSetupReplayString(wxCommandEvent& event) override;
 	void OnReloadReplayString(wxCommandEvent& event) override;
-	void OnDescribeReplayString(wxCommandEvent& event) override;
 	std::string DoAskForReplayString();
 	void DoSetupReplayString(const std::string& replay_string);
 

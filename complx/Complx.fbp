@@ -738,20 +738,6 @@
                         <property name="unchecked_bitmap"></property>
                         <event name="OnMenuSelection">OnReloadReplayString</event>
                     </object>
-                    <object class="wxMenuItem" expanded="1">
-                        <property name="bitmap"></property>
-                        <property name="checked">0</property>
-                        <property name="enabled">1</property>
-                        <property name="help">Pops a dialog explaining the current replay string.</property>
-                        <property name="id">ID_DESCRIBE_REPLAY_STRING</property>
-                        <property name="kind">wxITEM_NORMAL</property>
-                        <property name="label">&amp;Describe Replay String</property>
-                        <property name="name">menuTestDescribeReplayString</property>
-                        <property name="permission">none</property>
-                        <property name="shortcut">Ctrl+D</property>
-                        <property name="unchecked_bitmap"></property>
-                        <event name="OnMenuSelection">OnDescribeReplayString</event>
-                    </object>
                 </object>
                 <object class="wxMenu" expanded="1">
                     <property name="label">Help</property>
