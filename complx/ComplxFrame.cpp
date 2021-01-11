@@ -106,7 +106,7 @@ ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) :
     if (opts.running_in_cs2110docker)
     {
         docker_checker_timer.SetOwner(this);
-        Connect(wxID_ANY, wxEVT_TIMER, wxTimerEventHandler(ComplxFrame::OnDockerTimer), this);
+        Connect(docker_checker_timer.GetId(), wxEVT_TIMER, wxTimerEventHandler(ComplxFrame::OnDockerTimer), nullptr, this);
         docker_checker_timer.Start(5000);
 
     }
@@ -118,6 +118,12 @@ ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) :
   */
 ComplxFrame::~ComplxFrame()
 {
+    if (docker_checker_timer.IsRunning())
+    {
+        docker_checker_timer.Stop();
+        Disconnect(docker_checker_timer.GetId(), wxEVT_TIMER, wxTimerEventHandler(ComplxFrame::OnDockerTimer), nullptr, this);
+    }
+
     auto* config = wxConfigBase::Get();
 
     int width, height;
@@ -470,12 +476,6 @@ void ComplxFrame::OnActivate(wxActivateEvent& event)
   */
 void ComplxFrame::OnQuit(wxCommandEvent& event)
 {
-    if (docker_checker_timer.IsRunning())
-    {
-        Disconnect(wxID_ANY, wxEVT_TIMER, wxTimerEventHandler(ComplxFrame::OnDockerTimer), this);
-        //docker_checker_timer.Stop();
-    }
-
     Destroy();
 }
 

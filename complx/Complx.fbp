@@ -45,7 +45,7 @@
             <property name="minimum_size"></property>
             <property name="name">ComplxFrameDecl</property>
             <property name="pos"></property>
-            <property name="size">704,576</property>
+            <property name="size">800,600</property>
             <property name="style">wxDEFAULT_FRAME_STYLE|wxRESIZE_BORDER</property>
             <property name="subclass"></property>
             <property name="title">Complx LC-3 Simulator</property>
