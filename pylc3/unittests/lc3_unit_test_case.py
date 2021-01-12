@@ -380,7 +380,8 @@ class Postconditions(object):
         """Returns a base64 encoded string with the data."""
         return base64.b64encode(self._formBlob())
 
-def JsonExpandedOutputPerAssertion(name, tests):
+
+def JsonExpandedOutputPerAssertion(name, passed_assertions, failed_assertions):
     """Function appropriate for setting cls.json_report_func.
 
     The format of the results.json file is as follows.
@@ -399,14 +400,18 @@ def JsonExpandedOutputPerAssertion(name, tests):
     }
     """
     json_obj = {name: []}
+    tests = set()
+    tests.update(list(failed_assertions.keys()))
+    tests.update(list(passed_assertions.keys()))
     for test_name in tests:
-        for check_name in cls.passed_assertions_per_test.get(test_name, []):
+        for check_name in passed_assertions.get(test_name, []):
             json_obj[name].append({'display-name': f'{test_name}/{check_name}', 'passed': True})
-        for check_name, msg in cls.failed_assertions_per_test.get(test_name, []):
+        for check_name, msg in failed_assertions.get(test_name, []):
             json_obj[name].append({'display-name': f'{test_name}/{check_name}', 'passed': False, 'message': msg})
     return {'results': json_obj}
 
-def JsonOutputPerAssertion(name, tests):
+
+def JsonOutputPerAssertion(name, passed_assertions, failed_assertions):
     """Function appropriate for setting cls.json_report_func.
 
     The format of the results.json file is as follows.
@@ -428,16 +433,20 @@ def JsonOutputPerAssertion(name, tests):
     }
     """
     check_data = {}
+    tests = set()
+    tests.update(list(failed_assertions.keys()))
+    tests.update(list(passed_assertions.keys()))
     for test_name in tests:
-        for check_name in cls.passed_assertions_per_test.get(test_name, []):
+        for check_name in passed_assertions.get(test_name, []):
             assertion_name = f'{name} - {check_name}'
             check_data.setdefault(assertion_name, [])
             check_data[assertion_name].append({'display-name': f'{test_name}/{check_name}', 'passed': True})
-        for check_name, msg in cls.failed_assertions_per_test.get(test_name, []):
+        for check_name, msg in failed_assertions.get(test_name, []):
             assertion_name = f'{name} - {check_name}'
             check_data.setdefault(assertion_name, [])
             check_data[assertion_name].append({'display-name': f'{test_name}/{check_name}', 'passed': False, 'message': msg})
     return {'results': check_data}
+
 
 class LC3UnitTestCase(unittest.TestCase):
     """LC3UnitTestCase class eases testing of LC3 code from within python.
@@ -464,7 +473,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
     For JSON output cls.json_report_format must be set to either
     lc3_unit_test_case.JsonOutputPerAssertion or lc3_unit_test_case.JsonExpandedOutputPerAssertion
-    or additionally a function that takes two parameters and returns a map for json output see
+    or additionally a function that takes three parameters and returns a map for json output see
     afforementioned functions for examples.
     """
 
@@ -484,13 +493,10 @@ class LC3UnitTestCase(unittest.TestCase):
     def form_json_test_report(cls):
         name = cls.__name__
         filename = 'results.json'
-        tests = set()
-        tests.update(list(cls.failed_assertions_per_test.keys()))
-        tests.update(list(cls.passed_assertions_per_test.keys()))
         if not cls.json_report_func:
             print("Warning! json_report_func not set, so not generating a results.json file.\n")
             return
-        json_obj = cls.json_report_func(name, tests)
+        json_obj = cls.json_report_func(name, cls.passed_assertions_per_test, cls.failed_assertions_per_test)
         if json_obj:
             with open(filename, 'w') as f:
                 json.dump(json_obj, f)
