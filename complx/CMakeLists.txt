@@ -68,8 +68,6 @@ target_link_libraries(
 install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/complx DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 install(FILES ../doc/complx-tools.pdf DESTINATION share/doc/complx-tools)
-install(FILES ../doc/ComplxChangeLog.txt DESTINATION share/doc/complx-tools)
-install(FILES ../doc/PattPatelAppA.pdf DESTINATION share/doc/complx-tools)
 install(FILES ../doc/complx-tips.txt DESTINATION share/doc/complx-tools)
 install(FILES ../complx.png DESTINATION share/icons)
 install(FILES ../complx.desktop DESTINATION share/applications)

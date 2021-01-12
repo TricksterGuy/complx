@@ -70,7 +70,7 @@ void PrintError(int error);
   * Constructor
   */
 ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) :
-    ComplxFrameDecl(NULL, wxID_ANY, opts.title, wxDefaultPosition, wxSize(opts.width, opts.height)), console(NULL), memoryView(NULL), base_title(opts.title)
+    ComplxFrameDecl(NULL, wxID_ANY, opts.title, wxDefaultPosition, wxSize(opts.width, opts.height)), console(NULL), memoryView(NULL), base_title(opts.title), running_in_cs2110docker(opts.running_in_cs2110docker)
 {
     InitImages();
 
@@ -85,7 +85,7 @@ ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) :
     DoLoadFile(opts.loading_options);
 
     memoryView = new MemoryView();
-    memory->SetView(memoryView, opts.exact_column_sizing, opts.column_sizes);
+    memory->SetView(memoryView, true, opts.exact_column_sizing, opts.column_sizes);
     memory->SetDisassembleLevel(opts.disassemble);
     memory->SetUnsignedMode(false);
     memory->SetHighlight(opts.highlight);
@@ -1472,7 +1472,7 @@ void ComplxFrame::OnAbout(wxCommandEvent& event)
     aboutInfo.SetName("Complx");
     aboutInfo.SetVersion(Version::FULLVERSION_STRING);
     aboutInfo.SetDescription(_("LC-3 Simulator\nBug reports, thanks, and feature requests should be sent to Brandon.\nbwhitehead0308@gmail.com"));
-    aboutInfo.SetCopyright("(C) 2010-2018");
+    aboutInfo.SetCopyright("(C) 2010-2021");
     aboutInfo.AddDeveloper("Brandon Whitehead bwhitehead0308@gmail.com");
     aboutInfo.SetIcon(wxIcon(icon64_xpm));
 
@@ -1490,40 +1490,26 @@ void ComplxFrame::OnDocs(wxCommandEvent& event)
     wxLaunchDefaultBrowser(manual.GetFullPath());
 }
 
-/** OnISA
-  *
-  * Displays the lc3 ISA reference manual.
-  */
-void ComplxFrame::OnISA(wxCommandEvent& event)
-{
-    wxFileName manual(_(EXPAND_AND_STRINGIFY(PREFIX) "/share/doc/complx-tools/PattPatelAppA.pdf"));
-    manual.Normalize();
-    wxLaunchDefaultBrowser(manual.GetFullPath());
-}
-
-/** OnChangeLog
-  *
-  * Displays the change log
-  */
-void ComplxFrame::OnChangeLog(wxCommandEvent& event)
-{
-    wxFileName manual(_(EXPAND_AND_STRINGIFY(PREFIX) "/share/doc/complx-tools/ComplxChangeLog.txt"));
-    manual.Normalize();
-    wxLaunchDefaultBrowser(manual.GetFullPath());
-}
-
 void ComplxFrame::OnCreateBugReport(wxCommandEvent& event)
 {
-    wxFileName manual(_("https://github.com/TricksterGuy/complx/issues/new"));
-    wxLaunchDefaultBrowser(manual.GetFullPath());
+    if (!running_in_cs2110docker)
+    {
+        wxFileName manual(_("https://github.com/TricksterGuy/complx/issues/new"));
+        wxLaunchDefaultBrowser(manual.GetFullPath());
+    }
+    else
+    {
+        wxMessageBox("Bugs can be filed at this web address\n"
+                     "https://github.com/TricksterGuy/complx/issues/new");
+    }
 }
 
 void ComplxFrame::OnFirstTime(wxCommandEvent& event)
 {
     wxMessageBox(wxString::Format("Hi! You are currently running version %s of Complx.\n\n"
                                   "Since this is your first time running this program, here are a couple of tips.\n\n"
-                                  "Thing 0: Write your assembly code in pluma/gedit (or any text editor) and save it as myfile.asm\n"
-                                  "Thing 1: Report any bugs to TAs or me directly (bwhitehead0308@gmail.com).\n\n"
+                                  "Thing 0: Write your assembly code in your favorite text editor and save it as myfile.asm\n"
+                                  "Thing 1: You can report any bugs to me directly (bwhitehead0308@gmail.com).\n\n"
                                   "File issues at https://github.com/TricksterGuy/complx/issues or via the menus at Help > Send Bug Report\n",
                                   Version::FULLVERSION_STRING),
                  "Hi from Brandon", wxICON_INFORMATION | wxOK);

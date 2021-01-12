@@ -242,14 +242,6 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuHelpDocs = new wxMenuItem( menuHelp, wxID_ANY, wxString( _("&Documentation") ) + wxT('\t') + wxT("F1"), _("Opens up the Complx Documentation."), wxITEM_NORMAL );
 	menuHelp->Append( menuHelpDocs );
 
-	wxMenuItem* menuHelpISA;
-	menuHelpISA = new wxMenuItem( menuHelp, wxID_ANY, wxString( _("&LC-3 ISA") ) + wxT('\t') + wxT("SHIFT+F1"), _("Opens up the lc3 isa reference manual."), wxITEM_NORMAL );
-	menuHelp->Append( menuHelpISA );
-
-	wxMenuItem* menuHelpChangeLog;
-	menuHelpChangeLog = new wxMenuItem( menuHelp, ID_CHANGE_LOG, wxString( _("&Change Log") ) , _("Shows the change log"), wxITEM_NORMAL );
-	menuHelp->Append( menuHelpChangeLog );
-
 	wxMenuItem* menuHelpCreateBugReport;
 	menuHelpCreateBugReport = new wxMenuItem( menuHelp, ID_CREATE_BUG_REPORT, wxString( _("Create &Bug Report") ) , _("Create a bug report"), wxITEM_NORMAL );
 	menuHelp->Append( menuHelpCreateBugReport );
@@ -667,8 +659,6 @@ ComplxFrameDecl::ComplxFrameDecl( wxWindow* parent, wxWindowID id, const wxStrin
 	menuTest->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnSetupReplayString ), this, menuTestSetupReplayString->GetId());
 	menuTest->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnReloadReplayString ), this, menuTestReloadReplayString->GetId());
 	menuHelp->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnDocs ), this, menuHelpDocs->GetId());
-	menuHelp->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnISA ), this, menuHelpISA->GetId());
-	menuHelp->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnChangeLog ), this, menuHelpChangeLog->GetId());
 	menuHelp->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnCreateBugReport ), this, menuHelpCreateBugReport->GetId());
 	menuHelp->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnFirstTime ), this, menuHelpFirstTime->GetId());
 	menuHelp->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( ComplxFrameDecl::OnTips ), this, menuHelpTips->GetId());

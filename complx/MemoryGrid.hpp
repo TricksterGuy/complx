@@ -34,7 +34,7 @@ public:
     void OnBlackbox(wxCommandEvent& event);
     void OnAdvancedpoint(wxCommandEvent& event);
     void OnPCHere(wxCommandEvent& event);
-    void SetView(MemoryView* view, bool exact_column_sizes = false, const std::vector<int>& column_sizes = std::vector<int>());
+    void SetView(MemoryView* view, bool resize_columns = false, bool exact_column_sizes = false, const std::vector<int>& column_sizes = std::vector<int>());
     bool AcceptsFocusFromKeyboard() const;
 
     void SetDisassembleLevel(int level);

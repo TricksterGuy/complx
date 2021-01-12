@@ -117,8 +117,6 @@ public:
 
     // Help menu event handlers
     void OnDocs(wxCommandEvent& event) override;
-    void OnISA(wxCommandEvent& event) override;
-    void OnChangeLog(wxCommandEvent& event) override;
     void OnCreateBugReport(wxCommandEvent& event) override;
     void OnAbout(wxCommandEvent& event) override;
     void OnFirstTime(wxCommandEvent& event) override;
@@ -168,6 +166,7 @@ private:
       */
     bool DetectSubroutine(const std::string& file);
 
+    bool running_in_cs2110docker = false;
     wxTimer docker_checker_timer;
 };
 

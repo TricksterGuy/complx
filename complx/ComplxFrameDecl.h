@@ -84,7 +84,6 @@ class ComplxFrameDecl : public wxFrame
 			ID_TRACE_FILE,
 			ID_SETUP_REPLAY_STRING,
 			ID_RELOAD_REPLAY_STRING,
-			ID_CHANGE_LOG,
 			ID_CREATE_BUG_REPORT,
 			ID_FIRST_TIME_MESSAGE,
 			ID_TIPS,
@@ -179,8 +178,6 @@ class ComplxFrameDecl : public wxFrame
 		virtual void OnSetupReplayString( wxCommandEvent& event ) = 0;
 		virtual void OnReloadReplayString( wxCommandEvent& event ) = 0;
 		virtual void OnDocs( wxCommandEvent& event ) = 0;
-		virtual void OnISA( wxCommandEvent& event ) = 0;
-		virtual void OnChangeLog( wxCommandEvent& event ) = 0;
 		virtual void OnCreateBugReport( wxCommandEvent& event ) = 0;
 		virtual void OnFirstTime( wxCommandEvent& event ) = 0;
 		virtual void OnTips( wxCommandEvent& event ) = 0;
