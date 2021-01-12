@@ -470,7 +470,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
     failed_assertions_per_test = {}
     passed_assertions_per_test = {}
-    json_report_format = None
+    json_report_func = None
 
     @classmethod
     def setUpClass(cls):
@@ -490,9 +490,9 @@ class LC3UnitTestCase(unittest.TestCase):
         if not cls.json_report_func:
             print("Warning! json_report_func not set, so not generating a results.json file.\n")
             return
-        with open(filename, 'w') as f:
-            json_obj = cls.json_report_func(name, tests)
-            if json_obj:
+        json_obj = cls.json_report_func(name, tests)
+        if json_obj:
+            with open(filename, 'w') as f:
                 json.dump(json_obj, f)
 
     def setUp(self):
