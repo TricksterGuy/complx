@@ -1510,6 +1510,12 @@ void ComplxFrame::OnFirstTime(wxCommandEvent& event)
                                   "Since this is your first time running this program, here are a couple of tips.\n\n"
                                   "Thing 0: Write your assembly code in your favorite text editor and save it as myfile.asm\n"
                                   "Thing 1: You can report any bugs to me directly (bwhitehead0308@gmail.com).\n\n"
+                                  "Text editors with LC-3 Syntax Highlighting:\n"
+                                  "  - vim: https://github.com/nprindle/lc3.vim\n"
+                                  "  - VSCode: https://github.com/PaperFanz/lc3-assembly-vscode-ext\n"
+                                  "  - Atom: https://atom.io/packages/language-lc3\n"
+                                  "  - Notepad++: https://gist.github.com/nschulzke/f442de21fa44fe8015aff57257f08a0c\n"
+                                  "  - Sublime Text 2: https://github.com/mcgunslinger/Sublime-LC3\n\n"
                                   "File issues at https://github.com/TricksterGuy/complx/issues or via the menus at Help > Send Bug Report\n",
                                   Version::FULLVERSION_STRING),
                  "Hi from Brandon", wxICON_INFORMATION | wxOK);
