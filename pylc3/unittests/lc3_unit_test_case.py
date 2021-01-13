@@ -472,9 +472,10 @@ class LC3UnitTestCase(unittest.TestCase):
     is wanted.
 
     For JSON output cls.json_report_format must be set to either
-    lc3_unit_test_case.JsonOutputPerAssertion or lc3_unit_test_case.JsonExpandedOutputPerAssertion
-    or additionally a function that takes three parameters and returns a map for json output see
-    afforementioned functions for examples.
+    pyLC3.unittests.lc3_unit_test_case.JsonOutputPerAssertion or 
+    pyLC3.unittests.lc3_unit_test_case.JsonExpandedOutputPerAssertion
+    or additionally a function that takes three parameters (name, passed_tests, failed_tests)
+    and returns a map for json output see afforementioned functions for examples.
     """
 
     failed_assertions_per_test = {}
