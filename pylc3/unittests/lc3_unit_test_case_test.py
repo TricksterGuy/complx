@@ -1421,9 +1421,9 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
                     b'\xff'
         ])
 
-        self.assertEqual(headerBlob, expected_headerBlob)
         self.assertCountEqual(preBlob, expected_preBlob)
         self.assertCountEqual(postBlob, expected_postBlob)
+        self.assertEqual(headerBlob, expected_headerBlob)
 
         #print self.preconditions.encode()
 
