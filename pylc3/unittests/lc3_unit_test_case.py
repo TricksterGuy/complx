@@ -319,7 +319,7 @@ class Preconditions(object):
         headerblob = header.getvalue()
         header.close()
 
-        return headerblob + blob
+        return headerblob + datablob
 
     def describe(self, include_environment=True):
         """Returns a string describing the preconditions."""
@@ -393,7 +393,7 @@ class Postconditions(object):
         headerblob = header.getvalue()
         header.close()
 
-        return headerblob + blob
+        return headerblob + datablob
 
     def describe(self, include_environment=True):
         """Returns a string describing the postconditions."""
@@ -402,6 +402,73 @@ class Postconditions(object):
     def encode(self):
         """Returns a base64 encoded string with the data."""
         return base64.b64encode(self._formBlob())
+
+
+def JsonExpandedOutputPerAssertion(name, passed_assertions, failed_assertions):
+    """Function appropriate for setting cls.json_report_func.
+
+    The format of the results.json file is as follows.
+    {
+        "results": {
+            "TestGCD": [
+                {"display-name": "gcd(1, 1) -> 1/assembles", "passed": true},
+                {"display-name": "gcd(1, 1) -> 1/answer", "passed": true},
+                ...
+            ],
+            "TestLinkedList": [
+                ...
+            ]
+            ...
+        }
+    }
+    """
+    json_obj = {name: []}
+    tests = set()
+    tests.update(list(failed_assertions.keys()))
+    tests.update(list(passed_assertions.keys()))
+    for test_name in tests:
+        for check_name in passed_assertions.get(test_name, []):
+            json_obj[name].append({'display-name': f'{test_name}/{check_name}', 'passed': True})
+        for check_name, msg in failed_assertions.get(test_name, []):
+            json_obj[name].append({'display-name': f'{test_name}/{check_name}', 'passed': False, 'message': msg})
+    return {'results': json_obj}
+
+
+def JsonOutputPerAssertion(name, passed_assertions, failed_assertions):
+    """Function appropriate for setting cls.json_report_func.
+
+    The format of the results.json file is as follows.
+    {
+        "results": {
+            "TestGCD - assembles": [
+                { "display-name": "gcd(1, 1) -> 1/assembles", "passed": true },
+                ...
+            ],
+            "TestGCD - answer": [
+                { "display-name": "gcd(1, 1) -> 1/answer", "passed": true },
+                ...
+            ],
+            ...
+            "TestLinkedList - assembles": [
+                ...
+            ]
+        }
+    }
+    """
+    check_data = {}
+    tests = set()
+    tests.update(list(failed_assertions.keys()))
+    tests.update(list(passed_assertions.keys()))
+    for test_name in tests:
+        for check_name in passed_assertions.get(test_name, []):
+            assertion_name = f'{name} - {check_name}'
+            check_data.setdefault(assertion_name, [])
+            check_data[assertion_name].append({'display-name': f'{test_name}/{check_name}', 'passed': True})
+        for check_name, msg in failed_assertions.get(test_name, []):
+            assertion_name = f'{name} - {check_name}'
+            check_data.setdefault(assertion_name, [])
+            check_data[assertion_name].append({'display-name': f'{test_name}/{check_name}', 'passed': False, 'message': msg})
+    return {'results': check_data}
 
 
 class LC3UnitTestCase(unittest.TestCase):
@@ -423,10 +490,20 @@ class LC3UnitTestCase(unittest.TestCase):
     It is also important not use unittest.TestCase assertion methods directly since:
         1) They don't produce the replay/verification string upon failure
         2) They aren't logged in the verification string.
+
+    Note that each testCase must set self.display_name regardless of if JSON test output
+    is wanted.
+
+    For JSON output cls.json_report_format must be set to either
+    pyLC3.unittests.lc3_unit_test_case.JsonOutputPerAssertion or 
+    pyLC3.unittests.lc3_unit_test_case.JsonExpandedOutputPerAssertion
+    or additionally a function that takes three parameters (name, passed_tests, failed_tests)
+    and returns a map for json output see afforementioned functions for examples.
     """
 
     failed_assertions_per_test = {}
     passed_assertions_per_test = {}
+    json_report_func = None
 
     @classmethod
     def setUpClass(cls):
@@ -440,17 +517,13 @@ class LC3UnitTestCase(unittest.TestCase):
     def form_json_test_report(cls):
         name = cls.__name__
         filename = 'results.json'
-        tests = set()
-        tests.update(list(cls.failed_assertions_per_test.keys()))
-        tests.update(list(cls.passed_assertions_per_test.keys()))
-        json_obj = {name: []}
-        for test_name in tests:
-            for check_name in cls.passed_assertions_per_test.get(test_name, []):
-                json_obj[name].append({'display-name': '%s/%s' % (test_name, check_name), 'passed': True})
-            for check_name, msg in cls.failed_assertions_per_test.get(test_name, []):
-                json_obj[name].append({'display-name': '%s/%s' % (test_name, check_name), 'passed': False, 'message': msg})
-        with open(filename, 'w') as f:
-            json.dump(json_obj, f)
+        if not cls.json_report_func:
+            print("Warning! json_report_func not set, so not generating a results.json file.\n")
+            return
+        json_obj = cls.json_report_func(name, cls.passed_assertions_per_test, cls.failed_assertions_per_test)
+        if json_obj:
+            with open(filename, 'w') as f:
+                json.dump(json_obj, f)
 
     def setUp(self):
         self.state = pylc3.LC3State(testing_mode=True)
@@ -477,7 +550,11 @@ class LC3UnitTestCase(unittest.TestCase):
         self.passed_assertions = []
         self.failed_assertions = []
         self._hard_failed = False
+        # Display name for JSON. This is required to be set.
         self.display_name = None
+        # Set of labels that were modified as preconditions along with type
+        self._modified_labels = dict()
+        self._code_has_ran = False
         self.replay_msg = 'Code did not assemble or test issue.'
 
     def tearDown(self):
@@ -813,6 +890,7 @@ class LC3UnitTestCase(unittest.TestCase):
             value: Integer - Value to write to that register.
         """
 
+        self._internalAssert('setRegister', not self._code_has_ran, 'Attempt to set a register after the code has ran', AssertionType.fatal, internal=True)
         self._internalAssert('setRegister', register_number >= 0 and register_number < 8, 'Invalid register number given %d' % register_number, AssertionType.fatal, internal=True)
         self.state.set_register(register_number, value)
 
@@ -826,7 +904,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             value: Integer - Value to write to that register.
         """
-
+        self._internalAssert('setPC', not self._code_has_ran, 'Attempt to set the PC after the code has ran', AssertionType.fatal, internal=True)
         self.state.pc = _toUShort(value)
 
         self.preconditions.addPrecondition(PreconditionFlag.pc, "", value)
@@ -840,6 +918,13 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address to set.
             value: Integer - Value to write at that address
         """
+        self._internalAssert('setValue', not self._code_has_ran, 'Attempt to set a label after the code has ran', AssertionType.fatal, internal=True)
+
+        if label in self._modified_labels:
+            t = self._modified_labels.get(label)
+            self._internalAssert('setValue', t == 'VALUE', 'Attempt to use same label for writing different things to memory (%s and %s).'
+                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'VALUE'), AssertionType.fatal, internal=True)
+        self._modified_labels[label] = 'VALUE'
 
         self._writeMem(self._lookup(label), value)
 
@@ -854,6 +939,14 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address which in turn contains the address to set.
             value: Integer - Value to write at that address.
         """
+
+        self._internalAssert('setPointer', not self._code_has_ran, 'Attempt to set a value pointed to by label after the code has ran', AssertionType.fatal, internal=True)
+
+        if label in self._modified_labels:
+            t = self._modified_labels.get(label)
+            self._internalAssert('setPointer', t == 'POINTER', 'Attempt to use same label for writing different things to memory (%s and %s).'
+                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'POINTER'), AssertionType.fatal, internal=True)
+        self._modified_labels[label] = 'POINTER'
 
         self._writeMem(self._readMem(self._lookup(label)), value)
 
@@ -872,6 +965,13 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address which in turn contains the first address to set.
             arr: Iterable of Shorts - Values to write sequentially in memory.
         """
+        self._internalAssert('setArray', not self._code_has_ran, 'Attempt to set a value pointed to by label after the code has ran', AssertionType.fatal, internal=True)
+
+        if label in self._modified_labels:
+            t = self._modified_labels.get(label)
+            self._internalAssert('setArray', t == 'ARRAY', 'Attempt to use same label for writing different things to memory (%s and %s).'
+                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'ARRAY'), AssertionType.fatal, internal=True)
+        self._modified_labels[label] = 'ARRAY'
 
         start_addr = self._readMem(self._lookup(label))
         for addr, elem in enumerate(arr, start_addr):
@@ -893,6 +993,13 @@ class LC3UnitTestCase(unittest.TestCase):
             label: String - Label pointing at the address which in turn contains the address to set.
             value: String - String to write in memory.
         """
+        self._internalAssert('setString', not self._code_has_ran, 'Attempt to set a label after the code has ran', AssertionType.fatal, internal=True)
+
+        if label in self._modified_labels:
+            t = self._modified_labels.get(label)
+            self._internalAssert('setString', t == 'STRING', 'Attempt to use same label for writing different things to memory (%s and %s).'
+                ' If the intent was to set up a parameter for a subroutine use the fillXXX functions which puts data at a specified memory address.' % (t, 'STRING'), AssertionType.fatal, internal=True)
+        self._modified_labels[label] = 'STRING'
 
         start_addr = self._readMem(self._lookup(label))
         for addr, elem in enumerate(text, start_addr):
@@ -1068,6 +1175,8 @@ class LC3UnitTestCase(unittest.TestCase):
             value: Integer - Value to write at that address
         """
 
+        self._internalAssert('fillValue', not self._code_has_ran, 'Attempt to fill a memory address after the code has ran', AssertionType.fatal, internal=True)
+
         label = self.state.reverse_lookup(address)
         self._internalAssert('fillValue', not label, 'fillValue is not to be used on a labeled address, use setValue instead. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
 
@@ -1099,6 +1208,8 @@ class LC3UnitTestCase(unittest.TestCase):
         Raises:
             ValueError if the address has a label (use setString instead).
         """
+
+        self._internalAssert('fillString', not self._code_has_ran, 'Attempt to fill a memory address after the code has ran', AssertionType.fatal, internal=True)
 
         label = self.state.reverse_lookup(address)
         self._internalAssert('fillString', not label, 'fillString is not to be used on a labeled address, use setString instead. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
@@ -1133,6 +1244,8 @@ class LC3UnitTestCase(unittest.TestCase):
             ValueError if the address has a label (use setArray instead).
         """
 
+        self._internalAssert('fillArray', not self._code_has_ran, 'Attempt to fill a memory address after the code has ran', AssertionType.fatal, internal=True)
+
         label = self.state.reverse_lookup(address)
         self._internalAssert('fillArray', not label, 'fillArray is not to be used on a labeled address, use setArray instead. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
 
@@ -1164,6 +1277,8 @@ class LC3UnitTestCase(unittest.TestCase):
                        3) Iterable of Shorts/None - Next addresses, None to indicate no next address.
             data: Tuple - Node data. (See fillData for a more detailed description on the tuple's contents.)
         """
+
+        self._internalAssert('fillNode', not self._code_has_ran, 'Attempt to fill a memory address after the code has ran', AssertionType.fatal, internal=True)
 
         label = self.state.reverse_lookup(address)
 
@@ -1207,6 +1322,8 @@ class LC3UnitTestCase(unittest.TestCase):
             address: Short - Address to set.
             data: Tuple - Node data.
         """
+
+        self._internalAssert('fillData', not self._code_has_ran, 'Attempt to fill a memory address after the code has ran', AssertionType.fatal, internal=True)
 
         label = self.state.reverse_lookup(address)
         self._internalAssert('fillData', not label, 'fillData is not to be used on a labeled address. x%04x has label %s' % (address, label), AssertionType.fatal, internal=True)
@@ -1288,7 +1405,7 @@ class LC3UnitTestCase(unittest.TestCase):
             level: AssertionType. Assertion level override.
         """
 
-        assert self.break_address is None, "self.callSubroutine was previously used in this test, a call to assertReturned() should be made instead of assertHalted()."
+        self._internalAssert('assertHalted', self.break_address is None, "self.callSubroutine was previously used in this test, a call to assertReturned() should be made instead of assertHalted().", AssertionType.fatal, internal=True)
         # Don't use self.state.halted here as that is set if a Malformed instruction is executed.
         instruction = self.state.disassemble(self.state.pc, 1)
         malformed = '*' in instruction
@@ -1844,4 +1961,4 @@ class LC3UnitTestCase(unittest.TestCase):
         self._internalAssert('trap calls made', len(self.expected_traps) == len(made_calls) and not missing_calls and not unknown_calls, status_message, level=level)
 
     def _generateReplay(self):
-        return "\nString to set up this test in complx: %s\nString to check results in complx: %s\nPlease include the full output from this grader in questions to TA's/piazza\n" % (repr(self.preconditions.encode()), repr(self.postconditions.encode()))
+        return "\nString to set up this test in complx: %s\nPlease include the full output from this grader in questions to TA's/piazza\n" % repr(self.preconditions.encode())

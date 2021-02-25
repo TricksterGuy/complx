@@ -13,6 +13,7 @@
 #include <wx/socket.h>
 #include <wx/textctrl.h>
 #include <wx/window.h>
+#include <wx/timer.h>
 
 #include "ComplxFrameDecl.h"
 #include "LC3Console.hpp"
@@ -47,6 +48,7 @@ public:
         int height;
         std::vector<int> column_sizes;
         bool exact_column_sizing;
+        bool running_in_cs2110docker;
     };
     ComplxFrame(const Options& opts);
     ~ComplxFrame();
@@ -108,23 +110,20 @@ public:
     void OnTraceFile(wxCommandEvent& event) override;
 
     // Test menu event handlers
-    void OnStartReplayStringServer(wxCommandEvent& event) override;
 	void OnSetupReplayString(wxCommandEvent& event) override;
 	void OnReloadReplayString(wxCommandEvent& event) override;
-	void OnDescribeReplayString(wxCommandEvent& event) override;
 	std::string DoAskForReplayString();
 	void DoSetupReplayString(const std::string& replay_string);
 
     // Help menu event handlers
     void OnDocs(wxCommandEvent& event) override;
-    void OnISA(wxCommandEvent& event) override;
-    void OnChangeLog(wxCommandEvent& event) override;
     void OnCreateBugReport(wxCommandEvent& event) override;
     void OnAbout(wxCommandEvent& event) override;
     void OnFirstTime(wxCommandEvent& event) override;
     void OnTips(wxCommandEvent& event) override;
 
     // Misc event handlers required for THINGS.
+    void OnDockerTimer(wxTimerEvent& event);
     void OnActivate(wxActivateEvent& event);
     void OnIdle(wxIdleEvent& event);
     void OnRunUpdate(wxThreadEvent& event);
@@ -159,15 +158,16 @@ private:
     void PostInit();
     /** DetectSubroutine
       *
-      * Attempts to detect if a subroutine is found in the loaded code
-      * The way this function works is it will try to find a RET, JSR, or JSRR instruction.
-      * We do not look at trap instructions since they are black boxed anyway if true traps are disabled,
-      * however if a custom trap is written then it will of course have a RET statement.
+      * Attempts to detect if a subroutine is found in the code
+      * Specifically if there is any of the following instructions in the text (RET, RTI, JSR, JSRR).
       * The usage of this function is for enabling or disabling the Next/Prev Line and Finish control buttons.
       * @param ranges Code ranges the file that was loaded touches
       * @return True if a subroutine was detected false otherwise
       */
-    bool DetectSubroutine(const std::vector<code_range>& ranges);
+    bool DetectSubroutine(const std::string& file);
+
+    bool running_in_cs2110docker = false;
+    wxTimer docker_checker_timer;
 };
 
 #endif

@@ -89,6 +89,8 @@ void lc3_init(lc3_state& state, bool randomize_registers, bool randomize_memory,
     state.warn_limits[LC3_RESERVED_MEM_WRITE] = 100;
     state.warn_limits[LC3_RESERVED_MEM_READ] = 100;
     state.warn_limits[LC3_PUTSP_UNEXPECTED_NUL] = 100;
+    state.warn_limits[LC3_EXECUTE_IVT] = 1;
+    state.warn_limits[LC3_EXECUTE_TVT] = 1;
 
 
     // Set Stack Flags
@@ -232,6 +234,13 @@ void lc3_step(lc3_state& state)
     unsigned short data = state.mem[state.pc];
     // Test for blackbox (If the line was a JSR statement and it had a blackbox).
     bool blackbox_finish = lc3_blackbox_test(state);
+
+    // Warn if executing TVT/IVT
+    if (state.pc <= 0xFF)
+        lc3_warning(state, LC3_EXECUTE_TVT, state.pc, 0);
+    if (state.pc >= 0x100 && state.pc <= 0x1FF)
+        lc3_warning(state, LC3_EXECUTE_IVT, state.pc, 0);
+
     // Increment PC
     state.pc++;
     // Form Instruction

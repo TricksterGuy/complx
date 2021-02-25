@@ -1,0 +1,62 @@
+name: Run Tests
+
+on:
+  push:
+    paths:
+      - 'tests/**'
+      - 'liblc3/**'
+      - 'plugins/instructions/lc3_multiply/**'
+      - 'plugins/devices/lc3_random/**'
+      - 'plugins/traps/lc3_udiv/**'
+      - 'lc3_replay/**'
+      - 'pylc3/**'
+  pull_request:
+    paths:
+      - 'tests/**'
+      - 'liblc3/**'
+      - 'plugins/instructions/lc3_multiply/**'
+      - 'plugins/devices/lc3_random/**'
+      - 'plugins/traps/lc3_udiv/**'
+      - 'lc3_replay/**'
+      - 'pylc3/**'
+  workflow_dispatch:
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install Test Deps
+      run:  sudo apt-get install -y libboost-test-dev castxml python3-pip libpython3-dev libboost-python-dev libboost-serialization-dev
+
+    - name: Install Python Deps
+      run: |
+        pip3 install wheel setuptools unittest2
+        pip3 install -r pylc3/requirements.txt
+        pip3 install -r pylc3/requirements-build.txt
+
+    - name: Make build files.
+      run: |
+        mkdir build && cd build
+        cmake -DENABLE_TESTS=ON -DENABLE_PYLC3=ON -DENABLE_COMPLX=OFF -DENABLE_AS2OBJ=OFF ..
+
+    - name: Build and Install
+      run: sudo cmake --build build --target install
+
+    - name: Run LdConfig
+      run: sudo ldconfig
+
+    - name: Test
+      run: |
+        cd build
+        ctest -VV

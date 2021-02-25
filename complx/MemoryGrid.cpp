@@ -76,10 +76,27 @@ MemoryGrid::~MemoryGrid()
   *
   * Sets the backend Table the grid is using
   */
-void MemoryGrid::SetView(MemoryView* view, bool exact_column_sizes, const std::vector<int>& column_sizes)
+void MemoryGrid::SetView(MemoryView* view, bool resize_columns, bool exact_column_sizes, const std::vector<int>& column_sizes)
 {
     // DO NOT SET TO TRUE.
     // See TODOs in MemoryViewContainer.cpp
+    if (!resize_columns)
+    {
+        std::vector<int> saved_sizes = {
+            GetColSize(MemoryInfo),
+            GetColSize(MemoryAddress),
+            GetColSize(MemoryHexadecimal),
+            GetColSize(MemoryDecimal),
+            GetColSize(MemoryBinary),
+            GetColSize(MemoryLabel),
+            GetColSize(MemoryInstruction),
+            GetColSize(MemoryComment),
+        };
+        SetTable(view, false, wxGridSelectRows);
+        InitGridSizes(exact_column_sizes, saved_sizes);
+        return;
+    }
+
     SetTable(view, false, wxGridSelectRows);
     InitGridSizes(exact_column_sizes, column_sizes);
 }

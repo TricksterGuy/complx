@@ -70,7 +70,7 @@ void PrintError(int error);
   * Constructor
   */
 ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) :
-    ComplxFrameDecl(NULL, wxID_ANY, opts.title, wxDefaultPosition, wxSize(opts.width, opts.height)), console(NULL), memoryView(NULL), base_title(opts.title)
+    ComplxFrameDecl(NULL, wxID_ANY, opts.title, wxDefaultPosition, wxSize(opts.width, opts.height)), console(NULL), memoryView(NULL), base_title(opts.title), running_in_cs2110docker(opts.running_in_cs2110docker)
 {
     InitImages();
 
@@ -85,7 +85,7 @@ ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) :
     DoLoadFile(opts.loading_options);
 
     memoryView = new MemoryView();
-    memory->SetView(memoryView, opts.exact_column_sizing, opts.column_sizes);
+    memory->SetView(memoryView, true, opts.exact_column_sizing, opts.column_sizes);
     memory->SetDisassembleLevel(opts.disassemble);
     memory->SetUnsignedMode(false);
     memory->SetHighlight(opts.highlight);
@@ -102,6 +102,14 @@ ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) :
     Connect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_IO, wxThreadEventHandler(ComplxFrame::OnIo));
     Connect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_NOIO, wxThreadEventHandler(ComplxFrame::OnNoIo));
     Connect(wxID_ANY, wxEVT_COMMAND_RUNTHREAD_OUTPUT, wxThreadEventHandler(ComplxFrame::OnOutput));
+
+    if (opts.running_in_cs2110docker)
+    {
+        docker_checker_timer.SetOwner(this);
+        Connect(docker_checker_timer.GetId(), wxEVT_TIMER, wxTimerEventHandler(ComplxFrame::OnDockerTimer), nullptr, this);
+        docker_checker_timer.Start(5000);
+
+    }
 }
 
 /** ~ComplxFrame
@@ -110,6 +118,12 @@ ComplxFrame::ComplxFrame(const ComplxFrame::Options& opts) :
   */
 ComplxFrame::~ComplxFrame()
 {
+    if (docker_checker_timer.IsRunning())
+    {
+        docker_checker_timer.Stop();
+        Disconnect(docker_checker_timer.GetId(), wxEVT_TIMER, wxTimerEventHandler(ComplxFrame::OnDockerTimer), nullptr, this);
+    }
+
     auto* config = wxConfigBase::Get();
 
     int width, height;
@@ -281,7 +295,7 @@ void ComplxFrame::DoLoadFile(const LoadingOptions& opts)
             if ((code_range.location >= 0x100 && code_range.location <= 0x1FF) || (code_range.location + code_range.size >= 0x100 && code_range.location + code_range.size <= 0x1FF))
                 ivt_modification = true;
         }
-        subroutine_found = DetectSubroutine(ranges);
+        subroutine_found = DetectSubroutine(filename.GetFullPath().ToStdString());
     }
     catch (LC3AssembleException e)
     {
@@ -405,6 +419,13 @@ void ComplxFrame::PostInit()
     state.max_call_stack_size = call_stack_size;
     // Fix for console stealing focus.
     SetFocus();
+}
+
+void ComplxFrame::OnDockerTimer(wxTimerEvent& event)
+{
+    // Again annoying that docker doesn't generate the activate events when flipping back from editor to docker.
+    wxActivateEvent e;
+    OnActivate(e);
 }
 
 void ComplxFrame::OnActivate(wxActivateEvent& event)
@@ -1220,6 +1241,7 @@ void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
 
     {
         state.pc = static_cast<unsigned short>(subroutine_location);
+        state.call_stack.push_back(lc3_subroutine_call{state.pc, static_cast<unsigned short>(state.regs[6]), false});
         //wxString end_condition = wxString::Format("R7==x%04x", static_cast<unsigned short>(state.regs[7]));
         lc3_add_break(state, state.regs[7], "END_OF_SUBROUTINE");
         UpdateRegisters();
@@ -1251,8 +1273,8 @@ void ComplxFrame::OnUpdateHideAddresses(wxCommandEvent& event)
         mode = SHOW_ALL;
     else if (menuViewHideAddressesShowOnlyCodeData->IsChecked())
         mode = SHOW_MODIFIED;
-    else if ((menuViewHideAddressesShowNonZero->IsChecked()))
-        mode = SHOW_NONZERO;
+//    else if ((menuViewHideAddressesShowNonZero->IsChecked()))
+//        mode = SHOW_NONZERO;
     else
         mode = 0;
     ::OnUpdateHideAddresses(memory, memoryView, mode);
@@ -1339,64 +1361,6 @@ void ComplxFrame::OnDestroyView(wxCloseEvent& event)
     frame->Destroy();
 }
 
-void ComplxFrame::OnStartReplayStringServer(wxCommandEvent& event)
-{
-#ifdef ENABLE_LC3_REPLAY
-    if (Running())
-        return;
-
-    if (reload_options.file.empty())
-        OnLoad(event);
-
-    if (reload_options.file.empty())
-    {
-        wxMessageBox("An assembly file must be loaded to perform this operation", "Error");
-        return;
-    }
-
-    wxIPV4address address;
-    address.AnyAddress();
-    address.Service(21100);
-    wxSocketServer server(address, wxSOCKET_REUSEADDR);
-    if (!server.IsOk())
-    {
-        wxMessageBox("Unable to start Replay String Server.", "Error");
-        return;
-    }
-
-    wxSocketBase* client = nullptr;
-    {
-        std::unique_ptr<wxBusyInfo> wait(new wxBusyInfo("Waiting for connection..."));
-        std::unique_ptr<wxWindowDisabler> disabler(new wxWindowDisabler());
-
-        if (!server.WaitForAccept(10) || (client = server.Accept(false)) == nullptr)
-        {
-            wait.reset();
-            disabler.reset();
-
-            wxMessageBox("Complx did not receive a replay string from client.", "Error");
-            return;
-        }
-    }
-
-    uint32_t size;
-    client->Read(&size, sizeof(size));
-    size = wxINT32_SWAP_ON_LE(size);
-    if (size <= 1024)
-    {
-        char buf[size+1];
-        client->Read(buf, size);
-        buf[size] = 0;
-        DoSetupReplayString(std::string(buf, size));
-    }
-    else
-    {
-        wxMessageBox("Could not process replay string, length too long.", "Error");
-    }
-    client->Destroy();
-#endif
-}
-
 void ComplxFrame::OnSetupReplayString(wxCommandEvent& event)
 {
 #ifdef ENABLE_LC3_REPLAY
@@ -1417,6 +1381,24 @@ void ComplxFrame::OnSetupReplayString(wxCommandEvent& event)
     if (replay_str.empty())
         return;
 
+    try
+    {
+        std::string description = lc3_describe_replay(replay_str);
+        int answer = wxMessageBox(description, "Use this replay string?", wxYES_NO);
+        if (answer == wxNO)
+            return;
+    }
+    catch (std::string err)
+    {
+        wxMessageBox(err.c_str(), "Error replay string invalid");
+        return;
+    }
+    catch (const char* err)
+    {
+        wxMessageBox(err, "Error replay string invalid");
+        return;
+    }
+
     DoSetupReplayString(replay_str);
 #else
     wxMessageBox("Support for this menu function was not enabled.", "Error");
@@ -1432,40 +1414,6 @@ void ComplxFrame::OnReloadReplayString(wxCommandEvent& event)
     }
 
     DoSetupReplayString(reload_options.replay_string);
-#else
-    wxMessageBox("Support for this menu function was not enabled.", "Error");
-#endif
-}
-void ComplxFrame::OnDescribeReplayString(wxCommandEvent& event)
-{
-#ifdef ENABLE_LC3_REPLAY
-    std::string replay_str = reload_options.replay_string;
-    if (replay_str.empty())
-    {
-        replay_str = DoAskForReplayString();
-
-        if (replay_str.empty())
-        {
-            wxMessageBox("No replay string given.", "Error");
-            return;
-        }
-    }
-
-    try
-    {
-        std::string description = lc3_describe_replay(replay_str);
-        wxMessageBox(description);
-    }
-    catch (std::string err)
-    {
-        wxMessageBox(err.c_str(), "Error");
-        return;
-    }
-    catch (const char* err)
-    {
-        wxMessageBox(err, "Error");
-        return;
-    }
 #else
     wxMessageBox("Support for this menu function was not enabled.", "Error");
 #endif
@@ -1524,7 +1472,7 @@ void ComplxFrame::OnAbout(wxCommandEvent& event)
     aboutInfo.SetName("Complx");
     aboutInfo.SetVersion(Version::FULLVERSION_STRING);
     aboutInfo.SetDescription(_("LC-3 Simulator\nBug reports, thanks, and feature requests should be sent to Brandon.\nbwhitehead0308@gmail.com"));
-    aboutInfo.SetCopyright("(C) 2010-2018");
+    aboutInfo.SetCopyright("(C) 2010-2021");
     aboutInfo.AddDeveloper("Brandon Whitehead bwhitehead0308@gmail.com");
     aboutInfo.SetIcon(wxIcon(icon64_xpm));
 
@@ -1542,40 +1490,32 @@ void ComplxFrame::OnDocs(wxCommandEvent& event)
     wxLaunchDefaultBrowser(manual.GetFullPath());
 }
 
-/** OnISA
-  *
-  * Displays the lc3 ISA reference manual.
-  */
-void ComplxFrame::OnISA(wxCommandEvent& event)
-{
-    wxFileName manual(_(EXPAND_AND_STRINGIFY(PREFIX) "/share/doc/complx-tools/PattPatelAppA.pdf"));
-    manual.Normalize();
-    wxLaunchDefaultBrowser(manual.GetFullPath());
-}
-
-/** OnChangeLog
-  *
-  * Displays the change log
-  */
-void ComplxFrame::OnChangeLog(wxCommandEvent& event)
-{
-    wxFileName manual(_(EXPAND_AND_STRINGIFY(PREFIX) "/share/doc/complx-tools/ComplxChangeLog.txt"));
-    manual.Normalize();
-    wxLaunchDefaultBrowser(manual.GetFullPath());
-}
-
 void ComplxFrame::OnCreateBugReport(wxCommandEvent& event)
 {
-    wxFileName manual(_("https://github.com/TricksterGuy/complx/issues/new"));
-    wxLaunchDefaultBrowser(manual.GetFullPath());
+    if (!running_in_cs2110docker)
+    {
+        wxFileName manual(_("https://github.com/TricksterGuy/complx/issues/new"));
+        wxLaunchDefaultBrowser(manual.GetFullPath());
+    }
+    else
+    {
+        wxMessageBox("Bugs can be filed at this web address\n"
+                     "https://github.com/TricksterGuy/complx/issues/new");
+    }
 }
 
 void ComplxFrame::OnFirstTime(wxCommandEvent& event)
 {
     wxMessageBox(wxString::Format("Hi! You are currently running version %s of Complx.\n\n"
                                   "Since this is your first time running this program, here are a couple of tips.\n\n"
-                                  "Thing 0: Write your assembly code in pluma/gedit (or any text editor) and save it as myfile.asm\n"
-                                  "Thing 1: Report any bugs to TAs or me directly (bwhitehead0308@gmail.com).\n\n"
+                                  "Thing 0: Write your assembly code in your favorite text editor and save it as myfile.asm\n"
+                                  "Thing 1: You can report any bugs to me directly (bwhitehead0308@gmail.com).\n\n"
+                                  "Text editors with LC-3 Syntax Highlighting:\n"
+                                  "  - vim: https://github.com/nprindle/lc3.vim\n"
+                                  "  - VSCode: https://github.com/PaperFanz/lc3-assembly-vscode-ext\n"
+                                  "  - Atom: https://atom.io/packages/language-lc3\n"
+                                  "  - Notepad++: https://gist.github.com/nschulzke/f442de21fa44fe8015aff57257f08a0c\n"
+                                  "  - Sublime Text 2: https://github.com/mcgunslinger/Sublime-LC3\n\n"
                                   "File issues at https://github.com/TricksterGuy/complx/issues or via the menus at Help > Send Bug Report\n",
                                   Version::FULLVERSION_STRING),
                  "Hi from Brandon", wxICON_INFORMATION | wxOK);
@@ -1778,16 +1718,21 @@ void DestroyImages()
     infoImages->RemoveAll();
 }
 
-bool ComplxFrame::DetectSubroutine(const std::vector<code_range>& ranges)
+bool ComplxFrame::DetectSubroutine(const std::string& filename)
 {
-    for (const auto& range : ranges)
+    wxTextFile file(filename);
+    file.Open();
+    for (auto str = file.GetFirstLine(); !file.Eof(); str = file.GetNextLine())
     {
-        for (unsigned int i = 0; i < range.size; i++)
-        {
-            unsigned short data = state.mem[range.location + i];
-            // JSR and JSRR share the same opcode.
-            if (((data >> 12) & 0xF) == JSR_INSTR || data == 0xC1C0)
-                return true;
+        auto instruction = str.BeforeFirst(';');
+        instruction.MakeUpper();
+        // Trap intentionally omitted since there would be an RET/RTI instruction if there was a custom trap.
+        // Default TRAPs are blackboxed anyway.
+        if (instruction.Contains("JSR") ||
+            instruction.Contains("JSRR") ||
+            instruction.Contains("RET") ||
+            instruction.Contains("RTI")) {
+            return true;
         }
     }
     return false;
