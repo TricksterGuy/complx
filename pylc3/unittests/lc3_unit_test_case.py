@@ -315,6 +315,8 @@ class Preconditions(object):
         header.write(struct.pack('=I', REPLAY_STRING_VERSION_MINOR))
         header.write(struct.pack('=I', len(datablob)))
         header.write(struct.pack('=I', zlib.crc32(datablob) & 0xffffffff))
+        print(datablob)
+        print(zlib.crc32(datablob) & 0xffffffff)
 
         headerblob = header.getvalue()
         header.close()
