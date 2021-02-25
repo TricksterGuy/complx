@@ -1393,7 +1393,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         expected_headerBlob, expected_preBlob, expected_postBlob = (
                     b'lc-3\x00\x00\x00\x00\x01\x00\x00\x00\x7f\x01\x00\x00\xd1\xb4\x65\xc0',
-                    {b'\x01\x01\x00\x00\x00',
+                    [b'\x01\x01\x00\x00\x00',
                     b'\x02\x01\x00\x00\x00',
                     b'\x03\x01\x00\x00\x00',
                     b'\x04\x00\x00\x00\x00',
@@ -1401,7 +1401,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
                     b'\x06\xff\xff\xff\xff',
                     b'\x07\x00\x80\x00\x00',
                     b'\x08\x01\x00\x00\x00',
-                    b'\x10'},
+                    b'\x10'],
 
                     [b'\x11\x01\x00\x00\x004\x01\x00\x00\x00\x01@',
                     b'\x12\x00\x00\x00\x00\x01\x00\x00\x00\x00\x05',

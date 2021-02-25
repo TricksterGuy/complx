@@ -289,7 +289,7 @@ class Preconditions(object):
     def _formBlob(self):
         file = six.BytesIO()
 
-        for id, value in list(self._environment_data.items()):
+        for id, value in sorted(self_environment_data.items(), key = lambda x: x[0]):
             file.write(struct.pack('=B', id))
             file.write(struct.pack('=i', value))
         file.write(struct.pack('=B', 16))
@@ -315,8 +315,6 @@ class Preconditions(object):
         header.write(struct.pack('=I', REPLAY_STRING_VERSION_MINOR))
         header.write(struct.pack('=I', len(datablob)))
         header.write(struct.pack('=I', zlib.crc32(datablob) & 0xffffffff))
-        print(datablob)
-        print(zlib.crc32(datablob) & 0xffffffff)
 
         headerblob = header.getvalue()
         header.close()
