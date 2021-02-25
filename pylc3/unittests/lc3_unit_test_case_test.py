@@ -1279,7 +1279,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         blob = self.preconditions._formBlob()
 
-        expected_blob = b'\x07\x00\x80\x00\x00\x10\x19\x04\x00\x00\x00TATA\n\x00\x00\x00\x00\x00\x03\x00\x04\x00\x05\x00\x05\x00\xfe\xca\x06\x00\x00\xf0\x07\x00\x00\x80\xff'
+        expected_blob = b'lc-3\x00\x00\x00\x00\x01\x00\x00\x00\x28\x00\x00\x00\x16\x47\x60\x95\x07\x00\x80\x00\x00\x10\x19\x04\x00\x00\x00TATA\n\x00\x00\x00\x00\x00\x03\x00\x04\x00\x05\x00\x05\x00\xfe\xca\x06\x00\x00\xf0\x07\x00\x00\x80\xff'
 
         self.assertEqual(blob, expected_blob)
         #print self.preconditions.encode()
@@ -1318,9 +1318,10 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.fillData(0xC000, data=(0x9000, 'test', [44, 55], (72, [1, 2, 3])))
 
         def splitBlob(blob):
+            headerBlob = blob[0:20]
             preBlobettes = set()
             postBlobettes = set()
-            index = 0
+            index = 21
             while index < len(blob):
                 t = struct.unpack('=B', blob[index:index+1])[0]
                 if t == 16:
@@ -1347,12 +1348,13 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
                     size = struct.unpack('=I', blob[index:index+4])[0]
                     index += 4 + 2 * size
                     postBlobettes.add(blob[start:index])
-            return preBlobettes, postBlobettes
+            return headerBlob, preBlobettes, postBlobettes
 
-        preBlob, postBlob = splitBlob(self.preconditions._formBlob())
+        headerBlob, preBlob, postBlob = splitBlob(self.preconditions._formBlob())
 
-        expected_preBlob, expected_postBlob = ({
-                    b'\x01\x01\x00\x00\x00',
+        expected_headerBlob, expected_preBlob, expected_postBlob = (
+                    b'lc-3\x00\x00\x00\x00\x01\x00\x00\x00\x7f\x01\x00\x00\xd1\xb4\x65\xc0',
+                    {b'\x01\x01\x00\x00\x00',
                     b'\x02\x01\x00\x00\x00',
                     b'\x03\x01\x00\x00\x00',
                     b'\x04\x00\x00\x00\x00',
@@ -1380,7 +1382,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
                     b'\xff'
         ])
 
-
+        self.assertEqual(headerBlob, expected_headerBlob)
         self.assertCountEqual(preBlob, expected_preBlob)
         self.assertCountEqual(postBlob, expected_postBlob)
 
@@ -1396,7 +1398,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.expectSubroutineCall('TATA', {0: 6, 1: 7, 4: 8})
         blob = self.postconditions._formBlob()
 
-        expected_blob = b'\x12\x02\x04\x00\x00\x00TATA\x06\x00\x00\x00\x00\x00\x06\x00\x01\x00\x07\x00\x04\x00\x08\x00\xff'
+        expected_blob = b'lc-3\x00\x00\x00\x00\x01\x00\x00\x00\x1B\x00\x00\x00\x34\x5d\xb3\x23\x12\x02\x04\x00\x00\x00TATA\x06\x00\x00\x00\x00\x00\x06\x00\x01\x00\x07\x00\x04\x00\x08\x00\xff'
 
         self.assertEqual(blob, expected_blob)
 
@@ -1449,8 +1451,9 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.failed_assertions = []
 
         def splitBlob(blob):
+            headerBlob = blob[0:20]
             blobettes = []
-            index = 0
+            index = 21
             while index < len(blob):
                 id = struct.unpack('=B', blob[index:index+1])[0]
                 if id == 0xFF:
@@ -1471,10 +1474,11 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
                     size = struct.unpack('=I', blob[index:index+4])[0]
                     index += 4 + 2 * size
                 blobettes.append(blob[start:index])
-            return blobettes
+            return headerBlob, blobettes
 
-        blob = splitBlob(self.postconditions._formBlob())
-        expected_blob = [
+        headerBlob, dataBlobs = splitBlob(self.postconditions._formBlob())
+        expected_header = b'lc-3\x00\x00\x00\x00\x01\x00\x00\x00\x72\x01\x00\x00\xa1\xa5\x05\x87'
+        expected_blobs = [
             b'\x01\x00\x01\x00\x00\x00',
             b'\x02\x01\x06\x00\x00\x00\x01\x00\x00\x000P',
             b'\x03\x01\x00\x00\x00\x00\x01\x00\x00\x00\x000',
@@ -1495,7 +1499,8 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
             b'\x11\x02\x04\x00\x00\x00TATA\x03\x00\x00\x00\x06\x00\x07\x00\x08\x00',
             b'\xff'
         ]
-        self.assertEqual(blob, expected_blob)
+        self.assertEqual(headerBlob, expected_header)
+        self.assertEqual(dataBlobs, expected_blobs)
 
     # -----------------------------------
     # ---- Internal tests begin here ----

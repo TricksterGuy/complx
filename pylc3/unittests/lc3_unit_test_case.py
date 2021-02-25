@@ -27,9 +27,12 @@ import re
 import six
 import struct
 import unittest
+import zlib
 
 
 DEFAULT_MAX_EXECUTIONS = 1000000
+REPLAY_STRING_VERSION_MAJOR = 0
+REPLAY_STRING_VERSION_MINOR = 1
 
 
 class LC3InternalAssertion(Exception):
@@ -303,10 +306,20 @@ class Preconditions(object):
 
         file.write(struct.pack('=B', 0xff))
 
-        blob = file.getvalue()
+        datablob = file.getvalue()
         file.close()
 
-        return blob
+        header = six.BytesIO()
+        header.write('lc-3')
+        header.write(struct.pack('=I', REPLAY_STRING_VERSION_MAJOR))
+        header.write(struct.pack('=I', REPLAY_STRING_VERSION_MINOR))
+        header.write(struct.pack('=I', len(datablob)))
+        header.write(struct.pack('=I', zlib.crc32(datablob)))
+
+        headerblob = header.getvalue()
+        header.close()
+
+        return headerblob + blob
 
     def describe(self, include_environment=True):
         """Returns a string describing the preconditions."""
@@ -367,10 +380,20 @@ class Postconditions(object):
 
         file.write(struct.pack('=B', 0xff))
 
-        blob = file.getvalue()
+        datablob = file.getvalue()
         file.close()
 
-        return blob
+        header = six.BytesIO()
+        header.write('lc-3')
+        header.write(struct.pack('=I', REPLAY_STRING_VERSION_MAJOR))
+        header.write(struct.pack('=I', REPLAY_STRING_VERSION_MINOR))
+        header.write(struct.pack('=I', len(datablob)))
+        header.write(struct.pack('=I', zlib.crc32(datablob)))
+
+        headerblob = header.getvalue()
+        header.close()
+
+        return headerblob + blob
 
     def describe(self, include_environment=True):
         """Returns a string describing the postconditions."""
