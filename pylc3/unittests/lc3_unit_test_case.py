@@ -310,7 +310,7 @@ class Preconditions(object):
         file.close()
 
         header = six.BytesIO()
-        header.write('lc-3')
+        header.write(b'lc-3')
         header.write(struct.pack('=I', REPLAY_STRING_VERSION_MAJOR))
         header.write(struct.pack('=I', REPLAY_STRING_VERSION_MINOR))
         header.write(struct.pack('=I', len(datablob)))
@@ -384,7 +384,7 @@ class Postconditions(object):
         file.close()
 
         header = six.BytesIO()
-        header.write('lc-3')
+        header.write(b'lc-3')
         header.write(struct.pack('=I', REPLAY_STRING_VERSION_MAJOR))
         header.write(struct.pack('=I', REPLAY_STRING_VERSION_MINOR))
         header.write(struct.pack('=I', len(datablob)))
@@ -495,7 +495,7 @@ class LC3UnitTestCase(unittest.TestCase):
     is wanted.
 
     For JSON output cls.json_report_format must be set to either
-    pyLC3.unittests.lc3_unit_test_case.JsonOutputPerAssertion or 
+    pyLC3.unittests.lc3_unit_test_case.JsonOutputPerAssertion or
     pyLC3.unittests.lc3_unit_test_case.JsonExpandedOutputPerAssertion
     or additionally a function that takes three parameters (name, passed_tests, failed_tests)
     and returns a map for json output see afforementioned functions for examples.
