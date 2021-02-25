@@ -1359,7 +1359,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
             headerBlob = blob[0:20]
             preBlobettes = set()
             postBlobettes = set()
-            index = 21
+            index = 20
             while index < len(blob):
                 t = struct.unpack('=B', blob[index:index+1])[0]
                 if t == 16:
@@ -1492,7 +1492,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         def splitBlob(blob):
             headerBlob = blob[0:20]
             blobettes = []
-            index = 21
+            index = 20
             while index < len(blob):
                 id = struct.unpack('=B', blob[index:index+1])[0]
                 if id == 0xFF:
