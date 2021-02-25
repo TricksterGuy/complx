@@ -289,7 +289,7 @@ class Preconditions(object):
     def _formBlob(self):
         file = six.BytesIO()
 
-        for id, value in sorted(self_environment_data.items(), key = lambda x: x[0]):
+        for id, value in sorted(self._environment_data.items(), key = lambda x: x[0]):
             file.write(struct.pack('=B', id))
             file.write(struct.pack('=i', value))
         file.write(struct.pack('=B', 16))
