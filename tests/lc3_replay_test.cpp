@@ -1,5 +1,9 @@
+#include <boost/archive/iterators/base64_from_binary.hpp>
+#include <boost/archive/iterators/binary_from_base64.hpp>
+#include <boost/archive/iterators/transform_width.hpp>
 #include <boost/test/unit_test.hpp>
 #include <iostream>
+#include <iterator>
 #include <fstream>
 #include <vector>
 #include <lc3_all.hpp>
@@ -16,9 +20,9 @@ void split(const std::string& s, char delimiter, std::vector<std::string>& token
 
 void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& replay_string, std::stringstream& newinput);
 
-const std::string REPLAY_STRING = "AQEAAAACAQAAAAMBAAAABAAAAAAFAAAAAAb/////BwCAAAAIAQAAABARAQAAADQBAAAAAUASAAAAAAEAAAAABRMDAAAAQUhIAQAAAAcAFAQAAABCTEFIAQAAAKYCFQYAAABDQVdDQVcFAAAABQACAAkAADD//xYEAAAAUEFQQQQAAABNAEEATQBBABcAAAAABgAAAFIAQQBIAFIAQQBIABgEAAAAVEFUQQYAAAAFAEBAAIACAAUABwAaBAAAADgwMDABAAAAIQAbBAAAADkwMDAEAAAAVgBBAFYAQQAcBAAAAGEwMDADAAAAAQAgANkCHQQAAABiMDAwBwAAAAMAAQAAAP8AAQAiAAAAHQQAAABiMDIwBwAAAAMAAQAAsP8AAQA4AAAAHQQAAABiMDUwCgAAAAMABAAAsAGwArADsP8AAQBIAAAAHgQAAABjMDAwFQAAAAEAAJACAAQAdABlAHMAdAADAAIALAA3AP8AAQBIAAMAAwABAAIAAwAAAP8=";
+const std::string REPLAY_STRING = "bGMtMwAAAAABAAAAfwEAANG0ZcABAQAAAAIBAAAAAwEAAAAEAAAAAAUAAAAABv////8HAIAAAAgBAAAAEBEBAAAANAEAAAABQBIAAAAAAQAAAAAFEwMAAABBSEgBAAAABwAUBAAAAEJMQUgBAAAApgIVBgAAAENBV0NBVwUAAAAFAAIACQAAMP//FgQAAABQQVBBBAAAAE0AQQBNAEEAFwAAAAAGAAAAUgBBAEgAUgBBAEgAGAQAAABUQVRBBgAAAAUAQEAAgAIABQAHABoEAAAAODAwMAEAAAAhABsEAAAAOTAwMAQAAABWAEEAVgBBABwEAAAAYTAwMAMAAAABACAA2QIdBAAAAGIwMDAHAAAAAwABAAAA/wABACIAAAAdBAAAAGIwMjAHAAAAAwABAACw/wABADgAAAAdBAAAAGIwNTAKAAAAAwAEAACwAbACsAOw/wABAEgAAAAeBAAAAGMwMDAVAAAAAQAAkAIABAB0AGUAcwB0AAMAAgAsADcA/wABAEgAAwADAAEAAgADAAAA/w==";
 
-const std::string REPLAY_STRING_PBR = "BwCAAAAQGQQAAABUQVRBCgAAAAAAAwAEAAUABQD+ygYAAPAHAACA/w==";
+const std::string REPLAY_STRING_PBR = "bGMtMwAAAAABAAAAKAAAABZHYJUHAIAAABAZBAAAAFRBVEEKAAAAAAADAAQABQAFAP7KBgAA8AcAAID/";
 
 const std::vector<std::string> REPLAY_DESCRIPTIONS = {
 "true_traps: on",
@@ -62,7 +66,7 @@ std::string base64_encode(const std::string& text)
     const std::string base64_padding[3] = {"", "==", "="};
 
     std::stringstream ss;
-    std::copy(base64_enc(text.begin()), base64_enc(text.end()), ostream_iterator<char>(ss));
+    std::copy(base64_enc(text.begin()), base64_enc(text.end()), std::ostream_iterator<char>(ss));
     ss << base64_padding[text.size() % 3];
 
     return ss.str();
@@ -204,6 +208,7 @@ BOOST_FIXTURE_TEST_CASE(DescribeReplayTest, LC3ReplayTest)
 BOOST_FIXTURE_TEST_CASE(DescribeReplayTestPBR, LC3ReplayTest)
 {
     std::string output = lc3_describe_replay(REPLAY_STRING_PBR);
+
     std::vector<std::string> lines;
     split(output, '\n', lines);
 
@@ -223,7 +228,7 @@ BOOST_FIXTURE_TEST_CASE(ReplayTestRejectMagic, LC3ReplayTest)
 
     std::stringstream file(asm_file);
     std::stringstream input;
-    BOOST_CHECK_THROW(lc3_setup_replay(state, file, replay, input));
+    BOOST_CHECK_THROW(lc3_setup_replay(state, file, replay, input), const char*);
 }
 
 BOOST_FIXTURE_TEST_CASE(ReplayTestRejectImproperVersion, LC3ReplayTest)
@@ -236,7 +241,7 @@ BOOST_FIXTURE_TEST_CASE(ReplayTestRejectImproperVersion, LC3ReplayTest)
 
     std::stringstream file(asm_file);
     std::stringstream input;
-    BOOST_CHECK_THROW(lc3_setup_replay(state, file, replay, input));
+    BOOST_CHECK_THROW(lc3_setup_replay(state, file, replay, input), const char*);
 }
 
 BOOST_FIXTURE_TEST_CASE(ReplayTestRejectImproperVersion2, LC3ReplayTest)
@@ -249,7 +254,7 @@ BOOST_FIXTURE_TEST_CASE(ReplayTestRejectImproperVersion2, LC3ReplayTest)
 
     std::stringstream file(asm_file);
     std::stringstream input;
-    BOOST_CHECK_THROW(lc3_setup_replay(state, file, replay, input));
+    BOOST_CHECK_THROW(lc3_setup_replay(state, file, replay, input), const char*);
 }
 
 BOOST_FIXTURE_TEST_CASE(ReplayTestRejectInvalidSize, LC3ReplayTest)
@@ -262,7 +267,7 @@ BOOST_FIXTURE_TEST_CASE(ReplayTestRejectInvalidSize, LC3ReplayTest)
 
     std::stringstream file(asm_file);
     std::stringstream input;
-    BOOST_CHECK_THROW(lc3_setup_replay(state, file, replay, input));
+    BOOST_CHECK_THROW(lc3_setup_replay(state, file, replay, input), const char*);
 }
 
 BOOST_FIXTURE_TEST_CASE(ReplayTestRejectInvalidChecksum, LC3ReplayTest)
@@ -275,5 +280,5 @@ BOOST_FIXTURE_TEST_CASE(ReplayTestRejectInvalidChecksum, LC3ReplayTest)
 
     std::stringstream file(asm_file);
     std::stringstream input;
-    BOOST_CHECK_THROW(lc3_setup_replay(state, file, replay, input));
+    BOOST_CHECK_THROW(lc3_setup_replay(state, file, replay, input), const char*);
 }
