@@ -299,7 +299,7 @@ void ComplxFrame::DoLoadFile(const LoadingOptions& opts)
     }
     catch (LC3AssembleException e)
     {
-        wxMessageBox(wxString::Format("ERROR! %s", e.what()), wxString::Format("Loading %s failed", filename.GetFullName()));
+        wxMessageBox(wxString::Format("%s", e.what()), wxString::Format("Error! Loading %s failed", filename.GetFullName()));
         goto merge;
     }
     catch (std::vector<LC3AssembleException> e)
@@ -307,7 +307,7 @@ void ComplxFrame::DoLoadFile(const LoadingOptions& opts)
         std::stringstream oss;
         for (unsigned int i = 0; i < e.size(); i++)
             oss << e[i].what() << std::endl;
-        wxMessageBox(wxString::Format("ERROR! %s", oss.str()), wxString::Format("Loading %s failed", filename.GetFullName()));
+        wxMessageBox(wxString::Format("%s", oss.str()), wxString::Format("Error! Loading %s failed", filename.GetFullName()));
         goto merge;
     }
 
@@ -953,7 +953,7 @@ void ComplxFrame::OnWatchpoint(wxCommandEvent& event)
                 multiple = state.mem_watchpoints.find(info.data) != state.mem_watchpoints.end();
 
             if (multiple)
-                wxMessageBox(_("ERROR! You can't have two watchpoints refer to the same target"), _("Error"));
+                wxMessageBox(_("You can't have two watchpoints refer to the same target"), _("Error"));
             else
             {
                 if (info.is_reg)
@@ -1134,7 +1134,7 @@ void ComplxFrame::OnCallStack(wxCommandEvent& event)
 
     if (state.call_stack.empty())
     {
-        wxMessageBox("ERROR! You are not even in a subroutine.", "Complx");
+        wxMessageBox("You are not in a subroutine.", "Error");
         return;
     }
 
@@ -1179,7 +1179,7 @@ void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
 
     if (reload_options.file.empty())
     {
-        wxMessageBox("ERROR! An assembly file must be loaded to perform this operation", "Error");
+        wxMessageBox("An assembly file must be loaded to perform this operation", "Error");
         return;
     }
 
@@ -1195,7 +1195,7 @@ void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
     subroutine_location = lc3_sym_lookup(state, dialog->GetSubroutine());
     if (subroutine_location == -1)
     {
-        wxMessageBox(wxString::Format("ERROR! Subroutine location: %s was not found in symbol table", dialog->GetSubroutine()), "Error");
+        wxMessageBox(wxString::Format("Subroutine location: %s was not found in symbol table", dialog->GetSubroutine()), "Error");
         goto end;
     }
 
@@ -1205,7 +1205,7 @@ void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
         int value_calc = 0x10000;
         if (!expr.empty() && lc3_calculate(state, expr, value_calc))
         {
-            wxMessageBox(wxString::Format("ERROR! Parameter %s is a malformed expression", expr), "Error");
+            wxMessageBox(wxString::Format("Parameter %s is a malformed expression", expr), "Error");
             goto end;
         }
         params.push_back(value_calc);
@@ -1219,7 +1219,7 @@ void ComplxFrame::OnSubroutineCall(wxCommandEvent& event)
             int value_calc;
             if (lc3_calculate(state, name_expr.second, value_calc))
             {
-                wxMessageBox(wxString::Format("ERROR! Parameter %s is a malformed expression", name_expr.second), "Error");
+                wxMessageBox(wxString::Format("Parameter %s is a malformed expression", name_expr.second), "Error");
                 goto end;
             }
             env[name_expr.first] = value_calc;
@@ -1600,7 +1600,7 @@ bool ComplxFrame::Running()
     if (thread == NULL) return false;
     if (thread->IsPaused() || thread->IsRunning())
     {
-        wxMessageBox("ERROR! Pause execution first", "Complx");
+        wxMessageBox("Pause execution first", "Error!");
         return true;
     }
     return false;
