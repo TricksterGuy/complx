@@ -6,23 +6,23 @@
 
 const char* WARNING_MESSAGES[LC3_WARNINGS] =
 {
-    "Reading beyond end of input. Halting.",
-    "Writing x%04x to reserved memory at x%04x.",
-    "Reading from reserved memory at x%04x.",
-    "Unsupported Trap x%02x. Assuming Halt.",
-    "Unsupported Instruction x%04x. Halting.",
-    "Malformed Instruction x%04x. Halting.",
-    "RTI executed in user mode. Halting.",
-    "Trying to write invalid character x%04x.",
-    "PUTS called with invalid address x%04x.",
-    "Trying to write to the display when its not ready.",
-    "Trying to read from the keyboard when its not ready.",
-    "Turning off machine via the MCR register.",
-    "PUTSP called with invalid address x%04x",
-    "PUTSP found an unexpected NUL byte at address x%04x.",
-    "Invalid value x%04x loaded into the PSR."
-    "Executing trap vector table address x%04x.",
-    "Executing interrupt vector table address x%04x."
+    "W%03d: ""Reading beyond end of input. Halting.",
+    "W%03d: ""Writing x%04x to reserved memory at x%04x.",
+    "W%03d: ""Reading from reserved memory at x%04x.",
+    "W%03d: ""Unsupported Trap x%02x. Assuming Halt.",
+    "W%03d: ""Unsupported Instruction x%04x. Halting.",
+    "W%03d: ""Malformed Instruction x%04x. Halting.",
+    "W%03d: ""RTI executed in user mode. Halting.",
+    "W%03d: ""Trying to write invalid character x%04x.",
+    "W%03d: ""PUTS called with invalid address x%04x.",
+    "W%03d: ""Trying to write to the display when its not ready.",
+    "W%03d: ""Trying to read from the keyboard when its not ready.",
+    "W%03d: ""Turning off machine via the MCR register.",
+    "W%03d: ""PUTSP called with invalid address x%04x",
+    "W%03d: ""PUTSP found an unexpected NUL byte at address x%04x.",
+    "W%03d: ""Invalid value x%04x loaded into the PSR."
+    "W%03d: ""Executing trap vector table address x%04x.",
+    "W%03d: ""Executing interrupt vector table address x%04x."
 };
 
 lc3_instr lc3_decode(lc3_state& state, unsigned short data)
@@ -842,10 +842,9 @@ void lc3_warning(lc3_state& state, unsigned int warn_id, short arg1, short arg2)
     }
 
     char warning[128];
-    std::string msg;
+    sprintf(warning, WARNING_MESSAGES[warn_id], warn_id, (unsigned short) arg1, (unsigned short) arg2);
 
-    sprintf(warning, WARNING_MESSAGES[warn_id], (unsigned short) arg1, (unsigned short) arg2);
-    msg = warning;
+    std::string msg = warning;
 
     lc3_warning(state, msg);
     state.warn_stats[warn_id] += 1;
@@ -862,7 +861,7 @@ void lc3_warning(lc3_state& state, const std::string& msg)
     std::string message;
 
     unsigned short addr = state.pc - 1;
-    std::string instr = lc3_disassemble(state, state.mem[addr], 1);
+    std::string instr = lc3_disassemble(state, state.m em[addr], 1);
 
     sprintf(warning, "Warning at x%04x (instruction - %s): %s", addr, instr.c_str(), msg.c_str());
 
