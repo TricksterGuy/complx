@@ -1837,7 +1837,7 @@ class LC3UnitTestCase(unittest.TestCase):
         bits = sum([1 << a for a in registers])
         self.postconditions.add(PostconditionFlag.registers_unchanged, bits, [original_values[reg] for reg in sorted(registers)])
 
-    def assertStackManaged(self, stack, return_address, old_frame_pointer, level=AssertionType.soft):
+    def assertStackManaged(self, stack, return_address, old_frame_pointer, name=None, level=AssertionType.soft):
         """Asserts that the stack was managed correctly.
 
         This function should be called only for lc3 calling convention format subroutines.
