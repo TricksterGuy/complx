@@ -51,7 +51,10 @@ void parse_params(const std::string& line, std::map<std::string, std::string>& p
 
 std::string LC3AssembleException::what() const throw()
 {
-    std::string ret;
+    char buf[16];
+    snprintf(buf, 7, "E%03d: ", id);
+    std::string ret = buf;
+
     if (lineno != -1)
     {
         switch(id)
@@ -228,7 +231,7 @@ std::string LC3AssembleException::what() const throw()
             break;
         }
     }
-    ret = what_str;
+    ret += what_str;
     return ret;
 }
 
