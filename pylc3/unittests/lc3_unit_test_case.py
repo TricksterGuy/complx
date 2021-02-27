@@ -1367,7 +1367,7 @@ class LC3UnitTestCase(unittest.TestCase):
     def _internalAssertEqual(self, expected, actual, name, msg, level=AssertionType.soft, internal=False):
         self._internalAssert(name, expected == actual, msg=msg, level=level, internal=internal)
 
-    def assertReturned(self, level=AssertionType.hard):
+    def assertReturned(self, name=None, level=AssertionType.hard):
         """Assert that the code successfully returned from a subroutine call.
 
         This is achieved by hitting the breakpoint set at r7 when callSubroutine was called.
@@ -1375,6 +1375,10 @@ class LC3UnitTestCase(unittest.TestCase):
 
         This function generates one assertion.
             returned - Hard.
+
+        Args:
+            name: String. Assertion name override.
+            level: AssertionType. Assertion level override.
         """
 
         self._internalAssert('assertReturned', self.break_address is not None, "self.assertReturned() should only be used when a previous call to self.callSubroutine() was made.", AssertionType.fatal, internal=True)
@@ -1389,10 +1393,10 @@ class LC3UnitTestCase(unittest.TestCase):
             failure_msg += 'This was probably due to an infinite loop in the code.\n'
         failure_msg += 'This may indicate that your handling of the stack is incorrect or that R7 was clobbered.\n'
         failure_msg += 'PC: x%04x\nExecuted: %d instructions\nInstruction last on: %s\n' % (self.state.pc, self.state.executions, instruction)
-        self._assertShortEqual(self.state.pc, self.break_address, 'returned', failure_msg, level=level)
+        self._assertShortEqual(self.state.pc, self.break_address, name or 'returned', failure_msg, level=level)
         self.postconditions.add(PostconditionFlag.end_state, False)
 
-    def assertHalted(self, level=AssertionType.hard):
+    def assertHalted(self, name=None, level=AssertionType.hard):
         """Asserts that the LC3 has been halted normally.
 
         This is achieved by reaching a HALT statement or if true_traps is set and the MCR register's 15 bit is set.
@@ -1402,6 +1406,7 @@ class LC3UnitTestCase(unittest.TestCase):
             halted - Hard.
 
         Args:
+            name: String. Assertion name override.
             level: AssertionType. Assertion level override.
         """
 
@@ -1414,24 +1419,25 @@ class LC3UnitTestCase(unittest.TestCase):
         failure_msg += 'This was probably due to an infinite loop in the code.\n' if not malformed else ''
         failure_msg += 'PC: x%04x\nExecuted: %d instructions\nInstruction last on: %s\n' % (self.state.pc, self.state.executions, instruction)
         if self.true_traps:
-            self._assertEqual(state.get_memory(0xFFFE) >> 15 & 1, 0, 'halted', failure_msg, level=level)
+            self._assertEqual(state.get_memory(0xFFFE) >> 15 & 1, 0, name or 'halted', failure_msg, level=level)
         else:
-            self._assertShortEqual(self.state.get_memory(self.state.pc), 0xF025, 'halted', failure_msg, level=level)
+            self._assertShortEqual(self.state.get_memory(self.state.pc), 0xF025, name or 'halted', failure_msg, level=level)
         self.postconditions.add(PostconditionFlag.end_state, True)
 
-    def assertNoWarnings(self, level=AssertionType.soft):
+    def assertNoWarnings(self, name=None, level=AssertionType.soft):
         """Asserts that no warnings were reported during execution of the code.
 
         This function generates one assertion.
-            warning - Soft.
+            warnings - Soft.
 
         Args:
+            name: String. Assertion name override.
             level: AssertionType. Assertion level override.
         """
 
-        self._internalAssert('warnings', not self.state.warnings, 'Code generated warnings shown below:\n----\n%s' % self.state.warnings, level=level)
+        self._internalAssert(name or 'warnings', not self.state.warnings, 'Code generated warnings shown below:\n----\n%s' % self.state.warnings, level=level)
 
-    def assertRegister(self, register_number, value, level=AssertionType.soft):
+    def assertRegister(self, register_number, value, name=None, level=AssertionType.soft):
         """Asserts that a value at a label is a certain value.
 
         This exactly checks if state.memory[label] == value
@@ -1442,16 +1448,17 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             register_number: Integer - Register number to check.
             value: Integer - Expected value.
+            name: String. Assertion name override.
             level: AssertionType. Assertion level override.
         """
 
         self._internalAssert('assertRegister %x' % register_number, register_number >= 0 and register_number < 8, 'Invalid register number %d' % register_number, AssertionType.fatal, internal=True)
         actual = self._readReg(register_number)
         expected = _toShort(value)
-        self._assertShortEqual(expected, actual, 'R%d' % register_number, 'R%d was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (register_number, expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
+        self._assertShortEqual(expected, actual, name or ('R%d' % register_number), 'R%d was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (register_number, expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
         self.postconditions.add(PostconditionFlag.register, register_number, [value])
 
-    def assertPc(self, value, level=AssertionType.soft):
+    def assertPc(self, value, name=None, level=AssertionType.soft):
         """Asserts that the PC is a certain value.
 
         This exactly checks if state.pc == value
@@ -1461,15 +1468,16 @@ class LC3UnitTestCase(unittest.TestCase):
 
         Args:
             value: Integer - Expected value.
+            name: String. Assertion name override.
             level: AssertionType. Assertion level override.
         """
 
         actual = self.state.pc
         expected = _toUShort(value)
-        self._assertShortEqual(expected, actual, 'PC', 'PC was expected to be x%04x but code produced x%04x\n' % (expected, actual), level)
+        self._assertShortEqual(expected, actual, name or 'PC', 'PC was expected to be x%04x but code produced x%04x\n' % (expected, actual), level)
         self.postconditions.add(PostconditionFlag.pc, 0, [value])
 
-    def assertValue(self, label, value, level=AssertionType.soft):
+    def assertValue(self, label, value, name=None, level=AssertionType.soft):
         """Asserts that a value at a label is a certain value.
 
         This exactly checks if state.memory[label] == value
@@ -1480,15 +1488,16 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             label: String - Label pointing at the address to check.
             value: Integer - Expected value.
+            name: String. Assertion name override.
             level: AssertionType. Assertion level override.
         """
 
         actual = self._readMem(self._lookup(label))
         expected = _toShort(value)
-        self._assertShortEqual(expected, actual, 'value: %s' % label, 'MEM[%s] was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (label, expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
+        self._assertShortEqual(expected, actual, name or ('value: %s' % label), 'MEM[%s] was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (label, expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
         self.postconditions.add(PostconditionFlag.value, label, [value])
 
-    def assertPointer(self, label, value, level=AssertionType.soft):
+    def assertPointer(self, label, value, name=None, level=AssertionType.soft):
         """Asserts that a value at an address pointed to by label is a certain value.
 
         This exactly checks if state.memory[state.memory[label]] == value
@@ -1499,15 +1508,16 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             label: String - Label pointing at the address which in turn contains the address to check.
             value: Integer - Expected value.
+            name: String. Assertion name override.
             level: AssertionType. Assertion level override.
         """
 
         actual = self._readMem(self._readMem(self._lookup(label)))
         expected = _toShort(value)
-        self._assertShortEqual(expected, actual, 'pointer: %s' % label, 'MEM[MEM[%s]] was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (label, expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
+        self._assertShortEqual(expected, actual, name or ('pointer: %s' % label), 'MEM[MEM[%s]] was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (label, expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
         self.postconditions.add(PostconditionFlag.pointer, label, [value])
 
-    def assertArray(self, label, arr, level=AssertionType.soft):
+    def assertArray(self, label, arr, name=None, level=AssertionType.soft):
         """Asserts that a sequence of values starting at the address pointed to by label are certain values.
 
         This exactly checks if:
@@ -1522,6 +1532,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             label: String - Label pointing at the address which in turn contains the first address to start checking.
             arr: Iterable of Integers - Expected values to check sequentially.
+            name: String. Assertion name override.
             level: AssertionType. Assertion level override.
         """
 
@@ -1529,10 +1540,10 @@ class LC3UnitTestCase(unittest.TestCase):
         actual_arr = []
         for addr, _ in enumerate(arr, start_addr):
             actual_arr.append(self._readMem(addr))
-        self._assertEqual(arr, actual_arr, 'array: %s' % label, 'Sequence of values starting at MEM[%s] was expected to be %s but code produced %s\n' % (label, arr, actual_arr), level=level)
+        self._assertEqual(arr, actual_arr, name or ('array: %s' % label), 'Sequence of values starting at MEM[%s] was expected to be %s but code produced %s\n' % (label, arr, actual_arr), level=level)
         self.postconditions.add(PostconditionFlag.array, label, arr)
 
-    def assertString(self, label, text, level=AssertionType.soft):
+    def assertString(self, label, text, name=None, level=AssertionType.soft):
         """Asserts that sequence of characters followed by a NUL terminator starting at the address pointed to by label are certain values.
 
         This exactly checks if:
@@ -1548,6 +1559,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             label: String - Label pointing at the address which in turn contains the first address to start checking.
             text: String - Expected characters to check sequentially.
+            name: String. Assertion name override.
             level: AssertionType. Assertion level override.
         """
 
@@ -1558,10 +1570,10 @@ class LC3UnitTestCase(unittest.TestCase):
         actual_str.append(chr(self._readMem(start_addr + len(text), unsigned=True)))
         expected_str = list(six.u(text))
         expected_str.append('\0')
-        self._assertEqual(expected_str, actual_str, 'string: %s' % label, 'String of characters starting at MEM[%s] was expected to be %s but code produced %s\n' % (label, repr(''.join(expected_str)), repr(''.join(actual_str))), level=level)
+        self._assertEqual(expected_str, actual_str, name or ('string: %s' % label), 'String of characters starting at MEM[%s] was expected to be %s but code produced %s\n' % (label, repr(''.join(expected_str)), repr(''.join(actual_str))), level=level)
         self.postconditions.add(PostconditionFlag.string, label, [ord(char) for char in text])
 
-    def assertConsoleOutput(self, output, level=AssertionType.soft):
+    def assertConsoleOutput(self, output, name=None, level=AssertionType.soft):
         """Asserts that console output is a certain string.
 
         This function generates one assertion.
@@ -1569,15 +1581,16 @@ class LC3UnitTestCase(unittest.TestCase):
 
         Args:
             output: String - Expected console output.
+            name: String. Assertion name override.
             level: AssertionType. Assertion level override.
         """
 
         expected = output
         actual = self.state.output
-        self._assertEqual(expected, actual, 'console output', 'Console output was expected to be %s but code produced %s\n' % (repr(expected), repr(actual)), level=level)
+        self._assertEqual(expected, actual, name or 'console output', 'Console output was expected to be %s but code produced %s\n' % (repr(expected), repr(actual)), level=level)
         self.postconditions.add(PostconditionFlag.output, 0, [ord(char) for char in output])
 
-    def assertValueAt(self, address, value, level=AssertionType.soft):
+    def assertValueAt(self, address, value, name=None, level=AssertionType.soft):
         """Asserts that a value at an address is a certain value.
 
         This exactly checks if state.memory[address] == value
@@ -1589,6 +1602,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             address: Short - Address to check.
             value: Integer - Expected value.
+            name: String. Assertion name override.
             level: AssertionType. Assertion level override.
         """
 
@@ -1598,10 +1612,10 @@ class LC3UnitTestCase(unittest.TestCase):
 
         actual = self._readMem(address)
         expected = _toShort(value)
-        self._assertShortEqual(expected, actual, 'valueAt: x%04x' % address, 'MEM[x%04x] was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (address, expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
+        self._assertShortEqual(expected, actual, name or ('valueAt: x%04x' % address), 'MEM[x%04x] was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (address, expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
         self.postconditions.add(PostconditionFlag.direct_value, '%04x' % address, [value])
 
-    def assertArrayAt(self, address, arr, level=AssertionType.soft):
+    def assertArrayAt(self, address, arr, name=None, level=AssertionType.soft):
         """Asserts that a sequence of values starting at the address given are certain values.
 
         This exactly checks if:
@@ -1621,6 +1635,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             address: Short - Starting address of the array to check.
             arr: Iterable of Integers - Expected values to check sequentially.
+            name: String. Assertion name override.
             level: AssertionType. Assertion level override.
         """
 
@@ -1631,10 +1646,10 @@ class LC3UnitTestCase(unittest.TestCase):
         actual_arr = []
         for addr, _ in enumerate(arr, start_addr):
             actual_arr.append(self._readMem(addr))
-        self._assertEqual(arr, actual_arr, 'arrayAt: x%04x' % start_addr, 'Sequence of values at MEM[x%04x] was expected to be %s but code produced %s\n' % (start_addr, arr, actual_arr), level=level)
+        self._assertEqual(arr, actual_arr, name or ('arrayAt: x%04x' % start_addr), 'Sequence of values at MEM[x%04x] was expected to be %s but code produced %s\n' % (start_addr, arr, actual_arr), level=level)
         self.postconditions.add(PostconditionFlag.direct_array, '%04x' % start_addr, arr)
 
-    def assertStringAt(self, address, text, level=AssertionType.soft):
+    def assertStringAt(self, address, text, name=None, level=AssertionType.soft):
         """Asserts that sequence of characters followed by a NUL terminator starting at the address pointed to by label are certain values.
 
         This exactly checks if:
@@ -1655,6 +1670,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             address: Short - Starting address of the string to check.
             text: String - Expected characters to check sequentially.
+            name: String. Assertion name override.
             level: AssertionType. Assertion level override.
         """
 
@@ -1668,10 +1684,10 @@ class LC3UnitTestCase(unittest.TestCase):
         actual_str.append(chr(self._readMem(start_addr + len(text), unsigned=True)))
         expected_str = list(six.u(text))
         expected_str.append('\0')
-        self._assertEqual(expected_str, actual_str, 'stringAt: x%04x' % start_addr, 'String of characters at MEM[x%04x] was expected to be %s but code produced %s\n' % (start_addr, repr(''.join(expected_str)), repr(''.join(actual_str))), level=level)
+        self._assertEqual(expected_str, actual_str, name or ('stringAt: x%04x' % start_addr), 'String of characters at MEM[x%04x] was expected to be %s but code produced %s\n' % (start_addr, repr(''.join(expected_str)), repr(''.join(actual_str))), level=level)
         self.postconditions.add(PostconditionFlag.direct_string, '%04x' % start_addr, [ord(char) for char in text])
 
-    def assertNodeAt(self, address, next, data, level=AssertionType.soft):
+    def assertNodeAt(self, address, next, data, name=None, level=AssertionType.soft):
         """Asserts that a node starting at the address given is a certain value
 
         This can check nodes of arbitrary type: linked list nodes or n-ary tree nodes
@@ -1689,23 +1705,25 @@ class LC3UnitTestCase(unittest.TestCase):
             nodeAtNext: x<address> - Soft.
             nodeAtData: x<address> - Soft.
 
+        If the assertion name is overridden then the assertions will be named <name>-Next and <name>-Data.
+
         Args:
             address: Short - Address where the node is located.
             next_info: 1) None to indicate leaf node or last node. (Note only one 0 is checked in this case).
                        2) Short - Next address.
                        3) Iterable of Shorts/None - Next addresses, None to indicate no next address.
             data: NamedTuple - A NamedTuple describing the data and the contents.
+            name: String. Assertion base name override.
             level: AssertionType. Assertion level override.
         """
-
-        def assertDataHelper(t1, t2, fields):
+        def assertDataHelper(t1, t2, fields, data_assert_name):
             failure_msg = "Node's data starting at MEM[x%04x] was not equal.\nNonmatching fields below.\n-------------------------\n" % (address + size_next)
             if fields is None:
                 fields = ['Item %d' % i for i in range(len(t2))]
             for v1, v2, field in zip(t1, t2, fields):
                 if v1 != v2:
                     failure_msg += 'Data field: %s was not equal. expected: %s actual: %s\n' % (field, v1, v2)
-            self._assertEqual(t1, t2, 'nodeAtData: x%04x' % (address + size_next), failure_msg, level=level)
+            self._assertEqual(t1, t2, data_assert_name, failure_msg, level=level)
 
         label = self.state.reverse_lookup(address)
 
@@ -1731,12 +1749,19 @@ class LC3UnitTestCase(unittest.TestCase):
         def hexify(arr):
             return ['x%04x' % elem for elem in arr]
 
-        self._assertEqual(next_info, actual_next, 'nodeAtNext: x%04x' % address, "Node's next at MEM[x%04x] was expected to be %s but code produced %s\n" % (address, hexify(next_info), hexify(actual_next)), level=level)
-        assertDataHelper(expected, actual, data._fields)
+        if name is None:
+            next_assert_name = 'nodeAtNext: x%04x' % address
+            data_assert_name = 'nodeAtData: x%04x' % (address + size_next)
+        else:
+            next_assert_name = name + '-Next'
+            data_assert_name = name + '-Data'
+
+        self._assertEqual(next_info, actual_next, next_assert_name, "Node's next at MEM[x%04x] was expected to be %s but code produced %s\n" % (address, hexify(next_info), hexify(actual_next)), level=level)
+        assertDataHelper(expected, actual, data._fields, data_assert_name)
 
         self.postconditions.add(PostconditionFlag.node, '%04x' % address, _formDataPreconditions((next_info, data)))
 
-    def assertDataAt(self, address, data, level=AssertionType.soft):
+    def assertDataAt(self, address, data, name=None, level=AssertionType.soft):
         """Asserts that an arbitrary data structure/struct/record starting at the address given is a certain value
 
         This function generates one assertion.
@@ -1745,6 +1770,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Args:
             address: - Address where the data is located
             data: A collections.NamedTuple describing the data and its contents. See fillData for valid tuple information.
+            name: String. Assertion name override.
             level: AssertionType. Assertion level override.
         """
 
@@ -1755,7 +1781,7 @@ class LC3UnitTestCase(unittest.TestCase):
             for v1, v2, field in zip(t1, t2, fields):
                 if v1 != v2:
                     failure_msg += 'Data field: %s was not equal. expected: %s actual: %s\n' % (field, v1, v2)
-            self._assertEqual(t1, t2, 'dataAt: x%04x' % address, failure_msg, level=level)
+            self._assertEqual(t1, t2, name or ('dataAt: x%04x' % address), failure_msg, level=level)
 
         label = self.state.reverse_lookup(address)
         if label:
@@ -1765,7 +1791,7 @@ class LC3UnitTestCase(unittest.TestCase):
         assertDataHelper(expected, actual, data._fields)
         self.postconditions.add(PostconditionFlag.data, '%04x' %  address, _formDataPreconditions(data))
 
-    def assertReturnValue(self, answer, level=AssertionType.soft):
+    def assertReturnValue(self, answer, name=None, level=AssertionType.soft):
         """Asserts that the correct answer was returned.
 
         This is for verifying that the lc3 calling convention postcondition that memory[r6] == answer
@@ -1775,15 +1801,16 @@ class LC3UnitTestCase(unittest.TestCase):
 
         Args:
             answer: Integer - Expected answer.
+            name: String. Assertion name override.
             level: AssertionType. Assertion level override.
         """
 
         expected = _toShort(answer)
         actual = self._readMem(self.state.r6)
-        self._assertShortEqual(expected, actual, 'return value', 'Return value was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
+        self._assertShortEqual(expected, actual, name or 'return value', 'Return value was expected to be (%d x%04x) but code produced (%d x%04x)\n' % (expected, _toUShort(expected), actual, _toUShort(actual)), level=level)
         self.postconditions.add(PostconditionFlag.return_value, 0, [answer])
 
-    def assertRegistersUnchanged(self, registers=None, level=AssertionType.soft):
+    def assertRegistersUnchanged(self, registers=None, name=None, level=AssertionType.soft):
         """Asserts that registers value are the same as the beginning of execution.
 
         This is for verifying that caller saved registers are not clobbered as part of the lc3 calling convention.
@@ -1793,6 +1820,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
         Args:
             registers: List(Integer) - Register numbers's to check. None to check all except R6.
+            name: String. Assertion name override.
             level: AssertionType. Assertion level override.
         """
 
@@ -1804,7 +1832,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
         changed_registers = ['R%d' % reg for reg in registers if original_values[reg] != current_values[reg]]
         all_registers = ['R%d' % reg for reg in registers]
-        self._internalAssert('registers unchanged', not changed_registers, 'Expected %s to be unchanged after program/subroutine execution.\nThese registers have changed %s\n' % (all_registers, changed_registers), level=level)
+        self._internalAssert(name or 'registers unchanged', not changed_registers, 'Expected %s to be unchanged after program/subroutine execution.\nThese registers have changed %s\n' % (all_registers, changed_registers), level=level)
 
         bits = sum([1 << a for a in registers])
         self.postconditions.add(PostconditionFlag.registers_unchanged, bits, [original_values[reg] for reg in sorted(registers)])
@@ -1825,10 +1853,13 @@ class LC3UnitTestCase(unittest.TestCase):
             return address - Soft.
             old frame pointer - Soft.
 
+        If the assertion name is changed the assertions will be named <name>-Stack, <name>-Return Address, <name>-Old Frame Pointer.
+
         Args:
             stack: Integer - Expected stack location.
             return_address: Integer - Expected Return Address.
             old_frame_pointer: Integer - Expected Old Frame Pointer.
+            name: String. Assertion base name override.
             level: AssertionType. Assertion level override.
         """
         # TODO rework this function, should not require any arguments and should be precalculated from callSubroutine.
@@ -1836,12 +1867,20 @@ class LC3UnitTestCase(unittest.TestCase):
         actual_return_address = self._readMem(self.state.r6 - 1, unsigned=True)
         actual_old_frame_ptr = self._readMem(self.state.r6 - 2, unsigned=True)
 
-        self._assertShortEqual(self.state.r6, stack, 'stack', 'Calling convention not followed.\nExpected R6 to be x%04x after returning from subroutine code produced x%04x\n' % (_toUShort(stack), _toUShort(self.state.r6)), level=level)
-        self._assertShortEqual(return_address, actual_return_address, 'return address', 'Expected return address x%04x not found on stack in correct location code produced x%04x\n' % (return_address, actual_return_address), level=level)
-        self._assertShortEqual(old_frame_pointer, actual_old_frame_ptr, 'old frame pointer', 'Expected old frame pointer x%04x not found on stack in correct location code produced x%04x\n' % (old_frame_pointer, actual_old_frame_ptr), level=level)
+        stack_assertion_name = 'stack'
+        ra_assertion_name = 'return address'
+        ofp_assertion_name = 'old frame pointer'
+        if name is not None:
+            stack_assertion_name = name + '-Stack'
+            ra_assertion_name = name + '-Return Address'
+            ofp_assertion_name = name + '-Old Frame Pointer'
+
+        self._assertShortEqual(self.state.r6, stack, stack_assertion_name, 'Calling convention not followed.\nExpected R6 to be x%04x after returning from subroutine code produced x%04x\n' % (_toUShort(stack), _toUShort(self.state.r6)), level=level)
+        self._assertShortEqual(return_address, actual_return_address, ra_assertion_name, 'Expected return address x%04x not found on stack in correct location code produced x%04x\n' % (return_address, actual_return_address), level=level)
+        self._assertShortEqual(old_frame_pointer, actual_old_frame_ptr, ofp_assertion_name, 'Expected old frame pointer x%04x not found on stack in correct location code produced x%04x\n' % (old_frame_pointer, actual_old_frame_ptr), level=level)
         self.postconditions.add(PostconditionFlag.calling_convention_followed, 0, [stack, return_address, old_frame_pointer])
 
-    def assertSubroutineCallsMade(self, level=AssertionType.soft):
+    def assertSubroutineCallsMade(self, name=None, level=AssertionType.soft):
         """Asserts that the expected subroutine calls were made with no unexpected ones made.
 
         It is required to call expectSubroutineCall in order for this function to work. If it is
@@ -1851,6 +1890,7 @@ class LC3UnitTestCase(unittest.TestCase):
             subroutine calls made - Soft.
 
         Args:
+            name: String. Assertion base name override.
             level: AssertionType. Assertion level override.
         """
 
@@ -1915,9 +1955,9 @@ class LC3UnitTestCase(unittest.TestCase):
         status_message += 'Accepted optional calls made: %s\n' % subroutine_list(optional_calls) if optional_calls else ''
         status_message += 'Unknown subroutine calls made: %s\n' % subroutine_list(unknown_calls) if unknown_calls else ''
 
-        self._internalAssert('subroutine calls made', len(self.expected_subroutines) == len(made_calls) and not missing_calls and not unknown_calls, status_message, level=level)
+        self._internalAssert(name or 'subroutine calls made', len(self.expected_subroutines) == len(made_calls) and not missing_calls and not unknown_calls, status_message, level=level)
 
-    def assertTrapCallsMade(self, level=AssertionType.soft):
+    def assertTrapCallsMade(self, name=None, level=AssertionType.soft):
         """Asserts that the expected traps were called with no unexpected ones made.
 
         It is required to call expectTrapCall for this function to work. If it is
@@ -1928,6 +1968,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
         Args:
             level: AssertionType. Assertion level override.
+            name: String. Assertion base name override.
         """
 
         # (vector, (Tuples of key value pairs of (register, param)) )
@@ -1958,7 +1999,7 @@ class LC3UnitTestCase(unittest.TestCase):
         status_message += 'Accepted optional traps made: %s\n' % trap_list(optional_calls) if optional_calls else ''
         status_message += 'Unknown traps made: %s\n' % trap_list(unknown_calls) if unknown_calls else ''
 
-        self._internalAssert('trap calls made', len(self.expected_traps) == len(made_calls) and not missing_calls and not unknown_calls, status_message, level=level)
+        self._internalAssert(name or 'trap calls made', len(self.expected_traps) == len(made_calls) and not missing_calls and not unknown_calls, status_message, level=level)
 
     def _generateReplay(self):
         return "\nString to set up this test in complx: %s\nPlease include the full output from this grader in questions to TA's/piazza\n" % repr(self.preconditions.encode())
