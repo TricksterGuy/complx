@@ -1,19 +1,9 @@
 #include "MemoryViewFrame.hpp"
 #include "MemoryViewContainer.hpp"
-#include "MemoryGrid.hpp"
 #include <wx/textdlg.h>
 #include <wx/msgdlg.h>
 
 void PrintError(int error);
-
-/** MemoryViewFrame
-  *
-  * Constructor
-  */
-MemoryViewFrame::MemoryViewFrame(wxWindow* parent, MemoryView* view) : MemoryViewFrameDecl(parent), memoryView(view)
-{
-    memory->SetView(view);
-}
 
 /** InitGridSizes
   *
@@ -39,13 +29,12 @@ void MemoryViewFrame::OnGoto(wxCommandEvent& event)
   */
 void MemoryViewFrame::OnUpdateHideAddresses(wxCommandEvent& event)
 {
+    if (!memoryView) return;
     int mode;
     if (menuViewHideAddressesShowAll->IsChecked())
         mode = SHOW_ALL;
     else if (menuViewHideAddressesShowOnlyCodeData->IsChecked())
         mode = SHOW_MODIFIED;
-    else if ((menuViewHideAddressesShowNonZero->IsChecked()))
-        mode = SHOW_NONZERO;
     else
         mode = SHOW_ALL;
     ::OnUpdateHideAddresses(memory, memoryView, mode);
@@ -57,6 +46,7 @@ void MemoryViewFrame::OnUpdateHideAddresses(wxCommandEvent& event)
   */
 void MemoryViewFrame::OnHideAddressesCustom(wxCommandEvent& event)
 {
+    if (!memoryView) return;
     ::OnHideAddressesCustom(memory, memoryView);
 }
 
