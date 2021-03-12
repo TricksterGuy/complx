@@ -1922,18 +1922,18 @@ class LC3UnitTestCase(unittest.TestCase):
         actual_subroutines = set()
         for call in self.state.first_level_calls:
             known = True
-            name = self.state.reverse_lookup(call.address)
-            if not name:
-                name = f'Unknown Subroutine@x{hex(call.address)}'
+            subroutine_name = self.state.reverse_lookup(call.address)
+            if not subroutine_name:
+                subroutine_name = 'UnknownSubroutine@x%04x' % call.address
                 known = False
             if self._subroutine_call_mode == SubroutineCallMode.lc3_calling_convention:
-                actual_subroutines.add((name, tuple([_toShort(param) for param in call.params])))
+                actual_subroutines.add((subroutine_name, tuple([_toShort(param) for param in call.params])))
             else:
                 if known:
-                    params = tuple([(reg, param) for reg, param in enumerate(call.regs) if reg in self.subroutine_specifications[name]])
+                    params = tuple([(reg, param) for reg, param in enumerate(call.regs) if reg in self.subroutine_specifications[subroutine_name]])
                 else:
                     params = tuple([(reg, param) for reg, param in enumerate(call.regs) if reg in [0, 1, 2, 3, 4, 5]])
-                actual_subroutines.add(name, params)
+                actual_subroutines.add((subroutine_name, params))
 
         made_calls = set()
         missing_calls = set()

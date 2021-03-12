@@ -1220,11 +1220,11 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
     def testInvalidSubroutineCall(self):
         snippet = """
         .orig x3000
-            JSRR R0
-
+            JSR #1
             DONE HALT
+            RET
+        .end
         """
-        self
         self.loadCode(snippet)
 
         self.expectSubroutineCall("DONE", params=[])
@@ -1235,11 +1235,34 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         msgs = [tup[1] for tup in self.failed_assertions]
 
         self.assertEqual(names, ['subroutine calls made'])
-        self.assertIn('MEM[B] was expected to be (3 x0003) but code produced (5 x0005)\n', msgs[0])
+        self.assertIn('Expected the following subroutine calls to be made: DONE()\nCalls made correctly: none\nRequired calls missing: DONE()\nUnknown subroutine calls made: UnknownSubroutine@x3002()', msgs[0])
 
         # Clear so that the test doesn't fail during tearDown.
         self.failed_assertions = []
 
+    def testInvalidSubroutineCall2(self):
+        snippet = """
+        .orig x3000
+            JSRR R0
+            DONE HALT
+            RET
+        .end
+        """
+        self.loadCode(snippet)
+
+        self.setRegister(0, 0x4000)
+        self.expectSubroutineCall("DONE", params=[])
+        self.runCode()
+        self.assertSubroutineCallsMade()
+
+        names = [tup[0] for tup in self.failed_assertions]
+        msgs = [tup[1] for tup in self.failed_assertions]
+
+        self.assertEqual(names, ['subroutine calls made'])
+        self.assertIn('Expected the following subroutine calls to be made: DONE()\nCalls made correctly: none\nRequired calls missing: DONE()\nUnknown subroutine calls made: UnknownSubroutine@x4000()', msgs[0])
+
+        # Clear so that the test doesn't fail during tearDown.
+        self.failed_assertions = []
 
     def testProgramWithInterrupts(self):
         snippet = """
