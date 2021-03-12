@@ -1933,7 +1933,7 @@ class LC3UnitTestCase(unittest.TestCase):
                     params = tuple([(reg, param) for reg, param in enumerate(call.regs) if reg in self.subroutine_specifications[name]])
                 else:
                     params = tuple([(reg, param) for reg, param in enumerate(call.regs) if reg in [0, 1, 2, 3, 4, 5]])
-                actual_subroutines.add(name, params))
+                actual_subroutines.add(name, params)
 
         made_calls = set()
         missing_calls = set()
