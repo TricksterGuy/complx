@@ -1922,7 +1922,7 @@ class LC3UnitTestCase(unittest.TestCase):
         actual_subroutines = set()
         for call in self.state.first_level_calls:
             known = True
-            name = self.reverse_lookup(call.address)
+            name = self.state.reverse_lookup(call.address)
             if not name:
                 name = f'Unknown Subroutine@x{hex(call.address)}'
                 known = False
@@ -1930,10 +1930,10 @@ class LC3UnitTestCase(unittest.TestCase):
                 actual_subroutines.add((name, tuple([_toShort(param) for param in call.params])))
             else:
                 if known:
-                    params = tuple([(reg, param) for reg, param in enumerate(call.regs) if reg in self.subroutine_specifications[self._reverse_lookup(call.address)]])
+                    params = tuple([(reg, param) for reg, param in enumerate(call.regs) if reg in self.subroutine_specifications[name]])
                 else:
                     params = tuple([(reg, param) for reg, param in enumerate(call.regs) if reg in [0, 1, 2, 3, 4, 5]])
-                actual_subroutines.add((self._reverse_lookup(call.address), params))
+                actual_subroutines.add(name, params))
 
         made_calls = set()
         missing_calls = set()
