@@ -1217,6 +1217,30 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         # Checks that no subroutines were called.
         self.assertSubroutineCallsMade()
 
+    def testInvalidSubroutineCall(self):
+        snippet = """
+        .orig x3000
+            JSRR R0
+
+            DONE HALT
+        """
+        self
+        self.loadCode(snippet)
+
+        self.expectSubroutineCall("DONE", params=[])
+        self.runCode()
+        self.assertSubroutineCallsMade()
+
+        names = [tup[0] for tup in self.failed_assertions]
+        msgs = [tup[1] for tup in self.failed_assertions]
+
+        self.assertEqual(names, ['subroutine calls made'])
+        self.assertIn('MEM[B] was expected to be (3 x0003) but code produced (5 x0005)\n', msgs[0])
+
+        # Clear so that the test doesn't fail during tearDown.
+        self.failed_assertions = []
+
+
     def testProgramWithInterrupts(self):
         snippet = """
         .orig x180

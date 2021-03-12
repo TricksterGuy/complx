@@ -555,7 +555,7 @@ class LC3UnitTestCase(unittest.TestCase):
         # Set of labels that were modified as preconditions along with type
         self._modified_labels = dict()
         self._code_has_ran = False
-        self.replay_msg = 'Code did not assemble or test issue.'
+        self.replay_msg = '\nCode did not assemble or test issue.'
 
     def tearDown(self):
         def form_failure_message():
@@ -1921,10 +1921,18 @@ class LC3UnitTestCase(unittest.TestCase):
 
         actual_subroutines = set()
         for call in self.state.first_level_calls:
+            known = True
+            name = self.reverse_lookup(call.address)
+            if not name:
+                name = f'Unknown Subroutine@x{hex(call.address)}'
+                known = False
             if self._subroutine_call_mode == SubroutineCallMode.lc3_calling_convention:
-                actual_subroutines.add((self._reverse_lookup(call.address), tuple([_toShort(param) for param in call.params])))
+                actual_subroutines.add((name, tuple([_toShort(param) for param in call.params])))
             else:
-                params = tuple([(reg, param) for reg, param in enumerate(call.regs) if reg in self.subroutine_specifications[self._reverse_lookup(call.address)]])
+                if known:
+                    params = tuple([(reg, param) for reg, param in enumerate(call.regs) if reg in self.subroutine_specifications[self._reverse_lookup(call.address)]])
+                else:
+                    params = tuple([(reg, param) for reg, param in enumerate(call.regs) if reg in [0, 1, 2, 3, 4, 5]])
                 actual_subroutines.add((self._reverse_lookup(call.address), params))
 
         made_calls = set()
