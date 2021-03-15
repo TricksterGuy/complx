@@ -327,7 +327,7 @@ class Preconditions(object):
 
     def encode(self):
         """Returns a base64 encoded string with the data."""
-        return base64.b64encode(self._formBlob())
+        return six.ensure_str(base64.b64encode(self._formBlob()))
 
 
 class Postconditions(object):
@@ -555,7 +555,7 @@ class LC3UnitTestCase(unittest.TestCase):
         # Set of labels that were modified as preconditions along with type
         self._modified_labels = dict()
         self._code_has_ran = False
-        self.replay_msg = 'Code did not assemble or test issue.'
+        self.replay_msg = '\nCode did not assemble or test issue. Contact course staff for assistance.'
 
     def tearDown(self):
         def form_failure_message():
@@ -1921,11 +1921,19 @@ class LC3UnitTestCase(unittest.TestCase):
 
         actual_subroutines = set()
         for call in self.state.first_level_calls:
+            known = True
+            subroutine_name = self.state.reverse_lookup(call.address)
+            if not subroutine_name:
+                subroutine_name = 'UnknownSubroutine@x%04x' % call.address
+                known = False
             if self._subroutine_call_mode == SubroutineCallMode.lc3_calling_convention:
-                actual_subroutines.add((self._reverse_lookup(call.address), tuple([_toShort(param) for param in call.params])))
+                actual_subroutines.add((subroutine_name, tuple([_toShort(param) for param in call.params])))
             else:
-                params = tuple([(reg, param) for reg, param in enumerate(call.regs) if reg in self.subroutine_specifications[self._reverse_lookup(call.address)]])
-                actual_subroutines.add((self._reverse_lookup(call.address), params))
+                if known:
+                    params = tuple([(reg, param) for reg, param in enumerate(call.regs) if reg in self.subroutine_specifications[subroutine_name]])
+                else:
+                    params = tuple([(reg, param) for reg, param in enumerate(call.regs) if reg in [0, 1, 2, 3, 4, 5]])
+                actual_subroutines.add((subroutine_name, params))
 
         made_calls = set()
         missing_calls = set()
@@ -2002,4 +2010,4 @@ class LC3UnitTestCase(unittest.TestCase):
         self._internalAssert(name or 'trap calls made', len(self.expected_traps) == len(made_calls) and not missing_calls and not unknown_calls, status_message, level=level)
 
     def _generateReplay(self):
-        return "\nString to set up this test in complx: %s\nPlease include the full output from this grader in questions to TA's/piazza\n" % repr(self.preconditions.encode())
+        return "\nReplay String to set up this test in complx below:\n\n%s\n\nPlease include the full output from this grader in questions to TA's/piazza\nv%d.%d\n" % (self.preconditions.encode(), REPLAY_STRING_VERSION_MAJOR, REPLAY_STRING_VERSION_MINOR)

@@ -1342,7 +1342,8 @@ void ComplxFrame::OnFlipMemory(wxCommandEvent& event)
   */
 void ComplxFrame::OnNewView(wxCommandEvent& event)
 {
-    MemoryViewFrame* frame = new MemoryViewFrame(this, new MemoryView());
+    MemoryViewFrame* frame = new MemoryViewFrame(this);
+    frame->SetView(new MemoryView());
     views.push_back(frame);
     frame->Show();
     frame->Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(ComplxFrame::OnDestroyView), NULL, this);
