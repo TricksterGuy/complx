@@ -20,9 +20,9 @@ const char* WARNING_MESSAGES[LC3_WARNINGS] =
     "W%03d: ""Turning off machine via the MCR register.",
     "W%03d: ""PUTSP called with invalid address x%04x",
     "W%03d: ""PUTSP found an unexpected NUL byte at address x%04x.",
-    "W%03d: ""Invalid value x%04x loaded into the PSR."
+    "W%03d: ""Invalid value x%04x loaded into the PSR.",
     "W%03d: ""Executing trap vector table address x%04x.",
-    "W%03d: ""Executing interrupt vector table address x%04x."
+    "W%03d: ""Executing interrupt vector table address x%04x.",
 };
 
 lc3_instr lc3_decode(lc3_state& state, unsigned short data)
@@ -231,7 +231,7 @@ const lc3_state_change lc3_execute(lc3_state& state, lc3_instr instruction)
                     {
                         call_info.params.push_back(state.mem[call_info.r6 + i]);
                     }
-           	        for (unsigned int i = 0; i < 8; i++)
+		    for (unsigned int i = 0; i < 8; i++)
                     {
                         call_info.regs[i] = state.regs[i];
                     }
