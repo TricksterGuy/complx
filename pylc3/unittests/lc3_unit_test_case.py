@@ -246,7 +246,7 @@ def _formDataPreconditions(t):
         elif isinstance(item, list):
             expanded.append(DataItem.array.value)
             expanded.append(len(item))
-            expanded.extend(item)
+            expanded.extend(item.copy())
         elif isinstance(item, tuple):
             expanded.append(DataItem.data.value)
             expanded.extend(_formDataPreconditions(item))
@@ -977,7 +977,7 @@ class LC3UnitTestCase(unittest.TestCase):
         for addr, elem in enumerate(arr, start_addr):
             self._writeMem(addr, elem)
 
-        self.preconditions.addPrecondition(PreconditionFlag.array, label, arr)
+        self.preconditions.addPrecondition(PreconditionFlag.array, label, arr.copy())
 
     def setString(self, label, text):
         """Sets a sequence of characters followed by a NUL terminator starting at the address pointed to by label.
@@ -1117,7 +1117,7 @@ class LC3UnitTestCase(unittest.TestCase):
         self._internalAssert('expectSubroutineCall', not (value in self.expected_subroutines and value in self.optional_subroutines), 'Subroutine %s found in both expected and optional subroutine calls.' % str(value), AssertionType.fatal, internal=True)
 
         if isinstance(params, list):
-            self.postconditions.add(PostconditionFlag.subroutine_call, subroutine, params)
+            self.postconditions.add(PostconditionFlag.subroutine_call, subroutine, params.copy())
         else:
             data = list(six.moves.reduce(lambda a, b: a + b, list(params.items())))
             self.postconditions.add(PostconditionFlag.pass_by_regs, subroutine, data)
@@ -1252,7 +1252,7 @@ class LC3UnitTestCase(unittest.TestCase):
         for addr, elem in enumerate(arr, address):
             self._writeMem(addr, elem)
 
-        self.preconditions.addPrecondition(PreconditionFlag.direct_array, '%04x' % address, arr)
+        self.preconditions.addPrecondition(PreconditionFlag.direct_array, '%04x' % address, arr.copy())
 
     def fillNode(self, address, next, data):
         """Sets a node in memory at the address given.
@@ -1297,7 +1297,7 @@ class LC3UnitTestCase(unittest.TestCase):
             for addr, elem in enumerate(next, address):
                 self._writeMem(addr, 0 if elem is None else elem)
             size_next = len(next)
-            node_data = (next, data)
+            node_data = (next.copy(), data)
 
         self._writeData(address + size_next, data)
 
@@ -1541,7 +1541,7 @@ class LC3UnitTestCase(unittest.TestCase):
         for addr, _ in enumerate(arr, start_addr):
             actual_arr.append(self._readMem(addr))
         self._assertEqual(arr, actual_arr, name or ('array: %s' % label), 'Sequence of values starting at MEM[%s] was expected to be %s but code produced %s\n' % (label, arr, actual_arr), level=level)
-        self.postconditions.add(PostconditionFlag.array, label, arr)
+        self.postconditions.add(PostconditionFlag.array, label, arr.copy())
 
     def assertString(self, label, text, name=None, level=AssertionType.soft):
         """Asserts that sequence of characters followed by a NUL terminator starting at the address pointed to by label are certain values.
@@ -1647,7 +1647,7 @@ class LC3UnitTestCase(unittest.TestCase):
         for addr, _ in enumerate(arr, start_addr):
             actual_arr.append(self._readMem(addr))
         self._assertEqual(arr, actual_arr, name or ('arrayAt: x%04x' % start_addr), 'Sequence of values at MEM[x%04x] was expected to be %s but code produced %s\n' % (start_addr, arr, actual_arr), level=level)
-        self.postconditions.add(PostconditionFlag.direct_array, '%04x' % start_addr, arr)
+        self.postconditions.add(PostconditionFlag.direct_array, '%04x' % start_addr, arr.copy())
 
     def assertStringAt(self, address, text, name=None, level=AssertionType.soft):
         """Asserts that sequence of characters followed by a NUL terminator starting at the address pointed to by label are certain values.
