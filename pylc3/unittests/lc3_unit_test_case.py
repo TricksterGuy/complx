@@ -537,6 +537,7 @@ class LC3UnitTestCase(unittest.TestCase):
         self._code_has_ran = False
         self.replay_msg = '\nCode did not assemble or test issue. Contact course staff for assistance.'
         self.asm_filename = ''
+        self.enable_compression = True
 
     def tearDown(self):
         def form_failure_message():
@@ -1991,25 +1992,28 @@ class LC3UnitTestCase(unittest.TestCase):
 
         self._internalAssert(name or 'trap calls made', len(self.expected_traps) == len(made_calls) and not missing_calls and not unknown_calls, status_message, level=level)
 
-    def _generateReplay(self):
-        preblob = self.preconditions.encode()
-        postblob = self.postconditions.encode()
-
-        datablob = preblob + postblob
-
+    def _generateHeader(self, datablob):
         header = six.BytesIO()
         header.write(b'lc-3')
         header.write(struct.pack('=I', REPLAY_STRING_VERSION_MAJOR))
         header.write(struct.pack('=I', REPLAY_STRING_VERSION_MINOR))
         header.write(struct.pack('=I', len(datablob)))
         header.write(struct.pack('=I', zlib.crc32(datablob) & 0xffffffff))
-        header.write(struct.pack('=B', 1)) # Compression
+        header.write(struct.pack('=B', 1 if self.enable_compression else 0)) # Compression
         header.write(struct.pack('=I', len(self.asm_filename)))
-        header.write(struct.pack('=%ds' % len(self.asm_filename), self.asm_filename))
+        header.write(struct.pack('=%ds' % len(self.asm_filename), six.ensure_binary(self.asm_filename)))
 
         headerblob = header.getvalue()
         header.close()
+        return headerblob
 
-        blob = base64.b64encode(headerblob + zlib.compress(datablob, level = 9))
+
+    def _generateReplay(self):
+        preblob = self.preconditions.encode()
+        postblob = self.postconditions.encode()
+
+        datablob = preblob + postblob
+
+        blob = base64.b64encode(self._generateHeader(datablob) + zlib.compress(datablob, level = 9 if self.enable_compression else 0))
 
         return "\nReplay string to emulate this test case in complx below:\n\n%s\n\nPlease include the FULL OUTPUT in text form (not a screenshot) from this autograder in questions to TA's/piazza\nframework v%d.%d\n" % (blob, REPLAY_STRING_VERSION_MAJOR, REPLAY_STRING_VERSION_MINOR)
