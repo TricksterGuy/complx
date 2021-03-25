@@ -1438,7 +1438,6 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
 
         expected_preBlob, expected_postBlob = (
-                    b'lc-3\x00\x00\x00\x00\x01\x00\x00\x00\x7f\x01\x00\x00\xd1\xb4\x65\xc0',
                     [b'\x01\x01\x00\x00\x00',
                     b'\x02\x01\x00\x00\x00',
                     b'\x03\x01\x00\x00\x00',
