@@ -1481,7 +1481,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.expectSubroutineCall('TATA', {0: 6, 1: 7, 4: 8})
         blob = self.postconditions.encode()
 
-        expected_blob = b'\x12\x02\x04\x00\x00\x00TATA\x06\x00\x00\x00\x00\x00\x06\x00\x01\x00\x07\x00\x04\x00\x08\x00\xff'
+        expected_blob = b'\x07\x12\x02\x04\x00\x00\x00TATA\x06\x00\x00\x00\x00\x00\x06\x00\x01\x00\x07\x00\x04\x00\x08\x00\xff'
 
         self.assertEqual(blob, expected_blob)
 
