@@ -31,8 +31,8 @@ import zlib
 
 
 DEFAULT_MAX_EXECUTIONS = 1000000
-REPLAY_STRING_VERSION_MAJOR = 0
-REPLAY_STRING_VERSION_MINOR = 1
+REPLAY_STRING_VERSION_MAJOR = 1
+REPLAY_STRING_VERSION_MINOR = 0
 
 
 class LC3InternalAssertion(Exception):
@@ -309,25 +309,15 @@ class Preconditions(object):
         datablob = file.getvalue()
         file.close()
 
-        header = six.BytesIO()
-        header.write(b'lc-3')
-        header.write(struct.pack('=I', REPLAY_STRING_VERSION_MAJOR))
-        header.write(struct.pack('=I', REPLAY_STRING_VERSION_MINOR))
-        header.write(struct.pack('=I', len(datablob)))
-        header.write(struct.pack('=I', zlib.crc32(datablob) & 0xffffffff))
-
-        headerblob = header.getvalue()
-        header.close()
-
-        return headerblob + datablob
+        return datablob
 
     def describe(self, include_environment=True):
         """Returns a string describing the preconditions."""
         return ""
 
     def encode(self):
-        """Returns a base64 encoded string with the data."""
-        return six.ensure_str(base64.b64encode(self._formBlob()))
+        """Returns an encoded string with the data."""
+        return self._formBlob()
 
 
 class Postconditions(object):
@@ -383,25 +373,15 @@ class Postconditions(object):
         datablob = file.getvalue()
         file.close()
 
-        header = six.BytesIO()
-        header.write(b'lc-3')
-        header.write(struct.pack('=I', REPLAY_STRING_VERSION_MAJOR))
-        header.write(struct.pack('=I', REPLAY_STRING_VERSION_MINOR))
-        header.write(struct.pack('=I', len(datablob)))
-        header.write(struct.pack('=I', zlib.crc32(datablob) & 0xffffffff))
-
-        headerblob = header.getvalue()
-        header.close()
-
-        return headerblob + datablob
+        return datablob
 
     def describe(self, include_environment=True):
         """Returns a string describing the postconditions."""
         return ""
 
     def encode(self):
-        """Returns a base64 encoded string with the data."""
-        return base64.b64encode(self._formBlob())
+        """Returns a encoded string with the data."""
+        return self._formBlob()
 
 
 def JsonExpandedOutputPerAssertion(name, passed_assertions, failed_assertions):
@@ -556,6 +536,7 @@ class LC3UnitTestCase(unittest.TestCase):
         self._modified_labels = dict()
         self._code_has_ran = False
         self.replay_msg = '\nCode did not assemble or test issue. Contact course staff for assistance.'
+        self.asm_filename = ''
 
     def tearDown(self):
         def form_failure_message():
@@ -603,7 +584,7 @@ class LC3UnitTestCase(unittest.TestCase):
             self.failed_assertions.append((name, '%s%s' % (msg, self.replay_msg)))
             self._hard_failed = self._hard_failed or level == AssertionType.hard
 
-    def loadAsmFile(self, file, lc3_version=1):
+    def loadAsmFile(self, filename, lc3_version=1):
         """Loads an assembly file.
 
         Will assert if the file failed to assemble.
@@ -614,14 +595,15 @@ class LC3UnitTestCase(unittest.TestCase):
             version - Hard. Does the program use the correct version of the lc-3.
 
         Args:
-            file: String - Full path to the assembly file to load.
+            filename: String - Full path to the assembly file to load.
             lc3_version: Integer - which version of the LC-3 to use.
         """
 
-        status = self.state.load(file, disable_plugins=not self.enable_plugins, process_debug_comments=False)
-        self._internalAssert('assembles', not status, 'Unable to load file %s\nReason: %s' % (file, status), AssertionType.fatal)
+        status = self.state.load(filename, disable_plugins=not self.enable_plugins, process_debug_comments=False)
+        self._internalAssert('assembles', not status, 'Unable to load file %s\nReason: %s' % (filename, status), AssertionType.fatal)
         self._internalAssert('version', self.state.lc3_version == lc3_version, 'File uses different lc3 version than grader version: %d expected: %d\n' % (self.state.lc3_version, lc3_version), AssertionType.hard)
         self.setLC3Version(lc3_version)
+        self.asm_filename = filename
 
     def loadPattObjAndSymFile(self, obj_file, sym_file):
         """Loads an assembled object and symbol table file.
@@ -2010,4 +1992,24 @@ class LC3UnitTestCase(unittest.TestCase):
         self._internalAssert(name or 'trap calls made', len(self.expected_traps) == len(made_calls) and not missing_calls and not unknown_calls, status_message, level=level)
 
     def _generateReplay(self):
-        return "\nReplay String to set up this test in complx below:\n\n%s\n\nPlease include the full output from this grader in questions to TA's/piazza\nv%d.%d\n" % (self.preconditions.encode(), REPLAY_STRING_VERSION_MAJOR, REPLAY_STRING_VERSION_MINOR)
+        preblob = self.preconditions.encode()
+        postblob = self.postconditions.encode()
+
+        datablob = preblob + postblob
+
+        header = six.BytesIO()
+        header.write(b'lc-3')
+        header.write(struct.pack('=I', REPLAY_STRING_VERSION_MAJOR))
+        header.write(struct.pack('=I', REPLAY_STRING_VERSION_MINOR))
+        header.write(struct.pack('=I', len(datablob)))
+        header.write(struct.pack('=I', zlib.crc32(datablob) & 0xffffffff))
+        header.write(struct.pack('=B', 1)) # Compression
+        header.write(struct.pack('=I', len(self.asm_filename)))
+        header.write(struct.pack('=%ds' % len(self.asm_filename), self.asm_filename))
+
+        headerblob = header.getvalue()
+        header.close()
+
+        blob = base64.b64encode(headerblob + zlib.compress(datablob, level = 9))
+
+        return "\nReplay string to emulate this test case in complx below:\n\n%s\n\nPlease include the FULL OUTPUT in text form (not a screenshot) from this autograder in questions to TA's/piazza\nframework v%d.%d\n" % (blob, REPLAY_STRING_VERSION_MAJOR, REPLAY_STRING_VERSION_MINOR)
