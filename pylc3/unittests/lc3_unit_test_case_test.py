@@ -1582,6 +1582,21 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         ]
         self.assertEqual(dataBlobs, expected_blobs)
 
+    def testGenerateHeader(self):
+        self.asm_filename = 'test.asm'
+        headerblob = self._generateHeader(b'')
+        expected = b'lc-3\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x08\x00\x00\x00test.asm'
+
+        self.assertEqual(headerblob, expected)
+
+    def testGenerateHeaderNoCompression(self):
+        self.asm_filename = 'test.asm'
+        self.enable_compression = False
+        headerblob = self._generateHeader(b'')
+        expected = b'lc-3\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00test.asm'
+
+        self.assertEqual(headerblob, expected)
+
     # -----------------------------------
     # ---- Internal tests begin here ----
     # -----------------------------------
