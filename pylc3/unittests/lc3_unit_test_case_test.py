@@ -1281,7 +1281,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         msgs = [tup[1] for tup in self.failed_assertions]
 
         self.assertEqual(names, ['subroutine calls made'])
-        self.assertIn('Expected no subroutines to have been called.\nCalls made correctly: none\nRequired calls missing: none\nUnknown subroutine calls made: DONE()', msgs[0])
+        self.assertIn('Expected no subroutines to have been called.\nCalls made correctly: none\nRequired calls missing: none\nUnknown subroutine calls made: DONE', msgs[0])
 
         # Clear so that the test doesn't fail during tearDown.
         self.failed_assertions = []
