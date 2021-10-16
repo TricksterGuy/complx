@@ -1912,7 +1912,7 @@ class LC3UnitTestCase(unittest.TestCase):
             if self._subroutine_call_mode == SubroutineCallMode.lc3_calling_convention:
                 actual_subroutines.add((subroutine_name, tuple([_toShort(param) for param in call.params])))
             else:
-                if known:
+                if known and subroutine_name in self.subroutine_specifications:
                     params = tuple([(reg, param) for reg, param in enumerate(call.regs) if reg in self.subroutine_specifications[subroutine_name]])
                 else:
                     params = tuple([(reg, param) for reg, param in enumerate(call.regs) if reg in [0, 1, 2, 3, 4, 5]])
@@ -2011,9 +2011,6 @@ class LC3UnitTestCase(unittest.TestCase):
     def _generateReplay(self):
         preblob = self.preconditions.encode()
         postblob = self.postconditions.encode()
-
         datablob = preblob + postblob
-
         blob = base64.b64encode(self._generateHeader(datablob) + zlib.compress(datablob, level = 9 if self.enable_compression else 0))
-
         return "\nReplay string to emulate this test case in complx below:\n\n%s\n\nPlease include the FULL OUTPUT in text form (not a screenshot) from this autograder in questions to TA's/piazza\nframework v%d.%d\n" % (blob, REPLAY_STRING_VERSION_MAJOR, REPLAY_STRING_VERSION_MINOR)
