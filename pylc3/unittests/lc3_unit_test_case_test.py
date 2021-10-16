@@ -1264,6 +1264,28 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         # Clear so that the test doesn't fail during tearDown.
         self.failed_assertions = []
 
+    def testInvalidSubroutineCall3(self):
+        snippet = """
+        .orig x3000
+            JSR DONE
+            DONE HALT
+            RET
+        .end
+        """
+        self.loadCode(snippet)
+
+        self.runCode()
+        self.assertSubroutineCallsMade()
+
+        names = [tup[0] for tup in self.failed_assertions]
+        msgs = [tup[1] for tup in self.failed_assertions]
+
+        self.assertEqual(names, ['subroutine calls made'])
+        self.assertIn('Expected no subroutines to have been called.\nCalls made correctly: none\nRequired calls missing: none\nUnknown subroutine calls made: DONE()', msgs[0])
+
+        # Clear so that the test doesn't fail during tearDown.
+        self.failed_assertions = []
+
     def testProgramWithInterrupts(self):
         snippet = """
         .orig x180
