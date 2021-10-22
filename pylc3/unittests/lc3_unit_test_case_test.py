@@ -1301,7 +1301,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.runCode()
         self.assertSubroutineCallsMade()
 
-        self.assertEmpty(self.failed_assertions)
+        self.assertEqual(len(self.failed_assertions), 0)
 
         # Clear so that the test doesn't fail during tearDown.
         self.failed_assertions = []
@@ -1321,7 +1321,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.runCode()
         self.assertSubroutineCallsMade()
 
-        self.assertEmpty(self.failed_assertions)
+        self.assertEqual(len(self.failed_assertions), 0)
 
         # Clear so that the test doesn't fail during tearDown.
         self.failed_assertions = []
@@ -1341,7 +1341,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.runCode()
         self.assertSubroutineCallsMade()
 
-        self.assertEmpty(self.failed_assertions)
+        self.assertEqual(len(self.failed_assertions), 0)
 
         # Clear so that the test doesn't fail during tearDown.
         self.failed_assertions = []
@@ -1361,7 +1361,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.runCode()
         self.assertSubroutineCallsMade()
 
-        self.assertEmpty(self.failed_assertions)
+        self.assertEqual(len(self.failed_assertions), 0)
 
         # Clear so that the test doesn't fail during tearDown.
         self.failed_assertions = []
