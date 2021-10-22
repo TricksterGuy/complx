@@ -1301,11 +1301,67 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.runCode()
         self.assertSubroutineCallsMade()
 
-        names = [tup[0] for tup in self.failed_assertions]
-        msgs = [tup[1] for tup in self.failed_assertions]
+        self.assertEmpty(self.failed_assertions)
 
-        self.assertEqual(names, ['subroutine calls made'])
-        self.assertIn('Expected no subroutines to have been called.\nCalls made correctly: none\nRequired calls missing: none\nUnknown subroutine calls made: DONE', msgs[0])
+        # Clear so that the test doesn't fail during tearDown.
+        self.failed_assertions = []
+
+    def testMultiSymbolSubroutineCall2(self):
+        # Sigh...
+        snippet = """
+        .orig x3000
+            JSR DONE
+            ITSDONE DONE HALT
+            RET
+        .end
+        """
+        self.loadCode(snippet)
+        self.expectSubroutineCall("DONE", params=[])
+
+        self.runCode()
+        self.assertSubroutineCallsMade()
+
+        self.assertEmpty(self.failed_assertions)
+
+        # Clear so that the test doesn't fail during tearDown.
+        self.failed_assertions = []
+
+    def testMultiSymbolSubroutineCall3(self):
+        # Sigh...
+        snippet = """
+        .orig x3000
+            JSR DONE
+            DONE ITSDONE HALT
+            RET
+        .end
+        """
+        self.loadCode(snippet)
+        self.expectSubroutineCall("ITSDONE", params=[])
+
+        self.runCode()
+        self.assertSubroutineCallsMade()
+
+        self.assertEmpty(self.failed_assertions)
+
+        # Clear so that the test doesn't fail during tearDown.
+        self.failed_assertions = []
+
+    def testMultiSymbolSubroutineCall4(self):
+        # Sigh...
+        snippet = """
+        .orig x3000
+            JSR DONE
+            ITSDONE DONE HALT
+            RET
+        .end
+        """
+        self.loadCode(snippet)
+        self.expectSubroutineCall("ITSDONE", params=[])
+
+        self.runCode()
+        self.assertSubroutineCallsMade()
+
+        self.assertEmpty(self.failed_assertions)
 
         # Clear so that the test doesn't fail during tearDown.
         self.failed_assertions = []
