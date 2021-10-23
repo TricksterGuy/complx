@@ -1286,6 +1286,11 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         # Clear so that the test doesn't fail during tearDown.
         self.failed_assertions = []
 
+    def PatchForMultipleLabelSubroutine(self, expected_label):
+        the_label_addr = self._lookup(expected_label)
+        found_label = self._reverse_lookup(the_label_addr)
+        return found_label
+
     def testMultiSymbolSubroutineCall(self):
         # Sigh...
         snippet = """
@@ -1296,7 +1301,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         .end
         """
         self.loadCode(snippet)
-        self.expectSubroutineCall("DONE", params=[])
+        self.expectSubroutineCall(self.PatchForMultipleLabelSubroutine("DONE"), params=[])
 
         self.runCode()
         self.assertSubroutineCallsMade()
@@ -1316,7 +1321,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         .end
         """
         self.loadCode(snippet)
-        self.expectSubroutineCall("DONE", params=[])
+        self.expectSubroutineCall(self.PatchForMultipleLabelSubroutine("DONE"), params=[])
 
         self.runCode()
         self.assertSubroutineCallsMade()
@@ -1336,7 +1341,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         .end
         """
         self.loadCode(snippet)
-        self.expectSubroutineCall("ITSDONE", params=[])
+        self.expectSubroutineCall(self.PatchForMultipleLabelSubroutine("ITSDONE"), params=[])
 
         self.runCode()
         self.assertSubroutineCallsMade()
@@ -1356,7 +1361,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         .end
         """
         self.loadCode(snippet)
-        self.expectSubroutineCall("ITSDONE", params=[])
+        self.expectSubroutineCall(self.PatchForMultipleLabelSubroutine("ITSDONE"), params=[])
 
         self.runCode()
         self.assertSubroutineCallsMade()
