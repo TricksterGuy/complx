@@ -1301,7 +1301,8 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         .end
         """
         self.loadCode(snippet)
-        self.expectSubroutineCall(self.PatchForMultipleLabelSubroutine("DONE"), params=[])
+        #self.expectSubroutineCall(self.PatchForMultipleLabelSubroutine("DONE"), params=[])
+        self.expectSubroutineCall("DONE", params=[])
 
         self.runCode()
         self.assertSubroutineCallsMade()
