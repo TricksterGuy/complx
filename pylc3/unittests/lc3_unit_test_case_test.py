@@ -138,6 +138,8 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
             self.fillData(0x4000, (23, 24))
 
+        # Clear so that the test doesn't fail during tearDown.
+        self.failed_assertions = []
 
     def testRegister(self):
         snippet = """

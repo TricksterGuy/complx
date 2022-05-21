@@ -1307,7 +1307,7 @@ class LC3UnitTestCase(unittest.TestCase):
             address: Short - Address to set.
             data: Tuple - Node data.
         """
-
+        self._internalAssert('fillData', self.asm_filename, 'Attempt to fill a memory address before student program was loaded', AssertionType.fatal, internal=True)
         self._internalAssert('fillData', not self._code_has_ran, 'Attempt to fill a memory address after the code has ran', AssertionType.fatal, internal=True)
 
         label = self.state.reverse_lookup(address)
