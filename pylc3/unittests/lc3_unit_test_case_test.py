@@ -33,6 +33,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
     def loadCode(self, snippet):
         # This function is test only, Only use loadAsmFile for student code.
         self.state.loadCode(snippet)
+        self.asm_filename = 'this is a test'
 
     def testInit(self):
         self.init(pylc3.MemoryFillStrategy.fill_with_value, 0x8000)
@@ -120,6 +121,23 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         # Clear so that the test doesn't fail during tearDown.
         self.failed_assertions = []
+
+    def testFillsBeforeLoad(self):
+        # No file loaded
+        self.asm_filename = ''
+
+        # It is an error to fill addresses with values before loading the code.
+        with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
+            self.fillValue(0x4000, 10)
+        with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
+            self.fillString(0x4000, "Failure")
+        with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
+            self.fillArray(0x4000, [10, 23, 45])
+        with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
+            self.fillNode(0x4000, 0x4000, (23,))
+        with self.assertRaises(lc3_unit_test_case.LC3InternalAssertion):
+            self.fillData(0x4000, (23, 24))
+
 
     def testRegister(self):
         snippet = """
