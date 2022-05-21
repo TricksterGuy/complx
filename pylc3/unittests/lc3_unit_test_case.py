@@ -1157,7 +1157,7 @@ class LC3UnitTestCase(unittest.TestCase):
             address: Short - Address to set.
             value: Integer - Value to write at that address
         """
-        self._internalAssert('fillValue', not self.asm_filename, 'Attempt to fill a memory address before student program was loaded', AssertionType.fatal, internal=True)
+        self._internalAssert('fillValue', self.asm_filename, 'Attempt to fill a memory address before student program was loaded', AssertionType.fatal, internal=True)
         self._internalAssert('fillValue', not self._code_has_ran, 'Attempt to fill a memory address after the code has ran', AssertionType.fatal, internal=True)
 
         label = self.state.reverse_lookup(address)
@@ -1191,7 +1191,7 @@ class LC3UnitTestCase(unittest.TestCase):
         Raises:
             ValueError if the address has a label (use setString instead).
         """
-        self._internalAssert('fillString', not self.asm_filename, 'Attempt to fill a memory address before student program was loaded', AssertionType.fatal, internal=True)
+        self._internalAssert('fillString', self.asm_filename, 'Attempt to fill a memory address before student program was loaded', AssertionType.fatal, internal=True)
         self._internalAssert('fillString', not self._code_has_ran, 'Attempt to fill a memory address after the code has ran', AssertionType.fatal, internal=True)
 
         label = self.state.reverse_lookup(address)
@@ -1227,7 +1227,7 @@ class LC3UnitTestCase(unittest.TestCase):
             ValueError if the address has a label (use setArray instead).
         """
 
-        self._internalAssert('fillArray', not self.asm_filename, 'Attempt to fill a memory address before student program was loaded', AssertionType.fatal, internal=True)
+        self._internalAssert('fillArray', self.asm_filename, 'Attempt to fill a memory address before student program was loaded', AssertionType.fatal, internal=True)
         self._internalAssert('fillArray', not self._code_has_ran, 'Attempt to fill a memory address after the code has ran', AssertionType.fatal, internal=True)
 
         label = self.state.reverse_lookup(address)
@@ -1262,7 +1262,7 @@ class LC3UnitTestCase(unittest.TestCase):
             data: Tuple - Node data. (See fillData for a more detailed description on the tuple's contents.)
         """
 
-        self._internalAssert('fillNode', not self.asm_filename, 'Attempt to fill a memory address before student program was loaded', AssertionType.fatal, internal=True)
+        self._internalAssert('fillNode', self.asm_filename, 'Attempt to fill a memory address before student program was loaded', AssertionType.fatal, internal=True)
         self._internalAssert('fillNode', not self._code_has_ran, 'Attempt to fill a memory address after the code has ran', AssertionType.fatal, internal=True)
 
         label = self.state.reverse_lookup(address)
