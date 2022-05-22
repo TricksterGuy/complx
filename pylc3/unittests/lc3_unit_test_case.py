@@ -2015,7 +2015,7 @@ class LC3UnitTestCase(unittest.TestCase):
         datablob = preblob + postblob
         if self.enable_compression:
             datablob = zlib.compress(datablob, level = 9)
-        return base64.b64encode(self._generateHeader(datablob) + datablob)
+        return base64.b64encode(self.generateReplayHeader(datablob) + datablob)
 
     def generateReplayMessage(self):
         blob = self.generateReplayString()
