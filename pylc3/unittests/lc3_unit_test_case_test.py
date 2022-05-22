@@ -7,6 +7,7 @@ import six
 import struct
 import sys
 import unittest
+import zlib
 from pylc3.unittests import lc3_unit_test_case
 from pylc3.unittests.lc3_unit_test_case import DataItem
 
