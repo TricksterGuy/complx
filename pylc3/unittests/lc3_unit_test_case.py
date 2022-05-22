@@ -2014,5 +2014,7 @@ class LC3UnitTestCase(unittest.TestCase):
         preblob = self.preconditions.encode()
         postblob = self.postconditions.encode()
         datablob = preblob + postblob
-        blob = base64.b64encode(self._generateHeader(datablob) + zlib.compress(datablob, level = 9 if self.enable_compression else 0))
+        if self.enable_compression:
+            datablob = zlib.compress(datablob, level = 9)
+        blob = base64.b64encode(self._generateHeader(datablob) + datablob)
         return "\nReplay string to emulate this test case in complx below:\n\n%s\n\nPlease include the FULL OUTPUT in text form (not a screenshot) from this autograder in questions to TA's/piazza\nframework v%d.%d\n" % (blob, REPLAY_STRING_VERSION_MAJOR, REPLAY_STRING_VERSION_MINOR)
