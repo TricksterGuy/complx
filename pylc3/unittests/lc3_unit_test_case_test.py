@@ -1763,6 +1763,9 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertEqual(base64.b64decode(replay), expected_data)
         self.assertEqual(replay, base64.b64encode(expected_data))
 
+        expected_replay = b'bGMtMwEAAAAAAAAAKQAAABbVQQsABAAAAHRlc3QHAIAAABAZBAAAAFRBVEEKAAAAAAADAAQABQAFAP7KBgAA8AcAAID//w=='
+        self.assertEqual(replay, expected_replay)
+
     # -----------------------------------
     # ---- Internal tests begin here ----
     # -----------------------------------
