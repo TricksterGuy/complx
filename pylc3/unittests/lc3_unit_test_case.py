@@ -537,7 +537,7 @@ class LC3UnitTestCase(unittest.TestCase):
         self._code_has_ran = False
         self.replay_msg = '\nCode did not assemble or test issue. Contact course staff for assistance.'
         self.asm_filename = ''
-        self.enable_compression = True
+        self.enable_compression = False
 
     def tearDown(self):
         def form_failure_message():
