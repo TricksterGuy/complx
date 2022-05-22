@@ -31,7 +31,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
     def tearDownClass(cls):
         pass
 
-    def generateReplay(self)
+    def generateReplay(self):
         preblob = self.preconditions.encode()
         postblob = self.postconditions.encode()
         datablob = preblob + postblob
