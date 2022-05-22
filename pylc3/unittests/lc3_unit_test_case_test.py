@@ -1,4 +1,5 @@
 from .. import pylc3
+import base64
 import collections
 import logging
 import os
@@ -29,6 +30,12 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
     @classmethod
     def tearDownClass(cls):
         pass
+
+    def generateReplay(self)
+        preblob = self.preconditions.encode()
+        postblob = self.postconditions.encode()
+        datablob = preblob + postblob
+        return base64.b64encode(self._generateHeader(datablob) + zlib.compress(datablob, level = 9 if self.enable_compression else 0))
 
     def loadCode(self, snippet):
         # This function is test only, Only use loadAsmFile for student code.
@@ -1496,7 +1503,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         expected_blob = b'\x07\x00\x80\x00\x00\x10\x19\x04\x00\x00\x00TATA\n\x00\x00\x00\x00\x00\x03\x00\x04\x00\x05\x00\x05\x00\xfe\xca\x06\x00\x00\xf0\x07\x00\x00\x80\xff'
 
         self.assertEqual(blob, expected_blob)
-        print(self.preconditions.encode())
+        print(self.generateReplay())
 
     def testReplayString(self):
         snippet = """
@@ -1599,7 +1606,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertCountEqual(preBlob, expected_preBlob)
         self.assertCountEqual(postBlob, expected_postBlob)
 
-        print(self.preconditions.encode())
+        print(self.generateReplay())
 
     def testVerificationStringPassByRegs(self):
         snippet = """
