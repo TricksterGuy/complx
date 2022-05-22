@@ -10,12 +10,12 @@
 #include "lc3_replay.hpp"
 #include "BinaryStreamReader.hpp"
 
-void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& replay_string, std::stringstream& newinput);
+void lc3_setup_replay(lc3_state& state, const std::string& filename, std::istream& file, const std::string& replay_string, std::stringstream& newinput);
 
 const size_t HEADER_SIZE = 20;
 const size_t MAGIC = 0x332d636c; // lc-3
-const int MAJOR = 0;
-const int MINOR = 1;
+const int MAJOR = 1;
+const int MINOR = 0;
 
 enum class PreconditionFlag
 {
@@ -162,11 +162,8 @@ uint32_t get_crc(const char* data, size_t length)
     return result.checksum();
 }
 
-std::pair<uint32_t, uint32_t> decode_header(const std::string& header)
+std::tuple<uint32_t, uint32_t, bool, std::string> decode_header(BinaryStreamReader& hbstream)
 {
-    std::istringstream header_stream(header);
-    BinaryStreamReader hbstream(header_stream);
-
     unsigned int magic;
     hbstream >> magic;
     if (magic != MAGIC)
@@ -183,7 +180,15 @@ std::pair<uint32_t, uint32_t> decode_header(const std::string& header)
     unsigned int size, crc;
     hbstream >> size;
     hbstream >> crc;
-    return std::make_pair(size, crc);
+
+    char compression_enabled;
+
+    hbstream >> compression_enabled;
+
+    std::string replay_filename;
+    hbstream >> replay_filename;
+
+    return std::make_tuple(size, crc, compression_enabled, replay_filename);
 }
 
 std::pair<unsigned short, int> write_data(lc3_state& state, unsigned short address, const std::vector<short>& params, int i = 0)
@@ -306,31 +311,38 @@ void lc3_setup_replay(lc3_state& state, const std::string& filename, const std::
     if (!file.good())
         throw "Could not open " + filename + " for reading";
 
-    lc3_setup_replay(state, file, replay_string, newinput);
+    lc3_setup_replay(state, filename, file, replay_string, newinput);
 }
 
-void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& replay_string, std::stringstream& newinput)
+void lc3_setup_replay(lc3_state& state, const std::string& filename, std::istream& file, const std::string& replay_string, std::stringstream& newinput)
 {
     std::string decoded = base64_decode(replay_string);
+
+    std::istringstream stream(std::string(decoded.data(), decoded.size()));
+    BinaryStreamReader bstream(stream);
+    bstream.SetMaxStringSize(65536);
+    bstream.SetMaxVectorSize(65536);
+
     std::stringstream error;
     if (decoded.empty())
         throw "Failed to parse replay string: " + replay_string;
 
-    std::string header(decoded.data(), decoded.data() + HEADER_SIZE);
-    auto size_crc = decode_header(header);
+    auto header_info = decode_header(bstream);
 
-    if (decoded.size() != size_crc.first + HEADER_SIZE)
+    if (decoded.size() != std::get<0>(header_info) + bstream.TellG())
     {
-        error << "Failed to parse replay string. Internal size doesn't match. Got: " << decoded.size() << " Expected: " << size_crc.first;
+        printf("%d %d %d", decoded.size(), bstream.TellG(), std::get<0>(header_info));
+        error << "Failed to parse replay string. Internal size doesn't match. Got: " << decoded.size() - bstream.TellG() << " Expected: " << std::get<0>(header_info);
         throw error.str();
     }
-    if (get_crc(decoded.data() + HEADER_SIZE, decoded.size() - HEADER_SIZE) != size_crc.second)
+    if (get_crc(decoded.data() + bstream.TellG(), decoded.size() - bstream.TellG()) != std::get<1>(header_info))
         throw "Failed to parse replay string. Internal crc doesn't match.";
 
-    std::istringstream stream(std::string(decoded.data() + HEADER_SIZE, decoded.size() - HEADER_SIZE));
-    BinaryStreamReader bstream(stream);
-    bstream.SetMaxStringSize(65536);
-    bstream.SetMaxVectorSize(65536);
+    if (std::get<2>(header_info))
+        throw "Compression is not supported at this time";
+
+    if (std::get<3>(header_info) != filename)
+        throw "Replay string is for file: " + std::get<3>(header_info) + " file given does not match... Received file: " + filename;
 
     char memory_strategy = 0;
     unsigned int memory_strategy_value = 0;
@@ -546,26 +558,33 @@ void lc3_setup_replay(lc3_state& state, std::istream& file, const std::string& r
 
 std::string lc3_describe_replay(const std::string& replay_string)
 {
+    std::stringstream description;
+    std::stringstream error;
+
     std::string decoded = base64_decode(replay_string);
 
     if (decoded.empty())
         throw "Failed to parse replay string: " + replay_string;
 
-    std::string header(decoded.data(), decoded.data() + HEADER_SIZE);
-    auto size_crc = decode_header(header);
-
-    if (decoded.size() != size_crc.first + HEADER_SIZE)
-        throw "Failed to parse replay string. Internal size doesn't match.";
-    if (get_crc(decoded.data() + HEADER_SIZE, decoded.size() - HEADER_SIZE) != size_crc.second)
-        throw "Failed to parse replay string. Internal crc doesn't match.";
-
-    std::istringstream stream(std::string(decoded.data() + HEADER_SIZE, decoded.size() - HEADER_SIZE));
+    std::istringstream stream(std::string(decoded.data(), decoded.size()));
     BinaryStreamReader bstream(stream);
     bstream.SetMaxStringSize(65536);
     bstream.SetMaxVectorSize(65536);
 
-    std::stringstream description;
-    std::stringstream error;
+    auto header_info = decode_header(bstream);
+
+    if (decoded.size() != std::get<0>(header_info) + bstream.TellG())
+    {
+        error << "Failed to parse replay string. Internal size doesn't match. Got: " << decoded.size() - bstream.TellG() << " Expected: " << std::get<0>(header_info);
+        throw error.str();
+    }
+    if (get_crc(decoded.data() + bstream.TellG(), decoded.size() - bstream.TellG()) != std::get<1>(header_info))
+        throw "Failed to parse replay string. Internal crc doesn't match.";
+
+    if (std::get<2>(header_info))
+        throw "Compression is not supported at this time";
+
+    description << "filename: " << std::get<3>(header_info) << std::endl;
 
     while (bstream.Ok())
     {

@@ -35,6 +35,7 @@ public:
     uint32_t GetMaxVectorSize() const { return max_vector_size; }
     void SetInternalStreamState(std::ios_base::iostate state) { stream.setstate(state); }
     bool Ok() const { return !stream.fail(); }
+    uint32_t TellG() const {return stream.tellg();}
     enum
     {
         NO_READ_STRING_SIZES = 0,
