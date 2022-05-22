@@ -2013,6 +2013,8 @@ class LC3UnitTestCase(unittest.TestCase):
     def _generateReplay(self):
         preblob = self.preconditions.encode()
         postblob = self.postconditions.encode()
+        print(preblob)
+        print(postblob)
         datablob = preblob + postblob
         if self.enable_compression:
             datablob = zlib.compress(datablob, level = 9)
