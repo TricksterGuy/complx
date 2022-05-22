@@ -1340,7 +1340,7 @@ class LC3UnitTestCase(unittest.TestCase):
         for id in range(8):
             self.registers[id] = self.state.get_register(id)
         self.state.run(max_executions)
-        self.replay_msg = self._generateReplay()
+        self.replay_msg = self.generateReplayMessage()
 
     def _assertShortEqual(self, expected, actual, name, msg, level=AssertionType.soft, internal=False):
         """Helper to assert if two 16 bit values are equal."""
@@ -1994,7 +1994,7 @@ class LC3UnitTestCase(unittest.TestCase):
 
         self._internalAssert(name or 'trap calls made', len(self.expected_traps) == len(made_calls) and not missing_calls and not unknown_calls, status_message, level=level)
 
-    def _generateHeader(self, datablob):
+    def generateReplayHeader(self, datablob):
         header = six.BytesIO()
         header.write(b'lc-3')
         header.write(struct.pack('=I', REPLAY_STRING_VERSION_MAJOR))
@@ -2009,12 +2009,14 @@ class LC3UnitTestCase(unittest.TestCase):
         header.close()
         return headerblob
 
-
-    def _generateReplay(self):
+    def generateReplayString(self):
         preblob = self.preconditions.encode()
         postblob = self.postconditions.encode()
         datablob = preblob + postblob
         if self.enable_compression:
             datablob = zlib.compress(datablob, level = 9)
-        blob = base64.b64encode(self._generateHeader(datablob) + datablob)
+        return base64.b64encode(self._generateHeader(datablob) + datablob)
+
+    def generateReplayMessage(self):
+        blob = self.generateReplayString()
         return "\nReplay string to emulate this test case in complx below:\n\n%s\n\nPlease include the FULL OUTPUT in text form (not a screenshot) from this autograder in questions to TA's/piazza\nframework v%d.%d\n" % (blob, REPLAY_STRING_VERSION_MAJOR, REPLAY_STRING_VERSION_MINOR)

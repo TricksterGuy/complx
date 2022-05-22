@@ -32,12 +32,6 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
     def tearDownClass(cls):
         pass
 
-    def generateReplay(self):
-        preblob = self.preconditions.encode()
-        postblob = self.postconditions.encode()
-        datablob = preblob + postblob
-        return base64.b64encode(self._generateHeader(datablob) + zlib.compress(datablob, level = 9 if self.enable_compression else 0))
-
     def loadCode(self, snippet):
         # This function is test only, Only use loadAsmFile for student code.
         self.state.loadCode(snippet)
@@ -1506,7 +1500,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertEqual(blob, expected_blob)
         print(self.preconditions.encode())
         print(self.postconditions.encode())
-        print(self.generateReplay())
+        print(self.generateReplayString())
 
     def testReplayString(self):
         snippet = """
@@ -1611,7 +1605,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
 
         print(self.preconditions.encode())
         print(self.postconditions.encode())
-        print(self.generateReplay())
+        print(self.generateReplayString())
 
     def testVerificationStringPassByRegs(self):
         snippet = """
@@ -1728,7 +1722,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
     def testGenerateHeaderCompression(self):
         self.asm_filename = 'test.asm'
         self.enable_compression = True
-        headerblob = self._generateHeader(b'')
+        headerblob = self.generateReplayHeader(b'')
         expected = b'lc-3\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x08\x00\x00\x00test.asm'
 
         self.assertEqual(headerblob, expected)
@@ -1736,10 +1730,38 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
     def testGenerateHeaderNoCompression(self):
         self.asm_filename = 'test.asm'
         self.enable_compression = False
-        headerblob = self._generateHeader(b'')
+        headerblob = self.generateReplayHeader(b'')
         expected = b'lc-3\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00test.asm'
 
         self.assertEqual(headerblob, expected)
+
+    def testGenerateReplayString(self):
+        snippet = """
+        .orig x3000
+            TATA RET
+        .end
+        """
+        self.loadCode(snippet)
+        self.asm_filename = 'test'
+        self.callSubroutine("TATA", {0: 3, 4: 5})
+
+        blob = self.preconditions.encode()
+        expected_preblob = b'\x07\x00\x80\x00\x00\x10\x19\x04\x00\x00\x00TATA\n\x00\x00\x00\x00\x00\x03\x00\x04\x00\x05\x00\x05\x00\xfe\xca\x06\x00\x00\xf0\x07\x00\x00\x80\xff'
+        self.assertEqual(blob, expected_preblob)
+
+        blob = self.postconditions.encode()
+        expected_postblob = b'\xff'
+        self.assertEqual(blob, expected_postblob)
+
+        header = self.generateReplayHeader(expected_preblob + expected_postblob)
+        expected_header = b'lc-3\x01\x00\x00\x00\x00\x00\x00\x00)\x00\x00\x00\x16\xd5A\x0b\x00\x04\x00\x00\x00test'
+        self.assertEqual(header, expected_header)
+
+        expected_data = b'lc-3\x01\x00\x00\x00\x00\x00\x00\x00)\x00\x00\x00\x16\xd5A\x0b\x00\x04\x00\x00\x00test\x07\x00\x80\x00\x00\x10\x19\x04\x00\x00\x00TATA\n\x00\x00\x00\x00\x00\x03\x00\x04\x00\x05\x00\x05\x00\xfe\xca\x06\x00\x00\xf0\x07\x00\x00\x80\xff\xff'
+        replay = self.generateReplayString()
+
+        self.assertEqual(base64.b64decode(replay), expected_data)
+        self.assertEqual(replay, base64.b64encode(expected_data))
 
     # -----------------------------------
     # ---- Internal tests begin here ----
