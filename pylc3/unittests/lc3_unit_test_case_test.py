@@ -1488,6 +1488,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         .end
         """
         self.loadCode(snippet)
+        self.asm_filename = 'this_is_a_test.asm'
         self.callSubroutine("TATA", {0: 3, 4: 5})
 
         blob = self.preconditions.encode()
@@ -1495,7 +1496,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         expected_blob = b'\x07\x00\x80\x00\x00\x10\x19\x04\x00\x00\x00TATA\n\x00\x00\x00\x00\x00\x03\x00\x04\x00\x05\x00\x05\x00\xfe\xca\x06\x00\x00\xf0\x07\x00\x00\x80\xff'
 
         self.assertEqual(blob, expected_blob)
-        #print self.preconditions.encode()
+        print self.preconditions.encode()
 
     def testReplayString(self):
         snippet = """
@@ -1513,6 +1514,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.setPluginsEnabled(True)
         self.setStrictExecution(False)
         self.loadCode(snippet)
+        self.asm_filename = 'this_is_a_test.asm'
         self.setLC3Version(1)
         self.setRegister(4, 0x4001)
         self.setPc(0x500)
@@ -1597,7 +1599,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         self.assertCountEqual(preBlob, expected_preBlob)
         self.assertCountEqual(postBlob, expected_postBlob)
 
-        #print self.preconditions.encode()
+        print self.preconditions.encode()
 
     def testVerificationStringPassByRegs(self):
         snippet = """
@@ -1606,6 +1608,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
         .end
         """
         self.loadCode(snippet)
+        self.asm_filename = 'this_is_a_test.asm'
         self.expectSubroutineCall('TATA', {0: 6, 1: 7, 4: 8})
         blob = self.postconditions.encode()
 
