@@ -1489,6 +1489,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
             TATA RET
         .end
         """
+        self.enable_compression = True
         self.loadCode(snippet)
         self.asm_filename = 'this_is_a_test.asm'
         self.callSubroutine("TATA", {0: 3, 4: 5})
@@ -1512,6 +1513,7 @@ class LC3UnitTestCaseTest(lc3_unit_test_case.LC3UnitTestCase):
             TATA RET
         .end
         """
+        self.enable_compression = True
         self.init(pylc3.MemoryFillStrategy.fill_with_value, -1)
         self.setTrueTraps(True)
         self.setInterrupts(True)
