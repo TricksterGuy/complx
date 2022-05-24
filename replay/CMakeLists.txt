@@ -1,4 +1,4 @@
-find_package(Boost COMPONENTS serialization REQUIRED)
+find_package(Boost COMPONENTS serialization iostreams REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${complx-tools_SOURCE_DIR}/liblc3)
 set(CMAKE_SKIP_RPATH TRUE)

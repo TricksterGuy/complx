@@ -1,3 +1,4 @@
 
 build/
 
+/pylc3/unittests/*.pyc
