@@ -803,7 +803,7 @@ void lc3_mem_write(lc3_state& state, unsigned short addr, short value, bool priv
                 /// TODO consider allowing writing to the PSR.
             } else {
                 if (addr >= 0xFE00U && state.address_plugins.find(addr) != state.address_plugins.end())
-                    state.address_plugins[addr]->OnWrite(state, addr, value);
+                    return state.address_plugins[addr]->OnWrite(state, addr, value);
                 else if (!kernel_mode)
                     lc3_warning(state, LC3_RESERVED_MEM_WRITE, value, addr);
             }
@@ -819,7 +819,7 @@ void lc3_mem_write(lc3_state& state, unsigned short addr, short value, bool priv
         default:
             // Hey does a plugin handle this address
             if (addr >= 0xFE00U && state.address_plugins.find(addr) != state.address_plugins.end())
-                state.address_plugins[addr]->OnWrite(state, addr, value);
+                return state.address_plugins[addr]->OnWrite(state, addr, value);
             else if (!kernel_mode)
                 lc3_warning(state, LC3_RESERVED_MEM_WRITE, value, addr);
         }
