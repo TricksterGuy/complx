@@ -2,7 +2,7 @@ Source: complx-tools
 Section: devel
 Priority: optional
 Maintainer: Brandon Whitehead <tricksterguy87@gmail.com>
-Build-Depends: debhelper (>= 9), cmake, libwxgtk3.0-dev | libwxgtk3.0-gtk3-dev, flex, bison, libboost-test-dev, libboost-serialization-dev, libboost-iostreams-dev, libncurses5-dev, pkg-config, libglib2.0-dev, zlib1g-dev, liblc3-dev
+Build-Depends: debhelper (>= 9), cmake, libwxgtk3.0-dev | libwxgtk3.0-gtk3-dev, flex, bison, libboost-test-dev, libboost-serialization-dev, libboost-iostreams-dev, libncurses5-dev, pkg-config, libglib2.0-dev, zlib1g-dev, liblc3-dev, liblc3-plugins
 Standards-Version: 3.9.6
 Homepage: https://github.com/TricksterGuy/complx
 Vcs-Git: https://github.com/TricksterGuy/complx.git
@@ -10,4 +10,4 @@ Vcs-Git: https://github.com/TricksterGuy/complx.git
 Package: complx-tools
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: complx is a suite of educational tools for learning lc3 assembly. It includes both a gui and cli based simulator (named complx and comp respectively), an assembler (as2obj), and a framework for testing and grading lc3 assembly code (lc3test). Complx also be extended with plugins that add additional functionality to the LC3. The tools also come with a C++ interface to the LC3 (liblc3). Complx was written using the wxWidgets library.
+Description: [DEPRECATED] complx is a suite of educational tools for learning lc3 assembly. It includes both a gui and cli based simulator (named complx and comp respectively), an assembler (as2obj), and a framework for testing and grading lc3 assembly code (lc3test). Complx also be extended with plugins that add additional functionality to the LC3. The tools also come with a C++ interface to the LC3 (liblc3). Complx was written using the wxWidgets library. This package will soon be replaced by several individual packages.
