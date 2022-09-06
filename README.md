@@ -1,7 +1,7 @@
 complx
 ======
 
-# This repository is **SUPER** deprecated, The current codebase is now split up under [complx-tools](https://github.com/complx-tools) however that is still deprecated. All newer development will be done here [complx-tools](https://github.com/TricksterGuy/complx-tools)
+This repository is **SUPER** deprecated, The current codebase is now split up under [complx-tools (organization)](https://github.com/complx-tools) however that is still deprecated. All newer development will be done here [complx-tools (repo)](https://github.com/TricksterGuy/complx-tools)
 
 Extensible LC-3 Simulator written in C++.  Includes a Graphical User Interface and Command Line Interface simulator, Assembler, [Python Bindings](https://pypi.org/project/pyLC3), and Python Autograder (Examples)[https://github.com/TricksterGuy/pylc3-examples]. Mainly used in CS2110 at Georgia Tech.  Maintained by Brandon (bwhitehead0308 [AT] gmail [DOT] com).
 
