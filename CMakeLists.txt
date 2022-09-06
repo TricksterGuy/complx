@@ -15,6 +15,7 @@ option(ENABLE_TESTS "Enable testing" OFF)
 option(ENABLE_COVERAGE "Enable testing coverage" OFF)
 option(ENABLE_PYLC3 "Enable python bindings to liblc3" OFF)
 option(ENABLE_REPLAY "Enable replay setup from pylc3 tests" ON)
+option(HACK_DISABLE_LIBLC3_INSTALL_DEBIAN "TEMP Disable liblc3 install" OFF)
 
 if(ENABLE_TESTS)
     enable_testing()
@@ -132,7 +133,9 @@ if(ENABLE_AS2OBJ)
     install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/as2obj DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif(ENABLE_AS2OBJ)
 
+if(HACK_DISABLE_LIBLC3_INSTALL_DEBIAN)
 install(TARGETS lc3 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
+endif(HACK_DISABLE_LIBLC3_INSTALL_DEBIAN)
 
 if(ENABLE_REPLAY)
     add_subdirectory(replay)
