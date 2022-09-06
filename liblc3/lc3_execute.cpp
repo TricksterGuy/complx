@@ -731,7 +731,7 @@ short lc3_mem_read(lc3_state& state, unsigned short addr, bool privileged)
                 state.mem[DEV_PSR] = (short)((state.privilege << 15) | (state.priority << 8) | (state.n << 2) | (state.z << 1) | state.p);
             } else
             {
-                if (addr >= 0xFE00U && state.address_plugins.find(addr) != state.address_plugins.end())
+                if (state.address_plugins.find(addr) != state.address_plugins.end())
                     return state.address_plugins[addr]->OnRead(state, addr);
                 else if (!kernel_mode)
                     // Warn if reading from reserved memory if you aren't in kernel mode
@@ -802,8 +802,8 @@ void lc3_mem_write(lc3_state& state, unsigned short addr, short value, bool priv
                 lc3_warning(state, LC3_RESERVED_MEM_WRITE, addr, 0);
                 /// TODO consider allowing writing to the PSR.
             } else {
-                if (addr >= 0xFE00U && state.address_plugins.find(addr) != state.address_plugins.end())
-                    state.address_plugins[addr]->OnWrite(state, addr, value);
+                if (state.address_plugins.find(addr) != state.address_plugins.end())
+                    return state.address_plugins[addr]->OnWrite(state, addr, value);
                 else if (!kernel_mode)
                     lc3_warning(state, LC3_RESERVED_MEM_WRITE, value, addr);
             }
@@ -819,7 +819,7 @@ void lc3_mem_write(lc3_state& state, unsigned short addr, short value, bool priv
         default:
             // Hey does a plugin handle this address
             if (addr >= 0xFE00U && state.address_plugins.find(addr) != state.address_plugins.end())
-                state.address_plugins[addr]->OnWrite(state, addr, value);
+                return state.address_plugins[addr]->OnWrite(state, addr, value);
             else if (!kernel_mode)
                 lc3_warning(state, LC3_RESERVED_MEM_WRITE, value, addr);
         }

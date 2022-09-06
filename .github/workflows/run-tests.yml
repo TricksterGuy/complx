@@ -37,7 +37,7 @@ jobs:
         python-version: 3.8
 
     - name: Install Test Deps
-      run:  sudo apt-get install -y libboost-test-dev castxml python3-pip libpython3-dev libboost-python-dev libboost-serialization-dev
+      run:  sudo apt-get install -y libboost-test-dev castxml python3-pip libpython3-dev libboost-python-dev libboost-serialization-dev libboost-iostreams-dev zlib1g-dev
 
     - name: Install Python Deps
       run: |
