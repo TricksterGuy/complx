@@ -13,7 +13,6 @@ option(ENABLE_COMPLX "Build complx" ON)
 option(ENABLE_DEV "Build dev version" OFF)
 option(ENABLE_TESTS "Enable testing" OFF)
 option(ENABLE_COVERAGE "Enable testing coverage" OFF)
-option(ENABLE_PYLC3 "Enable python bindings to liblc3" OFF)
 option(ENABLE_REPLAY "Enable replay setup from pylc3 tests" ON)
 option(HACK_DISABLE_LIBLC3_INSTALL_DEBIAN "TEMP Disable liblc3 install" OFF)
 
@@ -156,10 +155,6 @@ endif(ENABLE_COMPLX)
 if(ENABLE_TESTS)
     add_subdirectory(tests)
 endif(ENABLE_TESTS)
-
-if(ENABLE_PYLC3)
-    add_subdirectory(pylc3)
-endif(ENABLE_PYLC3)
 
 # uninstall target
 configure_file(
