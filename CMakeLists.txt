@@ -6,7 +6,6 @@ project(complx-tools)
 # Add code coverage stuff.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-option(ENABLE_PLUGINS "Enable Official Plugins" ON)
 option(ENABLE_LC3EDIT "Build lc3edit" OFF)
 option(ENABLE_AS2OBJ "Build as2obj" ON)
 option(ENABLE_COMPLX "Build complx" ON)
@@ -139,10 +138,6 @@ endif(NOT HACK_DISABLE_LIBLC3_INSTALL_DEBIAN)
 if(ENABLE_REPLAY)
     add_subdirectory(replay)
 endif(ENABLE_REPLAY)
-
-if(ENABLE_PLUGINS)
-    add_subdirectory(plugins)
-endif(ENABLE_PLUGINS)
 
 if(ENABLE_LC3EDIT)
     add_subdirectory(lc3edit)

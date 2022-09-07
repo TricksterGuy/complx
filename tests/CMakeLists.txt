@@ -12,7 +12,6 @@ set(SRC_TESTS
     lc3_assemble_test.cpp
     lc3_basic_test.cpp
     lc3_parser_test.cpp
-    lc3_plugin_test.cpp
     lc3_revision_2019_test.cpp
 )
 
@@ -42,18 +41,6 @@ if(ENABLE_REPLAY)
     )
 endif(ENABLE_REPLAY)
 
-add_dependencies(
-    lc3_test_suite
-    lc3_multiply
-    lc3_udiv
-)
-
-add_custom_command(
-    TARGET lc3_test_suite POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/plugins/instructions/liblc3_multiply${CMAKE_SHARED_LIBRARY_SUFFIX} ${CMAKE_BINARY_DIR}/liblc3_multiply${CMAKE_SHARED_LIBRARY_SUFFIX}
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/plugins/traps/liblc3_udiv${CMAKE_SHARED_LIBRARY_SUFFIX} ${CMAKE_BINARY_DIR}/liblc3_udiv${CMAKE_SHARED_LIBRARY_SUFFIX}
-    COMMENT "Copying needed plugins for testing")
-
 set_target_properties(lc3_test_suite PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_test(NAME lc3_test_suite
@@ -63,11 +50,7 @@ add_test(NAME lc3_test_suite
 if(ENABLE_COVERAGE)
     set(CMAKE_SKIP_RPATH FALSE)
     set(CMAKE_INSTALL_RPATH
-        ${CMAKE_BINARY_DIR}
-        ${CMAKE_BINARY_DIR}/plugins/devices
-        ${CMAKE_BINARY_DIR}/plugins/instructions
-        ${CMAKE_BINARY_DIR}/plugins/traps
-        ${CMAKE_BINARY_DIR}/plugins/other)
+        ${CMAKE_BINARY_DIR})
 
     set(COVERAGE_EXCLUDES 'boost/*' 'c++/*' 'tests/*')
 
