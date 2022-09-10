@@ -15,14 +15,6 @@ set(SRC_TESTS
     lc3_revision_2019_test.cpp
 )
 
-if(ENABLE_REPLAY)
-    include_directories(../replay)
-    set(SRC_TESTS
-        ${SRC_TESTS}
-        lc3_replay_test.cpp
-    )
-endif(ENABLE_REPLAY)
-
 add_executable(
     lc3_test_suite
     ${SRC_TESTS}
@@ -33,13 +25,6 @@ target_link_libraries(
     lc3
     ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
 )
-
-if(ENABLE_REPLAY)
-    target_link_libraries(
-        lc3_test_suite
-        lc3_replay
-    )
-endif(ENABLE_REPLAY)
 
 set_target_properties(lc3_test_suite PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 

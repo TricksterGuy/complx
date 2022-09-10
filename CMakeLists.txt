@@ -7,12 +7,10 @@ project(complx-tools)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 option(ENABLE_LC3EDIT "Build lc3edit" OFF)
-option(ENABLE_AS2OBJ "Build as2obj" ON)
 option(ENABLE_COMPLX "Build complx" ON)
 option(ENABLE_DEV "Build dev version" OFF)
 option(ENABLE_TESTS "Enable testing" OFF)
 option(ENABLE_COVERAGE "Enable testing coverage" OFF)
-option(ENABLE_REPLAY "Enable replay setup from pylc3 tests" ON)
 option(HACK_DISABLE_LIBLC3_INSTALL_DEBIAN "TEMP Disable liblc3 install" OFF)
 
 if(ENABLE_TESTS)
@@ -95,9 +93,6 @@ set(SRC_LOGGING
     logging/logger.cpp
 )
 
-set(SRC_AS2OBJ
-    as2obj/main.cpp
-)
 
 add_library(
     lc3
@@ -117,27 +112,9 @@ add_library(
     ${SRC_LOGGING}
 )
 
-if(ENABLE_AS2OBJ)
-    add_executable(
-        as2obj
-        ${SRC_AS2OBJ}
-    )
-
-    target_link_libraries(
-        as2obj
-        lc3
-    )
-
-    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/as2obj DESTINATION ${CMAKE_INSTALL_BINDIR})
-endif(ENABLE_AS2OBJ)
-
 if(NOT HACK_DISABLE_LIBLC3_INSTALL_DEBIAN)
     install(TARGETS lc3 LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif(NOT HACK_DISABLE_LIBLC3_INSTALL_DEBIAN)
-
-if(ENABLE_REPLAY)
-    add_subdirectory(replay)
-endif(ENABLE_REPLAY)
 
 if(ENABLE_LC3EDIT)
     add_subdirectory(lc3edit)
