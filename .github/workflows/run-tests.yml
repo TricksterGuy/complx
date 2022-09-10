@@ -5,12 +5,10 @@ on:
     paths:
       - 'tests/**'
       - 'liblc3/**'
-      - 'lc3_replay/**'
   pull_request:
     paths:
       - 'tests/**'
       - 'liblc3/**'
-      - 'lc3_replay/**'
   workflow_dispatch:
 
 jobs:
@@ -25,13 +23,13 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install Test Deps
-      run:  sudo apt-get install -y libboost-test-dev libboost-serialization-dev libboost-iostreams-dev zlib1g-dev
+      run:  sudo apt-get install -y libboost-test-dev
 
 
     - name: Make build files.
       run: |
         mkdir build && cd build
-        cmake -DENABLE_TESTS=ON -DENABLE_COMPLX=OFF -DENABLE_AS2OBJ=OFF ..
+        cmake -DENABLE_TESTS=ON -DENABLE_COMPLX=OFF ..
 
     - name: Build and Install
       run: sudo cmake --build build --target install
