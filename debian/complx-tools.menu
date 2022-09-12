@@ -1,2 +1,0 @@
-?package(complx-tools):needs="X11" section="Applications/Programming"\
-  title="complx (GUI)" command="/usr/bin/complx"
