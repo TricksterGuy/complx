@@ -7,7 +7,6 @@ project(complx-tools)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 option(ENABLE_LC3EDIT "Build lc3edit" OFF)
-option(ENABLE_COMPLX "Build complx" ON)
 option(ENABLE_DEV "Build dev version" OFF)
 option(ENABLE_TESTS "Enable testing" OFF)
 option(ENABLE_COVERAGE "Enable testing coverage" OFF)
@@ -54,13 +53,6 @@ endif(CMAKE_BUILD_TYPE MATCHES "Debug")
 
 add_definitions(-DPREFIX=${CMAKE_INSTALL_PREFIX})
 add_definitions(-DSO_SUFFIX="${CMAKE_SHARED_LIBRARY_SUFFIX}")
-
-if(ENABLE_COMPLX)
-    set(wxWidgets_USE_LIBS stc xrc xml html adv net core base)
-    find_package(wxWidgets REQUIRED)
-    set(CMAKE_SKIP_RPATH TRUE)
-    include(${wxWidgets_USE_FILE})
-endif(ENABLE_COMPLX)
 
 if(CMAKE_HOST_WIN32)
     # Needed for htons
@@ -119,10 +111,6 @@ endif(NOT HACK_DISABLE_LIBLC3_INSTALL_DEBIAN)
 if(ENABLE_LC3EDIT)
     add_subdirectory(lc3edit)
 endif(ENABLE_LC3EDIT)
-
-if(ENABLE_COMPLX)
-    add_subdirectory(complx)
-endif(ENABLE_COMPLX)
 
 if(ENABLE_TESTS)
     add_subdirectory(tests)
